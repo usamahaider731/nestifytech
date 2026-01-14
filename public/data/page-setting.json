@@ -1,0 +1,28 @@
+{
+    "home_page": [
+        {
+            "slider": {
+                "type": "repeater",
+                "label": "main slider",
+                "controls":[
+                    "image"
+                ],
+                "settings": {
+                    "autoplay": true,
+                    "duration": 5000
+                },
+                "items": [
+                    {
+                        "image": "slider1.webp"   
+                    },
+                    {
+                        "image": "slider2.webp"
+                    },
+                    {
+                        "image": "slider3.webp"
+                    }
+                ]
+            }
+        }
+    ]
+}

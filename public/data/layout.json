@@ -1,0 +1,203 @@
+{
+    "layout": {
+        "Home": [
+            {
+                "title": "Gallery Settings",
+                "style": "main",
+                "fields": [
+                    {
+                        "label": "Main Slider Gallery",
+                        "type": "image",
+                        "name": "main_slider",
+                        "attribute": "required",
+                        "value": [
+                            "1761478635_6039b3ff1a895b03a0d20722190f776c_main_slider0.png",
+                            "1761478635_6039b3ff1a895b03a0d20722190f776c_main_slider1.png"
+                        ],
+                        "multiple": true
+                    },
+                    {
+                        "label": "Block Images Gallery",
+                        "type": "image",
+                        "name": "block_images",
+                        "attribute": "required",
+                        "value": "",
+                        "multiple": true
+                    }
+                ]
+            },
+            {
+                "title": "Home Checkbox's",
+                "style": "main",
+                "fields": [
+                    {
+                        "label": "Show Main Slider",
+                        "type": "checkbox",
+                        "name": "slider_toggle",
+                        "value": true
+                    },
+                    {
+                        "label": "Show Trending Products",
+                        "type": "checkbox",
+                        "name": "trending_product_toggle",
+                        "value": true
+                    },
+                    {
+                        "label": "Show Popular Products",
+                        "type": "checkbox",
+                        "name": "popular_product_toggle",
+                        "value": true
+                    },
+                    {
+                        "label": "Show Banner Image",
+                        "type": "checkbox",
+                        "name": "banner_image_toggle",
+                        "value": true
+                    },
+                    {
+                        "label": "Show Block Images",
+                        "type": "checkbox",
+                        "name": "block_images_toggle",
+                        "value": true
+                    },
+                    {
+                        "label": "Show Categories Products",
+                        "type": "checkbox",
+                        "name": "categories_products_toggle",
+                        "value": true
+                    },
+                    {
+                        "label": "Show Categories",
+                        "type": "checkbox",
+                        "name": "categories_toggle",
+                        "value": true
+                    }
+                ]
+            },
+            {
+                "title": "Selection's",
+                "style": "sidebar",
+                "fields": [
+                    {
+                        "label": "Home Categories",
+                        "style": 1,
+                        "name": "home_categories",
+                        "type": "dropdown",
+                        "placeholder": "Select Home Categories",
+                        "attribute": "required",
+                        "value": "[\"Earbuds\",\"Electronic\"]",
+                        "multiple": true,
+                        "children": true,
+                        "options": {
+                            "model": "Taxonomy",
+                            "type": "category",
+                            "parent_id": "0",
+                            "use_value": true
+                        }
+                    },
+                    {
+                        "label": "Products Categories",
+                        "style": 1,
+                        "name": "home_products_categories",
+                        "type": "dropdown",
+                        "placeholder": "Select Products Categories",
+                        "attribute": "required",
+                        "value": "[\"Earbuds\",\"Laptop\"]",
+                        "multiple": true,
+                        "children": true,
+                        "options": {
+                            "model": "Taxonomy",
+                            "type": "category",
+                            "parent_id": "0",
+                            "use_value": true
+                        }
+                    }
+                ]
+            },
+            {
+                "title": "Home Image",
+                "style": "sidebar",
+                "fields": [
+                    {
+                        "label": "Banner Image",
+                        "type": "image",
+                        "name": "banner_image",
+                        "attribute": "required",
+                        "value": "1761121690_6039b3ff1a895b03a0d20722190f776c_banner_image.svg"
+                    }
+                ]
+            },
+            {
+                "title": "Banner Slider Settings",
+                "style": "main",
+                "fields": [
+                    {
+                        "label": "Slider Effect",
+                        "type": "dropdown",
+                        "name": "Banner_slider_effect",
+                        "attribute": "required",
+                        "style": 2,
+                        "value": "fade",
+                        "options": [
+                            {
+                                "id": "slide",
+                                "title": "Slide"
+                            },
+                            {
+                                "id": "fade",
+                                "title": "Fade"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Slider Autoplay",
+                        "type": "dropdown",
+                        "name": "banner_slider_autoplay",
+                        "attribute": "required",
+                        "value": "0",
+                        "options": [
+                            {
+                                "id": "0",
+                                "title": "No"
+                            },
+                            {
+                                "id": "1",
+                                "title": "Yes"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Show Slider Navigation",
+                        "type": "dropdown",
+                        "name": "banner_slider_navigation",
+                        "value": "1",
+                        "options": [
+                            {
+                                "id": "0",
+                                "title": "No"
+                            },
+                            {
+                                "id": "1",
+                                "title": "Yes"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Slider Duration (in ms)",
+                        "type": "number",
+                        "name": "banner_slider_duration",
+                        "attribute": "required",
+                        "value": 5000
+                    },
+                    {
+                        "label": "Slider Transition Speed (in ms)",
+                        "type": "number",
+                        "name": "banner_slider_speed",
+                        "attribute": "required",
+                        "value": 800
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@theme {
+  
+  --font-sans:
+    Figtree, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-roboto: "Roboto", sans-serif;
+    --font-primary:  "Inter", sans-serif;
+    --font-josefin: "Josefin Sans", sans-serif;
+    --font-oswald: "Oswald", sans-serif;
+    --color-secondary: var(--secondary);
+    --color-text: var(--text);
+    --color-accent: var(--accent);
+    --color-res: var(--res);
+    --color-bg: var(--bg);
+    --color-heading: var(--heading);
+    --color-primary: var(--primary);
+    --color-permanent: var(--permanent);
+    --color-dynamic: var(--dynamic);
+}
+[x-cloak] {
+    display: none;
+}
+.nav-menu-list:hover .nav-menu-list-sub{
+  @apply flex;
+}

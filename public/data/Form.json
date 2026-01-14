@@ -1,0 +1,600 @@
+{
+    "product": [
+        {
+            "title": "Product Information",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Title",
+                    "name": "title",
+                    "value": "",
+                    "type": "text",
+                    "placeholder": "Product Title",
+                    "attribute": "required",
+                    "style": 1
+                },
+                {
+                    "label": "Sku",
+                    "name": "sku",
+                    "value": "",
+                    "type": "text",
+                    "placeholder": "Product Sku",
+                    "attribute": "required",
+                    "style": 1
+                },
+                {
+                    "label": "Description",
+                    "name": "description",
+                    "value": "",
+                    "type": "desc",
+                    "placeholder": "Description",
+                    "attribute": "required",
+                    "style": 1
+                }
+            ]
+        },
+        {
+            "title": "Featured Image",
+            "style": "sidebar",
+            "fields": [
+                {
+                    "label": "",
+                    "style": 1,
+                    "name": "image",
+                    "type": "image",
+                    "attribute": "required",
+                    "value": ""
+                }
+            ]
+        },
+        {
+            "title": "Gallery Images",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "",
+                    "style": 1,
+                    "name": "gallery",
+                    "type": "image",
+                    "attribute": "required",
+                    "value": "",
+                    "multiple": true
+                }
+            ]
+        },
+        {
+            "title": "Product Map",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Address",
+                    "style": 2,
+                    "name": "address",
+                    "type": "text",
+                    "placeholder": "Address",
+                    "attribute": "required",
+                    "value": ""
+                },
+                {
+                    "label": "State",
+                    "style": 1,
+                    "name": "state",
+                    "type": "dropdown",
+                    "placeholder": "State",
+                    "attribute": "required",
+                    "value": "",
+                    "options": {
+                        "model": "Taxonomy",
+                        "type": "state",
+                        "use_value": false
+                    }
+                },
+                {
+                    "label": "City",
+                    "style": 1,
+                    "name": "city",
+                    "type": "dropdown",
+                    "depends_on": "state",
+                    "placeholder": "City",
+                    "attribute": "required",
+                    "value": "",
+                    "options": {
+                        "model": "Taxonomy",
+                        "type": "city",
+                        "use_value": false
+                    }
+                },
+                {
+                    "name": "map-show",
+                    "label": "Show Map on Product",
+                    "type": "checkbox",
+                    "attribute": "checked"
+                }
+            ]
+        },
+        {
+            "title": "Product Collection",
+            "style": "sidebar",
+            "fields": [
+                {
+                    "label": "Category",
+                    "style": 1,
+                    "name": "category",
+                    "type": "dropdown",
+                    "placeholder": "Category",
+                    "attribute": "required",
+                    "value": "",
+                    "children": true,
+                    "multiple": true,
+                    "options": {
+                        "model": "Taxonomy",
+                        "type": "category",
+                        "parent_id": "0",
+                        "use_value": false
+                    }
+                },
+                {
+                    "label": "Brand",
+                    "style": 1,
+                    "name": "brand",
+                    "type": "dropdown",
+                    "placeholder": "Brand",
+                    "attribute": "required",
+                    "value": "",
+                    "options": {
+                        "model": "Taxonomy",
+                        "type": "brand",
+                        "use_value": false
+                    }
+                },
+                {
+                    "label": "Tags",
+                    "style": 1,
+                    "name": "tags",
+                    "type": "dropdown",
+                    "placeholder": "Tags",
+                    "attribute": "required",
+                    "value": "",
+                    "multiple": true,
+                    "children": true,
+                    "options": {
+                        "model": "Taxonomy",
+                        "type": "tag",
+                        "parent_id": "0",
+                        "use_value": false
+                    }
+                }
+            ]
+        },
+        {
+            "title": "Product Price",
+            "style": "sidebar",
+            "fields": [
+                {
+                    "label": "Regular Price",
+                    "type": "text",
+                    "name": "first_price",
+                    "style": 1,
+                    "placeholder": "Enter Ragular Price"
+                },
+                {
+                    "label": "Sale Price",
+                    "type": "text",
+                    "name": "second_price",
+                    "style": 1,
+                    "placeholder": "Enter Sale Price"
+                }
+            ]
+        },
+        {
+            "title": "Attributes",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "",
+                    "name": "attributes",
+                    "type": "attributes"
+                }
+            ]
+        },
+        {
+            "title": "Product Variations",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Variations",
+                    "name": "variations", 
+                    "type": "variations",
+                    "value": [
+                        {
+                            "size": "S",
+                            "color": "Red",
+                            "price": "1000",
+                            "image": "",
+                            "stock": 2
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "brand": [
+        {
+            "title": "Brand Information",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Title",
+                    "type": "text",
+                    "style": 2,
+                    "name": "title",
+                    "placeholder": "Brand Title"
+                },
+                {
+                    "label": "Description",
+                    "type": "desc",
+                    "style": 2,
+                    "name": "description",
+                    "placeholder": "Brand Description"
+                }
+            ]
+        },
+        {
+            "title": "Brand Image",
+            "style": "sidebar",
+            "fields": [
+                {
+                    "label": "",
+                    "name": "image",
+                    "type": "image",
+                    "style": 1,
+                    "filename": ""
+                }
+            ]
+        }
+    ],
+    "category": [
+        {
+            "title": "Category Information",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Title",
+                    "type": "text",
+                    "style": 2,
+                    "name": "title",
+                    "placeholder": "Category Title"
+                },
+                {
+                    "label": "Description",
+                    "type": "desc",
+                    "style": 2,
+                    "name": "description",
+                    "placeholder": "Category Description"
+                }
+            ]
+        },
+        {
+            "title": "Category Parent",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Parent",
+                    "type": "dropdown",
+                    "name": "parent_id",
+                    "placeholder": "Parent Category",
+                    "attribute": "required",
+                    "withChildren": true,
+                    "value": "",
+                    "options": {
+                        "model": "Taxonomy",
+                        "type": "category",
+                        "use_value": false,
+                        "parent_id": "0",
+                        "not_id": true
+                    }
+                }
+            ]
+        },
+        {
+            "title": "Category Image",
+            "style": "sidebar",
+            "fields": [
+                {
+                    "label": "Category Image",
+                    "style": 1,
+                    "name": "image",
+                    "type": "image",
+                    "filename": ""
+                }
+            ]
+        },
+        {
+            "title": "Category Discount",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Set Discount",
+                    "type": "checkbox",
+                    "style": 2,
+                    "name": "discount_toggle",
+                    "placeholder": "Category Discount (%)"
+
+                },
+                {
+                    "label": "Category Discount",
+                    "type": "number",
+                    "style": 2,
+                    "name": "discount",
+                    "placeholder": "Category Discount (%)",
+                    "condition": "discount_toggle",
+                    "condition_value": true
+                },
+                {
+                    "label": "Category Discount Date",
+                    "type": "calendar",
+                    "style": 2,
+                    "name": "discount_date",
+                    "placeholder": "Category Discount Date",
+                    "condition": "discount_toggle",
+                    "condition_value": true
+
+                }
+            ]
+        }
+    ],
+    "role": [
+        {
+            "title": "Role Information",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Title",
+                    "style": 1,
+                    "placeholder": "Role Title",
+                    "name": "title",
+                    "type": "text"
+                }
+            ]
+        },
+        {
+            "title": "Role Permission",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Dashboard",
+                    "style": 2,
+                    "name": "dashboard",
+                    "type": "checkbox"
+                },
+                {
+                    "label": "User Read",
+                    "style": 2,
+                    "name": "user-read",
+                    "type": "checkbox"
+                },
+                {
+                    "label": "User Write",
+                    "style": 2,
+                    "name": "user-write",
+                    "type": "checkbox"
+                },
+                {
+                    "label": "Role Write",
+                    "style": 2,
+                    "name": "role-write",
+                    "type": "checkbox"
+                },
+                {
+                    "label": "Role Read",
+                    "style": 2,
+                    "name": "role-read",
+                    "type": "checkbox"
+                },
+                {
+                    "label": "Product Read",
+                    "style": 2,
+                    "name": "product-read",
+                    "type": "checkbox"
+                },
+                {
+                    "label": "Product Create",
+                    "style": 2,
+                    "name": "product-create",
+                    "type": "checkbox"
+                },
+                {
+                    "label": "Category Read",
+                    "style": 2,
+                    "name": "category-read",
+                    "type": "checkbox"
+                },
+                {
+                    "label": "Category Write",
+                    "style": 2,
+                    "name": "category-write",
+                    "type": "checkbox"
+                },
+                {
+                    "label": "Brand Read",
+                    "style": 2,
+                    "name": "brand-read",
+                    "type": "checkbox"
+                },
+                {
+                    "label": "Brand Write",
+                    "style": 2,
+                    "name": "brand-write",
+                    "type": "checkbox"
+                }
+            ]
+        },
+        {
+            "title": "Role Setting Permission",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Transition Write",
+                    "style": 1,
+                    "name": "transition-write",
+                    "type": "checkbox"
+                },
+                {
+                    "label": "Transition Read",
+                    "style": 1,
+                    "name": "transition-read",
+                    "type": "checkbox"
+                },
+                {
+                    "label": "Site Read",
+                    "style": 2,
+                    "name": "site-read",
+                    "type": "checkbox"
+                },
+                {
+                    "label": "Site Write",
+                    "style": 2,
+                    "name": "site-write",
+                    "type": "checkbox"
+                },
+                {
+                    "label": "Font Write",
+                    "style": 2,
+                    "name": "font-write",
+                    "type": "checkbox"
+                },
+                {
+                    "label": "Font Read",
+                    "style": 2,
+                    "name": "font-read",
+                    "type": "checkbox"
+                },
+                {
+                    "label": "Color Write",
+                    "style": 2,
+                    "name": "color-write",
+                    "type": "checkbox"
+                },
+                {
+                    "label": "Color Read",
+                    "style": 2,
+                    "name": "color-read",
+                    "type": "checkbox"
+                }
+            ]
+        },
+        {
+            "title": "Layout Role Setting",
+            "style":"main",
+            "fields":[
+                {
+                    "label": "Home Layout",
+                    "style": 2,
+                    "type": "checkbox",
+                    "name": "home-layout-setting"
+                }
+            ]
+        }
+    ],
+    "user": [
+        {
+            "title": "User Information",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Name",
+                    "style": 1,
+                    "name": "name",
+                    "type": "text",
+                    "placeholder": "User Name"
+                },
+                {
+                    "label": "Email",
+                    "style": 1,
+                    "name": "email",
+                    "type": "text",
+                    "placeholder": "User Email"
+                }
+            ]
+        },
+        {
+            "title": "User Role",
+            "style": "main",
+            "fields": [
+                {
+                    "type": "checkbox",
+                    "name": "roles",
+                    "options": {
+                        "model": "Roles",
+                        "type": "role",
+                        "use_value": false
+                    }
+                }
+            ]
+        },
+        {
+            "title": "User Image",
+            "style": "sidebar",
+            "fields": [
+                {
+                    "label": "",
+                    "style": 1,
+                    "name": "image",
+                    "type": "image",
+                    "value": ""
+                }
+            ]
+        }
+    ],
+    "attributes": [
+        {
+            "title": "Attribute",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Name",
+                    "style": 1,
+                    "name": "name",
+                    "placeholder": "Enter Attribute Name",
+                    "type": "text"
+                },
+                {
+                    "label": "Select Type",
+                    "style": 1,
+                    "type": "dropdown",
+                    "name": "type",
+                    "placeholder": "Select Type",
+                    "options": [
+                        {
+                            "title": "Text",
+                            "id": "text"
+                        },
+                        {
+                            "title": "Dropdown",
+                            "id": "dropdown"
+                        },
+                        {
+                            "title": "Checkbox",
+                            "id": "checkbox"
+                        },
+                        {
+                            "title": "Radio",
+                            "id": "radio"
+                        },
+                        {
+                            "title": "Color",
+                            "id": "color"
+                        }
+                    ]
+                },
+                {
+                    "label": "Options",
+                    "name": "options",
+                    "type": "dynamic_options",
+                    "show_on": "type",
+                    "field_name": "name"
+                }
+            ]
+        }
+    ]
+}
