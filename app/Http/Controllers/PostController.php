@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AttributeOptions;
+use App\Models\AttributeValues;
 use App\Models\Attributes;
 use App\Models\Media;
 use App\Models\Posts;
@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\File;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
 use MongoDB\Builder\Expression\ObjectToArrayOperator;
+
+use function MongoDB\object;
 
 class PostController extends Controller
 {
@@ -65,205 +67,282 @@ class PostController extends Controller
 
         return Inertia::render("Admin/Post/{$post}/Create", compact('Data'));
     }
-    public function submit(Request $request, $post)
+    public function submit(Request $request, $post = null, $id = null)
     {
-        // dd(is_array($request->variations));
-        $formData = $request->except('_token');
-        $validation = $request->validate([
+        // dd(gettype($request->attributes));
+        $isEdit = $request->has('id');
+
+        // Validation
+        $rules = [
             'title' => 'string|max:30|required',
             'description' => 'string|max:500',
             'status' => 'string|required|max:20',
-            'sku' => 'string|required|max:50|unique:posts,sku',
-        ]);
-        try {
-            $product = Posts::create([
-                'type' => 'product',
-                'title' => $validation['title'],
-                'description' => $validation['description'],
-                'status' => $validation['status'],
-                'user_id' => Auth::user()->id,
-                'sku' => $validation['sku']
-            ]);
+            'sku' => 'string|required|max:50|unique:posts,sku'
+        ];
 
+        if ($isEdit) {
+            $rules['sku'] .= ',' . $request->id;
+        }
+
+        $validation = $request->validate($rules);
+
+        try {
+
+            // Create / Update
+            $product = Posts::updateOrCreate(
+                ['id' => $id],
+                [
+                    'user_id' => Auth::id(),
+                    'type' => 'product',
+                    'title' => $validation['title'],
+                    'description' => $validation['description'],
+                    'status' => $validation['status'],
+                    'sku' => $validation['sku'],
+                ]
+            );
+
+            /* ================= IMAGE ================= */
 
             if ($request->image) {
                 Media::handleImageUpload($request->image, $product, 'post');
             }
-            if (!is_null($request->gallery)) {
-                $gallery = is_string($request->gallery) ?
-                    json_decode($request->gallery, true) :
-                    $request->gallery;
+
+            if ($request->gallery) {
+                $gallery = is_string($request->gallery)
+                    ? json_decode($request->gallery, true)
+                    : $request->gallery;
 
                 Media::handleImageUpload($gallery, $product, 'post_gallery');
             }
-            $meta = $request->except('title', 'description', 'gallery', 'image', 'status', 'sku', 'attributes', 'variations');
+
+            /* ================= META ================= */
+
+            $meta = $request->except(
+                'title',
+                'description',
+                'gallery',
+                'image',
+                'status',
+                'sku',
+                'attributes',
+                'variations',
+                '_token',
+                'id'
+            );
+
             foreach ($meta as $key => $value) {
-                PostMeta::create([
-                    'post_id' => $product->id,
-                    'key' => $key,
-                    'value' => is_array($value) ? json_encode($value) : $value,
-                ]);
+                PostMeta::updateOrCreate(
+                    [
+                        'post_id' => $product->id,
+                        'key' => $key,
+                    ],
+                    [
+                        'value' => is_array($value) ? json_encode($value) : $value,
+                    ]
+                );
             }
-            if (!is_null($request->input('attributes'))) {
-                // $attributes = is_object($request->attributes) ?  ObjectToArrayOperator($request->attributes) :  $request->attributes;
-                $attributes = json_decode($request->input('attributes'), true);
 
-                if (is_array($attributes)) {
-                    foreach ($attributes as $attrGroup) {
-                        if (empty($attrGroup['label']) || !isset($attrGroup['fields'])) {
-                            continue;
-                        }
+            /* ================= ATTRIBUTES ================= */
 
-                        // Save parent attribute group
-                        $attrib = PostMeta::create([
-                            'key' => 'attribute_label',
-                            'value' => $attrGroup['label'],
-                            'post_id' => $product->id,
+            if ($request->attributes) {
+
+                // clear old on edit
+                if ($isEdit) {
+                    AttributeValues::where('parent_id', $product->id)
+                        ->where('parent_type', 'post')
+                        ->delete();
+                }
+
+                $attributes = $request->attributes;
+
+                foreach ($attributes as $field) {
+
+                    if (!empty($field['key']) && !empty($field['value'])) {
+
+                        $attr = Attributes::firstOrCreate(
+                            ['name' => $field['key']],
+                            ['type' => 'text']
+                        );
+
+                        AttributeValues::create([
+                            'attribute_id' => $attr->id,
+                            'value' => $field['value'],
+                            'parent_id' => $product->id,
+                            'parent_type' => 'post'
                         ]);
-                        // Save each field inside group
-                        foreach ($attrGroup['fields'] as $field) {
-                            if (!empty($field['key']) && !empty($field['value'])) {
-
-                                $thisAttr = Attributes::create(
-                                    [
-                                        'name' => $field['key'],
-                                        'type' => 'text',
-                                    ]
-                                );
-                                AttributeOptions::create(
-                                    [
-                                        'attribute_id' => $thisAttr->id,
-                                        'value' => $field['value'],
-                                        'parent_id' => $attrib->id,
-                                        'parent_type' => 'post'
-                                    ]
-                                );
-                            }
-                        }
                     }
                 }
             }
-            if ($request->variations && !is_null($request->variations)) {
-                $variations = is_array($request->variations) ? $request->variations : json_decode($request->variations, true);
+
+            /* ================= VARIATIONS ================= */
+
+            if ($request->variations) {
+
+                // remove old on edit
+                if ($isEdit) {
+                    PostVariation::where('post_id', $product->id)->delete();
+                }
+
+                $variations = is_array($request->variations)
+                    ? $request->variations
+                    : json_decode($request->variations, true);
+
                 foreach ($variations as $variation) {
-                    // dd(json_decode($variation['price'], true));
-                    $price = json_decode($variation['price'], true) ?? null;
-                    $stock = json_decode($variation['stock'], true) ?? null;
-                    $image = $variation['image'] ?? null;
-                    // dd($variation['image']);
 
                     $productVariation = PostVariation::create([
                         'post_id' => $product->id,
-                        'price'   => $price,
-                        'stock'   => $stock,
-
+                        'price' => json_decode($variation['price'], true),
+                        'stock' => json_decode($variation['stock'], true),
                     ]);
-                    if (!is_null($image)) {
-                        // dd($image);
-                        Media::handleImageUpload($image, $productVariation, 'post_variation');
+
+                    if (!empty($variation['image'])) {
+                        Media::handleImageUpload(
+                            $variation['image'],
+                            $productVariation,
+                            'post_variation'
+                        );
                     }
+
+                    // Size attributes
                     if (!empty($variation['size'])) {
+
                         $sizes = explode('&', json_decode($variation['size'], true));
+
                         foreach ($sizes as $sz) {
+
                             [$attrName, $attrValue] = explode('|', $sz);
+
                             $attribute = Attributes::firstOrCreate(
                                 ['name' => $attrName],
                                 ['type' => 'select']
                             );
-                            $option = AttributeOptions::firstOrCreate(
-                                [
-                                    'attribute_id' => $attribute->id,
-                                    'value'        => $attrValue,
-                                    'parent_id'    => $productVariation->id,
-                                    'parent_type'  => 'post_variation'
-                                ]
-                            );
+
+                            $option = AttributeValues::firstOrCreate([
+                                'attribute_id' => $attribute->id,
+                                'value' => $attrValue,
+                                'parent_id' => $productVariation->id,
+                                'parent_type' => 'post_variation'
+                            ]);
+
                             ProductVariationValue::create([
-                                'variation_id'        => $productVariation->id,
+                                'variation_id' => $productVariation->id,
                                 'attribute_option_id' => $option->id
                             ]);
                         }
                     }
+
+                    // Color
                     if (!empty($variation['color'])) {
+
                         $attribute = Attributes::firstOrCreate(
                             ['name' => 'Color'],
-                            ['type' => 'select']
+                            ['type' => 'checkbox']
                         );
-                        $option = AttributeOptions::firstOrCreate(
-                            [
-                                'attribute_id' => $attribute->id,
-                                'value'        => json_decode($variation['color'], true),
-                                'parent_id'    => $productVariation->id,
-                                'parent_type'  => 'post_variation'
-                            ]
-                        );
+
+                        $option = AttributeValues::firstOrCreate([
+                            'attribute_id' => $attribute->id,
+                            'value' => json_decode($variation['color'], true),
+                            'parent_id' => $productVariation->id,
+                            'parent_type' => 'post_variation'
+                        ]);
+
                         ProductVariationValue::create([
-                            'variation_id'        => $productVariation->id,
+                            'variation_id' => $productVariation->id,
                             'attribute_option_id' => $option->id
                         ]);
                     }
                 }
             }
-            return redirect()->back()->with('success', 'Form data saved successfully!');
+
+            return redirect()->back()
+                ->with('success', $isEdit ? 'Product updated!' : 'Product created!');
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'failed to create product' . $e
-            ]);
+            return back()->with('error', $e->getMessage());
         }
     }
-    public function edit(Request $request)
+
+    public function edit(Request $request, $post)
     {
         $product = Posts::find($request->id);
-        $stuv = [];
-        $stuv['title'] = $product->title;
-        $stuv['description'] = $product->description;
-        $stuv['status'] = $product->status;
+
+        $stuv = new \stdClass();
+
+        $stuv->title = $product->title;
+        $stuv->id = $product->id;
+        $stuv->description = $product->description;
+        $stuv->status = $product->status;
+
         $category = [];
-
-        // print_r($product->parent());
-
-        foreach ($product->parent() as $key => $value) {
+        foreach ($product->parent() as $value) {
             $category[] = $value->id;
         }
-        $brand = $product->brand()->id;
 
+        $stuv->category = $category;
+        $stuv->brand = $product->brand()->id;
 
-        $stuv['category'] = $category;
-        $stuv['brand'] = $brand;
-        $stuv['regular_price'] = $product->meta->firstWhere('key', 'first_price')->value ?? null;
-        $stuv['sale_price'] = $product->meta->firstWhere('key', 'second_price')->value ?? null;
-        $stuv['image'] = $product->image ? $product->image->filename : null;
-        $stuv['gallery'] = $product->gallery ? $product->gallery->pluck('filename') : null;
-        $stuv['attributes'] = [];
-        $attribute_labels = $product->meta->where('key', 'attribute_label');
-        foreach ($attribute_labels as $label) {
-            $attrGroup = [];
-            $attrGroup['label'] = $label->value;
-            $fields = [];
-            $options = Attributes::where('type', 'text')
-                ->whereHas('attribute_options', function ($query) use ($label) {
-                    $query->where('parent_id', $label->id)
-                        ->where('parent_type', 'post');
-                })->with(['attribute_options' => function ($query) use ($label) {
-                    $query->where('parent_id', $label->id)
-                        ->where('parent_type', 'post');
-                }])->get();
-            foreach ($options as $option) {
-                foreach ($option->attribute_options as $opt) {
-                    $fields[] = [
-                        'key' => $option->name,
-                        'value' => $opt->value
+        // $stuv->regular_price = $product->meta->firstWhere('key', 'first_price')->value ?? null;
+        // $stuv->sale_price = $product->meta->firstWhere('key', 'second_price')->value ?? null;
+        $stuv->sku = $product->sku ?? null;
+        $stuv->first_price = get_meta($product->meta, 'first_price');
+        $stuv->second_price = get_meta($product->meta, 'second_price');
+        $stuv->stock = get_meta($product->meta, 'stock');
+        $stuv->tags = get_meta($product->meta, 'tags');
+        $stuv->address = get_meta($product->meta, 'address');
+        $stuv->state = get_meta($product->meta, 'state');
+        $stuv->city = get_meta($product->meta, 'city');
+        $stuv->image = $product->image ? $product->image->filename : null;
+        $stuv->gallery = $product->gallery ? $product->gallery->pluck('filename') : null;
+
+        $stuv->attributes = Posts::HandleAttributes($product->id);
+
+        $vari = [];
+
+        foreach ($product->variations as $variation) {
+
+            $va = [];
+
+            foreach ($variation->variations_value as $v) {
+                if (
+                    isset($v->attribute_option) &&
+                    isset($v->attribute_option->attribute)
+                ) {
+                    $va[] = [
+                        'key'   => $v->attribute_option->attribute->name,
+                        'value' => $v->attribute_option->value
                     ];
                 }
             }
-            $attrGroup['fields'] = $fields;
-            $stuv['attributes'][] = $attrGroup;
+
+            $color = '';
+            $art = [];
+
+            foreach ($va as $n) {
+                if ($n['key'] == 'Color') {
+                    $color = $n['value'];
+                } else {
+                    $art[] = $n['key'] . '|' . $n['value'];
+                }
+            }
+            $image = Media::where('type', 'post_variation')->where('parent_id', $variation->id)->first();
+            if ($image) {
+                $variationImage = $image->filename;
+            } else {
+                $variationImage = null;
+            }
+            $vari[] = [
+                'price' => $variation->price,
+                'stock' => $variation->stock,
+                'color' => $color,
+                'size' => implode('&', $art),
+                'image' => $variationImage
+            ];
         }
-        $variations = $product->variations;
-        foreach ($variations as $key => $value) {
-            echo '<pre>' . print_r($value, true) . '</pre>';
-        }
-        // print_r($stuv);
+
+        $stuv->variations = $vari;
+        $Data = $this->data[$post] ?? false;
+        return Inertia::render("Admin/Post/product/Edit", [
+            'Data' => $Data,
+            'initialData' => $stuv
+        ]);
     }
 }

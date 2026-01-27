@@ -2,6 +2,10 @@
 
 *.blade.php diff=html
 *.css diff=css
+*.js diff=javascript
+*.jsx diff=javascript
+*.json diff=json
+*.xml diff=xml
 *.html diff=html
 *.md diff=markdown
 *.php diff=php

@@ -83,6 +83,7 @@
                     "placeholder": "State",
                     "attribute": "required",
                     "value": "",
+                    "valueInTitle": false,
                     "options": {
                         "model": "Taxonomy",
                         "type": "state",
@@ -97,6 +98,7 @@
                     "depends_on": "state",
                     "placeholder": "City",
                     "attribute": "required",
+                    "valueInTitle": false,
                     "value": "",
                     "options": {
                         "model": "Taxonomy",
@@ -163,6 +165,15 @@
                         "parent_id": "0",
                         "use_value": false
                     }
+                },
+                {
+                    "label": "Stock",
+                    "style": 1,
+                    "name": "stock",
+                    "type": "number",
+                    "placeholder": "Stock Quantity",
+                    "attribute": "required",
+                    "value": ""
                 }
             ]
         },

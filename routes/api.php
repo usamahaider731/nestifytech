@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ApiController;
 use App\Http\Controllers\FrontendController;
 use App\Models\Menu;
 use App\Models\Roles;
@@ -42,6 +43,10 @@ Route::get('/hello', function () {
         Roles::where('status', 'publish')->get()
     );
 });
+Route::get('/banners-message', [
+    ApiController::class, 'bannersMessage'
+])->name('api.message.banner');
+Route::get('/header-setting', [ApiController::class,'headerSettings'])->name('header.setting');
 // Route::controller(FrontendController::class)->group(function () {
 //     Route::get('/index', 'index')->name('api.index');
 //     Route::get('/header', 'header')->name('api.header');

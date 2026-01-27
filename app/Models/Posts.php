@@ -66,19 +66,19 @@ class Posts extends Model
             ->first();
     }
 
-    // public function brand()
-    // {
-    //     $meta = $this->meta->firstWhere('key', 'brand');
-    //     if (!$meta) {
-    //         return null;
-    //     }
+    public function brand()
+    {
+        $meta = $this->meta->firstWhere('key', 'brand');
+        if (!$meta) {
+            return null;
+        }
 
-    //     $brandId = $meta->value;
+        $brandId = $meta->value;
 
-    //     return Taxonomy::where('id', $brandId)
-    //         ->where('type', 'brand')
-    //         ->first();
-    // }
+        return Taxonomy::where('id', $brandId)
+            ->where('type', 'brand')
+            ->first();
+    }
 
 
     public function gallery()
@@ -96,5 +96,21 @@ class Posts extends Model
     {
         return $this->hasMany(PostVariation::class, 'post_id')
             ->with('variations_value');
+    }
+    // public function getAttribute($key)
+    // {
+    //     return parent::getAttribute($key);
+    // }
+    public static function HandleAttributes($id){
+        $values = AttributeValues::where(['parent_id'=>$id,'parent_type'=>'post'])->get();
+        $atr = [];
+        foreach ($values as $key => $value) {
+           $est =  Attributes::where(['id'=>$value->attribute_id])->first();
+           $atr[]=[
+            'key'=>$est->name,
+            'value'=>$value->value
+           ];
+        }
+        return $atr;
     }
 }

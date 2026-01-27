@@ -21,7 +21,7 @@ class Attributes extends Model
     ];
     public function options(): HasMany
     {
-        return $this->hasMany(AttributeOptions::class, 'attribute_id');
+        return $this->hasMany(AttributeValues::class, 'attribute_id');
     }
     public $timestamps = false;
 }

@@ -49,6 +49,11 @@
                 "use_value": true
             }
         },
+        "banner_text": {
+            "label": "Banner Text",
+            "type": "textarea",
+            "value": "Welcome to NestifyTech - Your One-Stop Shop for Tech Products!"
+        },
         "address": {
             "label": "Business Address",
             "type": "textarea",

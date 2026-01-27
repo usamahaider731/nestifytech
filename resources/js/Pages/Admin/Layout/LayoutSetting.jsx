@@ -10,6 +10,7 @@ function LayoutSetting({ data = [], type = 'home' }) {
         initialData={{}} // or build from config
         rows={data}
         mode="create"
+        type='Layout'
         routes={route('layout.submit', { 'type': type })}
       />
     </div>

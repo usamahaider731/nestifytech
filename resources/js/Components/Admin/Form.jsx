@@ -62,11 +62,11 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
         }
     };
     const updateField = (key, value) => {
-        // if (typeof value === 'object' && value !== null && !(value instanceof File)) {
-        //     value = JSON.stringify(value);
-        //     // console.log(key, typeof value);
+        if (typeof value === 'object' && value !== null && !(value instanceof File)) {
+            value = JSON.stringify(value);
+            // console.log(key, typeof value);
 
-        // }
+        }
 
         setData(prev => ({ ...prev, [key]: value }));
     };
@@ -122,7 +122,7 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
     }, []);
     useEffect(() => {
         if (data.state) {
-            updateField('city', '');
+            // updateField('city', '');
             setDropdownOptions(prev => ({ ...prev, city: [] }));
             fetchDropdownOptions({ city: true });
         }

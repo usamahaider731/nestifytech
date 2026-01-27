@@ -1,3 +1,4 @@
+import ActionDropdown from '@/Components/ActionDropdown'
 import ImageViwer from '@/Components/Admin/ImageViwer'
 import SvgViewer from '@/Components/Admin/SvgViewer'
 import Checkbox from '@/Components/Checkbox'
@@ -6,6 +7,7 @@ import AdminLayout from '@/Layouts/AdminLayout'
 import { Link } from '@inertiajs/react'
 import React, { useState } from 'react'
 import { RiDeleteBin6Line, RiFile3Fill, RiFileEditLine } from 'react-icons/ri'
+import { TbDotsVertical } from 'react-icons/tb'
 function Index({ products }) {
     const [Product, SetProduct] = useState(products.data);
     // console.log(Product)
@@ -18,12 +20,12 @@ function Index({ products }) {
                             <Table.TH.Checkbox />
                         </Table.TH>
                         <Table.TH className='w-1/20 font-medium'>Id</Table.TH>
-                        <Table.TH className='w-1/20 font-medium'>Sku</Table.TH>
+                        <Table.TH className='w-1/10 font-medium'>Sku</Table.TH>
                         <Table.TH className='w-1/20 font-medium'>Image</Table.TH>
                         <Table.TH className='w-15/100 font-medium'>Product</Table.TH>
-                        <Table.TH className='w-15/100 font-medium'>Parent</Table.TH>
+                        <Table.TH className='w-15/100 font-medium'>Category</Table.TH>
                         <Table.TH className='w-1/10 font-medium'>Brand</Table.TH>
-                        <Table.TH className='w-1/10 font-medium'>Status</Table.TH>
+                        <Table.TH className='w-1/20 font-medium'>Status</Table.TH>
                         <Table.TH className='w-15/100 font-medium'>Action</Table.TH>
                     </Table.TR>
                 </Table.THead>
@@ -68,27 +70,32 @@ function Index({ products }) {
                                         Data.brand ?
 
                                             <ImageViwer image={Data.brand.image} className='max-w-3/5' />
-                                                                                       
+
                                             : 'None'
                                     }
                                 </div>
                             </Table.TD>
                             <Table.TD className=''>
                                 <div className='w-full flex items-center line-clamp-1 whitespace-nowrap justify-center'>
-                                    <div className={`size-6 rounded-full ${Data.status=='publish' ? 'bg-green-600' : 'bg-red-500'}`}></div>
+                                    <div className={`size-4 rounded-full ${Data.status == 'publish' ? 'bg-green-600' : 'bg-red-500'}`}></div>
                                 </div>
                             </Table.TD>
                             <Table.TD className='flex'>
                                 <div className='w-full flex h-12 my-auto  items-center gap-3 justify-center'>
-                                    <span className='h-6.5 w-6.5 rounded-full bg-red-500 text-white text-sm flex text-center items-center justify-center'>
-                                        <RiDeleteBin6Line className='w-3' />
-                                    </span>
-                                    {/* <Link href={route('product.edit', { 'id': Data.id })} className='h-6.5 w-6.5 rounded-full bg-primary text-white text-sm flex text-center items-center justify-center'>
-                                        <RiFileEditLine className='w-3' />
-                                    </Link>
-                                    <Link href={route('product.index', { 'id': Data.id })} className='h-6.5 w-6.5 rounded-full bg-secondary text-white text-sm flex text-center items-center justify-center'>
-                                        <RiFile3Fill className='w-3' />
-                                    </Link> */}
+                                    <ActionDropdown>
+                                        <ActionDropdown.Trigger>
+                                            <TbDotsVertical className={`cursor-pointer size-4.25`} />
+                                        </ActionDropdown.Trigger>
+                                        <ActionDropdown.Context className={`flex flex-col gap-0.75 shadow-[2px_2px_3px_2px] shadow-secondary`}>
+                                            <ActionDropdown.Link href={route('post.edit',{'id': Data.id, 'post': 'product'})}>
+                                                
+                                                Edit
+                                            </ActionDropdown.Link>
+                                            <ActionDropdown.List className={` hover:bg-red-500`}>
+                                                Delete
+                                            </ActionDropdown.List>
+                                        </ActionDropdown.Context>
+                                    </ActionDropdown>
                                 </div>
                             </Table.TD>
                         </Table.TR>

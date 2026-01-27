@@ -146,6 +146,7 @@ const FieldControls = ({
                     <SecondaryDropdown
                         name={field.name}
                         value={data[field.name] || ''}
+                        valueInTitle={field.valueInTitle=='true' ? true : false}
                         options={processOptions(field.options, field.name)}
                         onChange={(val) => updateField(field.name, val)}
                         isLoading={loadingStates[field.name]}

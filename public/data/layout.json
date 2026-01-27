@@ -198,6 +198,69 @@
                     }
                 ]
             }
+        ],
+        "Header": [
+            {
+                "title": "Header Settings",
+                "style": "main",
+                "fields": [
+                    {
+                        "label": "Show Top Header",
+                        "type": "checkbox",
+                        "name": "top_header_toggle",
+                        "value": true
+                    },
+                    {
+                        "label": "Sticky Header",
+                        "type": "checkbox",
+                        "name": "sticky_header_toggle",
+                        "value": true
+                    },
+                    {
+                        "label": "Show Message Bar",
+                        "type": "checkbox",
+                        "name": "message_bar_toggle",
+                        "value": true
+                    },
+                    {
+                        "label": "Select Header Style",
+                        "type": "dropdown",
+                        "style": 2,
+                        "name": "header_style",
+                        "attribute": "required",
+                        "value": "style1",
+                        "options": [
+                            {
+                                "id": "style1",
+                                "title": "Style 1"
+                            },
+                            {
+                                "id": "style2",
+                                "title": "Style 2"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Select Header Container",
+                        "type": "dropdown",
+                        "style": 2,
+                        "name": "header_container",
+                        "attribute": "required",
+                        "value": "container",
+                        "options": [
+                            {
+                                "id": "container",
+                                "title": "Boxed"
+                            },
+                            {
+                                "id": "container-fluid",
+                                "title": "Full Width"
+                            }
+                        ]
+                    }
+                    
+                ]
+            }
         ]
     }
 }

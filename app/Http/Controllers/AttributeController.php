@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Attributes;
-use App\Models\AttributeOptions;
+use App\Models\AttributeValues;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -67,7 +67,7 @@ class AttributeController extends Controller
             if (!empty($validated['options'])) {
                 $options = json_decode($validated['options']);
                 foreach ($options as $option) {
-                    AttributeOptions::create([
+                    AttributeValues::create([
                         'attribute_id' => $attribute->id,
                         'value' => $option,
                     ]);
@@ -141,7 +141,7 @@ class AttributeController extends Controller
                 foreach ($options as $option) {
                     if (is_array($option) && isset($option['id'])) {
                         // Update existing option
-                        $attributeOption = AttributeOptions::where('attribute_id', $attribute->id)
+                        $attributeOption = AttributeValues::where('attribute_id', $attribute->id)
                             ->where('id', $option['id'])
                             ->first();
                         if ($attributeOption) {
@@ -151,7 +151,7 @@ class AttributeController extends Controller
                             $existingIds[] = $attributeOption->id;
                         }
                     } if (is_string($option)) {
-                       $strv= AttributeOptions::create([
+                       $strv= AttributeValues::create([
                             'attribute_id' => $attribute->id,
                             'value' => $option
                         ]);
@@ -159,12 +159,12 @@ class AttributeController extends Controller
                     }
                 }
                 // Delete options not in the request
-                AttributeOptions::where('attribute_id', $attribute->id)
+                AttributeValues::where('attribute_id', $attribute->id)
                     ->whereNotIn('id', $existingIds)
                     ->delete();
             } else {
                 // If no options sent, delete all
-                AttributeOptions::where('attribute_id', $attribute->id)->delete();
+                AttributeValues::where('attribute_id', $attribute->id)->delete();
             }
 
             DB::commit();

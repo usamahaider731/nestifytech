@@ -15,6 +15,6 @@ class ProductVariationValue extends Model
     ];
     public $timestamps = false;
     public function attribute_option(){
-        return $this->belongsTo(AttributeOptions::class, 'attribute_option_id');
+        return $this->belongsTo(AttributeValues::class, 'attribute_option_id')->with('attribute');
     }
 }

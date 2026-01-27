@@ -17,14 +17,14 @@ function DropdownSelect({
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
     const currentLabel =
-        options.find((opt) => opt.id === value)?.title ||
-        options.find((opt) => opt.value === value)?.title || value || '';
+        options.find((opt) => opt.id == value)?.title || 
+        options.find((opt) => opt.value == value)?.title || value || '';
     const handleClickOutside = (event) => {
         if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
             setIsOpen(false);
         }
     };
-
+console.log(currentLabel)
     const handleKeyDown = (e) => {
         if (!isOpen) return;
 

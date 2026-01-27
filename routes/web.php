@@ -55,7 +55,7 @@ Route::prefix('/admin')->middleware('auth', 'verified')->group(function () {
         Route::get('/{post}/create', 'create')->name('post.create');
         Route::get('/{post}/{id?}', 'index')->name('post.index');
         Route::get('/{post}/edit/{id}', 'edit')->name('post.edit');
-        Route::post('/{post}/submit', 'submit')->name('post.submit');
+        Route::post('/{post}/submit/{id?}', 'submit')->name('post.submit');
     });
     Route::prefix('/category')->controller(CategoryController::class)->group(function () {
         Route::get('/create', 'create')->name('category.create');
@@ -97,4 +97,4 @@ Route::prefix('/admin')->middleware('auth', 'verified')->group(function () {
     });
 });
 require __DIR__ . '/auth.php';
-require __DIR__ . '/api.php';
+// require __DIR__ . '/api.php';

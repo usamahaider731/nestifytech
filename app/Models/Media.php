@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\ImageManager;
 
+use function PHPUnit\Framework\isString;
+
 class Media extends Model
 {
   //
@@ -57,10 +59,19 @@ class Media extends Model
     }
     // Delete existing image if parent exists
     if ($parent->id) {
+      foreach ($images as $key => $value) {
+        if(isString($value)){
+          unset($images[$key]);
+        }
+      }
       self::deleteExecutingImage($parent->id, $type);
     }
     $filenames = [];
     foreach ($images as $key => $value) {
+      if(isString($value)){
+        $filenames[] = $value;
+        continue;
+      }
       $extension = $value->getClientOriginalExtension();
       $name = time() . uniqid('nestifytech') . md5($value->getClientOriginalName()) . preg_replace('/[^a-zA-Z0-9-_]/', '', md5($value->getClientOriginalName()));
       if ($extension == 'svg') {

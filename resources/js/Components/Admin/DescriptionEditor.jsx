@@ -8,7 +8,6 @@ const DescriptionEditor = ({ value, onChange, placeholder='' }) => {
         const observer = new MutationObserver(() => { });
         observer.disconnect();
     }, []);
-
     const modules = {
         toolbar: [
             ["bold", "italic", "underline", "strike"],
@@ -17,10 +16,8 @@ const DescriptionEditor = ({ value, onChange, placeholder='' }) => {
             [{ align: [] }],
             [{ color: [] }, { background: [] }],
             ["clean"]
-
         ],
     };
-
     return (
         <div className="w-full h-70 text-res fill-heading">
             <ReactQuill className="h-60 w-full"
@@ -28,7 +25,6 @@ const DescriptionEditor = ({ value, onChange, placeholder='' }) => {
                 value={value}
                 onChange={onChange}
                 modules={modules}
-                
                 placeholder={`${placeholder} ...`}
             />
             <input type="hidden" name="description" value={value} />

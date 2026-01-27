@@ -1,137 +1,85 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import TextInput from "../TextInput";
 import Textarea from "../Textarea";
 import PartButton from "./PartButton";
 import { RiAddLine, RiSubtractLine } from "react-icons/ri";
+import { textarea } from "@/Utils/classes";
 
-const CustomFields = ({ onChange = () => {} }) => {
-  const [sections, setSections] = useState([
-    {
-      sku: Date.now(),
-      label: "",
-      fields: [{ sku: Date.now() + 1, key: "", value: "" }],
-    },
+const CustomFields = ({ onChange = () => {},  value = [] }) => {
+console.log(value);
+  const [fields, setFields] = useState([
+    { sku: Date.now(), key: "", value: "" },
   ]);
-
-  const updateSections = (updated) => {
-    setSections(updated);
+  useEffect(() => {
+    if (!Array.isArray(value)) return;
+  setFields(value);
+  }, [value]);
+  const updateFields = (updated) => {
+    setFields(updated);
     onChange(updated);
   };
 
-  // Add new Section (Battery, Display, etc.)
-  const addSection = () => {
-    updateSections([
-      ...sections,
-      { sku: Date.now(), label: "", fields: [] },
+  // Add Field
+  const addField = () => {
+    updateFields([
+      ...fields,
+      { sku: Date.now(), key: "", value: "" },
     ]);
   };
 
-  const removeSection = (sku) => {
-    updateSections(sections.filter((sec) => sec.sku !== sku));
-  };
-
-  const updateSectionLabel = (sku, newLabel) => {
-    updateSections(
-      sections.map((sec) =>
-        sec.sku === sku ? { ...sec, label: newLabel } : sec
+  // Update Field
+  const updateField = (sku, name, value) => {
+    updateFields(
+      fields.map((f) =>
+        f.sku === sku ? { ...f, [name]: value } : f
       )
     );
   };
 
-  // Manage child fields inside section
-  const addField = (sectionSku) => {
-    updateSections(
-      sections.map((sec) =>
-        sec.sku === sectionSku
-          ? {
-              ...sec,
-              fields: [...sec.fields, { sku: Date.now(), key: "", value: "" }],
-            }
-          : sec
-      )
-    );
-  };
-
-  const updateField = (sectionSku, fieldSku, name, newValue) => {
-    updateSections(
-      sections.map((sec) =>
-        sec.sku === sectionSku
-          ? {
-              ...sec,
-              fields: sec.fields.map((f) =>
-                f.sku === fieldSku ? { ...f, [name]: newValue } : f
-              ),
-            }
-          : sec
-      )
-    );
-  };
-
-  const removeField = (sectionSku, fieldSku) => {
-    updateSections(
-      sections.map((sec) =>
-        sec.sku === sectionSku
-          ? { ...sec, fields: sec.fields.filter((f) => f.sku !== fieldSku) }
-          : sec
-      )
-    );
+  // Remove Field
+  const removeField = (sku) => {
+    updateFields(fields.filter((f) => f.sku !== sku));
   };
 
   return (
-    <div className="flex flex-col gap-8">
-      {sections.map((section) => (
-        <div key={section.sku} className="border border-res p-4 rounded-lg ">
-          {/* Label input */}
-          <div className="flex items-center justify-between mb-3">
-            <TextInput
-              value={section.label}
-              onChange={(e) => updateSectionLabel(section.sku, e.target.value)}
-              placeholder="Main Label (e.g. Battery, Display)"
-              className="w-3/4"
-            />
-            <PartButton onClick={() => removeSection(section.sku)} className="w-10 h-10 !p-0">
-              <RiSubtractLine />
-            </PartButton>
-          </div>
+    <div className="flex flex-col gap-4">
 
-          {/* Child Fields */}
-          {section.fields.map((field) => (
-            <div key={field.sku} className="flex justify-between gap-2 mb-2">
-              <TextInput
-                value={field.key}
-                onChange={(e) =>
-                  updateField(section.sku, field.sku, "key", e.target.value)
-                }
-                placeholder="Key (e.g. Capacity)"
-                className="w-1/5 bg-transparent h-10"
-              />
-              <Textarea
-                value={field.value}
-                onChange={(e) =>
-                  updateField(section.sku, field.sku, "value", e.target.value)
-                }
-                placeholder="Value (e.g. 5000mAh)"
-                className="w-2/3 bg-transparent "
-              />
-              <PartButton
-                onClick={() => removeField(section.sku, field.sku)}
-                className="w-10 h-10 !p-0"
-              >
-                <RiSubtractLine />
-              </PartButton>
-            </div>
-          ))}
+      {fields.map((field) => (
+        <div key={field.sku} className="flex gap-2">
 
-          <PartButton onClick={() => addField(section.sku)} className="mt-2 size-8 !p-0">
-            <RiAddLine />
+          <TextInput
+            value={field.key}
+            onChange={(e) =>
+              updateField(field.sku, "key", e.target.value)
+            }
+            placeholder="Key (e.g. Capacity)"
+            className="max-w-1/4 bg-transparent h-10"
+          />
+
+          <Textarea
+            value={field.value}
+            onChange={(e) =>
+              updateField(field.sku, "value", e.target.value)
+            }
+            placeholder="Value (e.g. 5000mAh)"
+            className={`w-2/3 bg-transparent ${textarea}`}
+          />
+
+          <PartButton
+            onClick={() => removeField(field.sku)}
+            className="w-10 h-10 !p-0"
+          >
+            <RiSubtractLine />
           </PartButton>
+
         </div>
       ))}
 
-      {/* Add new section */}
-      <PartButton onClick={addSection} className="mt-4 size-10 !p-0">
+      {/* Add Button */}
+      <PartButton onClick={addField} className="mt-2 size-10 !p-0">
         <RiAddLine />
       </PartButton>
+
     </div>
   );
 };

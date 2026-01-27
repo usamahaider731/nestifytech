@@ -1,4 +1,5 @@
 import { Transition, TransitionChild } from '@headlessui/react';
+import { Link } from '@inertiajs/react';
 import React, { createContext, useContext, useState } from 'react'
 const AttributeDropDownContext = createContext();
 
@@ -49,7 +50,15 @@ function List({ children, className, ...props }) {
         </div>
     )
 }
+function link({ children, className, ...props }) {
+    return (
+        <Link {...props} className={`${className} h-10 w-full px-3 cursor-pointer flex items-center hover:bg-primary justify-start rounded-md`} {...props}>
+            {children}
+        </Link>
+    )
+}
 ActionDropdown.List = List;
 ActionDropdown.Context = Context;
 ActionDropdown.Trigger = Trigger;
+ActionDropdown.Link = link;
 export default ActionDropdown

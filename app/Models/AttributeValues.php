@@ -5,15 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+// use MongoDB\Laravel\Relations\HasOne;
 
-class AttributeOptions extends Model
+class AttributeValues extends Model
 {
     use HasFactory;
     
-    protected $table = "attribute_options";
+    protected $table = "attribute_values";
     
     protected $fillable = [
+        'id',
         'attribute_id',
         'value',
         'parent_id',
@@ -24,9 +27,9 @@ class AttributeOptions extends Model
     /**
      * Get the attribute that owns this value
      */
-    public function attribute(): BelongsTo
+    public function attribute(): HasOne
     {
-        return $this->belongsTo(Attributes::class, 'attribute_id');
+        return $this->hasOne(Attributes::class, 'id','attribute_id');
     }
     
     /**

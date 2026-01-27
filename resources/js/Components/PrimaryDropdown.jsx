@@ -44,6 +44,10 @@ function PrimaryDropdown({ className = '', onChange='', placeholder = 'Select Ca
     }, [value, options]);
 
     return (
+        <>
+        {Open &&
+        <div className="size-full fixed inset-0 z-40" onClick={()=>{setOpen(false)}}></div>
+        }
         <div className={`flex flex-col relative w-full ${className}`}>
             <div className='w-full h-fit relative' onClick={() => setOpen(true)}>
                 <TextInput className='w-full' placeholder={placeholder} value={currentLabel} />
@@ -86,6 +90,7 @@ function PrimaryDropdown({ className = '', onChange='', placeholder = 'Select Ca
                 </div>
             </div>
         </div>
+        </>
     );
 }
 
