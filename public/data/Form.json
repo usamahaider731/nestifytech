@@ -214,7 +214,7 @@
             "fields": [
                 {
                     "label": "Variations",
-                    "name": "variations", 
+                    "name": "variations",
                     "type": "variations",
                     "value": [
                         {
@@ -330,7 +330,6 @@
                     "style": 2,
                     "name": "discount_toggle",
                     "placeholder": "Category Discount (%)"
-
                 },
                 {
                     "label": "Category Discount",
@@ -349,7 +348,6 @@
                     "placeholder": "Category Discount Date",
                     "condition": "discount_toggle",
                     "condition_value": true
-
                 }
             ]
         }
@@ -496,8 +494,8 @@
         },
         {
             "title": "Layout Role Setting",
-            "style":"main",
-            "fields":[
+            "style": "main",
+            "fields": [
                 {
                     "label": "Home Layout",
                     "style": 2,
@@ -604,6 +602,40 @@
                     "type": "dynamic_options",
                     "show_on": "type",
                     "field_name": "name"
+                }
+            ]
+        }
+    ],
+    "language": [
+        {
+            "title": "Language Information",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Language Name",
+                    "name": "language_name",
+                    "value": "",
+                    "type": "text",
+                    "attribute": "required"
+                },
+                {
+                    "label": "Language Prefix",
+                    "name": "language_prefix",
+                    "value": "",
+                    "placeholder": "Enter Prefix like (ur, en, cz)",
+                    "type":"text"
+                }
+                
+            ]
+        },
+        {
+            "title": "Language Image",
+            "style":"sidebar",
+            "fields":[
+                {
+                    "label": "Select Image or svg Icon",
+                    "type": "image",
+                    "name": "language_image"
                 }
             ]
         }

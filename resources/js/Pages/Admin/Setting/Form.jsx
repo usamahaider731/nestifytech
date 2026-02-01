@@ -79,7 +79,7 @@ function Form({ Data = [], name = '', link = '', type = '' }) {
         for (const [key, optionsConfig] of Object.entries(optionsToFetch)) {
             try {
                 const response = await axios.get(
-                    `/taxonomy-options/${optionsConfig.type}`,
+                    `/api/taxonomy-options/${optionsConfig.type}`,
                     {
                         params: {
                             use_value: optionsConfig.use_value || false,

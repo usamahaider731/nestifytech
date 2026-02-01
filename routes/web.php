@@ -4,6 +4,7 @@ use App\Http\Controllers\AttributeController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\FrontendController;
+use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\LayoutController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\PostController;
@@ -87,6 +88,9 @@ Route::prefix('/admin')->middleware('auth', 'verified')->group(function () {
         Route::get('/','index')->name('admin.tags.index');
         Route::post('/submit','submit')->name('tags.submit');
         Route::post('/update/{id}','update')->name('tags.update');
+    });
+    Route::prefix('/language')->controller(LanguageController::class)->group(function(){
+        Route::get('/create','create')->name('admin.lang.create');
     });
     Route::prefix('/layout')->controller(LayoutController::class)->group(function() {
         Route::get('/type/{type}','layout')->name('layout.setting');

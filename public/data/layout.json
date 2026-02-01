@@ -1,5 +1,142 @@
 {
     "layout": {
+        "Header": [
+            {
+                "title": "Header Settings",
+                "style": "main",
+                "fields": [
+                    {
+                        "label": "Show Top Header",
+                        "type": "checkbox",
+                        "name": "top_header_toggle",
+                        "value": false
+                    },
+                    {
+                      "label": "Show Language Selector",
+                      "type":"checkbox",
+                      "name": "top_header_language_toggle",
+                      "value":true  
+                    },
+                    {
+                        "label": "Sticky Header",
+                        "type": "checkbox",
+                        "name": "sticky_header_toggle",
+                        "value": false
+                    },
+                    {
+                        "label": "Show Message Bar",
+                        "type": "checkbox",
+                        "name": "message_bar_toggle",
+                        "value": true
+                    },
+                    {
+                        "label": "Select Header Style",
+                        "type": "dropdown",
+                        "style": 2,
+                        "name": "header_style",
+                        "attribute": "required",
+                        "value": "style1",
+                        "options": [
+                            {
+                                "id": "style1",
+                                "title": "Style 1"
+                            },
+                            {
+                                "id": "style2",
+                                "title": "Style 2"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Select Header Container",
+                        "type": "dropdown",
+                        "style": 2,
+                        "name": "header_container",
+                        "attribute": "required",
+                        "value": "container",
+                        "options": [
+                            {
+                                "id": "container",
+                                "title": "Boxed"
+                            },
+                            {
+                                "id": "container-fluid",
+                                "title": "Full Width"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Top Header Text",
+                        "style": 2,
+                        "type": "text",
+                        "name": "top_header_text",
+                        "value": "Welcome to Worldwide Electronics Store"
+                    }
+                ]
+            },
+            {
+                "title": "Header Logo",
+                "style": "sidebar",
+                "fields": [
+                    {
+                        "title": "Home Header Logo",
+                        "type": "dropdown",
+                        "condition": "logo_toggle",
+                        "condition_value": true,
+                        "name": "home_header_logo",
+                        "label": "Home Header Logo",
+                        "value": "logo_light",
+                        "options": [
+                            {
+                                "id": "logo_light",
+                                "title": "Logo Light"
+                            },
+                            {
+                                "id": "logo_dark",
+                                "title": "Logo Dark"
+                            }
+                        ]
+                    },
+                    {
+                        "title": "Other Page Header Logo",
+                        "type": "dropdown",
+                        "condition": "logo_toggle",
+                        "condition_value": true,
+                        "name": "other_page_header_logo",
+                        "label": "Other Page Header Logo",
+                        "value": "logo_dark",
+                        "options": [
+                            {
+                                "id": "logo_light",
+                                "title": "Logo Light"
+                            },
+                            {
+                                "id": "logo_dark",
+                                "title": "Logo Dark"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "title": "Header Main Setting",
+                "style": "main",
+                "fields": [
+                    {
+                        "label": "Show Categories Dropdown",
+                        "type": "checkbox",
+                        "name": "categories_dropdown",
+                        "value": true
+                    },
+                    {
+                        "label": "Show Logo",
+                        "type": "checkbox",
+                        "name": "logo_toggle",
+                        "value": true
+                    }
+                ]
+            }
+        ],
         "Home": [
             {
                 "title": "Gallery Settings",
@@ -196,69 +333,6 @@
                         "attribute": "required",
                         "value": 800
                     }
-                ]
-            }
-        ],
-        "Header": [
-            {
-                "title": "Header Settings",
-                "style": "main",
-                "fields": [
-                    {
-                        "label": "Show Top Header",
-                        "type": "checkbox",
-                        "name": "top_header_toggle",
-                        "value": true
-                    },
-                    {
-                        "label": "Sticky Header",
-                        "type": "checkbox",
-                        "name": "sticky_header_toggle",
-                        "value": true
-                    },
-                    {
-                        "label": "Show Message Bar",
-                        "type": "checkbox",
-                        "name": "message_bar_toggle",
-                        "value": true
-                    },
-                    {
-                        "label": "Select Header Style",
-                        "type": "dropdown",
-                        "style": 2,
-                        "name": "header_style",
-                        "attribute": "required",
-                        "value": "style1",
-                        "options": [
-                            {
-                                "id": "style1",
-                                "title": "Style 1"
-                            },
-                            {
-                                "id": "style2",
-                                "title": "Style 2"
-                            }
-                        ]
-                    },
-                    {
-                        "label": "Select Header Container",
-                        "type": "dropdown",
-                        "style": 2,
-                        "name": "header_container",
-                        "attribute": "required",
-                        "value": "container",
-                        "options": [
-                            {
-                                "id": "container",
-                                "title": "Boxed"
-                            },
-                            {
-                                "id": "container-fluid",
-                                "title": "Full Width"
-                            }
-                        ]
-                    }
-                    
                 ]
             }
         ]

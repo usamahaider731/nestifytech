@@ -100,7 +100,7 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
                     params.parent = data[field.depends_on];
                 }
 
-                const response = await axios.get(`/${config.model.toLowerCase()}-options/${config.type ?? ''}`, { params });
+                const response = await axios.get(`/api/${config.model.toLowerCase()}-options/${config.type ?? ''}`, { params });
 
                 const mapped = response.data;
 
@@ -117,7 +117,7 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
         fetchDropdownOptions();
 
         if (rows.some(s => s.fields.some(f => f.options?.model === 'Roles'))) {
-            axios.get('/roles-options').then(res => setRolesList(res.data)).catch(() => { });
+            axios.get('/api/roles-options').then(res => setRolesList(res.data)).catch(() => { });
         }
     }, []);
     useEffect(() => {
@@ -127,6 +127,7 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
             fetchDropdownOptions({ city: true });
         }
     }, [data.state]);
+    console.log(rows)
     const groupedSections = {
         main: rows.filter(r => r.style !== 'sidebar'),
         sidebar: rows.filter(r => r.style === 'sidebar'),

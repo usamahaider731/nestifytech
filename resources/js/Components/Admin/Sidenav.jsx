@@ -22,9 +22,10 @@ import {
   RiLayoutTop2Line,
   RiLayoutBottomLine,
   RiMenu2Line,
+  RiTranslateAi,
 } from 'react-icons/ri';
 
-import { FaUser } from 'react-icons/fa';
+import { FaLanguage, FaUser } from 'react-icons/fa';
 
 const menu = [
   {
@@ -97,6 +98,23 @@ const menu = [
           },
         ],
       },
+      {
+        id: "language",
+        title: "Language",
+        icon: <RiTranslateAi className='size-4' />,
+        menu: [
+          {
+            id: "view-language",
+            title: "View",
+            route: '/'
+          },
+          {
+            id: "create-language",
+            title: 'Create Language',
+            route: route('admin.lang.create')
+          }
+        ]
+      }
     ],
   },
   {

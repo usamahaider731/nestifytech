@@ -23,8 +23,8 @@ class SettingController extends Controller
     protected $file;
     public function __construct()
     {
-
-        $this->file = public_path('data/setting.json');
+        parent::__construct();
+        $this->file = $this->json_file_location.'/setting.json';
         $path = File::exists($this->file) ? File::get($this->file) : '{}';
         $this->data = json_decode($path, true);
         $this->delete_null_tax();
@@ -50,7 +50,7 @@ class SettingController extends Controller
     }
     public function updateCountry()
     {
-        $file = public_path('data/countries.json');
+        $file = $this->json_file_location.'/countries.json';
         $countriesData = File::exists($file) ? File::get($file) : [];
         $countriesData = json_decode($countriesData, true);
         $countries = Taxonomy::where('type', 'country')->get();
@@ -222,7 +222,7 @@ class SettingController extends Controller
             return $item['key'] === 'id';
         });
         $country_id = $country_id[0]['value'];
-        $state = public_path('data/states.json');
+        $state = $this->json_file_location.'/states.json';
         File::exists($state) && $dataState = File::get($state);
         $stateData = json_decode($dataState);
         $states = array_filter($stateData, function ($item) use ($country_id) {
@@ -270,7 +270,7 @@ class SettingController extends Controller
         $country = Taxonomy::where(['type' => 'country', 'title' => $countryName])->first();
         if (!$country) return;
 
-        $cityPath = public_path('data/cities.json');
+        $cityPath = $this->json_file_location.'/cities.json';
         if (!File::exists($cityPath)) return;
         $dataCity = File::get($cityPath);
 

@@ -16,7 +16,8 @@ class AttributeController extends Controller
     public $data;
     function __construct()
     {
-        $this->path = public_path('data/Form.json');
+        parent::__construct();
+        $this->path = $this->json_file_location.'Form.json';
         // Properly parse the JSON file
         if (File::exists($this->path)) {
             $json = File::get($this->path);

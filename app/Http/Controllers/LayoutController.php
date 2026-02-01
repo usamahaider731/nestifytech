@@ -14,16 +14,11 @@ class LayoutController extends Controller
 
     public $file;
     public $data;
-    //   function __construct()
-    //     {
-    //         $this->file = file_get_contents(public_path('data/layout.json'));
-
-    //         $this->data = json_decode($this->file);
-    //         $this->data = $this->data->layout ?? [];
-    //     }
+  
     function __construct()
     {
-        $this->file = public_path('data/layout.json');
+        parent::__construct();
+        $this->file = $this->json_file_location.'/layout.json';
 
         $data = file_get_contents($this->file);
         $str = json_decode($data, true);
@@ -78,7 +73,7 @@ class LayoutController extends Controller
         $type = ucfirst($type);
 
         $data = $this->data[$type] ?? [];
-        return Inertia::render('Admin/Layout/LayoutSetting', compact('data'));
+        return Inertia::render('Admin/Layout/LayoutSetting', compact('data', 'type'));
     }
     public function menuSubmit(Request $request)
     {
@@ -124,15 +119,13 @@ class LayoutController extends Controller
             foreach ($value as $keys => $file) {
 
                 if ($file instanceof \Illuminate\Http\UploadedFile) {
-                    $filename = time() . '_' . md5('layout-images') . '_' . $key . $keys. '.' . $file->getClientOriginalExtension();
+                    $filename = time() . '_' . md5('layout-images') . '_' . $key . $keys . '.' . $file->getClientOriginalExtension();
                     $file->move(public_path('storage/uploads/image'), $filename);
                     $trq[] = $filename;
                 }
             }
             // dd($trq);
             return $settingItem['value'] = $trq;
-
-
         } elseif ($field['type'] == 'image' && $value instanceof \Illuminate\Http\UploadedFile) {
             if (!empty($field['value'])) {
                 if (file_exists(public_path('storage/uploads/image/' . $field['value']))) {
@@ -149,45 +142,143 @@ class LayoutController extends Controller
     public function submitLayoutPages(Request $request, $type)
     {
         $type = Str::ucfirst($type ?? 'Home');
-        // dd($request->all());
-        $currentSettings = json_decode(json_encode($this->data[$type] ?? []), true);
 
+        /*
+    |--------------------------------------------------------------------------
+    | Decode layout data safely
+    |--------------------------------------------------------------------------
+    */
+        $layoutSetting = $this->data;
+
+        if (is_string($layoutSetting)) {
+            $layoutSetting = json_decode($layoutSetting, true);
+        }
+
+        $layoutSetting = is_array($layoutSetting) ? $layoutSetting : [];
+
+        if (!isset($layoutSetting[$type])) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid layout type'
+            ], 422);
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | Separate current & other layouts
+    |--------------------------------------------------------------------------
+    */
+        $currentSettings = $layoutSetting[$type];
+
+        $otherSetting = array_filter(
+            $layoutSetting,
+            fn($key) => $key !== $type,
+            ARRAY_FILTER_USE_KEY
+        );
+
+        /*
+    |--------------------------------------------------------------------------
+    | Update fields
+    |--------------------------------------------------------------------------
+    */
         foreach ($currentSettings as &$section) {
-            if (!isset($section['fields']) || !is_array($section['fields'])) {
+
+            if (empty($section['fields']) || !is_array($section['fields'])) {
                 continue;
             }
 
             foreach ($section['fields'] as &$field) {
-                $key = $field['name'] ?? null;
-                if (!$key) continue;
-                if ($field['type'] === 'image' && $request->hasFile($key)) {
-                    if (isset($field['multiple']) && $field['multiple']) {
-                        $strv = [];
-                        foreach ($request->file($key) as $file) {
-                            $strv[] = $file;
+
+                $key  = $field['name'] ?? null;
+                $typeField = $field['type'] ?? null;
+
+                if (!$key || !$typeField) {
+                    continue;
+                }
+
+                switch ($typeField) {
+
+                    case 'image':
+
+                        if ($request->hasFile($key)) {
+
+                            if (!empty($field['multiple'])) {
+
+                                $files = [];
+                                foreach ($request->file($key) as $file) {
+                                    $files[] = $file;
+                                }
+
+                                $field['value'] = $this->typeRender($key, $files, $field);
+                            } else {
+                                $field['value'] = $this->typeRender(
+                                    $key,
+                                    $request->file($key),
+                                    $field
+                                );
+                            }
+                        } else {
+                            // Ensure correct default
+                            $field['value'] = $field['multiple'] ?? false
+                                ? ($field['value'] ?? [])
+                                : ($field['value'] ?? '');
                         }
-                        $uploadedNames = $this->typeRender($key, $strv, $field);
-                        // dd($request->file($key));/
-                    } else {
-                        $files = $request->file($key);
-                        $uploadedNames = $this->typeRender($key, $files, $field);
-                    }
-                    $field['value'] = $uploadedNames;
-                } elseif ($request->has($key)) {
-                    $field['value'] = $request->input($key);
+                        break;
+
+                    case 'checkbox':
+                        // Checkbox is false if not sent
+                        $field['value'] = $request->boolean($key);
+                        break;
+
+                    case 'number':
+                        if ($request->has($key)) {
+                            $field['value'] = (int) $request->input($key);
+                        }
+                        break;
+
+                    case 'dropdown':
+                        if ($request->has($key)) {
+                            $value = $request->input($key);
+                            $field['value'] = is_array($value) ? $value : $value;
+                        }
+                        break;
+
+                    default:
+                        if ($request->has($key)) {
+                            $field['value'] = $request->input($key);
+                        }
+                        break;
                 }
             }
         }
-        File::put($this->file, json_encode([
-            'layout' => [
-                $type => $currentSettings
-            ]
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
+        // IMPORTANT: remove references
+        unset($section, $field);
+
+        /*
+    |--------------------------------------------------------------------------
+    | Save updated layout
+    |--------------------------------------------------------------------------
+    */
+        File::put(
+            $this->file,
+            json_encode([
+                'layout' => [
+                    $type => $currentSettings,
+                    ...$otherSetting
+                ]
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+        );
+
+        /*
+    |--------------------------------------------------------------------------
+    | Response
+    |--------------------------------------------------------------------------
+    */
         return response()->json([
-            'status' => true,
+            'status'  => true,
             'message' => 'Layout updated successfully',
-            'data' => $currentSettings,
+            'data'    => $currentSettings,
         ]);
     }
 }

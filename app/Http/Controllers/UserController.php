@@ -13,6 +13,12 @@ use Illuminate\Support\Facades\File;
 
 class UserController extends Controller
 {
+    public $file;
+    public function __construct()
+    {
+         parent::__construct();
+         $this->file = $this->json_file_location.'/Form.json';
+    }
     public function users()
     {
 
@@ -66,7 +72,7 @@ class UserController extends Controller
         $user->roles = is_string($user->roles) ? json_decode($user->roles, true) : $user->roles;
 
         $roles = Roles::where('status', 'publish')->get();
-        $file = File::exists(public_path('data/Form.json')) ? File::get(public_path('data/Form.json')) : '';
+        $file = File::exists($this->file) ? File::get($this->file) : '';
         $data = json_decode($file, true);
         $user_rows = $data['user'];
         return inertia::render('Admin/Users/Edit', compact('user', 'roles', 'user_rows'));
@@ -112,7 +118,7 @@ class UserController extends Controller
     }
     public function RoleManage(Request $request)
     {
-        $file = json_decode(File::get(public_path('data/Form.json')), true);
+        $file = json_decode(File::get($this->file), true);
         $Data = $file['role'];
         $id = $request->id ?? null;
         $roles = null;
@@ -126,7 +132,7 @@ class UserController extends Controller
     {
         $role = Roles::where('id', $id)->first();
         $role->permission = json_decode($role->permission, true);
-        $file = json_decode(File::get(public_path('data/Form.json')), true);
+        $file = json_decode(File::get(), true);
         $data = $file['role'];
         return inertia::render('Admin/Role/Detail', compact('data', 'role'));
     }
