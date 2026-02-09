@@ -9,6 +9,7 @@
 /storage/framework/views
 /storage/logs
 /storage/pail
+
 /vendor
 .env
 .env.backup
