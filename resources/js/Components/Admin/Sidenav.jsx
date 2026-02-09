@@ -106,7 +106,7 @@ const menu = [
           {
             id: "view-language",
             title: "View",
-            route: '/'
+            route: route('admin.lang.index')
           },
           {
             id: "create-language",

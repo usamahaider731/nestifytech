@@ -47,6 +47,9 @@ Route::get('/banners-message', [
     ApiController::class, 'bannersMessage'
 ])->name('api.message.banner');
 Route::get('/header-setting', [ApiController::class,'headerSettings'])->name('header.setting');
+Route::get('/language', [ApiController::class,'language'])->name('language'); 
+Route::get('/image/{filename}', [ApiController::class,'image'])->name('image'); 
+Route::get('/get_taxonomies',[ApiController::class, 'get_taxonomies'])->name('api.get_taxonomies');
 // Route::controller(FrontendController::class)->group(function () {
 //     Route::get('/index', 'index')->name('api.index');
 //     Route::get('/header', 'header')->name('api.header');

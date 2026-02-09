@@ -90,7 +90,11 @@ Route::prefix('/admin')->middleware('auth', 'verified')->group(function () {
         Route::post('/update/{id}','update')->name('tags.update');
     });
     Route::prefix('/language')->controller(LanguageController::class)->group(function(){
+        Route::get('/','index')->name('admin.lang.index');
         Route::get('/create','create')->name('admin.lang.create');
+        Route::get('/edit/{prefix}','edit')->name('admin.lang.edit');
+        Route::post('/create','submit')->name('admin.lang.submit');
+        Route::post('/edit/{prefix}','update')->name('admin.lang.update');
     });
     Route::prefix('/layout')->controller(LayoutController::class)->group(function() {
         Route::get('/type/{type}','layout')->name('layout.setting');

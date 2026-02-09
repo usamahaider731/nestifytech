@@ -30,7 +30,8 @@ class FrontendController extends Controller
    public function index()
    {
       $categories = Taxonomy::where('type', 'category')->where('status', 'publish')->with('image', 'children')->get();
-      return ['categories' => $categories];
+      // return ['categories' => $categories];
+      return view('index');
    }
    public function get_taxonomies(Request $request)
    {

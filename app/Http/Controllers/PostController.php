@@ -31,7 +31,7 @@ class PostController extends Controller
     public function __construct()
     {
         parent::__construct();
-        $this->path = $this->json_file_location.'/setting.json';
+        $this->path = $this->json_file_location.'/Form.json';
 
         // Properly parse the JSON file
         if (File::exists($this->path)) {
@@ -63,9 +63,9 @@ class PostController extends Controller
     }
     public function create(Request $request, $post)
     {
+
         // Safely get boolean value from the JSON array
         $Data = $this->data[$post] ?? false;
-
         return Inertia::render("Admin/Post/{$post}/Create", compact('Data'));
     }
     public function submit(Request $request, $post = null, $id = null)

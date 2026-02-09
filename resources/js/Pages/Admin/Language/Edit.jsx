@@ -3,16 +3,19 @@ import axios from 'axios';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { useForm } from '@inertiajs/react';
 import React from 'react';
-function Create({ data }) {
+function Edit({ data, initialData }) {
+    
     return (
         <Form
-            initialData={{}}
+            initialData={initialData}
             rows={data}
-            mode="create"
+            mode="edit"
+          
+            
             type="Language"
-            routes={route('admin.lang.submit')}
+            routes={route('admin.lang.update', initialData.prefix)}
         />
     );
 }
-export default Create;
-Create.layout = (page) => <AdminLayout>{page}</AdminLayout>;
+export default Edit;
+Edit.layout = (page) => <AdminLayout>{page}</AdminLayout>;

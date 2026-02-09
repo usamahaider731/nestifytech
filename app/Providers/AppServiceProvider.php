@@ -31,7 +31,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Read your JSON files safely
         $settingsPath = storage_path('app/data/setting.json');
-        $layoutPath = public_path('app/data/layout.json');
+        $layoutPath = storage_path('app/data/layout.json');
 
         $settings = $filesystem->exists($settingsPath) ? $filesystem->get($settingsPath) : '{}';
         $layout = $filesystem->exists($layoutPath) ? $filesystem->get($layoutPath) : '{}';

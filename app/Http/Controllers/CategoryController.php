@@ -21,7 +21,7 @@ class CategoryController extends Controller
     public function __construct()
     {
         parent::__construct();
-        $this->path = $this->json_file_location.'/setting.json';
+        $this->path = $this->json_file_location.'/Form.json';
 
         // Properly parse the JSON file
         if (File::exists($this->path)) {
