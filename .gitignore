@@ -19,15 +19,10 @@
 /public/hot
 /public/storage
 
-# =========================
-# Storage (Laravel standard)
-# =========================
-/storage/*
+
 !/storage/app/.gitignore
 !/storage/framework/.gitignore
 !/storage/logs/.gitignore
-
-# Ignore runtime data folder
 /storage/app/data/*
 !/storage/app/data/.gitignore
 
