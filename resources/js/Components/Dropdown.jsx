@@ -18,16 +18,16 @@ const Dropdown = ({ children }) => {
     );
 };
 
-const Trigger = ({ children }) => {
+const Trigger = ({ children, className = '', ...props }) => {
     const { open, setOpen, toggleOpen } = useContext(DropDownContext);
 
     return (
         <>
-            <div onClick={toggleOpen}>{children}</div>
+            <div onClick={toggleOpen} {...props} className={className}>{children}</div>
 
             {open && (
                 <div
-                    className="fixed inset-0 z-40"
+                    className="fixed inset-0 z-40 min-h-screen"
                     onClick={() => setOpen(false)}
                 ></div>
             )}
@@ -40,6 +40,7 @@ const Content = ({
     width = '48',
     contentClasses = 'py-1 bg-white dark:bg-gray-700',
     children,
+    className = ''
 }) => {
     const { open, setOpen } = useContext(DropDownContext);
     let alignmentClasses = 'origin-top';
@@ -65,7 +66,7 @@ const Content = ({
                 leaveTo="opacity-0 scale-95"
             >
                 <div
-                    className={`absolute z-50 mt-2 rounded-md shadow-lg ${alignmentClasses} ${widthClasses}`}
+                    className={`absolute z-50 mt-2 rounded-md shadow-lg ${alignmentClasses} ${widthClasses} ${className}`}
                     onClick={() => setOpen(false)}
                 >
                     <div

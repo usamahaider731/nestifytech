@@ -28,7 +28,7 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): \Symfony\Component\HttpFoundation\Response
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -46,6 +46,6 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('admin.dashboard', absolute: false));
+        return Inertia::location(config('app.frontend_url') . '/dashboard');
     }
 }

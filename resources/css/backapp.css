@@ -26,22 +26,30 @@
 .dropdown::-webkit-scrollbar {
   display: none;
 }
-.react-calendar .react-calendar__tile--active:enabled:hover, .react-calendar__tile--active:enabled:focus, .react-calendar__tile:hover{
+
+.react-calendar .react-calendar__tile--active:enabled:hover,
+.react-calendar__tile--active:enabled:focus,
+.react-calendar__tile:hover {
   background-color: var(--color-primary);
   color: white;
 }
-.react-calendar .react-calendar__tile--active:enabled:hover, .react-calendar .react-calendar__tile--active:enabled:focus{
+
+.react-calendar .react-calendar__tile--active:enabled:hover,
+.react-calendar .react-calendar__tile--active:enabled:focus {
   background-color: var(--color-primary);
   color: white;
 }
-.react-calendar .react-calendar__tile--active{
+
+.react-calendar .react-calendar__tile--active {
   background-color: var(--color-primary);
   color: white;
 }
-.react-calendar .react-calendar__tile.react-calendar__month-view__days__day.react-calendar__month-view__days__day--neighboringMonth{
+
+.react-calendar .react-calendar__tile.react-calendar__month-view__days__day.react-calendar__month-view__days__day--neighboringMonth {
   @apply text-secondary;
 }
-.react-calendar__tile{
+
+.react-calendar__tile {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -51,37 +59,51 @@
   padding: 0px;
   aspect-ratio: 1 / 1;
 }
+
 .scroll-hidden::-webkit-scrollbar {
   display: none;
 }
-.react-calendar__month-view__days{
+
+.react-calendar__month-view__days {
   gap: 0.5rem;
   display: grid !important;
   grid-template-columns: repeat(7, 1fr);
   grid-template-rows: repeat(5, 1fr);
 
 }
+
 .calendar-main .react-calendar {
   @apply rounded-2xl bg-accent border-secondary p-4 border-2;
 }
+
 .ql-toolbar.ql-snow {
   @apply rounded-t-md !border-secondary text-secondary fill-secondary;
 }
-.react-calendar .react-calendar__navigation .react-calendar__navigation__arrow, .react-calendar .react-calendar__navigation .react-calendar__navigation__arrow:enabled:hover, .react-calendar .react-calendar__navigation .react-calendar__navigation__arrow:enabled:focus{
+
+.react-calendar .react-calendar__navigation .react-calendar__navigation__arrow,
+.react-calendar .react-calendar__navigation .react-calendar__navigation__arrow:enabled:hover,
+.react-calendar .react-calendar__navigation .react-calendar__navigation__arrow:enabled:focus {
   @apply rounded-full border-secondary border-2 bg-transparent text-white size-9 max-w-9 flex items-center justify-center min-w-9;
 }
-.react-calendar .react-calendar__tile.react-calendar__month-view__days__day{
+
+.react-calendar .react-calendar__tile.react-calendar__month-view__days__day {
   @apply text-white;
 }
-.react-calendar .react-calendar__navigation .react-calendar__navigation__label, .react-calendar .react-calendar__navigation .react-calendar__navigation__label:enabled:hover, .react-calendar .react-calendar__navigation .react-calendar__navigation__label:enabled:focus{
+
+.react-calendar .react-calendar__navigation .react-calendar__navigation__label,
+.react-calendar .react-calendar__navigation .react-calendar__navigation__label:enabled:hover,
+.react-calendar .react-calendar__navigation .react-calendar__navigation__label:enabled:focus {
   @apply text-heading font-semibold text-sm bg-transparent;
 }
-.react-calendar .react-calendar__tile--now{
+
+.react-calendar .react-calendar__tile--now {
   @apply text-white bg-green-600;
 }
-.react-calendar .react-calendar__navigation{
+
+.react-calendar .react-calendar__navigation {
   @apply gap-3;
 }
+
 .ql-container.ql-snow {
   @apply rounded-b-md !border-secondary;
 }
@@ -105,6 +127,7 @@
 .ql-snow.ql-toolbar button {
   @apply !text-res !fill-res;
 }
+
 /*
   The default border color has changed to `currentcolor` in Tailwind CSS v4,
   so we've added these compatibility styles to make sure everything still

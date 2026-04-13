@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Textarea from '@/Components/Textarea';
+import PhoneInput from '@/Components/PhoneInput';
+import Repeater from '@/Components/Admin/Repeater';
 import { useForm } from '@inertiajs/react';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
@@ -7,6 +9,8 @@ import TextInput from '@/Components/TextInput';
 import DropdownSelect from '@/Components/DropdownSelect';
 import ImageUploader from '@/Components/Admin/ImageUploader';
 import axios from 'axios';
+import Checkbox from '@/Components/Checkbox';
+import Togglebox from '@/Components/Togglebox';
 
 function Form({ Data = [], name = '', link = '', type = '' }) {
     const [dropdownOptions, setDropdownOptions] = useState({});
@@ -15,7 +19,13 @@ function Form({ Data = [], name = '', link = '', type = '' }) {
     const { data, setData, post, processing, errors } = useForm(() => {
         const initial = {};
         Object.entries(Data).forEach(([key, setting]) => {
-            initial[key] = setting.value;
+            let val = setting.value;
+            if (typeof val === 'string' && (val.startsWith('[') || val.startsWith('{'))) {
+                try {
+                    val = JSON.parse(val);
+                } catch (e) {}
+            }
+            initial[key] = val;
         });
         return initial;
     });
@@ -51,8 +61,8 @@ function Form({ Data = [], name = '', link = '', type = '' }) {
         // Case 2: Static options provided as object (like font example)
         if (typeof options === 'object' && !options.model) {
             return Object.values(options).map(option => ({
-                id: option.id,
-                title: option.title
+                id: option.id ?? option.value,
+                title: option.title ?? option.label
             }));
         }
 
@@ -73,13 +83,23 @@ function Form({ Data = [], name = '', link = '', type = '' }) {
                 optionsToFetch[key] = setting.options;
                 setLoadingStates(prev => ({ ...prev, [key]: true }));
             }
+            // Check for repeaters
+            if (setting.type === 'repeater' && setting.fields) {
+                setting.fields.forEach(f => {
+                    if (f.type === 'dropdown' && f.options?.model) {
+                        optionsToFetch[f.name] = f.options;
+                        setLoadingStates(prev => ({ ...prev, [f.name]: true }));
+                    }
+                });
+            }
         });
 
         // Fetch each dynamic option
         for (const [key, optionsConfig] of Object.entries(optionsToFetch)) {
             try {
+                const endpoint = optionsConfig.model === 'Menu' ? `/api/menu-locations` : `/api/taxonomy-options/${optionsConfig.type}`;
                 const response = await axios.get(
-                    `/api/taxonomy-options/${optionsConfig.type}`,
+                    endpoint,
                     {
                         params: {
                             use_value: optionsConfig.use_value || false,
@@ -90,7 +110,16 @@ function Form({ Data = [], name = '', link = '', type = '' }) {
 
                 setDropdownOptions(prev => ({
                     ...prev,
-                    [optionsConfig.type]: (response.data).map((value => ({
+                    [key]: (response.data).map((value => ({
+                        id: value.id,
+                        title: value.title
+                    })))
+                }));
+                // Also set by config's own name if inside a repeater
+                const optionKey = optionsConfig.type || key;
+                setDropdownOptions(prev => ({
+                    ...prev,
+                    [optionKey]: (response.data).map((value => ({
                         id: value.id,
                         title: value.title
                     })))
@@ -127,10 +156,11 @@ function Form({ Data = [], name = '', link = '', type = '' }) {
                         return (
                             <div
                                 className={`
-                                ${(setting.type === 'text' || setting.type === 'dropdown' || setting.type === 'image') && 'col-span-2'} 
+                                ${(setting.type === 'text' || setting.type === 'phone' || setting.type === 'dropdown' || setting.type === 'image') && ((setting.style && setting.style == 2) ? 'col-span-4' : 'col-span-2')} 
                                 ${setting.type === 'color' && 'col-span-1'} 
                                 ${setting.type === 'textarea' && 'col-span-4'}
-                                ${setting.type === 'checkbox' && 'col-span-4 flex-row items-center gap-3'}
+                                ${setting.type === 'repeater' && 'col-span-4'}
+                                ${setting.type === 'checkbox' && 'col-span-4 flex-col gap-3'}
                                 flex flex-col gap-2
                             `}
                                 key={key}
@@ -139,6 +169,7 @@ function Form({ Data = [], name = '', link = '', type = '' }) {
                                     value={setting.label}
                                     className='text-base capitalize text-res'
                                     htmlFor={key}
+
                                 />
 
                                 {(setting.type === 'text' && !setting.depend_on) && (
@@ -147,16 +178,44 @@ function Form({ Data = [], name = '', link = '', type = '' }) {
                                         name={key}
                                         value={data[key] || ''}
                                         className='w-full'
+                                        placeholder={setting.placeholder ?? ''}
                                         onChange={(e) => handleChange(e, key)}
                                         error={errors[key]}
                                     />
                                 )}
+
+                                {setting.type === 'phone' && (
+                                    <PhoneInput
+                                        id={key}
+                                        name={key}
+                                        value={data[key] || ''}
+                                        className='w-full'
+                                        onChange={(phone) => setData(key, phone)}
+                                        error={errors[key]}
+                                    />
+                                )}
+
+                                {setting.type === 'repeater' && (
+                                    <Repeater
+                                        id={key}
+                                        name={key}
+                                        value={data[key] || []}
+                                        onChange={(val) => setData(key, val)}
+                                        label={setting.label}
+                                        fields={setting.fields || []}
+                                        dropdownOptions={dropdownOptions}
+                                        loadingStates={loadingStates}
+                                    />
+                                )}
+
                                 {(setting.type === 'text' && setting.depend_on) && (
 
                                     <TextInput
                                         id={key}
                                         name={key}
                                         readOnly={true}
+                                        placeholder={setting.placeholder ?? ''}
+
                                         value={data[key] || ''}
                                         className='w-full'
                                         onChange={(e) => handleChange(e, key)}
@@ -168,6 +227,8 @@ function Form({ Data = [], name = '', link = '', type = '' }) {
                                     <Textarea
                                         id={key}
                                         name={key}
+                                        placeholder={setting.placeholder ?? ''}
+
                                         className='bg-transparent rounded outline-0 ring-0 border-secondary text-heading focus:ring-0 focus:outline-0 focus:border-secondary'
                                         value={data[key] || ''}
                                         onChange={(e) => handleChange(e, key)}
@@ -197,7 +258,7 @@ function Form({ Data = [], name = '', link = '', type = '' }) {
                                     <DropdownSelect
                                         id={key}
                                         name={key}
-                                        value={setting.value ?? data[key]}
+                                        value={data[key]}   // ✅ ONLY THIS
                                         className='w-full'
                                         options={processOptions(setting.options)}
                                         onChange={(value) => handleDropdownChange(value, key)}
@@ -209,17 +270,18 @@ function Form({ Data = [], name = '', link = '', type = '' }) {
                                 }
 
                                 {setting.type === 'checkbox' && (
-                                    <div className='flex items-center'>
-                                        <input
+                                    <div className='flex gap-2'>
+
+                                        <Togglebox
                                             id={key}
-                                            type="checkbox"
+                                            name={key}
                                             checked={data[key] || false}
                                             onChange={(e) => handleChange(e, key)}
                                             className='h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary'
                                         />
-                                        <label htmlFor={key} className='ml-2 block text-sm text-gray-700'>
-                                            {setting.label}
-                                        </label>
+                                        <InputLabel htmlFor={key} className='text-base capitalize text-res'>
+                                            {setting.value_label ?? setting.label}
+                                        </InputLabel>
                                     </div>
                                 )}
                                 {setting.type === 'image' && (

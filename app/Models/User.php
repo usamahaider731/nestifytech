@@ -45,18 +45,16 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
-    protected $casts = [
-        'roles' => 'array',
-        'image' => 'array'
-    ];
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'roles' => 'array',
+            'image' => 'array'
         ];
     }
-    protected $appends = ['user_role'];
+    protected $appends = ['user_role', 'user_avater', 'user_permissions'];
 
     public static function online()
     {
@@ -72,36 +70,68 @@ class User extends Authenticatable
         }
         return $query->get();
     }
-    public function image(): HasOne
+    public function getUserAvaterAttribute()
     {
-        return $this->hasOne(Media::class, 'parent_id')->where('type', 'user');
+        $image = \Illuminate\Support\Facades\DB::table('media')->where(['parent_id' => $this->id, 'type' => 'user'])->first();
+        return $image ? $image : null;
     }
-    public function password(): HasOne
-    {
-        return $this->password;
-    }
-
     public function getUserRoleAttribute()
     {
         $roles = $this->roles;
-
-        // ✅ Only decode if it's a string
         if (is_string($roles)) {
             $roles = json_decode($roles, true);
         }
-
         if (!is_array($roles) || empty($roles)) {
             return [];
         }
 
         if (count($roles) === 1 && is_numeric($roles[0])) {
-            return Roles::where('id', $roles[0])->pluck('title')->toArray();
+            return \Illuminate\Support\Facades\DB::table('roles')->where('id', $roles[0])->pluck('title')->toArray();
         }
 
         if (count($roles) > 1) {
-            return Roles::whereIn('id', $roles)->pluck('title')->toArray();
+            return \Illuminate\Support\Facades\DB::table('roles')->whereIn('id', $roles)->pluck('title')->toArray();
         }
 
         return [];
+    }
+
+    public function getUserPermissionsAttribute()
+    {
+        $roles = $this->roles;
+        if (is_string($roles)) {
+            $roles = json_decode($roles, true);
+        }
+        if (!is_array($roles) || empty($roles)) {
+            return [];
+        }
+
+        $allPermissions = [];
+        $rolesData = \Illuminate\Support\Facades\DB::table('roles')->whereIn('id', $roles)->get();
+        foreach ($rolesData as $role) {
+            // New system uses 'permissions' (plural) column
+            $permissions = isset($role->permissions) ? (is_string($role->permissions) ? json_decode($role->permissions, true) : $role->permissions) : null;
+            
+            if (is_array($permissions)) {
+                // Flatten nested structure: { "content": ["Product-Read", ...], ... }
+                foreach ($permissions as $category => $perms) {
+                    if (is_array($perms)) {
+                        foreach ($perms as $p) {
+                            $allPermissions[] = strtolower(trim($p));
+                        }
+                    }
+                }
+            } else {
+                // Backward compatibility for old flat structure if any
+                $legacy = isset($role->permission) ? (is_string($role->permission) ? json_decode($role->permission, true) : $role->permission) : null;
+                if (is_array($legacy)) {
+                    foreach ($legacy as $key => $value) {
+                        if ($value == 1) $allPermissions[] = strtolower(trim($key));
+                    }
+                }
+            }
+        }
+
+        return array_values(array_unique($allPermissions));
     }
 }

@@ -3,7 +3,7 @@ import { RiCheckFill } from "react-icons/ri";
 export default function Checkbox({ className = '', onChange='', ...props }) {
     return (
         <>
-            <label className="relative size-4.5">
+            <label className="relative size-4.5 cursor-pointer">
                 <input
                 onChange={onChange}
                     {...props}

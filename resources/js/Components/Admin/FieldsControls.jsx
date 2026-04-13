@@ -1,4 +1,3 @@
-// FieldRenderer.js
 import React from 'react';
 import InputLabel from '@/Components/InputLabel';
 import TextInput from '@/Components/TextInput';
@@ -15,16 +14,27 @@ import InputField from './InputField';
 import Textarea from '../Textarea';
 import Repeater from './Repeater';
 import DateRangePicker from './Calendar';
+import PhoneInput from '../PhoneInput';
+import AttributesSelector from './AttributesSelector';
+import PermissionMatrix from './PermissionMatrix';
+import VariationsSelector from './VariationsSelector';
 
 const FieldControls = ({
     field,
     data,
     updateField,
     rolesList,
+    normalizeImageValue,
     onChange,
     dropdownOptions,
     loadingStates,
+    id = null
 }) => {
+    const getNestedValue = (obj, path) => {
+        if (!path.includes('.')) return obj[path];
+        return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+    };
+
     const colSpan =
         field.style === 2 ? 'col-span-6' :
             field.type === 'checkbox' ? 'col-span-2' : 'col-span-3';
@@ -40,27 +50,29 @@ const FieldControls = ({
     let fieldClass = '';
     // isset condition
     if (field.condition) {
-          fieldClass = 'hidden';
-          console.log(data[field.condition])
+        fieldClass = 'hidden';
 
-      if (data[field.condition] == field.condition_value || data[field.condition]) {
-          fieldClass = 'flex';
-      }
-      
+        if (data[field.condition] == field.condition_value || data[field.condition]) {
+            fieldClass = 'flex';
+        }
+
     }
-    
+
     // === TEXT FIELD ===
     if (field.type === 'text' || field.type === 'number') {
         if (!field.show_on || data[field.show_on] === "text" || data[field.show_on] === 'color') {
 
-
+          let  value = getNestedValue(data, field.name)
+            if (typeof value === 'undefined' && field.value) {
+                value = field.value;
+            }
             return (
                 <div className={`flex flex-col gap-2 ${colSpan} ${fieldClass}`} key={field.name}>
                     <InputLabel className='text-heading'>{field.label}</InputLabel>
                     <TextInput
                         type={field.type}
                         name={field.name}
-                        value={data[field.name] || field.value || ''}
+                        value={value}
                         placeholder={field.placeholder}
                         onChange={(e) => updateField(field.name, e.target.value)}
                         required={field.attribute === 'required'}
@@ -71,6 +83,23 @@ const FieldControls = ({
         }
     }
 
+    // === PHONE FIELD ===
+    if (field.type === 'phone') {
+        return (
+            <div className={`flex flex-col gap-2 ${colSpan} ${fieldClass}`} key={field.name}>
+                <InputLabel className='text-heading'>{field.label}</InputLabel>
+                <PhoneInput
+                    name={field.name}
+                    value={data[field.name] || ''}
+                    onChange={(val) => updateField(field.name, val)}
+                    required={field.attribute === 'required'}
+                    className="w-full"
+                    error={data.errors?.[field.name]}
+                />
+            </div>
+        );
+    }
+
     // === DESCRIPTION ===
     if (field.type === 'desc') {
         return (
@@ -78,7 +107,12 @@ const FieldControls = ({
                 <InputLabel className='text-heading'>{field.label}</InputLabel>
                 <DescriptionEditor
                     name={field.name}
+                    translate={field.translate}
+                    type={field.name}
+                    field={field}
+                    data={field.translate ? data : null}
                     value={data[field.name] || ''}
+                    id={id}
                     onChange={(val) => updateField(field.name, val)}
                     placeholder={field.placeholder}
                 />
@@ -98,28 +132,25 @@ const FieldControls = ({
 
     // === IMAGE ===
     if (field.type === 'image') {
-        let value = null;
-        let multiple = !!field.multiple;
-        if (field.value) {
-            value = field.value;
-        }
-        else if (data[field.name]?.filename) {
-            value = data[field.name].filename;
-        } else if (data[field.name]) {
-            value = data[field.name];
-        }
+        const value = normalizeImageValue(field, data);
+
         return (
             <div className="col-span-6" key={field.name}>
-                <InputLabel className='text-heading'>{field.label}</InputLabel>
+                <InputLabel className="text-heading">
+                    {field.label}
+                </InputLabel>
+
                 <ImageUploader
-                    value={value}
-                    multiple={multiple}
+                    key={field.name}
                     name={field.name}
-                    onChange={(file) => updateField(field.name, file)}
+                    multiple={!!field.multiple}
+                    value={value}
+                    onChange={(files) => updateField(field.name, files)}
                 />
             </div>
         );
     }
+
 
     // === DROPDOWN ===
     if (field.type === 'dropdown') {
@@ -131,7 +162,8 @@ const FieldControls = ({
                         name={field.name}
                         placeholder={field.placeholder}
                         valueInTitle={field.options.use_value}
-                        value={data[field.name] || field.value || ''}
+                        searchable={field.searchable}
+                        value={getNestedValue(data, field.name) || field.value || ''}
                         options={processOptions(field.options, field.name)}
                         onChange={(val) => updateField(field.name, val)}
                         isLoading={loadingStates[field.name]}
@@ -146,7 +178,8 @@ const FieldControls = ({
                     <SecondaryDropdown
                         name={field.name}
                         value={data[field.name] || ''}
-                        valueInTitle={field.valueInTitle=='true' ? true : false}
+                        none={field.none ? true : false}
+                        valueInTitle={field.valueInTitle == 'true' ? true : false}
                         options={processOptions(field.options, field.name)}
                         onChange={(val) => updateField(field.name, val)}
                         isLoading={loadingStates[field.name]}
@@ -161,6 +194,7 @@ const FieldControls = ({
                     <PrimaryDropdown
                         name={field.name}
                         value={data[field.name] || ''}
+                        none={field.none ? true : false}
                         options={processOptions(field.options, field.name)}
                         onChange={(val) => updateField(field.name, val)}
                         isLoading={loadingStates[field.name]}
@@ -173,6 +207,7 @@ const FieldControls = ({
                 <InputLabel className='text-heading'>{field.label}</InputLabel>
                 <DropdownSelect
                     name={field.name}
+                    searchable={field.searchable}
                     value={data[field.name] || field.value || ''}
                     options={processOptions(field.options, field.name)}
                     onChange={(val) => updateField(field.name, val)}
@@ -207,22 +242,24 @@ const FieldControls = ({
             <div className={`flex flex-col gap-2 ${colSpan}`} key={field.name}>
                 <InputLabel className='text-heading'>{field.label}</InputLabel>
                 <Togglebox
-                    checked={!!data[field.name] || field.attribute == 'checked' || field.value == true}
+                    checked={!!getNestedValue(data, field.name) || field.attribute == 'checked' || field.value == true}
                     onChange={(e) => updateField(field.name, field.value ? (field.value === true ? field.value = false : field.value = true) : e.target.checked)}
                 />
             </div>
         );
     }
 
-
-    // === ATTRIBUTES ===
-    if (field.type === 'attributes') {
+    // === PERMISSION MATRIX ===
+    if (field.type === 'matrix') {
         return (
-            <div className="w-full col-span-6" key={field.name}>
-                <InputLabel className='text-heading'>{field.label}</InputLabel>
-                <CustomFields
+            <div className="col-span-6" key={field.name}>
+                <PermissionMatrix
+                    label={field.label}
+                    name={field.name}
+                    rows={field.rows || []}
+                    cols={field.cols || []}
+                    value={getNestedValue(data, field.name) || []}
                     onChange={(val) => updateField(field.name, val)}
-                    value={data[field.name] || []}
                 />
             </div>
         );
@@ -244,122 +281,46 @@ const FieldControls = ({
             );
         }
     }
-    if (field.type === 'variations') {
-        const variations = data[field.name] || [];
+
+    if (field.type === 'repeater') {
         return (
-            <div key={field.name} className="space-y-4 col-span-6">
-                <InputLabel className='text-heading'>{field.label}</InputLabel>
+            <div className={`col-span-6 ${fieldClass}`} key={field.name}>
+                <Repeater
+                    value={data[field.name] || []}
+                    onChange={(val) => updateField(field.name, val)}
+                    label={field.label}
+                    fields={field.fields || []}
+                    dropdownOptions={dropdownOptions}
+                    loadingStates={loadingStates}
+                />
+            </div>
+        )
+    }
 
-                {variations.map((variation, index) => (
-                    <div key={index} className="flex justify-between gap-2 grid-flow-col p-3 rounded-lg shadow-md">
-                        <div className='flex flex-col gap-5 w-2/5'>
-                            {/* Size */}
-                            <Textarea
-
-                                placeholder="Enter the product size and write it as Key | Value. Use a new & for each entry."
-                                value={variation.size || ""}
-                                onChange={(e) => {
-                                    const updated = [...variations];
-                                    updated[index].size = e.target.value;
-                                    updateField(field.name, updated);
-                                }}
-                                className="border p-2 bg-transparent h-fit rounded w-full"
-                            />
-
-                            {/* Color */}
-                            <InputField
-                                type="text"
-                                placeholder="Color"
-                                value={variation.color || ""}
-                                onChange={(e) => {
-                                    const updated = [...variations];
-                                    updated[index].color = e.target.value;
-                                    updateField(field.name, updated);
-                                }}
-                                className="border p-2 h-fit rounded w-full"
-                            />
-
-                            {/* Price */}
-                            <InputField
-                                type="number"
-                                placeholder="Price"
-                                value={variation.price || ""}
-                                onChange={(e) => {
-                                    const updated = [...variations];
-                                    updated[index].price = e.target.value;
-                                    updateField(field.name, updated);
-                                }}
-                                className="border p-2 rounded w-full"
-                            />
-                            <InputField
-                                type="number"
-                                placeholder="Stock"
-                                value={variation.stock || ""}
-                                onChange={(e) => {
-                                    const updated = [...variations];
-                                    updated[index].stock = e.target.value;
-                                    updateField(field.name, updated);
-                                }}
-                                className="border p-2 rounded w-full appearance-none"
-                            />
-                        </div>
-                        {/* Image */}
-                        <div className='w-11/20 flex justify-between'>
-                            <div className='w-17/20'>
-                                <ImageUploader
-                                    value={variation.image}
-                                    name="image"
-                                    onChange={(file) => {
-                                        if (file) {
-                                            const newfile = file;
-                                            const updated = [...variations];
-                                            updated[index].image = newfile;       // Store actual File for backend
-                                            // updated[index].preview = file.url; // ImageUploader already builds url
-                                            updateField(field.name, updated);
-                                            console.log(file, variation);
-
-                                        }
-                                    }}
-                                    className="border rounded h-60 !max-h-60 min-h-auto"
-                                />
-
-
-                            </div>
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    const updated = variations.filter((_, i) => i !== index);
-                                    updateField(field.name, updated);
-                                }}
-                                className="bg-red-500 size-8 text-white rounded"
-                            >
-                                ✕
-                            </button>
-                        </div>
-
-                    </div>
-                ))}
-
-                <span
-                    type="button"
-                    onClick={() =>
-                        updateField(field.name, [
-                            ...variations,
-                            { size: "", color: "", price: "", image: "" },
-                        ])
-                    }
-                    className="bg-primary text-white px-4 py-2 rounded mt-2"
-                >
-                    + Add Variation
-                </span>
+    // === ATTRIBUTES (Features / Specs key-value repeater) ===
+    if (field.type === 'attributes') {
+        return (
+            <div className="col-span-6" key={field.name}>
+                <AttributesSelector
+                    value={getNestedValue(data, field.name) || []}
+                    onChange={(val) => updateField(field.name, val)}
+                />
             </div>
         );
     }
-    if (field.type === 'repeater') {
+
+    // === VARIATIONS ===
+    if (field.type === 'variations') {
         return (
-            <Repeater />
-        )
+            <div className="col-span-6" key={field.name}>
+                <VariationsSelector
+                    value={getNestedValue(data, field.name) || []}
+                    onChange={(val) => updateField(field.name, val)}
+                />
+            </div>
+        );
     }
+
     return null;
 };
 

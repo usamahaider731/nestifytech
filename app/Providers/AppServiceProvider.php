@@ -2,12 +2,12 @@
 
 namespace App\Providers;
 
-use App\Models\Menu;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Vite;
+use Illuminate\Support\Facades\DB;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -32,9 +32,11 @@ class AppServiceProvider extends ServiceProvider
         // Read your JSON files safely
         $settingsPath = storage_path('app/data/setting.json');
         $layoutPath = storage_path('app/data/layout.json');
+        $sidebarMenuPath = storage_path('app/data/sidebar-menu.json');
 
         $settings = $filesystem->exists($settingsPath) ? $filesystem->get($settingsPath) : '{}';
         $layout = $filesystem->exists($layoutPath) ? $filesystem->get($layoutPath) : '{}';
+        $sidebarMenuContent = $filesystem->exists($sidebarMenuPath) ? $filesystem->get($sidebarMenuPath) : '[]';
 
         $layoutArr = json_decode($layout, true);
         $qes = [];
@@ -52,12 +54,14 @@ class AppServiceProvider extends ServiceProvider
         }
 
         $data = json_decode($settings, true) ?: [];
-        if (table_exists('menu') === true) {
-        $menu = Menu::where('parent_id', 0)->with('children')->get();
+        if (DB::getSchemaBuilder()->hasTable('menu')) {
+            $allMenus = DB::table('menu')->get()->toArray();
+            $menu = $this->buildMenuTree($allMenus);
         } else {
             $menu = [];
         }
-        $data = array_merge($data, ['menu' => $menu], ['layout' => $datas]);
+        $sidebarMenu = json_decode($sidebarMenuContent, true) ?: [];
+        $data = array_merge($data, ['menu' => $menu], ['layout' => $datas], ['sidebar_menu' => $sidebarMenu]);
 
         // Prefetch Vite assets
         Vite::prefetch(concurrency: 3);
@@ -65,5 +69,23 @@ class AppServiceProvider extends ServiceProvider
         // Share with Inertia & Blade
         Inertia::share(['setting' => $data]);
         View::share(['setting' => $data]);
+    }
+
+    private function buildMenuTree($elements, $parentId = 0)
+    {
+        $branch = [];
+        foreach ($elements as $element) {
+            $element = (array) $element;
+            if ($element['parent_id'] == $parentId) {
+                $children = $this->buildMenuTree($elements, $element['id']);
+                if ($children) {
+                    $element['children'] = $children;
+                } else {
+                    $element['children'] = [];
+                }
+                $branch[] = $element;
+            }
+        }
+        return $branch;
     }
 }

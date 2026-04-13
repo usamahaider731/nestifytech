@@ -1,5 +1,6 @@
 import AdminLayout from '@/Layouts/AdminLayout';
-import React from 'react';
+import { Link } from '@inertiajs/react';
+import  React from 'react';
 
 function Detail({ role, data }) {
     const initial = {};
@@ -15,8 +16,16 @@ function Detail({ role, data }) {
     });
 
     return (
-        <div className="w-full p-8 mx-auto shadow-lg mt-8">
-           
+        <div className="w-full px-8 pb-8 mx-auto shadow-lg mt-8">
+            <div className="flex justify-between mb-5 items-center">
+                <h1 className="text-xl font-medium capitalize text-primary">{role.title}</h1>
+                <Link
+                    href={route('edit.role', { id: role.id })}
+                    className="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium"
+                >
+                    Edit Role
+                </Link>
+            </div>
 
             <table className="w-full table-auto bg-accent overflow-hidden">
                 <thead className="bg-permanent text-heading text-left">

@@ -8,7 +8,7 @@ abstract class Controller
 
     public function __construct()
     {
-        $this->json_file_location = storage_path('app/private/data');
+        $this->json_file_location = storage_path('app/data');
 
         // Ensure directory exists
         if (!file_exists($this->json_file_location)) {

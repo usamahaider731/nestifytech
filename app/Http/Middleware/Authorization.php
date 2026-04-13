@@ -1,38 +1,31 @@
 <?php
 namespace App\Http\Middleware;
 
-
-use App\Models\Settings;
-use App\Models\State;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
-use App\Models\Menu;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\View;
-class Authorization{
+
+class Authorization {
     public function handle(Request $request, Closure $next): Response
     {
- 
-        $api_keys = Settings::where('a', 'api_keys')->first()->value;
+        $settingRow = DB::table('settings')->where('a', 'api_keys')->first();
+        $api_keys = $settingRow ? json_decode($settingRow->value, true) : [];
 
-        $key =  $request->header('Authorization');
+        $key = $request->header('Authorization');
+        $valid = false;
 
-      $valid = false;
-      if($key){
-
-          foreach($api_keys['keys'] as $v){
-              
-              if($v['api_key'] == $key){
-                  $valid  =true;
+        if ($key && isset($api_keys['keys'])) {
+            foreach ($api_keys['keys'] as $v) {
+                if ($v['api_key'] == $key) {
+                    $valid = true;
                 }
             }
         }
-      
-        if(! $valid){
-            return response(['error'=>true, 'message'=>'Invalid API key'], 200);
+
+        if (!$valid) {
+            return response(['error' => true, 'message' => 'Invalid API key'], 200);
         }
         return $next($request);
     }
-
 }

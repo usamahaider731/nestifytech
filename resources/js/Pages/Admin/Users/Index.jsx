@@ -5,7 +5,16 @@ import { RiUserLine, RiUserAddLine, RiUser2Line, RiDeleteBin6Line, RiFile3Fill, 
 import { Link } from '@inertiajs/react';
 import Table from '@/Components/Table'
 import ImageViwer from '@/Components/Admin/ImageViwer';
-function Index({ users, userStats }) {
+import { usePage } from '@inertiajs/react';
+import { hasPermission } from '@/Utils/helper';
+function Index({ users, userStats, table }) {
+  const { auth } = usePage().props;
+  const [Users, SetUsers] = React.useState(users.data);
+
+  React.useEffect(() => {
+    SetUsers(users.data);
+  }, [users.data]);
+
   const statCards = [
     {
       title: 'Total Users',
@@ -35,14 +44,14 @@ function Index({ users, userStats }) {
 
   return (
     <div className='px-5 py-7 flex flex-col gap-7.5'>
-      <div className='flex flex-wrap w-full gap-7'>
+      <div className='grid grid-cols-4 flex-wrap w-full gap-5'>
         {statCards.map((card, idx) => (
-          <div key={idx} className='p-6 flex flex-1/4 justify-between gap-10 items-start shadow bg-accent rounded-lg'>
-            <div className='flex text-heading flex-col'>
-
-              <h4 className='text-heading font-primary text-base font-medium'>{card.title}</h4>
-              <div className='flex items-center my-1 gap-1'>
-                <span className='text-2xl font-medium font-primary'>{card.count}</span>
+          <div key={idx} className='p-5 flex col-span-1 justify-between flex-col gap-10 items-start shadow bg-accent rounded-2xl'>
+            <div className='flex text-heading flex-col w-full'>
+              <div className='flex items-center w-full justify-between'>
+                <div className={`${card.iconBg} rounded-lg size-9 flex items-center justify-center`}>
+                  {card.icon}
+                </div>
                 <span
                   className={`text-base mb-2 font-medium ${card.change >= 0 ? 'text-green-600' : 'text-red-600'
                     }`}
@@ -50,16 +59,32 @@ function Index({ users, userStats }) {
                   ({card.change >= 0 ? '+' : ''}{card.change}%)
                 </span>
               </div>
-              <span className='text-secondary mt-1 font-primary text-sm font-medium'>{card.note}</span>
+
+
+              <span className='text-2xl mt-2 font-medium font-primary'>{card.count}</span>
+
+              {/* </div> */}
+              <div className='flex w-full justify-between'>
+                <span className='text-secondary mt-1 font-primary text-sm font-medium'>{card.title}</span>
+
+              </div>
             </div>
-            <div className={`${card.iconBg} rounded size-9 flex items-center justify-center`}>
-              {card.icon}
-            </div>
+
+
           </div>
         ))}
       </div>
-      <div className='w-full'>
-        <Table values={users.data} className='w-full'>
+      <div className='w-full flex flex-col gap-5'>
+        <Table 
+          values={users} 
+          className='w-full'
+          bulk={table?.bulk}
+          keywords={table?.keywords}
+          searchRoute="users"
+          onDataUpdate={SetUsers}
+          paginationPerPage={table?.paginationPerPage}
+          paginationList={table?.paginationList}
+        >
           <Table.THead className='w-full'>
             <Table.TR className='w-full text-heading uppercase text-sm h-14 bg-accent'>
               <Table.TH className='w-1/20 font-medium'>
@@ -70,11 +95,13 @@ function Index({ users, userStats }) {
               <Table.TH className='w-1/5 font-medium'>User</Table.TH>
               <Table.TH className='w-3/10 font-medium'>Role</Table.TH>
               <Table.TH className='w-1/10 font-medium'>Active</Table.TH>
-              <Table.TH className='w-1/5 font-medium'>Action</Table.TH>
+              {hasPermission(auth.user, 'user-write') && (
+                <Table.TH className='w-1/5 font-medium'>Action</Table.TH>
+              )}
             </Table.TR>
           </Table.THead>
           <Table.TBody className='w-full'>
-            {users.data && users.data.map((User) => (
+            {Users && Users.map((User) => (
               <Table.TR className='w-full text-sm bg-permanent h-12 text-res' key={User.id}>
                 <Table.TD className="">
                   <div className='relative w-fit flex items-center mx-auto'>
@@ -107,25 +134,27 @@ function Index({ users, userStats }) {
                 <Table.TD className=''>
                   <div className='w-full flex items-center justify-center'>
                     {User.active ?
-                      <div className='bg-green-500 size-4.5 rounded-full animate-pulse'></div>
+                      <div className='bg-green-600/20 px-2 py-1 rounded-md text-green-700 text-[11px] font-medium flex text-center items-center justify-center'>Actiive</div>
                       :
-                      <div className='bg-red-500 size-4.5 rounded-full animate-pulse'></div>
+                      <div className='bg-red-600/20 px-2 py-1 rounded-md text-red-700 text-[11px] font-medium flex text-center items-center justify-center'>Inactiive</div>
                     }
                   </div>
                 </Table.TD>
-                <Table.TD className='flex'>
-                  <div className='w-full flex h-12 my-auto  items-center gap-3 justify-center'>
-                    <span className='h-6.5 w-6.5 rounded-full bg-red-500 text-white text-sm flex text-center items-center justify-center'>
-                      <RiDeleteBin6Line className='w-3' />
-                    </span>
-                    <Link href={route('user.edit', { 'id': User.id })} className='h-6.5 w-6.5 rounded-full bg-primary text-white text-sm flex text-center items-center justify-center'>
-                      <RiFileEditLine className='w-3' />
-                    </Link>
-                    <span className='h-6.5 w-6.5 rounded-full bg-secondary text-white text-sm flex text-center items-center justify-center'>
-                      <RiFile3Fill className='w-3' />
-                    </span>
-                  </div>
-                </Table.TD>
+                {hasPermission(auth.user, 'user-write') && (
+                  <Table.TD className='flex'>
+                    <div className='w-full flex h-12 my-auto  items-center gap-3 justify-center'>
+                      <span className='h-6.5 w-6.5 rounded-full bg-red-500 text-white text-sm flex text-center items-center justify-center cursor-pointer'>
+                        <RiDeleteBin6Line className='w-3' />
+                      </span>
+                      <Link href={route('user.edit', { 'id': User.id })} className='h-6.5 w-6.5 rounded-full bg-primary text-white text-sm flex text-center items-center justify-center'>
+                        <RiFileEditLine className='w-3' />
+                      </Link>
+                      <span className='h-6.5 w-6.5 rounded-full bg-secondary text-white text-sm flex text-center items-center justify-center cursor-pointer'>
+                        <RiFile3Fill className='w-3' />
+                      </span>
+                    </div>
+                  </Table.TD>
+                )}
               </Table.TR>
             ))}
           </Table.TBody>

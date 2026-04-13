@@ -1,23 +1,29 @@
 <?php
 
-use App\Http\Controllers\AttributeController;
-use App\Http\Controllers\BrandController;
-use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\AdminBuilderController;
+use App\Http\Controllers\AiController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FilterController;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\LayoutController;
 use App\Http\Controllers\MediaController;
-use App\Http\Controllers\PostController;
+use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SettingController;
-use App\Http\Controllers\TagsController;
+use App\Http\Controllers\TaxonomyController;
 use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
-
-Route::controller(FrontendController::class)->group(function(){
-    Route::get('/','index')->name('index');
+use App\Http\Controllers\ReviewController;
+Route::controller(FilterController::class)->group(function () {
+    Route::post("bulk/action", "bulk_action")->name("bulk.action");
+});
+Route::controller(FrontendController::class)->group(function () {
+    Route::get('/', 'index')->name('index');
 });
 Route::get('/image/{filename}_{height}_{width}.{extension}', [MediaController::class, 'thumbimageUrl'])
     ->where([
@@ -27,81 +33,110 @@ Route::get('/image/{filename}_{height}_{width}.{extension}', [MediaController::c
         'extension' => '[a-zA-Z0-9]+'
     ])
     ->name('thumb.image');
+Route::get('/search/keywords', [SearchController::class, 'search'])->name('search.keywords');
 Route::get('/backend-colors.min.css', [SettingController::class, 'backendcolors'])->name('backend.colors');
 Route::get('/colors.min.css', [SettingController::class, 'colors'])->name('colors');
+Route::get('/search-pages.json', [SettingController::class, 'searchPages'])->name('search.pages');
 Route::get('/updateData', [SettingController::class, 'updateData'])->name('update');
-Route::prefix('/admin')->middleware('auth', 'verified')->group(function () {
 
-    Route::get('/dashboard', function () {
+Route::post('/ai/generate/text', [AiController::class, 'generateText'])->name('ai.generate.text');
 
-        return Inertia::render('Dashboard');
-    })->name('admin.dashboard');
+Route::prefix('/admin')->middleware(['auth', 'verified'])->group(function () {
+    Route::get('/', [DashboardController::class, 'dashboard'])->name('admin.dashboard')->middleware('permission:dashboard');
     Route::controller(SettingController::class)->group(function () {
+        // ... (existing routes)
         Route::get('/setting/{type}', 'setting')->name('admin.setting');
         Route::post('/setting/{type}', 'settingUpdate')->name('setting.update');
-        Route::get('/transition', 'translations')->name('admin.translations');
+        Route::get('/transition', 'translations')->name('admin.translations')->middleware('permission:transition-read');
         Route::get('/countryUpdate', 'updateCountry')->name('admin.country.update');
-        Route::post('/transition', 'updateTranslation')->name('admin.translations.update');
+        Route::post('/transition', 'updateTranslation')->name('admin.translations.update')->middleware('permission:transition-write');
     });
-   
-    Route::get('/users', [UserController::class, 'users'])->name('users');
-    Route::get('/user/edit/{id}', [UserController::class, 'userEdit'])->name('user.edit');
-    Route::post('/user/edit/{id}', [UserController::class, 'userEditSubmit'])->name('submit.user');
-    Route::get('/users-role', [UserController::class, 'Role'])->name('role');
-    Route::get('/users-role/create', [UserController::class, 'RoleManage'])->name('role.create');
-    Route::get('/users-role/details/{id}', [UserController::class, 'RoleDetail'])->name('role.detail');
-    Route::post('/users-role/create/{status}', [UserController::class, 'RoleSubmit'])->name('submit.role');
-    Route::get('/users-role/edit/{id}', [UserController::class, 'RoleManage'])->name('edit.role');
-    Route::prefix('/post')->controller(PostController::class)->group(function () {
-        Route::get('/{post}/create', 'create')->name('post.create');
-        Route::get('/{post}/{id?}', 'index')->name('post.index');
-        Route::get('/{post}/edit/{id}', 'edit')->name('post.edit');
-        Route::post('/{post}/submit/{id?}', 'submit')->name('post.submit');
+    // Admin Builder Routes
+    Route::prefix('/builder')->controller(AdminBuilderController::class)->middleware('permission:site-write')->group(function () {
+        Route::get('/', 'index')->name('admin.builder.index');
+        Route::get('/edit/{type}/{config_type}', 'edit')->name('admin.builder.edit');
+        Route::post('/update/{id}', 'update')->name('admin.builder.update');
+        Route::post('/store', 'store')->name('admin.builder.store');
+        Route::delete('/destroy/{id}', 'destroy')->name('admin.builder.destroy');
     });
-    Route::prefix('/category')->controller(CategoryController::class)->group(function () {
-        Route::get('/create', 'create')->name('category.create');
-        Route::post('/create', 'submit')->name('create.category');
-        Route::post('/edit/{id}', 'submit')->name('edit.category');
-        Route::get('/', 'index')->name('category.index');
-        Route::get('/edit/{id}', 'edit')->name('category.edit');
+    Route::prefix('/module/{type}')->controller(ModuleController::class)->group(function () {
+        Route::get('/migrate', 'migrate')->name('module.migrate');
+        Route::get('/', 'index')->name('module.index');
+        Route::get('/create', 'create')->name('module.create');
+        Route::get('/edit/{id}', 'edit')->name('module.edit');
+        Route::post('/submit/{id?}', 'submit')->name('module.submit');
+        Route::get('/{id?}', 'index')->name('module.index.with_id');
     });
-    Route::prefix('/brand')->controller(BrandController::class)->group(function () {
-        Route::get('/', 'index')->name('brand.index');
-        Route::get('/create', 'create')->name('brand.create');
-        Route::get('/edit/{id}', 'edit')->name('brand.edit');
-        Route::post('/create', 'submit')->name('create.brand');
-        Route::post('/edit/{id}', 'submit')->name('edit.brand');
+    // Keeping legacy names for backward compatibility by mapping them to ModuleController
+    Route::get('/users', [ModuleController::class, 'index'])->defaults('type', 'user')->name('users')->middleware('permission:user-read');
+    Route::get('/user/edit/{id}', [ModuleController::class, 'edit'])->defaults('type', 'user')->name('user.edit')->middleware('permission:user-write');
+    Route::post('/user/edit/{id}', [ModuleController::class, 'submit'])->defaults('type', 'user')->name('submit.user')->middleware('permission:user-write');
+    
+    Route::group(['middleware' => ['permission:role-read']], function() {
+        Route::get('/users-role', [ModuleController::class, 'index'])->defaults('type', 'role')->name('role');
+        Route::get('/users-role/details/{id}', [ModuleController::class, 'edit'])->defaults('type', 'role')->name('role.detail');
+    });
+
+    Route::group(['middleware' => ['permission:role-write']], function() {
+        Route::get('/users-role/create', [ModuleController::class, 'create'])->defaults('type', 'role')->name('role.create');
+        Route::post('/users-role/create/{status}', [ModuleController::class, 'submit'])->defaults('type', 'role')->name('submit.role');
+        Route::get('/users-role/edit/{id}', [ModuleController::class, 'edit'])->defaults('type', 'role')->name('edit.role');
+    });
+
+    Route::prefix('/post')->controller(ModuleController::class)->group(function () {
+        Route::get('/{type}/create', 'create')->name('post.create');
+        Route::get('/{type}/{id?}', 'index')->name('post.index');
+        Route::get('/{type}/edit/{id}', 'edit')->name('post.edit');
+        Route::post('/{type}/submit/{id?}', 'submit')->name('post.submit');
+    });
+
+    Route::prefix('/taxonomy/{type}')->controller(ModuleController::class)->group(function () {
+        Route::get('/', 'index')->name('taxonomy.index');
+        Route::get('/create', 'create')->name('taxonomy.create');
+        Route::get('/edit/{id}', 'edit')->name('taxonomy.edit');
+        Route::post('/submit/{id?}', 'submit')->name('taxonomy.submit');
+    });
+
+    Route::prefix('/attributes')->controller(ModuleController::class)->middleware('permission:attribute-read')->group(function () {
+        Route::get('/', 'index')->defaults('type', 'attributes')->name('admin.attributes.index');
+        Route::get('/create', 'create')->defaults('type', 'attributes')->name('admin.attributes.create')->middleware('permission:attribute-write');
+        Route::post('/store', 'submit')->defaults('type', 'attributes')->name('admin.attributes.store')->middleware('permission:attribute-write');
+        Route::get('/{id}', 'edit')->defaults('type', 'attributes')->name('admin.attributes.show'); // Map show to and edit for dynamic feel
+        Route::get('/{id}/edit', 'edit')->defaults('type', 'attributes')->name('admin.attributes.edit')->middleware('permission:attribute-write');
+        Route::post('/{id}', 'submit')->defaults('type', 'attributes')->name('admin.attributes.update')->middleware('permission:attribute-write');
+        // destroy/options still need special handling if not unified, but let's keep them in AttributeController for now or unify them too
     });
     
-    Route::prefix('/attributes')->controller(AttributeController::class)->group(function () {
-        Route::get('/', 'index')->name('admin.attributes.index');
-        Route::get('/create', 'create')->name('admin.attributes.create');
-        Route::post('/store', 'store')->name('admin.attributes.store');
-        Route::get('/{id}', 'show')->name('admin.attributes.show');
-        Route::get('/{id}/edit', 'edit')->name('admin.attributes.edit');
-        Route::post('/{id}', 'update')->name('admin.attributes.update');
-        Route::delete('/{id}', 'destroy')->name('admin.attributes.destroy');
-        Route::get('/options/list', 'getAttributesOptions')->name('admin.attributes.options');
-        Route::get('/{attributeId}/values/options', 'getAttributeValuesOptions')->name('admin.attributes.values.options');
+    // Add missing destroy and options routes to ModuleController
+    Route::delete('/attributes/{id}', [ModuleController::class, 'destroy'])->name('admin.attributes.destroy')->middleware('permission:attribute-write');
+    Route::get('/attributes/options/list', [ModuleController::class, 'getAttributesOptions'])->name('admin.attributes.options');
+    Route::get('/attributes/{attributeId}/values/options', [ModuleController::class, 'getAttributeValuesOptions'])->name('admin.attributes.values.options');
+    // Keeping old named routes for backward compatibility/redirects if needed
+    Route::get('/category', fn() => redirect()->route('taxonomy.index', ['type' => 'category']))->name('category.index');
+    Route::get('/brand', fn() => redirect()->route('taxonomy.index', ['type' => 'brand']))->name('brand.index');
+    Route::get('/tags', fn() => redirect()->route('taxonomy.index', ['type' => 'tag']))->name('admin.tags.index');
+ 
+    Route::prefix('/language')->controller(LanguageController::class)->middleware('permission:site-read')->group(function () {
+        Route::get('/', 'index')->name('admin.lang.index');
+        Route::get('/create', 'create')->name('admin.lang.create');
+        Route::get('/edit/{prefix}', 'edit')->name('admin.lang.edit');
+        Route::post('/create', 'submit')->name('admin.lang.submit');
+        Route::post('/edit/{prefix}', 'update')->name('admin.lang.update');
     });
-    Route::prefix('/tags')->controller(TagsController::class)->group(function() {
-        Route::get('/','index')->name('admin.tags.index');
-        Route::post('/submit','submit')->name('tags.submit');
-        Route::post('/update/{id}','update')->name('tags.update');
+    Route::prefix('/layout')->controller(LayoutController::class)->group(function () {
+        Route::get('/type/{type}', 'layout')->name('layout.setting');
+        Route::get('/menu', 'menu')->name('menu.setting')->middleware('permission:menu-setting');
+        Route::post('/type/{type}', 'submitLayoutPages')->name('layout.submit');
+        Route::post('/menu', 'menuSubmit')->name('menu.submit')->middleware('permission:menu-setting');
+        Route::post('/menu/update/{id}', 'menuUpdate')->name('menu.update')->middleware('permission:menu-setting');
+        Route::delete('/menu/{id}', 'menuDestroy')->name('menu.destroy')->middleware('permission:menu-setting');
     });
-    Route::prefix('/language')->controller(LanguageController::class)->group(function(){
-        Route::get('/','index')->name('admin.lang.index');
-        Route::get('/create','create')->name('admin.lang.create');
-        Route::get('/edit/{prefix}','edit')->name('admin.lang.edit');
-        Route::post('/create','submit')->name('admin.lang.submit');
-        Route::post('/edit/{prefix}','update')->name('admin.lang.update');
+    Route::prefix('/reviews')->controller(ModuleController::class)->middleware('permission:review-read')->group(function () {
+        Route::get('/', 'index')->defaults('type', 'review')->name('admin.reviews.index');
+        Route::delete('/{id}', 'destroy')->defaults('type', 'review')->name('admin.reviews.destroy')->middleware('permission:review-write');
     });
-    Route::prefix('/layout')->controller(LayoutController::class)->group(function() {
-        Route::get('/type/{type}','layout')->name('layout.setting');
-        Route::get('/menu','menu')->name('menu.setting');
-        Route::post('/type/{type}','submitLayoutPages')->name('layout.submit');
-        Route::post('/menu','menuSubmit')->name('menu.submit');
-        Route::post('/menu/update/{id}','menuUpdate')->name('menu.update');
+    Route::prefix('/ai')->controller(AiController::class)->group(function () {
+        Route::post('/check/field', 'checkField')->name('ai.check.field');
     });
 });
 require __DIR__ . '/auth.php';

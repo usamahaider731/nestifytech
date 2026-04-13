@@ -6,7 +6,8 @@ function Edit({ Data = [], initialData = {} }) {
             initialData={initialData}
             rows={Data}
             mode="edit"
-            routes={route('post.submit',{'post': 'product', 'id': initialData.id})}
+            routes={route('post.submit',{'type': 'product', 'id': initialData.id})}
+            redirectUrl={route('post.index', { type: 'product' })}
         />
     );
 }

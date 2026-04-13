@@ -9,15 +9,14 @@ import axios from 'axios';
 import Form from '@/Components/Admin/Form';
 function Edit({ user, user_rows }) {
     const { post } = useForm();
+    console.log(user.id)
     return (
         <Form
             initialData={user}
             rows={user_rows}
             mode="edit"
-            onSubmit={(e, formData) => {
-                e.preventDefault();
-                post(route('submit.user', { id: user?.id }), { ...formData });
-            }}
+            routes={route('user.edit',{id: user.id})}
+            redirectUrl={route('users')}
         />
     )
 }

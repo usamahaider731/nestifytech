@@ -6,7 +6,8 @@ function Create({ Data = [] }) {
             initialData={{}} // or build from config
             rows={Data}
             mode="create"
-            routes={route('post.submit',{'post': 'product'})}
+            routes={route('post.submit',{'type': 'product'})}
+            redirectUrl={route('post.index', { type: 'product' })}
         />
     );
 }

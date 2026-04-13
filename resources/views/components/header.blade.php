@@ -99,7 +99,7 @@
                             </x-slot>
                         </x-select-dropdown>
                     </div>
-                    <button class="rounded-r-full h-full px-4 cursor-pointer bg-primary border-2 border-primary text-black">
+                    <button class="rounded-r-full h-full px-4 cursor-pointer bg-primary border-2 border-primary text-white">
                         <i class="ri-search-line text-xl"></i>
                     </button>
                 </div>

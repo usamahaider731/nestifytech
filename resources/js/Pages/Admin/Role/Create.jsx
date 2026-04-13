@@ -1,5 +1,5 @@
 import React from 'react';
-import { useForm } from '@inertiajs/react';
+import { useForm, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import InputLabel from '@/Components/InputLabel';
 import TextInput from '@/Components/TextInput';
@@ -39,7 +39,10 @@ const Create = ({ Data, roles }) => {
     post(route('submit.role', { status }), {
       ...data,
       preserveScroll: true,
-      onSuccess: () => toast.success(id ? 'Upload Successfully': 'Create Successfully'),
+      onSuccess: () => {
+        toast.success(id ? 'Upload Successfully': 'Create Successfully');
+        router.visit(route('role'));
+      },
       onsubmit: () => toast.loading("Form is Submmiting"),
       onError: () => toast.error(id ? 'Failed to Upload' : 'Failed to Create')
     });

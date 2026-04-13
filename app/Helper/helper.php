@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Taxonomy;
+use Illuminate\Support\Facades\DB;
 
 function get_meta($metaCollection, $meta_key)
 {
@@ -78,7 +78,7 @@ function img_svg($filename, $class = '', $thumb = false, $path = 'storage/upload
 }
 function get_taxonomy($type = null, $key = null, $value = null, $limit = null)
 {
-    $query = Taxonomy::where('type', $type)->with('allChildren');
+    $query = DB::table('taxonomies')->where('type', $type);
 
     if (!is_null($key) && !is_null($value)) {
         $query->where($key, $value);
@@ -86,10 +86,22 @@ function get_taxonomy($type = null, $key = null, $value = null, $limit = null)
 
     if (!is_null($limit)) {
         if ($limit == 1) {
-            return $query->first();
+            $item = $query->first();
+            if ($item) {
+                $item->children = DB::table('taxonomies')->where('parent_id', $item->id)->get();
+            }
+            return $item;
         }
-        return $query->limit($limit)->get();
+        $items = $query->limit($limit)->get();
+        foreach ($items as $item) {
+             $item->children = DB::table('taxonomies')->where('parent_id', $item->id)->get();
+        }
+        return $items;
     }
 
-    return $query->get();
+    $items = $query->get();
+    foreach ($items as $item) {
+         $item->children = DB::table('taxonomies')->where('parent_id', $item->id)->get();
+    }
+    return $items;
 }

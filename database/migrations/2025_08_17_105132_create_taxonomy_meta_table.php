@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('taxonomy_meta', function (Blueprint $table) {
             $table->id();
             $table->string('taxonomy_id',255)->nullable();
-            $table->string('value',255)->nullable();
+            $table->longText('value')->nullable();
             $table->string('key',255)->nullable();
         });
     }

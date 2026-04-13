@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { RiUpload2Fill } from 'react-icons/ri';
 
 const ImageUploader = React.memo(function ImageUploader({
@@ -9,63 +9,44 @@ const ImageUploader = React.memo(function ImageUploader({
     multiple = false,
 }) {
     const [images, setImages] = useState([]);
-    const prevValueRef = useRef(null);
-    // Utility to format file sizes
+    const initializedRef = useRef(false);
+
     const formatFileSize = (bytes) => {
         if (!bytes) return '0 Bytes';
         const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
     };
 
-    // Load initial value (files or paths)
+    /* 🔹 Initialize from value (ONLY ONCE) */
     useEffect(() => {
-        const isSame =
-            JSON.stringify(prevValueRef.current) === JSON.stringify(value);
-        if (isSame) return;
+        if (initializedRef.current) return;
+        initializedRef.current = true;
 
-        prevValueRef.current = value;
+        if (!value) return;
 
-        const loadImages = async () => {
-            if (Array.isArray(value)) {
-                const files = value.map((val) => {
-                    const isString = typeof val === 'string';
-                    const url = isString
-                        ? `/storage/uploads/image/${val}`
-                        : URL.createObjectURL(val);
-                    const size = isString ? 0 : val.size;
+        const list = Array.isArray(value) ? value : [value];
 
-                    return {
-                        url,
-                        name: isString ? val : val.name,
-                        size,
-                        isLocal: !isString,
-                    };
-                });
-                setImages(files);
-            } else if (value) {
-                const isString = typeof value === 'string';
-                const url = isString
-                    ? `/storage/uploads/image/${value}`
-                    : URL.createObjectURL(value);
-                const size = isString ? 0 : value.size;
-                setImages([
-                    {
-                        url,
-                        name: isString ? value : value.name,
-                        size,
-                        isLocal: !isString,
-                    },
-                ]);
-            } else {
-                setImages([]);
-            }
-        };
+        const files = list.map((val) => {
+            const isString = typeof val === 'string';
 
-        loadImages();
+            return {
+                url: isString
+                    ? (val.startsWith('http') ? val : `/storage/uploads/image/${val}`)
+                    : URL.createObjectURL(val),
+                name: isString ? val : val.name,
+                size: isString ? 0 : val.size,
+                isLocal: !isString,
+                file: isString ? null : val,
+            };
+        });
 
-        // Cleanup created URLs
+        setImages(files);
+    }, [value]);
+
+    /* 🔹 Cleanup blobs on unmount */
+    useEffect(() => {
         return () => {
             images.forEach((img) => {
                 if (img.isLocal && img.url.startsWith('blob:')) {
@@ -73,24 +54,51 @@ const ImageUploader = React.memo(function ImageUploader({
                 }
             });
         };
-    }, [value]);
-    // Handle file input changes
+    }, [images]);
+
     const handleFiles = (files) => {
-        const fileArray = Array.from(files);
-        const previews = fileArray.map((file) => ({
+        if (!files.length) return;
+
+        const newFiles = Array.from(files);
+
+        const previews = newFiles.map((file) => ({
             url: URL.createObjectURL(file),
             name: file.name,
             size: file.size,
             isLocal: true,
+            file,
         }));
-        const updatedImages = multiple ? [...images, ...previews] : previews;
+
+        const updatedImages = multiple
+            ? [...images, ...previews]
+            : previews;
+
         setImages(updatedImages);
-        onChange(multiple ? fileArray : fileArray[0]);
+
+        const updatedValue = multiple
+            ? updatedImages.map(img => img.file).filter(Boolean)
+            : updatedImages[0]?.file || null;
+        onChange(updatedValue);
     };
+
     const removeFile = (index) => {
-        const updated = images.filter((_, i) => i !== index);
-        setImages(updated);
-        if (updated.length === 0) onChange(null);
+        const img = images[index];
+
+        if (img?.isLocal && img.url.startsWith('blob:')) {
+            URL.revokeObjectURL(img.url);
+        }
+
+        const updatedImages = images.filter((_, i) => i !== index);
+        console.log(images);
+
+        setImages(updatedImages);
+        console.log(updatedImages);
+
+        const updatedValue = multiple
+            ? updatedImages.map(img => img.name).filter(Boolean)
+            : null;
+        console.log(updatedValue);
+        onChange(updatedValue);
     };
 
     return (
@@ -99,12 +107,14 @@ const ImageUploader = React.memo(function ImageUploader({
         >
             <input
                 type="file"
+                name={name}
                 accept="image/*"
                 multiple={multiple}
                 hidden
                 onChange={(e) => {
                     if (e.target.files.length) {
                         handleFiles(e.target.files);
+                        e.target.value = '';
                     }
                 }}
             />
@@ -133,6 +143,7 @@ const ImageUploader = React.memo(function ImageUploader({
                                         {formatFileSize(img.size)}
                                     </span>
                                 </div>
+
                                 <button
                                     type="button"
                                     onClick={() => removeFile(index)}
@@ -149,7 +160,7 @@ const ImageUploader = React.memo(function ImageUploader({
                     <span className="w-10 h-11 rounded flex items-center justify-center bg-permanent">
                         <RiUpload2Fill className="size-5 text-res" />
                     </span>
-                    <span className="text-xl font-medium text-heading">
+                    <span className="text-xl font-medium text-center text-heading">
                         Drag and drop your image here
                     </span>
                     <span className="text-base -mt-1 font-medium text-res">or</span>

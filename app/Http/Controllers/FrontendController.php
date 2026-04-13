@@ -2,57 +2,72 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Menu;
-use App\Models\Taxonomy;
-use App\Providers\AppServiceProvider;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class FrontendController extends Controller
 {
-   public $settings;
-   public $header;
-   function __construct()
-   {
-      $this->settings = view()->shared('setting');
+    public $settings;
+    public $header;
 
-      $this->header = Menu::where('parent_id', 0)->where('location', 'header')->with('children')->get();
-   }
-   public function header()
-   {
-      $header = $this->header;
-      return ['header_links' => $header];
-   }
-   public function setting()
-   {
+    function __construct()
+    {
+        parent::__construct();
+        $this->settings = view()->shared('setting');
+        $headerLocation = $this->settings['menu']['header_menu']['value'] ?? 'header';
+        
+        $allMenus = DB::table('menu')->get()->toArray();
+        $this->header = $this->buildMenuTree($allMenus, 0, $headerLocation);
+    }
 
-      return  $this->settings;
-   }
-   public function index()
-   {
-      $categories = Taxonomy::where('type', 'category')->where('status', 'publish')->with('image', 'children')->get();
-      // return ['categories' => $categories];
-      return view('index');
-   }
-   public function get_taxonomies(Request $request)
-   {
-      // Always initialize the query first
-      $taxonomies = Taxonomy::query();
+    private function buildMenuTree($elements, $parentId = 0, $location = null)
+    {
+        $branch = [];
+        foreach ($elements as $element) {
+            $element = (array) $element;
+            if ($element['parent_id'] == $parentId && (!$location || $element['location'] == $location)) {
+                $children = $this->buildMenuTree($elements, $element['id']);
+                $element['children'] = $children ?: [];
+                $branch[] = $element;
+            }
+        }
+        return $branch;
+    }
 
-      // Apply filters
-      if (empty($request->data)) {
-         $taxonomies->where([
+    public function header()
+    {
+        return ['header_links' => $this->header];
+    }
+
+    public function setting()
+    {
+        return $this->settings;
+    }
+
+    public function index()
+    {
+        return redirect()->away(config('app.frontend_url'));
+    }
+
+    public function get_taxonomies(Request $request)
+    {
+        $taxonomies = DB::table('taxonomies')->where([
             'type' => $request->type,
             'status' => 'publish',
-         ])->with(['image', 'children']);
-      }
+        ]);
 
-      if (!is_null($request->limit)) {
-         $taxonomies->limit($request->limit);
-      }
+        if (!is_null($request->limit)) {
+            $taxonomies->limit($request->limit);
+        }
 
-      // Must return the result of ->get()
-      $result = $taxonomies->get();
+        $result = $taxonomies->get()->map(function($item) {
+            $item->image = DB::table('media')->where('parent_id', $item->id)->where('type', $item->type)->first();
+            // Handle simple list children if needed
+            $item->children = DB::table('taxonomies')->where('parent_id', $item->id)->get();
+            return $item;
+        });
 
-      return response()->json($result);
-   }
+        return response()->json($result);
+    }
 }

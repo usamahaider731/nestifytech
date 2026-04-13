@@ -20,9 +20,89 @@
     --color-permanent: var(--permanent);
     --color-dynamic: var(--dynamic);
 }
+
+/* 🌐 Global Smooth Scroll */
+html {
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 🌀 Premium Site Preloader */
+#preloader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.6s ease, visibility 0.6s;
+}
+
+.loader-ripple {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+.loader-ripple div {
+  position: absolute;
+  border: 4px solid var(--primary);
+  opacity: 1;
+  border-radius: 50%;
+  animation: loader-ripple 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+.loader-ripple div:nth-child(2) {
+  animation-delay: -0.5s;
+}
+@keyframes loader-ripple {
+  0% { top: 36px; left: 36px; width: 0; height: 0; opacity: 0; }
+  5% { top: 36px; left: 36px; width: 0; height: 0; opacity: 1; }
+  100% { top: 0px; left: 0px; width: 72px; height: 72px; opacity: 0; }
+}
+
+/* ✨ Scroll Reveal Animations */
+.reveal {
+  opacity: 0;
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, opacity;
+}
+
+.reveal.active {
+  opacity: 1;
+  transform: translate(0, 0) scale(1) !important;
+}
+
+.reveal-bottom { transform: translateY(50px); }
+.reveal-top { transform: translateY(-50px); }
+.reveal-left { transform: translateX(-50px); }
+.reveal-right { transform: translateX(50px); }
+.reveal-scale { transform: scale(0.9); }
+
+/* [x-cloak] Utility */
 [x-cloak] {
     display: none;
 }
 .nav-menu-list:hover .nav-menu-list-sub{
   @apply flex;
+}
+
+/* Custom Stylish Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-accent, #f8f8f8);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-res, #acabc1);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary, #fed700);
 }

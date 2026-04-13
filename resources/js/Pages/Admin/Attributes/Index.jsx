@@ -10,11 +10,11 @@ import axios, { Axios } from 'axios';
 import { toast } from 'react-toastify';
 import { Link } from '@inertiajs/react';
 
-function Index({ attributes }) {
-    const [Attributes, SetAttributes] = useState(attributes);
+function Index({ attributes, table }) {
+    const [Attributes, SetAttributes] = useState(attributes.data || attributes);
     const [DropdownOpenActions, SetDropdownOpenActions] = useState(null);
     const [Delete, SetDelete] = useState(null);
-    
+
     function DeleteItemsFunction(attributeId) {
         SetDelete(attributeId);
     }
@@ -30,24 +30,32 @@ function Index({ attributes }) {
                     toast.success("Attribute deleted successfully!");
                 }
             } catch (error) {
-                    toast.error("Failed to deleted Attribute");
+                toast.error("Failed to deleted Attribute");
             }
         }
     };
     return (
-        <div className='w-11/12 mx-auto pt-10'>
+        <div className='w-11/12 mx-auto pt-10 gap-4 flex flex-col'>
             <div className='flex items-center'></div>
-            <Table values={Attributes}>
-                <Table.THead className='border-b border-b-secondary'>
-                    <Table.TR>
+            <Table 
+                values={attributes} 
+                onDataUpdate={SetAttributes} 
+                searchRoute="admin.attributes.index" 
+                keywords={table?.keywords}
+                paginationPerPage={table?.paginationPerPage}
+                paginationList={table?.paginationList}
+                bulk={table?.bulk}
+                className="w-full"
+            >
+                <Table.THead className='border-b border-b-secondary bg-secondary'>
+                    <Table.TR className='h-12 bg-accent border-b border-b-secondary text-heading w-full text-sm font-medium'>
                         <Table.TH className='w-1/20'>
                             <Table.TH.Checkbox />
                         </Table.TH>
                         <Table.TH className='w-1/20'>ID</Table.TH>
                         <Table.TH className='w-3/20'>Attribute</Table.TH>
-                        <Table.TH className='w-3/20'>Slug</Table.TH>
                         <Table.TH className='w-1/5'>Type</Table.TH>
-                        <Table.TH className='w-1/5'>Options</Table.TH>
+                        <Table.TH className='w-7/20'>Options</Table.TH>
                         <Table.TH className='w-1/5'>
                             Actions
                         </Table.TH>
@@ -55,8 +63,10 @@ function Index({ attributes }) {
                 </Table.THead>
                 <Table.TBody>
                     {Attributes.length > 0 && Attributes.map((attribute) => {
+                        const options = attribute?.options ?? [];
+
                         return (
-                            <Table.TR key={attribute.id} className='h-12 bg-accent border-b border-b-secondary text-heading w-full text-sm font-medium'>
+                            <Table.TR key={attribute.id} className='h-12 bg-permanent border-b border-b-secondary text-heading w-full text-sm font-medium'>
                                 <Table.TD>
                                     <Table.TD.Checkbox valueId={attribute.id} />
                                 </Table.TD>
@@ -66,24 +76,30 @@ function Index({ attributes }) {
                                 <Table.TD className='text-center'>
                                     {attribute.name}
                                 </Table.TD>
-                                <Table.TD className='text-center'>
-                                    {attribute.slug}
-                                </Table.TD>
+
                                 <Table.TD className='text-center'>
                                     {attribute.type}
                                 </Table.TD>
-                                <Table.TD className='text-center'>
-                                    <div className='w-full items-center flex gap-1.5 justify-center'>
-                                        {attribute.options ?
-                                            attribute.options.map((option, key) => {
-                                                return (
-                                                    <span key={key} className='px-2 py-0.75 text-xs rounded bg-primary text-heading'>
-                                                        {option.value}
-                                                    </span>
-                                                )
-                                            })
-                                            : 'No Options'
-                                        }
+
+                                <Table.TD className="text-center w-1/5 max-w-7/20 scroll-hidden">
+                                    <div className="w-full items-center overflow-x-auto h-full flex gap-1.5 justify-center">
+                                        {options.length === 0 && "No Options"}
+
+                                        {options.length > 0 && options.length <= 4 &&
+                                            options.map((option, key) => (
+                                                <span
+                                                    key={key}
+                                                    className="px-2 py-0.75 text-xs rounded bg-primary text-heading"
+                                                >
+                                                    {option.value}
+                                                </span>
+                                            ))}
+
+                                        {options.length > 4 && (
+                                            <span className="px-2 py-0.75 text-xs rounded bg-primary text-heading">
+                                                {options.length} Attributes
+                                            </span>
+                                        )}
                                     </div>
                                 </Table.TD>
                                 <Table.TD>
@@ -101,7 +117,7 @@ function Index({ attributes }) {
                                                     <div className='h-10 w-full px-3 cursor-pointer flex items-center hover:bg-primary justify-start rounded-md'>
                                                         View
                                                     </div>
-                                                    <Link href={route('admin.attributes.edit',{'id': attribute.id})} className='h-10 w-full px-3 cursor-pointer flex items-center hover:bg-dynamic justify-start rounded-md'>
+                                                    <Link href={route('admin.attributes.edit', { 'id': attribute.id })} className='h-10 w-full px-3 cursor-pointer flex items-center hover:bg-dynamic justify-start rounded-md'>
                                                         Edit
                                                     </Link>
                                                     <div onClick={() => DeleteItemsFunction(attribute.id)} className='h-10 w-full px-3 cursor-pointer flex items-center hover:bg-red-500 justify-start rounded-md'>
@@ -139,7 +155,7 @@ function Index({ attributes }) {
                     </Popup.PopupBox>
                 </Popup>
             }
-            
+
         </div>
     )
 }

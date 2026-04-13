@@ -30,6 +30,15 @@
                     "placeholder": "Description",
                     "attribute": "required",
                     "style": 1
+                },
+                {
+                    "label": "Short Description",
+                    "name": "short_description",
+                    "value": "",
+                    "type": "desc",
+                    "placeholder": "Short Description",
+                    "attribute": "required",
+                    "style": 1
                 }
             ]
         },
@@ -200,11 +209,29 @@
         {
             "title": "Attributes",
             "style": "main",
+            "tab": "Attributes",
             "fields": [
                 {
-                    "label": "",
+                    "label": "Attributes",
                     "name": "attributes",
-                    "type": "attributes"
+                    "type": "repeater",
+                    "fields": [
+                        {
+                            "name": "key",
+                            "label": "Feature / Spec",
+                            "type": "dropdown",
+                            "placeholder": "e.g. Battery, RAM...",
+                            "options": {
+                                "model": "Attribute"
+                            }
+                        },
+                        {
+                            "name": "value",
+                            "label": "Value",
+                            "type": "text",
+                            "placeholder": "e.g. 7200mAh, 8GB..."
+                        }
+                    ]
                 }
             ]
         },
@@ -623,15 +650,14 @@
                     "name": "language_prefix",
                     "value": "",
                     "placeholder": "Enter Prefix like (ur, en, cz)",
-                    "type":"text"
+                    "type": "text"
                 }
-                
             ]
         },
         {
             "title": "Language Image",
-            "style":"sidebar",
-            "fields":[
+            "style": "sidebar",
+            "fields": [
                 {
                     "label": "Select Image or svg Icon",
                     "type": "image",

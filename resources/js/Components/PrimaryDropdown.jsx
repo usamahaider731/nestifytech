@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import TextInput from './TextInput';
 import { RiArrowRightSLine, RiCheckLine, RiExpandUpDownLine } from 'react-icons/ri';
 
-function PrimaryDropdown({ className = '', onChange='', placeholder = 'Select Category', options = [], value = '', valueInTitle = false }) {
+function PrimaryDropdown({ className = '', onChange='', placeholder = 'Select Category', options = [], value = '', valueInTitle = false, none = false }) {
     const [subOption, setSubOption] = useState(null);
     const [Open, setOpen] = useState(false);
-    const [initialValue, setInitialValue] = useState(value);
-    const [currentLabel, setCurrentLabel] = useState(null);
+    const [initialValue, setInitialValue] = useState(value || '');
+    const [currentLabel, setCurrentLabel] = useState('');
     const openChildren = (children) => {
         setSubOption(children);
     };
@@ -56,35 +56,44 @@ function PrimaryDropdown({ className = '', onChange='', placeholder = 'Select Ca
             </div>
             <div className={`top-12 ${Open ? 'flex' : 'hidden'} absolute left-0 w-full bg-bg z-50`}>
                 <div className={`duration-500 h-40 overflow-y-auto ease-in-out w-full ${subOption ? 'hidden' : ''}`}>
+                    {none &&
+                        <div
+                            key={0}
+                            onClick={()=>setValue({id:0,title:'None'})}
+                            className='h-10 cursor-pointer flex items-center font-medium text-base justify-between text-heading px-5 text-center w-full hover:bg-primary'
+                        >
+                            None
+                        </div>
+                    }
                     {
                         Array.isArray(options) && options.map((option, ctx) => (
-                            <>
-                                <div key={option.id ?? ctx} onClick={()=>setValue(option)} className={`h-10 cursor-pointer flex items-center font-normal text-base justify-between text-heading px-5 text-center w-full hover:bg-primary ${(value == option.id || value == option.title) ?? 'bg-primary'}`}>
-                                    <span className=''>{option.title}</span>
+                            <React.Fragment key={option.id ?? `opt-${ctx}`}>
+                                <div onClick={()=>setValue(option)} className={`h-10 cursor-pointer flex items-center font-normal text-base justify-between text-heading px-5 text-center w-full hover:bg-primary ${(value == option.id || value == option.title) ?? 'bg-primary'}`}>
+                                    <span className=''>{option.title ?? option.label}</span>
                                     {(value == option.id || value == option.title) ?? <RiCheckLine className='h-4 w-4' />}
                                 </div>
                                 {
                                     Array.isArray(option.children) && option.children.map((suboption, idex) => {
                                         return (
-                                            <>
-                                                <div key={suboption.id ?? idex} onClick={()=>setValue(suboption)} className={`h-10 cursor-pointer flex items-center font-normal text-base justify-between text-heading pr-5 pl-10 text-center w-full hover:bg-primary ${(value == suboption.id || value == suboption.title) ?? 'bg-primary'}`}>
+                                            <React.Fragment key={suboption.id ?? `sub-${ctx}-${idex}`}>
+                                                <div onClick={()=>setValue(suboption)} className={`h-10 cursor-pointer flex items-center font-normal text-base justify-between text-heading pr-5 pl-10 text-center w-full hover:bg-primary ${(value == suboption.id || value == suboption.title) ?? 'bg-primary'}`}>
                                                     <span className=''>{suboption.title}</span>
                                                     {(value == suboption.id || value == suboption.title) ?? <RiCheckLine className='h-4 w-4' />}
                                                 </div>
                                                 {
-                                                    Array.isArray(suboption.children) && suboption.children.map((childoption) =>
-                                                        <div key={childoption.id} onClick={()=>setValue(childoption)} className={`h-10 cursor-pointer flex items-center font-normal text-base justify-between text-heading pr-5 pl-12 text-center w-full hover:bg-primary ${(value == childoption.id || value == childoption.title) ?? 'bg-primary'}`}>
+                                                    Array.isArray(suboption.children) && suboption.children.map((childoption, c_idx) =>
+                                                        <div key={childoption.id ?? `child-${ctx}-${idex}-${c_idx}`} onClick={()=>setValue(childoption)} className={`h-10 cursor-pointer flex items-center font-normal text-base justify-between text-heading pr-5 pl-12 text-center w-full hover:bg-primary ${(value == childoption.id || value == childoption.title) ?? 'bg-primary'}`}>
                                                             <span className=''>{childoption.title}</span>
                                                             {(value == childoption.id || value == childoption.title) ?? <RiCheckLine className='h-4 w-4' />}
                                                         </div>
                                                     )
                                                 }
-                                            </>
+                                            </React.Fragment>
                                         )
                                     })
                                 }
 
-                            </>
+                            </React.Fragment>
                         ))
                     }
                 </div>
