@@ -1,0 +1,18 @@
+[
+    {
+        "prefix": "en",
+        "name": "English",
+        "direction": "ltr",
+        "active": "true",
+        "is_default": "true",
+        "image": "1769950506_dfb12cf2942c376e7b4157df3c2be9df_flag.png"
+    },
+    {
+        "prefix": "ur",
+        "name": "Urdu",
+        "direction": "rtl",
+        "active": "true",
+        "is_default": false,
+        "image": "1770042076_dfb12cf2942c376e7b4157df3c2be9df_flag.png"
+    }
+]

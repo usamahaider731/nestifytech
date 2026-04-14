@@ -2,6 +2,7 @@
 !private/
 !public/
 !data/
+!data/**
 !schema/
 !schema/**
 !import/

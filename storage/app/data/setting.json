@@ -1,0 +1,348 @@
+{
+    "site": {
+        "name": {
+            "label": "Site Name",
+            "type": "text",
+            "value": "NestifyTech"
+        },
+        "site_link": {
+            "label": "Site Link",
+            "type": "text",
+            "value": "localhost:3000"
+        },
+        "tagline": {
+            "label": "Tagline",
+            "type": "text",
+            "value": "Shop the World"
+        },
+        "email": {
+            "label": "Contact Email",
+            "type": "text",
+            "value": "info@nestifytech.com"
+        },
+        "phone": {
+            "label": "Contact Number",
+            "type": "phone",
+            "value": "+923218086139"
+        },
+        "copyright_text": {
+            "label": "Copy Right",
+            "type": "text",
+            "value": "All Rights Reserved"
+        },
+        "country": {
+            "label": "Country",
+            "type": "dropdown",
+            "value": "Pakistan",
+            "options": {
+                "model": "App\\Models\\Taxonomy",
+                "type": "country",
+                "meta": "currency",
+                "use_value": true
+            }
+        },
+        "currency": {
+            "label": "Currency",
+            "type": "text",
+            "attributes": "read-only",
+            "value": "PKR",
+            "depend_on": "country",
+            "meta_value": "currency"
+        },
+        "featured_tag": {
+            "label": "Featured Tag",
+            "type": "dropdown",
+            "value": 1176,
+            "options": {
+                "model": "App\\Models\\Taxonomy",
+                "type": "tag",
+                "use_value": true
+            }
+        },
+        "hot_tag": {
+            "label": "Hot Tag",
+            "type": "dropdown",
+            "value": 1183,
+            "options": {
+                "model": "App\\Models\\Taxonomy",
+                "type": "tag",
+                "use_value": true
+            }
+        },
+        "banner_text": {
+            "label": "Banner Text",
+            "type": "textarea",
+            "value": "Welcome to NestifyTech - Your One-Stop Shop for Tech Products!"
+        },
+        "address": {
+            "label": "Business Address",
+            "type": "textarea",
+            "value": "123 Tech Street, Silicon Valley, CA"
+        },
+        "tax_fee_type": {
+            "label": "Tax Fee in Price or persentage",
+            "type": "dropdown",
+            "value": "'persentage",
+            "style": 2,
+            "options": {
+                "Persentage": {
+                    "label": "Persentage",
+                    "value": "'persentage"
+                },
+                "Price": {
+                    "label": "Price",
+                    "value": "Price"
+                }
+            }
+        },
+        "deliviry": {
+            "label": "Deviliry Package Per Order",
+            "type": "text",
+            "value": 250
+        },
+        "tax_fee": {
+            "label": "Tax Fees Per Product",
+            "type": "text",
+            "value": "2.5"
+        },
+        "light_logo": {
+            "label": "Light Logo",
+            "type": "image",
+            "value": "1755141413_28560d7113ad464752dd19ff0de702a8_light_logo.svg"
+        },
+        "dark_logo": {
+            "label": "Dark Logo",
+            "type": "image",
+            "value": "1755141413_28560d7113ad464752dd19ff0de702a8_dark_logo.svg"
+        }
+    },
+    "backend-color": {
+        "secondary": {
+            "value": "#808390",
+            "label": "secondary",
+            "type": "color"
+        },
+        "primary": {
+            "value": "#7367f0",
+            "label": "primary",
+            "type": "color"
+        },
+        "accent": {
+            "value": "#2f3349",
+            "label": "accent",
+            "type": "color"
+        },
+        "res": {
+            "value": "#acabc1",
+            "label": "res",
+            "type": "color"
+        },
+        "bg": {
+            "value": "#25293c",
+            "label": "bg",
+            "type": "color"
+        },
+        "dynamic": {
+            "value": "#3a3d53",
+            "label": "dynamic",
+            "type": "color"
+        },
+        "heading": {
+            "value": "#cfcde4",
+            "label": "heading",
+            "type": "color"
+        },
+        "permanent": {
+            "value": "#373b50",
+            "label": "permanent",
+            "type": "color"
+        }
+    },
+    "color": {
+        "secondary": {
+            "value": "#2a3746",
+            "label": "secondary",
+            "type": "color"
+        },
+        "primary": {
+            "value": "#fed700",
+            "label": "primary",
+            "type": "color"
+        },
+        "accent": {
+            "value": "#f5f5f5",
+            "label": "accent",
+            "type": "color"
+        },
+        "res": {
+            "value": "#333e48",
+            "label": "res",
+            "type": "color"
+        },
+        "bg": {
+            "value": "#f8f8f8",
+            "label": "bg",
+            "type": "color"
+        },
+        "dynamic": {
+            "value": "#ddd",
+            "label": "dynamic",
+            "type": "color"
+        },
+        "heading": {
+            "value": "#7c7c7c",
+            "label": "heading",
+            "type": "color"
+        },
+        "permanent": {
+            "value": "#eaeaea",
+            "label": "permanent",
+            "type": "color"
+        },
+        "text": {
+            "value": "#7c7c7c",
+            "label": "text",
+            "type": "color"
+        }
+    },
+    "ai": {
+        "ai_toggle": {
+            "label": "Did You Use Ai For Your Site",
+            "type": "checkbox",
+            "style": 1,
+            "value_label": "Yes",
+            "value": true
+        },
+        "ai_platform": {
+            "label": "Ai Platform (That you will use for ai)",
+            "type": "dropdown",
+            "style": 2,
+            "options": {
+                "openai": {
+                    "label": "Open AI",
+                    "value": "openai"
+                },
+                "groq": {
+                    "label": "Groq",
+                    "value": "groq"
+                }
+            },
+            "value": "groq"
+        },
+        "api_key": {
+            "value": "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",
+            "label": "Api Key",
+            "type": "text",
+            "style": "2"
+        },
+        "description_prompt": {
+            "value": "Write an SEO-optimized product description between 100 and 350 characters.\n\nProduct Title: {title}\nBrand: {brand}\nCategory: {category}\n\nInclude:\n\nA meta description (maximum 160 characters)\n\nBullet-point features\n\nA short Benefits section explaining customer value\n\n2 short FAQs related to the product\n\nTone should be human-friendly, clear, and professional.\nAvoid unnecessary fluff. Make it suitable for an e-commerce product page.",
+            "label": "Description Prompt",
+            "type": "textarea",
+            "placeholder": "Enter Description Prompt"
+        },
+        "short_description_prompt": {
+            "value": "Write a short product description (40-60 words).\n\nProduct: {title}\nBrand: {brand}\nCategory: {category}\n\nMake it catchy and clear.",
+            "label": "Short Description Prompt",
+            "type": "textarea",
+            "placeholder": "Enter Short Description Prompt"
+        },
+        "seo_description_prompt": {
+            "value": "Write an SEO meta description for this product. Keep it under 160 characters. Focus on keywords and customer benefit.\n\nProduct: {title}\nDescription: {description}",
+            "label": "SEO Description Prompt",
+            "type": "textarea",
+            "placeholder": "Enter SEO Description Prompt"
+        },
+        "chatbot_prompt": {
+            "value": "You are NestifyAI, a smart assistant for the NestifyTech Admin Panel. Your goal is to help administrators with their tasks, provide info about the system, and assist in managing products and settings. Be concise, friendly, and professional.",
+            "label": "Chatbot Prompt",
+            "type": "textarea",
+            "placeholder": "Enter Chatbot Prompt"
+        }
+    },
+    "font": {
+        "primary": {
+            "value": "'Oswald', sans-serif",
+            "label": "select primary font",
+            "type": "dropdown",
+            "options": {
+                "Roboto": {
+                    "label": "Roboto",
+                    "value": "'Roboto', sans-serif"
+                },
+                "Josefin": {
+                    "label": "Josefin",
+                    "value": "'Josefin', sans-serif"
+                },
+                "Oswald": {
+                    "label": "Oswald",
+                    "value": "'Oswald', sans-serif"
+                }
+            }
+        },
+        "secondary": {
+            "value": "'Roboto', sans-serif",
+            "label": "select secondary font",
+            "type": "dropdown",
+            "options": {
+                "Roboto": {
+                    "label": "Roboto",
+                    "value": "'Roboto', sans-serif"
+                },
+                "Josefin": {
+                    "label": "Josefin",
+                    "value": "'Josefin', sans-serif"
+                },
+                "Oswald": {
+                    "label": "Oswald",
+                    "value": "'Oswald', sans-serif"
+                }
+            }
+        },
+        "permanent": {
+            "value": "'Josefin', sans-serif",
+            "label": "select permanent font",
+            "type": "dropdown",
+            "options": {
+                "Roboto": {
+                    "label": "Roboto",
+                    "value": "'Roboto', sans-serif"
+                },
+                "Josefin": {
+                    "label": "Josefin",
+                    "value": "'Josefin', sans-serif"
+                },
+                "Oswald": {
+                    "label": "Oswald",
+                    "value": "'Oswald', sans-serif"
+                }
+            }
+        }
+    },
+    "menu": {
+        "header_menu": {
+            "label": "Header Menu Location",
+            "type": "text",
+            "value": "header",
+            "placeholder": "Enter location name (e.g. header)"
+        },
+        "footer_menu": {
+            "label": "Footer Menu Location",
+            "type": "text",
+            "value": "footer",
+            "placeholder": "Enter location name (e.g. footer)"
+        },
+        "useful_links_menu": {
+            "label": "Useful Links Location",
+            "type": "text",
+            "value": "useful_links",
+            "placeholder": "Enter location name"
+        },
+        "services_menu": {
+            "label": "Services Menu Location",
+            "type": "text",
+            "value": "services",
+            "placeholder": "Enter location name"
+        }
+    }
+}

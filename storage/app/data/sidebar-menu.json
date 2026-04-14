@@ -1,0 +1,319 @@
+[
+  {
+    "id": "group-1",
+    "title": "Admin Group",
+    "menu": [
+      {
+        "id": "dashboard",
+        "title": "Dashboard",
+        "icon": "ri-dashboard-line",
+        "route": "admin.dashboard",
+        "permission": "dashboard"
+      },
+      {
+        "id": "users",
+        "title": "Users",
+        "icon": "ri-user-line",
+        "route": "users",
+        "permission": "user-read"
+      },
+      {
+        "id": "role",
+        "title": "Roles & Permissions",
+        "icon": "ri-shield-user-line",
+        "permission": "role-read",
+        "menu": [
+          {
+            "id": "view-roles",
+            "title": "View Roles",
+            "route": "role",
+            "permission": "role-read"
+          },
+          {
+            "id": "create-role",
+            "title": "Create Role",
+            "route": "role.create",
+            "permission": "role-write"
+          }
+        ]
+      },
+      {
+        "id": "settings",
+        "title": "Setting",
+        "icon": "ri-settings-3-line",
+        "menu": [
+          {
+            "id": "site-setting",
+            "title": "Site Setting",
+            "route": "admin.setting",
+            "params": {
+              "type": "site"
+            },
+            "icon": "ri-global-line",
+            "permission": "site-read"
+          },
+          {
+            "id": "font-setting",
+            "title": "Font Setting",
+            "route": "admin.setting",
+            "params": {
+              "type": "font"
+            },
+            "icon": "ri-font-size-2",
+            "permission": "font-read"
+          },
+          {
+            "id": "color-setting",
+            "title": "Color Setting",
+            "route": "admin.setting",
+            "params": {
+              "type": "color"
+            },
+            "icon": "ri-palette-line",
+            "permission": "color-read"
+          },
+          {
+            "id": "backend-color-setting",
+            "title": "Backend Color Setting",
+            "route": "admin.setting",
+            "params": {
+              "type": "backend-color"
+            },
+            "icon": "ri-palette-line",
+            "permission": "color-read"
+          },
+          {
+            "id": "ai-setting",
+            "title": "Ai Setting",
+            "route": "admin.setting",
+            "params": {
+              "type": "ai"
+            },
+            "icon": "ri-sparkling-2-line",
+            "permission": "ai-write"
+          },
+          {
+            "id": "transition-setting",
+            "title": "Translation",
+            "route": "admin.translations",
+            "icon": "ri-translate-2",
+            "permission": "transition-read"
+          }
+        ]
+      },
+      {
+        "id": "language",
+        "title": "Language",
+        "icon": "ri-translate-ai",
+        "permission": "site-read",
+        "menu": [
+          {
+            "id": "view-language",
+            "title": "View",
+            "route": "admin.lang.index",
+            "permission": "site-read"
+          },
+          {
+            "id": "create-language",
+            "title": "Create Language",
+            "route": "admin.lang.create",
+            "permission": "site-write"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "group-2",
+    "title": "Post & E-commerce",
+    "menu": [
+      {
+        "id": "product",
+        "title": "Product",
+        "icon": "ri-shopping-bag-3-line",
+        "permission": "product-read",
+        "menu": [
+          {
+            "id": "add-product",
+            "title": "Add Product",
+            "route": "post.create",
+            "params": {
+              "type": "product"
+            },
+            "permission": "product-create"
+          },
+          {
+            "id": "view-product",
+            "title": "View Product",
+            "route": "post.index",
+            "params": {
+              "type": "product"
+            },
+            "permission": "product-read"
+          },
+          {
+            "id": "view-reviews",
+            "title": "Product Reviews",
+            "route": "admin.reviews.index",
+            "permission": "review-read"
+          }
+        ]
+      },
+      {
+        "id": "category",
+        "title": "Category",
+        "icon": "ri-apps-line",
+        "permission": "category-read",
+        "menu": [
+          {
+            "id": "category-index",
+            "title": "View Categories",
+            "route": "taxonomy.index",
+            "params": {
+              "type": "category"
+            },
+            "permission": "category-read"
+          },
+          {
+            "id": "create-category",
+            "title": "Create Category",
+            "route": "taxonomy.create",
+            "params": {
+              "type": "category"
+            },
+            "permission": "category-write"
+          }
+        ]
+      },
+      {
+        "id": "brand",
+        "title": "Brand",
+        "icon": "ri-price-tag-3-line",
+        "permission": "brand-read",
+        "menu": [
+          {
+            "id": "brand-index",
+            "title": "View Brands",
+            "route": "taxonomy.index",
+            "params": {
+              "type": "brand"
+            },
+            "permission": "brand-read"
+          },
+          {
+            "id": "create-brand",
+            "title": "Create Brand",
+            "route": "taxonomy.create",
+            "params": {
+              "type": "brand"
+            },
+            "permission": "brand-write"
+          }
+        ]
+      },
+      {
+        "id": "attribute",
+        "title": "Attribute",
+        "icon": "ri-function-line",
+        "permission": "attribute-read",
+        "menu": [
+          {
+            "id": "view-attribute",
+            "title": "View Attribute",
+            "route": "admin.attributes.index",
+            "permission": "attribute-read"
+          },
+          {
+            "id": "create-attribute",
+            "title": "Create Attribute",
+            "route": "admin.attributes.create",
+            "permission": "attribute-write"
+          }
+        ]
+      },
+      {
+        "id": "tag",
+        "title": "Tags",
+        "icon": "ri-price-tag-2-line",
+        "permission": "tag-read",
+        "menu": [
+          {
+            "id": "view-tags",
+            "route": "taxonomy.index",
+            "params": {
+              "type": "tag"
+            },
+            "title": "View Tags",
+            "permission": "tag-read"
+          },
+          {
+            "id": "create-tag",
+            "route": "taxonomy.create",
+            "params": {
+              "type": "tag"
+            },
+            "title": "Create Tag",
+            "permission": "tag-write"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "group-3",
+    "title": "Layout & Pages",
+    "menu": [
+      {
+        "id": "header",
+        "title": "Header",
+        "icon": "ri-layout-top-2-line",
+        "route": "layout.setting",
+        "params": {
+          "type": "header"
+        },
+        "permission": "header-layout-setting"
+      },
+      {
+        "id": "footer",
+        "title": "Footer",
+        "icon": "ri-layout-bottom-line",
+        "route": "layout.setting",
+        "params": {
+          "type": "footer"
+        },
+        "permission": "footer-layout-setting"
+      },
+      {
+        "id": "menu",
+        "title": "Menu",
+        "icon": "ri-menu-2-line",
+        "route": "menu.setting",
+        "permission": "menu-setting"
+      },
+      {
+        "id": "home",
+        "title": "Home Page",
+        "icon": "ri-bubble-chart-fill",
+        "route": "layout.setting",
+        "params": {
+          "type": "home"
+        },
+        "permission": "home-layout-setting"
+      }
+    ]
+  },
+  {
+    "id": "group-developer",
+    "title": "Developer Tools",
+    "menu": [
+      {
+        "id": "admin-builder",
+        "title": "Admin Builder",
+        "icon": "ri-hammer-line",
+        "route": "admin.builder.index",
+        "permission": "site-write"
+      }
+    ]
+  }
+]
+

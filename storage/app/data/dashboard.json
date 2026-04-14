@@ -1,0 +1,88 @@
+{
+    "main": [
+        {
+            "title": "Product Analysics",
+            "table": "posts",
+            "type": "product",
+            "color": "var(--color-red-500)",
+            "background": "color-mix(in srgb, var(--color-red-400), transparent 10%)",
+            "column": "status",
+            "icon": "icon-query",
+            "description": "Total number of Products"
+        },
+        {
+            "title": "Users Analysics",
+            "key": "users-count",
+            "table": "users",
+            "icon": "icon-user",
+            "color": "var(--color-green-600)",
+            "description": "Total number of users",
+            "background": "color-mix(in srgb, var(--color-green-400), transparent 10%)"
+        },
+        {
+            "title": "Brand Analysics",
+            "key": "brand-count",
+            "table": "taxonomies",
+            "type": "brand",
+            "icon": "icon-activity",
+            "color": "#36A2EB",
+            "description": "Total number of brand",
+            "background": "#36A2EB"
+        },
+        {
+            "title": "Category Analysics",
+            "table": "taxonomies",
+            "type": "category",
+            "column": "status",
+            "icon": "icon-categories",
+
+            "color": "var(--color-primary)",
+            "background": "color-mix(in srgb, var(--color-primary), transparent 10%)",
+            "description": "Total number of Categories"
+
+        }
+    ],
+    "chart": [
+        {
+            "title": "Product Upload Analysics",
+            "table": "posts",
+            "is_line": true,
+            "group_by": "day",
+            "color": "var(--color-green-600)",
+            "col": 6,
+            "column": "created_at",
+            "type": "product",
+            "chart": "line",
+            "description": "Product Upload By Time"
+        },
+        {
+            "title": "Product Status",
+            "table": "posts",
+            "type": "product",
+            "color": "var(--color-primary)",
+            "column": "status",
+            "col": 4,
+            "description":"Product Status Analysics",
+            "chart": "pie"
+        },
+        {
+            "title": "Users Analysics",
+            "table": "users",
+            "color": "var(--color-primary)",
+            "column": "active",
+            "value_label": [
+                {
+                    "key": 0,
+                    "value": "Inactive"
+                },
+                {
+                    "key": 1,
+                    "value": "Active"
+                }
+            ],
+            "col": 4,
+            "description":"Product Status Analysics",
+            "chart": "pie"
+        }
+    ]
+}

@@ -1,0 +1,274 @@
+{
+  "categories": [
+    {
+      "id": 1,
+      "name": "Electronics",
+      "slug": "electronics",
+      "description": "All electronic devices and accessories",
+      "image_url": "https://images.unsplash.com/photo-1556740738-b6a63e27c4df",
+      "parent_id": 0,
+      "count": 342
+    },
+    {
+      "id": 2,
+      "name": "Clothing & Apparel",
+      "slug": "clothing-apparel",
+      "description": "Fashion for men, women and children",
+      "image_url": "https://images.pexels.com/photos/298863/pexels-photo-298863.jpeg",
+      "parent_id": 0,
+      "count": 289
+    },
+    {
+      "id": 3,
+      "name": "Home & Garden",
+      "slug": "home-garden",
+      "description": "Furniture and garden supplies",
+      "image_url": "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92",
+      "parent_id": 0,
+      "count": 176
+    },
+    {
+      "id": 4,
+      "name": "Sports & Outdoors",
+      "slug": "sports-outdoors",
+      "description": "Sports equipment and outdoor gear",
+      "image_url": "https://images.pexels.com/photos/863988/pexels-photo-863988.jpeg",
+      "parent_id": 0,
+      "count": 154
+    },
+    {
+      "id": 5,
+      "name": "Health & Beauty",
+      "slug": "health-beauty",
+      "description": "Cosmetics, skincare and wellness products",
+      "image_url": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9",
+      "parent_id": 0,
+      "count": 231
+    },
+    {
+      "id": 6,
+      "name": "Smartphones",
+      "slug": "smartphones",
+      "description": "Mobile phones and accessories",
+      "image_url": "https://images.pexels.com/photos/47261/pexels-photo-47261.jpeg",
+      "parent_id": 1,
+      "count": 142
+    },
+    {
+      "id": 7,
+      "name": "Laptops",
+      "slug": "laptops",
+      "description": "Portable computers and accessories",
+      "image_url": "https://images.unsplash.com/photo-1593642632823-8f785ba67e45",
+      "parent_id": 1,
+      "count": 98
+    },
+    {
+      "id": 8,
+      "name": "TVs & Monitors",
+      "slug": "tvs-monitors",
+      "description": "Televisions and computer displays",
+      "image_url": "https://images.pexels.com/photos/5721908/pexels-photo-5721908.jpeg",
+      "parent_id": 1,
+      "count": 76
+    },
+    {
+      "id": 9,
+      "name": "Cameras",
+      "slug": "cameras",
+      "description": "DSLRs, mirrorless and compact cameras",
+      "image_url": "https://images.unsplash.com/photo-1516035069371-29a1b244cc32",
+      "parent_id": 1,
+      "count": 54
+    },
+    {
+      "id": 10,
+      "name": "Men's Clothing",
+      "slug": "mens-clothing",
+      "description": "Clothing for men",
+      "image_url": "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg",
+      "parent_id": 2,
+      "count": 145
+    },
+    {
+      "id": 11,
+      "name": "Women's Clothing",
+      "slug": "womens-clothing",
+      "description": "Clothing for women",
+      "image_url": "https://images.unsplash.com/photo-1489987707025-afc232f7ea0f",
+      "parent_id": 2,
+      "count": 187
+    },
+    {
+      "id": 12,
+      "name": "Kids' Clothing",
+      "slug": "kids-clothing",
+      "description": "Clothing for children",
+      "image_url": "https://images.pexels.com/photos/2079438/pexels-photo-2079438.jpeg",
+      "parent_id": 2,
+      "count": 93
+    },
+    {
+      "id": 13,
+      "name": "Shoes",
+      "slug": "shoes",
+      "description": "Footwear for all ages",
+      "image_url": "https://images.unsplash.com/photo-1460353581641-37baddab0fa2",
+      "parent_id": 2,
+      "count": 112
+    },
+    {
+      "id": 14,
+      "name": "Furniture",
+      "slug": "furniture",
+      "description": "Home furniture and decor",
+      "image_url": "https://images.unsplash.com/photo-1555041469-a586c61ea9bc",
+      "parent_id": 3,
+      "count": 152
+    },
+    {
+      "id": 15,
+      "name": "Kitchenware",
+      "slug": "kitchenware",
+      "description": "Cookware and kitchen accessories",
+      "image_url": "https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg",
+      "parent_id": 3,
+      "count": 87
+    },
+    {
+      "id": 16,
+      "name": "Garden Tools",
+      "slug": "garden-tools",
+      "description": "Tools for gardening and landscaping",
+      "image_url": "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae",
+      "parent_id": 3,
+      "count": 65
+    },
+    {
+      "id": 17,
+      "name": "Fitness Equipment",
+      "slug": "fitness-equipment",
+      "description": "Exercise machines and weights",
+      "image_url": "https://images.pexels.com/photos/221247/pexels-photo-221247.jpeg",
+      "parent_id": 4,
+      "count": 98
+    },
+    {
+      "id": 18,
+      "name": "Camping Gear",
+      "slug": "camping-gear",
+      "description": "Tents, sleeping bags and outdoor equipment",
+      "image_url": "https://images.unsplash.com/photo-1537905569824-f89f14cceb68",
+      "parent_id": 4,
+      "count": 76
+    },
+    {
+      "id": 19,
+      "name": "Cycling",
+      "slug": "cycling",
+      "description": "Bicycles and cycling accessories",
+      "image_url": "https://images.pexels.com/photos/100582/pexels-photo-100582.jpeg",
+      "parent_id": 4,
+      "count": 54
+    },
+    {
+      "id": 20,
+      "name": "Skincare",
+      "slug": "skincare",
+      "description": "Facial and body care products",
+      "image_url": "https://images.unsplash.com/photo-1571781926291-c477ebfd024b",
+      "parent_id": 5,
+      "count": 132
+    },
+    {
+      "id": 21,
+      "name": "Makeup",
+      "slug": "makeup",
+      "description": "Cosmetics and beauty products",
+      "image_url": "https://images.pexels.com/photos/3373739/pexels-photo-3373739.jpeg",
+      "parent_id": 5,
+      "count": 187
+    },
+    {
+      "id": 22,
+      "name": "Hair Care",
+      "slug": "hair-care",
+      "description": "Shampoos, conditioners and styling products",
+      "image_url": "https://images.unsplash.com/photo-1600334129128-685c5582fd35",
+      "parent_id": 5,
+      "count": 98
+    },
+    {
+      "id": 23,
+      "name": "Vitamins & Supplements",
+      "slug": "vitamins-supplements",
+      "description": "Nutritional supplements and vitamins",
+      "image_url": "https://images.pexels.com/photos/5946082/pexels-photo-5946082.jpeg",
+      "parent_id": 5,
+      "count": 76
+    },
+    {
+      "id": 24,
+      "name": "Gaming Consoles",
+      "slug": "gaming-consoles",
+      "description": "Video game systems and accessories",
+      "image_url": "https://images.unsplash.com/photo-1607853202273-797f1c22a38e",
+      "parent_id": 1,
+      "count": 87
+    },
+    {
+      "id": 25,
+      "name": "Headphones",
+      "slug": "headphones",
+      "description": "Audio headsets and earphones",
+      "image_url": "https://images.pexels.com/photos/205926/pexels-photo-205926.jpeg",
+      "parent_id": 1,
+      "count": 65
+    },
+    {
+      "id": 26,
+      "name": "Smart Watches",
+      "slug": "smart-watches",
+      "description": "Wearable technology and smart watches",
+      "image_url": "https://images.unsplash.com/photo-1523275335684-37898b6baf30",
+      "parent_id": 1,
+      "count": 54
+    },
+    {
+      "id": 27,
+      "name": "Home Decor",
+      "slug": "home-decor",
+      "description": "Decorative items for your home",
+      "image_url": "https://images.pexels.com/photos/584399/living-room-couch-interior-room-584399.jpeg",
+      "parent_id": 3,
+      "count": 143
+    },
+    {
+      "id": 28,
+      "name": "Bedding",
+      "slug": "bedding",
+      "description": "Bed sheets, pillows and comforters",
+      "image_url": "https://images.unsplash.com/photo-1616627561839-074385245ff6",
+      "parent_id": 3,
+      "count": 87
+    },
+    {
+      "id": 29,
+      "name": "Swimwear",
+      "slug": "swimwear",
+      "description": "Bathing suits and beachwear",
+      "image_url": "https://images.pexels.com/photos/808874/pexels-photo-808874.jpeg",
+      "parent_id": 2,
+      "count": 65
+    },
+    {
+      "id": 30,
+      "name": "Winter Sports",
+      "slug": "winter-sports",
+      "description": "Skiing, snowboarding and winter gear",
+      "image_url": "https://images.unsplash.com/photo-1518604666860-9ed391f76460",
+      "parent_id": 4,
+      "count": 54
+    }
+  ]
+}

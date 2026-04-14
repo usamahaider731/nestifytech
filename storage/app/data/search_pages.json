@@ -1,0 +1,22 @@
+[
+  { "title": "Dashboard", "route": "/admin", "category": "Dashboards", "icon": "RiDashboardLine" },
+  { "title": "Users", "route": "/admin/users", "category": "Apps & Pages", "icon": "FaUser" },
+  { "title": "Roles & Permissions", "route": "/admin/users-role", "category": "Apps & Pages", "icon": "RiShieldUserLine" },
+  { "title": "Create Role", "route": "/admin/users-role/create", "category": "Apps & Pages", "icon": "RiShieldUserLine" },
+  { "title": "Site Settings", "route": "/admin/setting/site", "category": "Settings", "icon": "RiGlobalLine" },
+  { "title": "Font Settings", "route": "/admin/setting/font", "category": "Settings", "icon": "RiFontSize2" },
+  { "title": "Color Settings", "route": "/admin/setting/color", "category": "Settings", "icon": "RiPaletteLine" },
+  { "title": "Backend Color Settings", "route": "/admin/setting/backend-color", "category": "Settings", "icon": "RiPaletteLine" },
+  { "title": "AI Settings", "route": "/admin/setting/ai", "category": "Settings", "icon": "RiAiGenerateText" },
+  { "title": "Translations", "route": "/admin/transition", "category": "Settings", "icon": "RiTranslate2" },
+  { "title": "Languages", "route": "/admin/language", "category": "Settings", "icon": "RiTranslateAi" },
+  { "title": "Products", "route": "/admin/post/product", "category": "E-commerce", "icon": "RiShoppingBag3Line" },
+  { "title": "Add Product", "route": "/admin/post/product/create", "category": "E-commerce", "icon": "RiShoppingBag3Line" },
+  { "title": "Categories", "route": "/admin/taxonomy/category", "category": "E-commerce", "icon": "RiAppsLine" },
+  { "title": "Brands", "route": "/admin/taxonomy/brand", "category": "E-commerce", "icon": "RiPriceTag3Line" },
+  { "title": "Attributes", "route": "/admin/attributes", "category": "E-commerce", "icon": "RiFunctionLine" },
+  { "title": "Tags", "route": "/admin/taxonomy/tag", "category": "E-commerce", "icon": "RiPriceTag2Line" },
+  { "title": "Header Setup", "route": "/admin/layout/type/header", "category": "User Interface", "icon": "RiLayoutTop2Line" },
+  { "title": "Menu Setup", "route": "/admin/layout/menu", "category": "User Interface", "icon": "RiMenu2Line" },
+  { "title": "Home Page Setup", "route": "/admin/layout/type/home", "category": "User Interface", "icon": "RiBubbleChartFill" }
+]
