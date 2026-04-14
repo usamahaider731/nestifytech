@@ -2,4 +2,8 @@
 !private/
 !public/
 !data/
+!schema/
+!schema/**
+!import/
+!import/**
 !.gitignore
