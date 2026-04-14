@@ -1,0 +1,112 @@
+{
+    "db": {
+        "model": "App\\Models\\Taxonomy",
+        "type": "tag",
+        "validation": {
+            "title": "required|string|max:255",
+            "description": "nullable|string",
+            "status": "required|string"
+        },
+        "schema": [
+            {"name": "title", "type": "string"},
+            {"name": "description", "type": "longText", "nullable": true},
+            {"name": "status", "type": "string", "default": "publish"},
+            {"name": "type", "type": "string", "index": true}
+        ],
+        "main_fields": [
+            "title",
+            "description",
+            "status"
+        ],
+        "fixed_fields": {
+            "type": "tag"
+        },
+        "meta_fields": "auto",
+        "table": "taxonomies"
+    },
+    "table": {
+        "keywords": true,
+        "paginationPerPage": 10,
+        "paginationList": [
+            10,
+            20,
+            50,
+            100
+        ],
+        "table": "taxonomies",
+        "type": "tag",
+        "bulk": {
+            "table": "taxonomies",
+            "type": "tag",
+            "route": "bulk.action",
+            "column": "status",
+            "is_meta": false,
+            "options": [
+                {
+                    "label": "Delete",
+                    "value": "delete"
+                },
+                {
+                    "label": "Publish",
+                    "value": "publish"
+                },
+                {
+                    "label": "Draft",
+                    "value": "Draft"
+                }
+            ]
+        },
+        "columns": [
+            {
+                "id": "id",
+                "label": "ID",
+                "column": "id",
+                "width": "5%",
+                "sort": true
+            },
+            {
+                "id": "title",
+                "label": "TAG",
+                "column": "title",
+                "sort": true,
+                "width": "30%"
+            },
+            {
+                "id": "description",
+                "label": "DESCRIPTION",
+                "column": "description",
+                "width": "45%",
+                "type": "description"
+            },
+            {
+                "id": "action",
+                "label": "ACTION",
+                "column": "action",
+                "width": "20%",
+                "type": "action"
+            }
+        ]
+    },
+    "form": [
+        {
+            "title": "Tag Information",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Title",
+                    "style": 2,
+                    "placeholder": "Tag Title",
+                    "name": "title",
+                    "type": "text"
+                },
+                {
+                    "label": "Description",
+                    "style": 2,
+                    "placeholder": "Tag Title",
+                    "name": "description",
+                    "type": "desc"
+                }
+            ]
+        }
+    ]
+}

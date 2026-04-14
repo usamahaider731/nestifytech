@@ -1,0 +1,42 @@
+[
+    {
+        "title": "Nexus Labs",
+        "slug": "nexus-labs",
+        "image": "https:\/\/logo.clearbit.com\/google.com"
+    },
+    {
+        "title": "VoltGear",
+        "slug": "voltgear",
+        "image": "https:\/\/logo.clearbit.com\/tesla.com"
+    },
+    {
+        "title": "Pulse Audio",
+        "slug": "pulse-audio",
+        "image": "https:\/\/logo.clearbit.com\/spotify.com"
+    },
+    {
+        "title": "Orbit Mobile",
+        "slug": "orbit-mobile",
+        "image": "https:\/\/logo.clearbit.com\/apple.com"
+    },
+    {
+        "title": "Zenith Home",
+        "slug": "zenith-home",
+        "image": "https:\/\/logo.clearbit.com\/ikea.com"
+    },
+    {
+        "title": "Apex Tools",
+        "slug": "apex-tools",
+        "image": "https:\/\/logo.clearbit.com\/dewalt.com"
+    },
+    {
+        "title": "ClearView",
+        "slug": "clearview",
+        "image": "https:\/\/logo.clearbit.com\/sony.com"
+    },
+    {
+        "title": "SteelForm",
+        "slug": "steelform",
+        "image": "https:\/\/logo.clearbit.com\/hermanmiller.com"
+    }
+]

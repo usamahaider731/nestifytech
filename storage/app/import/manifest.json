@@ -1,0 +1,6 @@
+{
+    "categories": "categories.json",
+    "brands": "brands.json",
+    "tags": "tags.json",
+    "products": "products.json"
+}

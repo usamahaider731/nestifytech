@@ -1,0 +1,235 @@
+{
+    "db": {
+        "model": "App\\Models\\Taxonomy",
+        "type": "category",
+        "validation": {
+            "title": "required|string|max:255",
+            "description": "nullable|string",
+            "status": "required|string",
+            "parent_id": "nullable|integer"
+        },
+        "schema": [
+            {
+                "name": "title",
+                "type": "string"
+            },
+            {
+                "name": "description",
+                "type": "longText",
+                "nullable": true
+            },
+            {
+                "name": "status",
+                "type": "string",
+                "default": "publish"
+            },
+            {
+                "name": "parent_id",
+                "type": "unsignedBigInteger",
+                "default": 0,
+                "index": true
+            },
+            {
+                "name": "type",
+                "type": "string",
+                "index": true
+            }
+        ],
+        "main_fields": [
+            "title",
+            "description",
+            "status",
+            "parent_id"
+        ],
+        "fixed_fields": {
+            "type": "category"
+        },
+        "relations": {
+            "image": "taxonomy"
+        },
+        "meta_fields": "auto",
+        "table": "taxonomies"
+    },
+    "table": {
+        "keywords": true,
+        "paginationPerPage": 10,
+        "paginationList": [
+            10,
+            20,
+            50,
+            100
+        ],
+        "table": "taxonomies",
+        "type": "category",
+        "bulk": {
+            "table": "taxonomies",
+            "type": "category",
+            "route": "bulk.action",
+            "column": "status",
+            "is_meta": false,
+            "options": [
+                {
+                    "label": "Delete",
+                    "value": "delete"
+                },
+                {
+                    "label": "Publish",
+                    "value": "publish"
+                },
+                {
+                    "label": "Draft",
+                    "value": "Draft"
+                }
+            ]
+        },
+        "columns": [
+            {
+                "id": "id",
+                "label": "ID",
+                "column": "id",
+                "width": "5%",
+                "sort": true
+            },
+            {
+                "id": "image",
+                "label": "IMAGE",
+                "width": "5%",
+                "column": "image",
+                "type": "image",
+                "key": "filename"
+            },
+            {
+                "id": "title",
+                "label": "CATEGORY",
+                "column": "title",
+                "sort": true,
+                "width": "20%"
+            },
+            {
+                "id": "parent",
+                "column": "parent_id",
+                "label": "PARENT",
+                "type": "badage",
+                "value_table": "taxonomies",
+                "value_condition": {
+                    "pass_value_of_key": "id",
+                    "return_key": "title"
+                },
+                "width": "15%"
+            },
+            {
+                "id": "discount",
+                "column": "discount",
+                "type": "discount",
+                "meta": true,
+                "meta_key": "discount",
+                "meta_value_type": "string",
+                "label": "DISCOUNT",
+                "width": "10%"
+            },
+            {
+                "id": "status",
+                "label": "STATUS",
+                "column": "status",
+                "width": "10%",
+                "type": "status_dot"
+            },
+            {
+                "id": "action",
+                "label": "ACTION",
+                "column": "action",
+                "width": "20%",
+                "type": "action"
+            }
+        ]
+    },
+    "form": [
+        {
+            "title": "Category Information",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Title",
+                    "type": "text",
+                    "style": 2,
+                    "name": "title",
+                    "placeholder": "Category Title"
+                },
+                {
+                    "label": "Description",
+                    "type": "desc",
+                    "style": 2,
+                    "name": "description",
+                    "placeholder": "Category Description"
+                }
+            ]
+        },
+        {
+            "title": "Category Parent",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Parent",
+                    "type": "dropdown",
+                    "name": "parent_id",
+                    "placeholder": "Parent Category",
+                    "attribute": "required",
+                    "withChildren": true,
+                    "value": "",
+                    "none": true,
+                    "options": {
+                        "model": "Taxonomy",
+                        "type": "category",
+                        "use_value": false,
+                        "parent_id": "0",
+                        "not_id": true
+                    }
+                }
+            ]
+        },
+        {
+            "title": "Category Image",
+            "style": "sidebar",
+            "fields": [
+                {
+                    "label": "Category Image",
+                    "style": 1,
+                    "name": "image",
+                    "type": "image",
+                    "filename": ""
+                }
+            ]
+        },
+        {
+            "title": "Category Discount",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Set Discount",
+                    "type": "checkbox",
+                    "style": 2,
+                    "name": "discount_toggle",
+                    "placeholder": "Category Discount (%)"
+                },
+                {
+                    "label": "Category Discount",
+                    "type": "number",
+                    "style": 2,
+                    "name": "discount",
+                    "placeholder": "Category Discount (%)",
+                    "condition": "discount_toggle",
+                    "condition_value": true
+                },
+                {
+                    "label": "Category Discount Date",
+                    "type": "calendar",
+                    "style": 2,
+                    "name": "discount_date",
+                    "placeholder": "Category Discount Date",
+                    "condition": "discount_toggle",
+                    "condition_value": true
+                }
+            ]
+        }
+    ]
+}

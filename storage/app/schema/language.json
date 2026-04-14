@@ -1,0 +1,26 @@
+{
+    "db": {
+        "model": "App\\Models\\Posts",
+        "type": "language",
+        "validation": {
+            "title": "required|string",
+            "prefix": "required|string|max:10"
+        },
+        "schema": [
+            {"name": "title", "type": "string"},
+            {"name": "sku", "type": "string", "unique": true},
+            {"name": "status", "type": "string", "default": "active"},
+            {"name": "type", "type": "string", "default": "language"}
+        ],
+        "main_fields": [
+            "title",
+            "sku",
+            "status"
+        ],
+        "meta_fields": "auto",
+        "fixed_fields": {
+            "type": "language"
+        },
+        "table": "posts"
+    }
+}

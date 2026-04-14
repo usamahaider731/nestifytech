@@ -1,0 +1,34 @@
+[
+    {
+        "title": "New",
+        "slug": "new"
+    },
+    {
+        "title": "Sale",
+        "slug": "sale"
+    },
+    {
+        "title": "Bestseller",
+        "slug": "bestseller"
+    },
+    {
+        "title": "Limited",
+        "slug": "limited"
+    },
+    {
+        "title": "Free shipping",
+        "slug": "free-shipping"
+    },
+    {
+        "title": "Eco",
+        "slug": "eco"
+    },
+    {
+        "title": "Gift idea",
+        "slug": "gift-idea"
+    },
+    {
+        "title": "Pro",
+        "slug": "pro"
+    }
+]

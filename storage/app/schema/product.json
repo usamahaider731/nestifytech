@@ -1,0 +1,388 @@
+{
+    "db": {
+        "model": "App\\Models\\Posts",
+        "type": "product",
+        "auto_slug": "sku",
+        "validation": {
+            "title": "required|string|max:100",
+            "description": "nullable|string|max:10000",
+            "status": "required|string|max:20",
+            "sku": "required|string|max:50"
+        },
+        "schema": [
+            {
+                "name": "user_id",
+                "type": "unsignedBigInteger",
+                "index": true
+            },
+            {
+                "name": "title",
+                "type": "string"
+            },
+            {
+                "name": "sku",
+                "type": "string",
+                "unique": true
+            },
+            {
+                "name": "description",
+                "type": "longText",
+                "nullable": true
+            },
+            {
+                "name": "status",
+                "type": "string",
+                "default": "publish"
+            },
+            {
+                "name": "type",
+                "type": "string",
+                "index": true
+            }
+        ],
+        "main_fields": [
+            "title",
+            "description",
+            "status",
+            "sku"
+        ],
+        "fixed_fields": {
+            "user_id": "auth_id",
+            "type": "product"
+        },
+        "relations": {
+            "image": "single_image",
+            "gallery": "gallery_image",
+            "attributes": "attributes",
+            "variations": "variations"
+        },
+        "meta_fields": "auto",
+        "features": {
+            "category": true,
+            "brand": true,
+            "attributes": true,
+            "variations": true,
+            "category_filter": true
+        },
+        "meta_processing": {
+            "category": "json_array",
+            "brand": "string"
+        },
+        "table": "posts"
+    },
+    "table": {
+        "keywords": true,
+        "paginationPerPage": 10,
+        "paginationList": [
+            10,
+            20,
+            50,
+            100
+        ],
+        "table": "posts",
+        "type": "product",
+        "bulk": {
+            "table": "posts",
+            "type": "product",
+            "route": "bulk.action",
+            "column": "status",
+            "is_meta": false,
+            "options": [
+                {
+                    "label": "Delete",
+                    "value": "delete"
+                },
+                {
+                    "label": "Publish",
+                    "value": "publish"
+                },
+                {
+                    "label": "Draft",
+                    "value": "Draft"
+                }
+            ]
+        },
+        "columns": [
+            {
+                "id": "id",
+                "label": "ID",
+                "column": "id",
+                "width": "5%",
+                "sort": true
+            },
+            {
+                "id": "sku",
+                "label": "SKU",
+                "column": "sku",
+                "width": "10%",
+                "sort": true
+            },
+            {
+                "id": "image",
+                "label": "IMAGE",
+                "width": "5%",
+                "column": "image",
+                "type": "image",
+                "key": "filename"
+            },
+            {
+                "id": "title",
+                "label": "PRODUCT",
+                "column": "title",
+                "sort": true,
+                "width": "20%"
+            },
+            {
+                "id": "category",
+                "column": "parent",
+                "label": "CATEGORY",
+                "type": "badage",
+                "field": "category",
+                "meta": true,
+                "meta_key": "category",
+                "value_table": "taxonomies",
+                "is_array": true,
+                "meta_value_type": "json",
+                "value_condition": {
+                    "pass_value_of_key": "id",
+                    "return_key": "title"
+                },
+                "width": "20%"
+            },
+            {
+                "id": "brand",
+                "label": "BRAND",
+                "type": "brand_image",
+                "field": "brand",
+                "meta": true,
+                "meta_key": "brand",
+                "value_table": "taxonomies",
+                "meta_value_type": "string",
+                "value_condition": {
+                    "pass_value_of_key": "id",
+                    "return_key": "title"
+                },
+                "media_type": "taxonomy",
+                "width": "10%"
+            },
+            {
+                "id": "status",
+                "label": "STATUS",
+                "column": "status",
+                "width": "10%",
+                "type": "status_dot"
+            },
+            {
+                "id": "action",
+                "label": "ACTION",
+                "column": "action",
+                "width": "20%",
+                "type": "action"
+            }
+        ]
+    },
+    "form": [
+        {
+            "title": "Basic Information",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Product Title",
+                    "name": "title",
+                    "type": "text",
+                    "placeholder": "e.g. Wireless Headphone Pro",
+                    "attribute": "required",
+                    "style": 2
+                },
+                {
+                    "label": "SKU / Model",
+                    "name": "sku",
+                    "type": "text",
+                    "placeholder": "WP-001",
+                    "attribute": "required",
+                    "style": 2
+                },
+                {
+                    "label": "Full Description",
+                    "name": "description",
+                    "type": "desc",
+                    "placeholder": "Write product details here...",
+                    "translate": true,
+                    "generate_required": [
+                        "title",
+                        "category",
+                        "brand",
+                        "attribute"
+                    ]
+                }
+            ]
+        },
+        {
+            "title": "Media Assets",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Featured Image",
+                    "name": "image",
+                    "type": "image"
+                },
+                {
+                    "label": "Product Gallery",
+                    "name": "gallery",
+                    "type": "image",
+                    "multiple": true
+                }
+            ]
+        },
+        {
+            "title": "Search Engine Optimization (SEO)",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "SEO Title",
+                    "name": "seo_title",
+                    "type": "text",
+                    "placeholder": "Custom title for search engines",
+                    "style": 2
+                },
+                {
+                    "label": "SEO Keywords",
+                    "name": "seo_keywords",
+                    "type": "text",
+                    "placeholder": "keywords, separated, by, commas",
+                    "style": 2
+                },
+                {
+                    "label": "SEO Meta Description",
+                    "name": "seo_description",
+                    "type": "desc",
+                    "placeholder": "Summary of the product for snippets..."
+                }
+            ]
+        },
+        {
+            "title": "Specifications & Variations",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Technical Attributes",
+                    "name": "attributes",
+                    "type": "attributes"
+                },
+                {
+                    "label": "Product Variations",
+                    "name": "variations",
+                    "type": "variations"
+                }
+            ]
+        },
+        {
+            "title": "Organize",
+            "style": "sidebar",
+            "fields": [
+                {
+                    "label": "Category",
+                    "name": "category",
+                    "type": "dropdown",
+                    "multiple": true,
+                    "searchable": true,
+                    "options": {
+                        "model": "Taxonomy",
+                        "type": "category"
+                    }
+                },
+                {
+                    "label": "Product Brand",
+                    "name": "brand",
+                    "type": "dropdown",
+                    "searchable": true,
+                    "options": {
+                        "model": "Taxonomy",
+                        "type": "brand"
+                    }
+                },
+                {
+                    "label": "Tags",
+                    "name": "tags",
+                    "type": "dropdown",
+                    "multiple": true,
+                    "searchable": true,
+                    "options": {
+                        "model": "Taxonomy",
+                        "type": "tag"
+                    }
+                }
+            ]
+        },
+        {
+            "title": "Address",
+            "style": "main",
+            "fields": [
+                {
+                    "name": "address",
+                    "label": "Address",
+                    "type": "text",
+                    "style": 2
+                },
+                {
+                    "label": "State",
+                    "name": "state",
+                    "type": "dropdown",
+                    "searchable": true,
+                    "options": {
+                        "model": "Taxonomy",
+                        "type": "state"
+                    }
+                },
+                {
+                    "label": "City",
+                    "name": "city",
+                    "type": "dropdown",
+                    "searchable": true,
+                    "depends_on": "state",
+                    "options": {
+                        "model": "Taxonomy",
+                        "type": "city"
+                    }
+                }
+            ]
+        },
+        {
+            "title": "Price Adjustment",
+            "style": "sidebar",
+            "fields": [
+                {
+                    "label": "Regular Price",
+                    "type": "text",
+                    "name": "first_price"
+                },
+                {
+                    "label": "Sale Price",
+                    "type": "text",
+                    "name": "second_price"
+                },
+                {
+                    "label": "Stock",
+                    "type": "number",
+                    "name": "stock"
+                }
+            ]
+        },
+        {
+            "title": "Publish",
+            "style": "sidebar",
+            "fields": [
+                {
+                    "label": "Status",
+                    "name": "status",
+                    "type": "dropdown",
+                    "options": [
+                        { "label": "Publish", "value": "publish" },
+                        { "label": "Draft", "value": "draft" },
+                        { "label": "Pending", "value": "pending" }
+                    ]
+                }
+            ]
+        }
+    ]
+}

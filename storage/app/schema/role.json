@@ -1,0 +1,170 @@
+{
+    "db": {
+        "model": "App\\Models\\Roles",
+        "type": "role",
+        "validation": {
+            "title": "required|string|unique:roles"
+        },
+        "schema": [
+            {
+                "name": "title",
+                "type": "string"
+            },
+            {
+                "name": "status",
+                "type": "string",
+                "default": "active"
+            },
+            {
+                "name": "permission",
+                "type": "longText",
+                "nullable": true
+            }
+        ],
+        "main_fields": [
+            "title",
+            "status",
+            "permission"
+        ],
+        "meta_fields": "auto",
+        "table": "roles"
+    },
+    "table": {
+        "keywords": true,
+        "paginationPerPage": 10,
+        "paginationList": [
+            10,
+            20,
+            50,
+            100
+        ],
+        "table": "roles",
+        "type": "role",
+        "columns": [
+            {
+                "id": "id",
+                "label": "ID",
+                "column": "id",
+                "width": "5%",
+                "sort": true
+            },
+            {
+                "id": "title",
+                "label": "ROLE",
+                "column": "title",
+                "sort": true,
+                "width": "55%"
+            },
+            {
+                "id": "status",
+                "label": "STATUS",
+                "column": "status",
+                "width": "20%",
+                "type": "status_dot"
+            },
+            {
+                "id": "action",
+                "label": "ACTION",
+                "column": "action",
+                "width": "20%",
+                "type": "action"
+            }
+        ]
+    },
+    "form": [
+        {
+            "title": "Role Details",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Role Title",
+                    "name": "title",
+                    "type": "text",
+                    "placeholder": "e.g. Administrator, Editor...",
+                    "style": 2
+                },
+                {
+                    "label": "Status",
+                    "name": "status",
+                    "type": "dropdown",
+                    "options": [
+                        {
+                            "title": "Active",
+                            "id": "active"
+                        },
+                        {
+                            "title": "Inactive",
+                            "id": "inactive"
+                        }
+                    ],
+                    "style": 2
+                }
+            ]
+        },
+        {
+            "title": "Content Management permission",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Content Access",
+                    "name": "permission.content",
+                    "type": "matrix",
+                    "rows": [
+                        "Product",
+                        "Category",
+                        "Brand",
+                        "Tag",
+                        "Attribute"
+                    ],
+                    "cols": [
+                        "Read",
+                        "Write",
+                        "Delete"
+                    ]
+                }
+            ]
+        },
+        {
+            "title": "System Control permission",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Administrative Access",
+                    "name": "permission.system",
+                    "type": "matrix",
+                    "rows": [
+                        "User",
+                        "Role",
+                        "Setting",
+                        "Layout"
+                    ],
+                    "cols": [
+                        "Read",
+                        "Write",
+                        "Delete"
+                    ]
+                }
+            ]
+        },
+        {
+            "title": "User Interaction permission",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Customer Engagement",
+                    "name": "permission.sales",
+                    "type": "matrix",
+                    "rows": [
+                        "Review",
+                        "Order"
+                    ],
+                    "cols": [
+                        "Read",
+                        "Write",
+                        "Delete"
+                    ]
+                }
+            ]
+        }
+    ]
+}

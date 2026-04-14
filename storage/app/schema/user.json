@@ -1,0 +1,160 @@
+{
+    "db": {
+        "model": "App\\Models\\User",
+        "type": "user",
+        "validation": {
+            "name": "required|string|max:255",
+            "email": "required|email|unique:users"
+        },
+        "schema": [
+            {"name": "name", "type": "string"},
+            {"name": "email", "type": "string", "unique": true},
+            {"name": "password", "type": "string"},
+            {"name": "active", "type": "boolean", "default": true}
+        ],
+        "main_fields": [
+            "name",
+            "email"
+        ],
+        "meta_fields": "auto",
+        "fixed_fields": {
+        },
+        "table": "users"
+    },
+    "table": {
+        "keywords": true,
+        "paginationPerPage": 10,
+        "paginationList": [
+            10,
+            20,
+            50,
+            100
+        ],
+        "table": "users",
+        "type": "user",
+        "bulk": {
+            "table": "users",
+            "type": "user",
+            "route": "bulk.action",
+            "column": "active",
+            "is_meta": false,
+            "options": [
+                {
+                    "label": "Delete",
+                    "value": "delete"
+                },
+                {
+                    "label": "Active",
+                    "value": "1"
+                },
+                {
+                    "label": "Inactive",
+                    "value": "0"
+                }
+            ]
+        },
+        "columns": [
+            {
+                "id": "id",
+                "label": "ID",
+                "column": "id",
+                "width": "5%",
+                "sort": true
+            },
+            {
+                "id": "image",
+                "label": "IMAGE",
+                "width": "5%",
+                "column": "image",
+                "type": "image",
+                "key": "filename"
+            },
+            {
+                "id": "name",
+                "label": "USER",
+                "column": "name",
+                "sort": true,
+                "width": "20%"
+            },
+            {
+                "id": "role",
+                "label": "ROLE",
+                "column": "user_role",
+                "type": "role_badges",
+                "source_column": "roles",
+                "value_table": "roles",
+                "is_array": true,
+                "meta_value_type": "json",
+                "value_condition": {
+                    "pass_value_of_key": "id",
+                    "return_key": "title"
+                },
+                "width": "30%"
+            },
+            {
+                "id": "active",
+                "label": "ACTIVE",
+                "column": "active",
+                "type": "status_dot",
+                "width": "20%"
+            },
+            {
+                "id": "action",
+                "label": "ACTION",
+                "column": "action",
+                "width": "20%",
+                "type": "action"
+            }
+        ]
+    },
+    "form": [
+        {
+            "title": "User Information",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Name",
+                    "style": 1,
+                    "name": "name",
+                    "type": "text",
+                    "placeholder": "User Name"
+                },
+                {
+                    "label": "Email",
+                    "style": 1,
+                    "name": "email",
+                    "type": "text",
+                    "placeholder": "User Email"
+                }
+            ]
+        },
+        {
+            "title": "User Role",
+            "style": "main",
+            "fields": [
+                {
+                    "type": "checkbox",
+                    "name": "roles",
+                    "options": {
+                        "model": "Roles",
+                        "type": "role",
+                        "use_value": false
+                    }
+                }
+            ]
+        },
+        {
+            "title": "User Image",
+            "style": "sidebar",
+            "fields": [
+                {
+                    "label": "",
+                    "style": 1,
+                    "name": "image",
+                    "type": "image",
+                    "value": ""
+                }
+            ]
+        }
+    ]
+}

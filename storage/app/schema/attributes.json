@@ -1,0 +1,103 @@
+{
+    "db": {
+        "model": "App\\Models\\Attributes",
+        "type": "attributes",
+        "validation": {
+            "name": "required|string",
+            "type": "required|string"
+        },
+        "schema": [
+            {"name": "name", "type": "string"},
+            {"name": "group", "type": "string", "nullable": true},
+            {"name": "type", "type": "string", "default": "text"},
+            {"name": "options", "type": "json", "nullable": true}
+        ],
+        "main_fields": [
+            "name",
+            "group",
+            "type"
+        ],
+        "meta_fields": "auto",
+        "fixed_fields": {},
+        "table": "attributes"
+    },
+    "table": {
+        "keywords": true,
+        "bulk": {
+            "table": "attributes",
+            "route": "bulk.action",
+            "is_meta": false,
+            "options": [
+                {
+                    "label": "Delete",
+                    "value": "delete"
+                }
+            ]
+        },
+        "paginationPerPage": 10,
+        "paginationList": [
+            10,
+            20,
+            50,
+            100
+        ]
+    },
+    "form": [
+        {
+            "title": "Attribute",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Name",
+                    "style": 1,
+                    "name": "name",
+                    "placeholder": "e.g. Battery Capacity",
+                    "type": "text"
+                },
+                {
+                    "label": "Group",
+                    "style": 1,
+                    "name": "group",
+                    "placeholder": "e.g. Battery, Storage, Camera...",
+                    "type": "text"
+                },
+                {
+                    "label": "Select Type",
+                    "style": 1,
+                    "type": "dropdown",
+                    "name": "type",
+                    "placeholder": "Select Type",
+                    "options": [
+                        {
+                            "title": "Text",
+                            "id": "text"
+                        },
+                        {
+                            "title": "Dropdown",
+                            "id": "dropdown"
+                        },
+                        {
+                            "title": "Checkbox",
+                            "id": "checkbox"
+                        },
+                        {
+                            "title": "Radio",
+                            "id": "radio"
+                        },
+                        {
+                            "title": "Color",
+                            "id": "color"
+                        }
+                    ]
+                },
+                {
+                    "label": "Options",
+                    "name": "options",
+                    "type": "dynamic_options",
+                    "show_on": "type",
+                    "field_name": "name"
+                }
+            ]
+        }
+    ]
+}

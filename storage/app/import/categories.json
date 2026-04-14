@@ -1,0 +1,55 @@
+[
+    {
+        "title": "Electronics",
+        "slug": "electronics",
+        "description": "Devices and gadgets",
+        "image": "https:\/\/images.unsplash.com\/photo-1498049794561-7780e7231661?w=800&q=80"
+    },
+    {
+        "title": "Phones",
+        "slug": "phones",
+        "parent_slug": "electronics",
+        "image": "https:\/\/images.unsplash.com\/photo-1511707171634-5f897ff02aa9?w=800&q=80"
+    },
+    {
+        "title": "Laptops",
+        "slug": "laptops",
+        "parent_slug": "electronics",
+        "image": "https:\/\/images.unsplash.com\/photo-1496181133206-80ce9b88a853?w=800&q=80"
+    },
+    {
+        "title": "Audio",
+        "slug": "audio",
+        "parent_slug": "electronics",
+        "image": "https:\/\/images.unsplash.com\/photo-1505740420928-5e560c06d30e?w=800&q=80"
+    },
+    {
+        "title": "Wearables",
+        "slug": "wearables",
+        "parent_slug": "electronics",
+        "image": "https:\/\/images.unsplash.com\/photo-1523275335684-37898b6baf30?w=800&q=80"
+    },
+    {
+        "title": "Accessories",
+        "slug": "accessories",
+        "parent_slug": "electronics",
+        "image": "https:\/\/images.unsplash.com\/photo-1526733158173-e4073a726fa3?w=800&q=80"
+    },
+    {
+        "title": "Home & Living",
+        "slug": "home-living",
+        "image": "https:\/\/images.unsplash.com\/photo-1484101403033-57105d2b77ca?w=800&q=80"
+    },
+    {
+        "title": "Kitchen",
+        "slug": "kitchen",
+        "parent_slug": "home-living",
+        "image": "https:\/\/images.unsplash.com\/photo-1556911220-e15b29be8c8f?w=800&q=80"
+    },
+    {
+        "title": "Furniture",
+        "slug": "furniture",
+        "parent_slug": "home-living",
+        "image": "https:\/\/images.unsplash.com\/photo-1524758631624-e2822e304c36?w=800&q=80"
+    }
+]

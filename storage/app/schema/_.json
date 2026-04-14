@@ -1,0 +1,72 @@
+{
+    "keywords": true,
+    "paginationPerPage": 5,
+    "paginationList": [
+        5,
+        10,
+        20,
+        50,
+        100
+    ],
+    "table": "taxonomies",
+    "type": "brand",
+    "bulk": {
+        "table": "taxonomies",
+        "type": "brand",
+        "route": "bulk.action",
+        "column": "status",
+        "is_meta": false,
+        "options": [
+            {
+                "label": "Delete",
+                "value": "delete"
+            },
+            {
+                "label": "Publish",
+                "value": "publish"
+            },
+            {
+                "label": "Draft",
+                "value": "Draft"
+            }
+        ]
+    },
+    "columns": [
+        {
+            "id": "id",
+            "label": "ID",
+            "column": "id",
+            "width": "5%",
+            "sort": true
+        },
+        {
+            "id": "image",
+            "label": "IMAGE",
+            "width": "10%",
+            "column": "image",
+            "type": "image",
+            "key": "filename"
+        },
+        {
+            "id": "title",
+            "label": "BRAND",
+            "column": "title",
+            "sort": true,
+            "width": "25%"
+        },
+        {
+            "id": "description",
+            "label": "DESCRIPTION",
+            "column": "description",
+            "width": "40%",
+            "type": "description"
+        },
+        {
+            "id": "action",
+            "label": "ACTION",
+            "column": "action",
+            "width": "20%",
+            "type": "action"
+        }
+    ]
+}

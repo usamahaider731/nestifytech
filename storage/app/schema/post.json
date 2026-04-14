@@ -1,0 +1,47 @@
+{
+    "db": {
+        "model": "App\\Models\\Posts",
+        "type": "post",
+        "auto_slug": "sku",
+        "validation": {
+            "title": "required|string|max:100",
+            "description": "nullable|string|max:10000",
+            "status": "required|string|max:20"
+        },
+        "schema": [
+            {"name": "user_id", "type": "unsignedBigInteger", "index": true},
+            {"name": "title", "type": "string"},
+            {"name": "sku", "type": "string", "unique": true},
+            {"name": "description", "type": "longText", "nullable": true},
+            {"name": "status", "type": "string", "default": "publish"},
+            {"name": "type", "type": "string", "index": true}
+        ],
+        "main_fields": [
+            "title",
+            "sku",
+            "description",
+            "status"
+        ],
+        "fixed_fields": {
+            "user_id": "auth_id",
+            "type": "post"
+        },
+        "relations": {
+            "image": "single_image",
+            "gallery": "gallery_image"
+        },
+        "meta_fields": "auto",
+        "features": {
+            "category": true,
+            "brand": true,
+            "attributes": true,
+            "variations": false,
+            "category_filter": true
+        },
+        "meta_processing": {
+            "category": "json_array",
+            "brand": "string"
+        },
+        "table": "posts"
+    }
+}

@@ -1,0 +1,137 @@
+{
+    "db": {
+        "model": "App\\Models\\Taxonomy",
+        "type": "brand",
+        "validation": {
+            "title": "required|string|max:255",
+            "description": "nullable|string",
+            "status": "required|string"
+        },
+        "schema": [
+            {"name": "title", "type": "string"},
+            {"name": "description", "type": "longText", "nullable": true},
+            {"name": "status", "type": "string", "default": "publish"},
+            {"name": "type", "type": "string", "index": true}
+        ],
+        "main_fields": [
+            "title",
+            "description",
+            "status"
+        ],
+        "fixed_fields": {
+            "type": "brand"
+        },
+        "relations": {
+            "image": "single_image"
+        },
+        "meta_fields": "auto",
+        "table": "taxonomies"
+    },
+    "table": {
+        "keywords": true,
+        "paginationPerPage": 5,
+        "paginationList": [
+            5,
+            10,
+            20,
+            50,
+            100
+        ],
+        "table": "taxonomies",
+        "type": "brand",
+        "bulk": {
+            "table": "taxonomies",
+            "type": "brand",
+            "route": "bulk.action",
+            "column": "status",
+            "is_meta": false,
+            "options": [
+                {
+                    "label": "Delete",
+                    "value": "delete"
+                },
+                {
+                    "label": "Publish",
+                    "value": "publish"
+                },
+                {
+                    "label": "Draft",
+                    "value": "Draft"
+                }
+            ]
+        },
+        "columns": [
+            {
+                "id": "id",
+                "label": "ID",
+                "column": "id",
+                "width": "5%",
+                "sort": true
+            },
+            {
+                "id": "image",
+                "label": "IMAGE",
+                "width": "10%",
+                "column": "image",
+                "type": "image",
+                "key": "filename"
+            },
+            {
+                "id": "title",
+                "label": "BRAND",
+                "column": "title",
+                "sort": true,
+                "width": "25%"
+            },
+            {
+                "id": "description",
+                "label": "DESCRIPTION",
+                "column": "description",
+                "width": "40%",
+                "type": "description"
+            },
+            {
+                "id": "action",
+                "label": "ACTION",
+                "column": "action",
+                "width": "20%",
+                "type": "action"
+            }
+        ]
+    },
+    "form": [
+        {
+            "title": "Brand Information",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Title",
+                    "type": "text",
+                    "style": 2,
+                    "name": "title",
+                    "placeholder": "Brand Title"
+                },
+                {
+                    "label": "Description",
+                    "type": "desc",
+                    "style": 2,
+                    "name": "description",
+                    "placeholder": "Brand Description"
+                }
+            ]
+        },
+        {
+            "title": "Brand Image",
+            "style": "sidebar",
+            "fields": [
+                {
+                    "label": "",
+                    "name": "image",
+                    "type": "image",
+                    "style": 1,
+                    "filename": ""
+                }
+            ]
+        }
+    ]
+}

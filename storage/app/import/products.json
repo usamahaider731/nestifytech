@@ -1,0 +1,3496 @@
+{
+    "products": [
+        {
+            "sku": "DEMO-001",
+            "title": "Smartphone X #1",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-001<\/strong>. Category <em>phones<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1523275335684-37898b6baf30?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1505740420928-5e560c06d30e?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1526170315870-efffd0ad46b4?w=800&q=80"
+            ],
+            "categories": [
+                "phones"
+            ],
+            "brand": "nexus-labs",
+            "tags": [
+                "new",
+                "sale"
+            ],
+            "meta": {
+                "first_price": "36",
+                "second_price": "30",
+                "stock": "11",
+                "seo_title": "Smartphone X #1 | Demo Store",
+                "seo_description": "Buy Smartphone X #1 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "0.30 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2024"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-002",
+            "title": "Ultrabook Air #2",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-002<\/strong>. Category <em>laptops<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1505740420928-5e560c06d30e?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1526170315870-efffd0ad46b4?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1491553895911-0055eca6402d?w=800&q=80"
+            ],
+            "categories": [
+                "laptops"
+            ],
+            "brand": "voltgear",
+            "tags": [
+                "bestseller"
+            ],
+            "meta": {
+                "first_price": "43",
+                "second_price": "36",
+                "stock": "12",
+                "seo_title": "Ultrabook Air #2 | Demo Store",
+                "seo_description": "Buy Ultrabook Air #2 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "0.40 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2025"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-003",
+            "title": "Noise-Cancel Headphones #3",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-003<\/strong>. Category <em>audio<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1526170315870-efffd0ad46b4?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1491553895911-0055eca6402d?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1542291026-7eec264c27ff?w=800&q=80"
+            ],
+            "categories": [
+                "audio"
+            ],
+            "brand": "pulse-audio",
+            "tags": [
+                "new",
+                "free-shipping"
+            ],
+            "meta": {
+                "first_price": "50",
+                "second_price": "42",
+                "stock": "13",
+                "seo_title": "Noise-Cancel Headphones #3 | Demo Store",
+                "seo_description": "Buy Noise-Cancel Headphones #3 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "24 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "0.50 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2023"
+                        }
+                    ]
+                }
+            ],
+            "variations": [
+                {
+                    "price": 42,
+                    "stock": 8,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "White"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "L"
+                        }
+                    ]
+                },
+                {
+                    "price": 52,
+                    "stock": 6,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "Blue"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "XL"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-004",
+            "title": "Fitness Band #4",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-004<\/strong>. Category <em>wearables<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1491553895911-0055eca6402d?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1542291026-7eec264c27ff?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1560343090-f0409e92791a?w=800&q=80"
+            ],
+            "categories": [
+                "wearables"
+            ],
+            "brand": "orbit-mobile",
+            "tags": [
+                "sale",
+                "gift-idea"
+            ],
+            "meta": {
+                "first_price": "57",
+                "second_price": "48",
+                "stock": "14",
+                "seo_title": "Fitness Band #4 | Demo Store",
+                "seo_description": "Buy Fitness Band #4 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "0.60 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2024"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-005",
+            "title": "USB-C Hub #5",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-005<\/strong>. Category <em>accessories<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1542291026-7eec264c27ff?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1560343090-f0409e92791a?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1524678606370-a47ad25cb82a?w=800&q=80"
+            ],
+            "categories": [
+                "accessories"
+            ],
+            "brand": "zenith-home",
+            "tags": [
+                "pro",
+                "limited"
+            ],
+            "meta": {
+                "first_price": "64",
+                "second_price": "54",
+                "stock": "15",
+                "seo_title": "USB-C Hub #5 | Demo Store",
+                "seo_description": "Buy USB-C Hub #5 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "0.70 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2025"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-006",
+            "title": "Wireless Mouse #6",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-006<\/strong>. Category <em>kitchen<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1560343090-f0409e92791a?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1524678606370-a47ad25cb82a?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1525547718571-030b6c236b79?w=800&q=80"
+            ],
+            "categories": [
+                "kitchen"
+            ],
+            "brand": "apex-tools",
+            "tags": [
+                "eco"
+            ],
+            "meta": {
+                "first_price": "71",
+                "second_price": "60",
+                "stock": "16",
+                "seo_title": "Wireless Mouse #6 | Demo Store",
+                "seo_description": "Buy Wireless Mouse #6 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "24 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "0.80 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2023"
+                        }
+                    ]
+                }
+            ],
+            "variations": [
+                {
+                    "price": 60,
+                    "stock": 11,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "Black"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "M"
+                        }
+                    ]
+                },
+                {
+                    "price": 70,
+                    "stock": 9,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "Blue"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "XL"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-007",
+            "title": "Mechanical Keyboard #7",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-007<\/strong>. Category <em>furniture<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1524678606370-a47ad25cb82a?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1525547718571-030b6c236b79?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1523275335684-37898b6baf30?w=800&q=80"
+            ],
+            "categories": [
+                "furniture"
+            ],
+            "brand": "clearview",
+            "tags": [
+                "new",
+                "sale"
+            ],
+            "meta": {
+                "first_price": "78",
+                "second_price": "66",
+                "stock": "17",
+                "seo_title": "Mechanical Keyboard #7 | Demo Store",
+                "seo_description": "Buy Mechanical Keyboard #7 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "0.90 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2024"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-008",
+            "title": "Portable Speaker #8",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-008<\/strong>. Category <em>phones<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1525547718571-030b6c236b79?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1523275335684-37898b6baf30?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1505740420928-5e560c06d30e?w=800&q=80"
+            ],
+            "categories": [
+                "phones"
+            ],
+            "brand": "steelform",
+            "tags": [
+                "bestseller"
+            ],
+            "meta": {
+                "first_price": "85",
+                "second_price": "72",
+                "stock": "18",
+                "seo_title": "Portable Speaker #8 | Demo Store",
+                "seo_description": "Buy Portable Speaker #8 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "1.00 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2025"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-009",
+            "title": "Tablet Pro #9",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-009<\/strong>. Category <em>laptops<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1523275335684-37898b6baf30?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1505740420928-5e560c06d30e?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1526170315870-efffd0ad46b4?w=800&q=80"
+            ],
+            "categories": [
+                "laptops"
+            ],
+            "brand": "nexus-labs",
+            "tags": [
+                "new",
+                "free-shipping"
+            ],
+            "meta": {
+                "first_price": "92",
+                "second_price": "78",
+                "stock": "19",
+                "seo_title": "Tablet Pro #9 | Demo Store",
+                "seo_description": "Buy Tablet Pro #9 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "24 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "1.10 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2023"
+                        }
+                    ]
+                }
+            ],
+            "variations": [
+                {
+                    "price": 78,
+                    "stock": 14,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "White"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "L"
+                        }
+                    ]
+                },
+                {
+                    "price": 88,
+                    "stock": 12,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "Blue"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "XL"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-010",
+            "title": "Smart Watch #10",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-010<\/strong>. Category <em>audio<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1505740420928-5e560c06d30e?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1526170315870-efffd0ad46b4?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1491553895911-0055eca6402d?w=800&q=80"
+            ],
+            "categories": [
+                "audio"
+            ],
+            "brand": "voltgear",
+            "tags": [
+                "sale",
+                "gift-idea"
+            ],
+            "meta": {
+                "first_price": "99",
+                "second_price": "84",
+                "stock": "20",
+                "seo_title": "Smart Watch #10 | Demo Store",
+                "seo_description": "Buy Smart Watch #10 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "1.20 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2024"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-011",
+            "title": "LED Desk Lamp #11",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-011<\/strong>. Category <em>wearables<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1526170315870-efffd0ad46b4?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1491553895911-0055eca6402d?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1542291026-7eec264c27ff?w=800&q=80"
+            ],
+            "categories": [
+                "wearables"
+            ],
+            "brand": "pulse-audio",
+            "tags": [
+                "pro",
+                "limited"
+            ],
+            "meta": {
+                "first_price": "106",
+                "second_price": "90",
+                "stock": "21",
+                "seo_title": "LED Desk Lamp #11 | Demo Store",
+                "seo_description": "Buy LED Desk Lamp #11 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "1.30 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2025"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-012",
+            "title": "Coffee Maker #12",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-012<\/strong>. Category <em>accessories<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1491553895911-0055eca6402d?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1542291026-7eec264c27ff?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1560343090-f0409e92791a?w=800&q=80"
+            ],
+            "categories": [
+                "accessories"
+            ],
+            "brand": "orbit-mobile",
+            "tags": [
+                "eco"
+            ],
+            "meta": {
+                "first_price": "113",
+                "second_price": "96",
+                "stock": "22",
+                "seo_title": "Coffee Maker #12 | Demo Store",
+                "seo_description": "Buy Coffee Maker #12 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "24 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "1.40 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2023"
+                        }
+                    ]
+                }
+            ],
+            "variations": [
+                {
+                    "price": 96,
+                    "stock": 17,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "Black"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "M"
+                        }
+                    ]
+                },
+                {
+                    "price": 106,
+                    "stock": 5,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "Blue"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "XL"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-013",
+            "title": "Blender Set #13",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-013<\/strong>. Category <em>kitchen<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1542291026-7eec264c27ff?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1560343090-f0409e92791a?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1524678606370-a47ad25cb82a?w=800&q=80"
+            ],
+            "categories": [
+                "kitchen"
+            ],
+            "brand": "zenith-home",
+            "tags": [
+                "new",
+                "sale"
+            ],
+            "meta": {
+                "first_price": "120",
+                "second_price": "102",
+                "stock": "23",
+                "seo_title": "Blender Set #13 | Demo Store",
+                "seo_description": "Buy Blender Set #13 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "1.50 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2024"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-014",
+            "title": "Office Chair #14",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-014<\/strong>. Category <em>furniture<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1560343090-f0409e92791a?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1524678606370-a47ad25cb82a?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1525547718571-030b6c236b79?w=800&q=80"
+            ],
+            "categories": [
+                "furniture"
+            ],
+            "brand": "apex-tools",
+            "tags": [
+                "bestseller"
+            ],
+            "meta": {
+                "first_price": "127",
+                "second_price": "108",
+                "stock": "24",
+                "seo_title": "Office Chair #14 | Demo Store",
+                "seo_description": "Buy Office Chair #14 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "1.60 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2025"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-015",
+            "title": "Bookshelf Unit #15",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-015<\/strong>. Category <em>phones<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1524678606370-a47ad25cb82a?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1525547718571-030b6c236b79?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1523275335684-37898b6baf30?w=800&q=80"
+            ],
+            "categories": [
+                "phones"
+            ],
+            "brand": "clearview",
+            "tags": [
+                "new",
+                "free-shipping"
+            ],
+            "meta": {
+                "first_price": "134",
+                "second_price": "129",
+                "stock": "25",
+                "seo_title": "Bookshelf Unit #15 | Demo Store",
+                "seo_description": "Buy Bookshelf Unit #15 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "24 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "1.70 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2023"
+                        }
+                    ]
+                }
+            ],
+            "variations": [
+                {
+                    "price": 129,
+                    "stock": 20,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "White"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "L"
+                        }
+                    ]
+                },
+                {
+                    "price": 139,
+                    "stock": 8,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "Blue"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "XL"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-016",
+            "title": "Monitor Stand #16",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-016<\/strong>. Category <em>laptops<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1525547718571-030b6c236b79?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1523275335684-37898b6baf30?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1505740420928-5e560c06d30e?w=800&q=80"
+            ],
+            "categories": [
+                "laptops"
+            ],
+            "brand": "steelform",
+            "tags": [
+                "sale",
+                "gift-idea"
+            ],
+            "meta": {
+                "first_price": "141",
+                "second_price": "135",
+                "stock": "26",
+                "seo_title": "Monitor Stand #16 | Demo Store",
+                "seo_description": "Buy Monitor Stand #16 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "1.80 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2024"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-017",
+            "title": "Webcam HD #17",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-017<\/strong>. Category <em>audio<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1523275335684-37898b6baf30?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1505740420928-5e560c06d30e?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1526170315870-efffd0ad46b4?w=800&q=80"
+            ],
+            "categories": [
+                "audio"
+            ],
+            "brand": "nexus-labs",
+            "tags": [
+                "pro",
+                "limited"
+            ],
+            "meta": {
+                "first_price": "148",
+                "second_price": "141",
+                "stock": "27",
+                "seo_title": "Webcam HD #17 | Demo Store",
+                "seo_description": "Buy Webcam HD #17 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "1.90 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2025"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-018",
+            "title": "Mic Studio #18",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-018<\/strong>. Category <em>wearables<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1505740420928-5e560c06d30e?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1526170315870-efffd0ad46b4?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1491553895911-0055eca6402d?w=800&q=80"
+            ],
+            "categories": [
+                "wearables"
+            ],
+            "brand": "voltgear",
+            "tags": [
+                "eco"
+            ],
+            "meta": {
+                "first_price": "155",
+                "second_price": "147",
+                "stock": "28",
+                "seo_title": "Mic Studio #18 | Demo Store",
+                "seo_description": "Buy Mic Studio #18 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "24 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "2.00 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2023"
+                        }
+                    ]
+                }
+            ],
+            "variations": [
+                {
+                    "price": 147,
+                    "stock": 23,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "Black"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "M"
+                        }
+                    ]
+                },
+                {
+                    "price": 157,
+                    "stock": 11,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "Blue"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "XL"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-019",
+            "title": "Power Bank #19",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-019<\/strong>. Category <em>accessories<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1526170315870-efffd0ad46b4?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1491553895911-0055eca6402d?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1542291026-7eec264c27ff?w=800&q=80"
+            ],
+            "categories": [
+                "accessories"
+            ],
+            "brand": "pulse-audio",
+            "tags": [
+                "new",
+                "sale"
+            ],
+            "meta": {
+                "first_price": "162",
+                "second_price": "153",
+                "stock": "29",
+                "seo_title": "Power Bank #19 | Demo Store",
+                "seo_description": "Buy Power Bank #19 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "2.10 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2024"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-020",
+            "title": "Car Charger #20",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-020<\/strong>. Category <em>kitchen<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1491553895911-0055eca6402d?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1542291026-7eec264c27ff?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1560343090-f0409e92791a?w=800&q=80"
+            ],
+            "categories": [
+                "kitchen"
+            ],
+            "brand": "orbit-mobile",
+            "tags": [
+                "bestseller"
+            ],
+            "meta": {
+                "first_price": "169",
+                "second_price": "159",
+                "stock": "30",
+                "seo_title": "Car Charger #20 | Demo Store",
+                "seo_description": "Buy Car Charger #20 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "2.20 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2025"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-021",
+            "title": "Screen Protector #21",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-021<\/strong>. Category <em>furniture<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1542291026-7eec264c27ff?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1560343090-f0409e92791a?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1524678606370-a47ad25cb82a?w=800&q=80"
+            ],
+            "categories": [
+                "furniture"
+            ],
+            "brand": "zenith-home",
+            "tags": [
+                "new",
+                "free-shipping"
+            ],
+            "meta": {
+                "first_price": "176",
+                "second_price": "165",
+                "stock": "31",
+                "seo_title": "Screen Protector #21 | Demo Store",
+                "seo_description": "Buy Screen Protector #21 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "24 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "2.30 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2023"
+                        }
+                    ]
+                }
+            ],
+            "variations": [
+                {
+                    "price": 165,
+                    "stock": 6,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "White"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "L"
+                        }
+                    ]
+                },
+                {
+                    "price": 175,
+                    "stock": 4,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "Blue"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "XL"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-022",
+            "title": "Phone Case #22",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-022<\/strong>. Category <em>phones<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1560343090-f0409e92791a?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1524678606370-a47ad25cb82a?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1525547718571-030b6c236b79?w=800&q=80"
+            ],
+            "categories": [
+                "phones"
+            ],
+            "brand": "apex-tools",
+            "tags": [
+                "sale",
+                "gift-idea"
+            ],
+            "meta": {
+                "first_price": "183",
+                "second_price": "171",
+                "stock": "32",
+                "seo_title": "Phone Case #22 | Demo Store",
+                "seo_description": "Buy Phone Case #22 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "2.40 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2024"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-023",
+            "title": "Laptop Sleeve #23",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-023<\/strong>. Category <em>laptops<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1524678606370-a47ad25cb82a?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1525547718571-030b6c236b79?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1523275335684-37898b6baf30?w=800&q=80"
+            ],
+            "categories": [
+                "laptops"
+            ],
+            "brand": "clearview",
+            "tags": [
+                "pro",
+                "limited"
+            ],
+            "meta": {
+                "first_price": "190",
+                "second_price": "177",
+                "stock": "33",
+                "seo_title": "Laptop Sleeve #23 | Demo Store",
+                "seo_description": "Buy Laptop Sleeve #23 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "2.50 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2025"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-024",
+            "title": "HDMI Cable #24",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-024<\/strong>. Category <em>audio<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1525547718571-030b6c236b79?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1523275335684-37898b6baf30?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1505740420928-5e560c06d30e?w=800&q=80"
+            ],
+            "categories": [
+                "audio"
+            ],
+            "brand": "steelform",
+            "tags": [
+                "eco"
+            ],
+            "meta": {
+                "first_price": "197",
+                "second_price": "183",
+                "stock": "34",
+                "seo_title": "HDMI Cable #24 | Demo Store",
+                "seo_description": "Buy HDMI Cable #24 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "24 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "2.60 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2023"
+                        }
+                    ]
+                }
+            ],
+            "variations": [
+                {
+                    "price": 183,
+                    "stock": 9,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "Black"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "M"
+                        }
+                    ]
+                },
+                {
+                    "price": 193,
+                    "stock": 7,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "Blue"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "XL"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-025",
+            "title": "SSD Enclosure #25",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-025<\/strong>. Category <em>wearables<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1523275335684-37898b6baf30?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1505740420928-5e560c06d30e?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1526170315870-efffd0ad46b4?w=800&q=80"
+            ],
+            "categories": [
+                "wearables"
+            ],
+            "brand": "nexus-labs",
+            "tags": [
+                "new",
+                "sale"
+            ],
+            "meta": {
+                "first_price": "204",
+                "second_price": "189",
+                "stock": "35",
+                "seo_title": "SSD Enclosure #25 | Demo Store",
+                "seo_description": "Buy SSD Enclosure #25 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "2.70 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2024"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-026",
+            "title": "Router WiFi #26",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-026<\/strong>. Category <em>accessories<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1505740420928-5e560c06d30e?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1526170315870-efffd0ad46b4?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1491553895911-0055eca6402d?w=800&q=80"
+            ],
+            "categories": [
+                "accessories"
+            ],
+            "brand": "voltgear",
+            "tags": [
+                "bestseller"
+            ],
+            "meta": {
+                "first_price": "211",
+                "second_price": "195",
+                "stock": "36",
+                "seo_title": "Router WiFi #26 | Demo Store",
+                "seo_description": "Buy Router WiFi #26 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "2.80 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2025"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-027",
+            "title": "Smart Plug #27",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-027<\/strong>. Category <em>kitchen<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1526170315870-efffd0ad46b4?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1491553895911-0055eca6402d?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1542291026-7eec264c27ff?w=800&q=80"
+            ],
+            "categories": [
+                "kitchen"
+            ],
+            "brand": "pulse-audio",
+            "tags": [
+                "new",
+                "free-shipping"
+            ],
+            "meta": {
+                "first_price": "218",
+                "second_price": "201",
+                "stock": "37",
+                "seo_title": "Smart Plug #27 | Demo Store",
+                "seo_description": "Buy Smart Plug #27 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "24 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "2.90 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2023"
+                        }
+                    ]
+                }
+            ],
+            "variations": [
+                {
+                    "price": 201,
+                    "stock": 12,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "White"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "L"
+                        }
+                    ]
+                },
+                {
+                    "price": 211,
+                    "stock": 10,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "Blue"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "XL"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-028",
+            "title": "Air Purifier #28",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-028<\/strong>. Category <em>furniture<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1491553895911-0055eca6402d?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1542291026-7eec264c27ff?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1560343090-f0409e92791a?w=800&q=80"
+            ],
+            "categories": [
+                "furniture"
+            ],
+            "brand": "orbit-mobile",
+            "tags": [
+                "sale",
+                "gift-idea"
+            ],
+            "meta": {
+                "first_price": "225",
+                "second_price": "207",
+                "stock": "38",
+                "seo_title": "Air Purifier #28 | Demo Store",
+                "seo_description": "Buy Air Purifier #28 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "3.00 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2024"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-029",
+            "title": "Vacuum Mini #29",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-029<\/strong>. Category <em>phones<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1542291026-7eec264c27ff?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1560343090-f0409e92791a?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1524678606370-a47ad25cb82a?w=800&q=80"
+            ],
+            "categories": [
+                "phones"
+            ],
+            "brand": "zenith-home",
+            "tags": [
+                "pro",
+                "limited"
+            ],
+            "meta": {
+                "first_price": "32",
+                "second_price": "13",
+                "stock": "39",
+                "seo_title": "Vacuum Mini #29 | Demo Store",
+                "seo_description": "Buy Vacuum Mini #29 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "3.10 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2025"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-030",
+            "title": "Electric Kettle #30",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-030<\/strong>. Category <em>laptops<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1560343090-f0409e92791a?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1524678606370-a47ad25cb82a?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1525547718571-030b6c236b79?w=800&q=80"
+            ],
+            "categories": [
+                "laptops"
+            ],
+            "brand": "apex-tools",
+            "tags": [
+                "eco"
+            ],
+            "meta": {
+                "first_price": "39",
+                "second_price": "34",
+                "stock": "40",
+                "seo_title": "Electric Kettle #30 | Demo Store",
+                "seo_description": "Buy Electric Kettle #30 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "24 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "3.20 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2023"
+                        }
+                    ]
+                }
+            ],
+            "variations": [
+                {
+                    "price": 34,
+                    "stock": 15,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "Black"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "M"
+                        }
+                    ]
+                },
+                {
+                    "price": 44,
+                    "stock": 3,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "Blue"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "XL"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-031",
+            "title": "Toaster Oven #31",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-031<\/strong>. Category <em>audio<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1524678606370-a47ad25cb82a?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1525547718571-030b6c236b79?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1523275335684-37898b6baf30?w=800&q=80"
+            ],
+            "categories": [
+                "audio"
+            ],
+            "brand": "clearview",
+            "tags": [
+                "new",
+                "sale"
+            ],
+            "meta": {
+                "first_price": "46",
+                "second_price": "40",
+                "stock": "41",
+                "seo_title": "Toaster Oven #31 | Demo Store",
+                "seo_description": "Buy Toaster Oven #31 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "3.30 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2024"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-032",
+            "title": "Standing Desk #32",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-032<\/strong>. Category <em>wearables<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1525547718571-030b6c236b79?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1523275335684-37898b6baf30?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1505740420928-5e560c06d30e?w=800&q=80"
+            ],
+            "categories": [
+                "wearables"
+            ],
+            "brand": "steelform",
+            "tags": [
+                "bestseller"
+            ],
+            "meta": {
+                "first_price": "53",
+                "second_price": "46",
+                "stock": "42",
+                "seo_title": "Standing Desk #32 | Demo Store",
+                "seo_description": "Buy Standing Desk #32 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "3.40 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2025"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-033",
+            "title": "Gaming Mousepad #33",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-033<\/strong>. Category <em>accessories<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1523275335684-37898b6baf30?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1505740420928-5e560c06d30e?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1526170315870-efffd0ad46b4?w=800&q=80"
+            ],
+            "categories": [
+                "accessories"
+            ],
+            "brand": "nexus-labs",
+            "tags": [
+                "new",
+                "free-shipping"
+            ],
+            "meta": {
+                "first_price": "60",
+                "second_price": "52",
+                "stock": "43",
+                "seo_title": "Gaming Mousepad #33 | Demo Store",
+                "seo_description": "Buy Gaming Mousepad #33 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "24 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "3.50 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2023"
+                        }
+                    ]
+                }
+            ],
+            "variations": [
+                {
+                    "price": 52,
+                    "stock": 18,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "White"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "L"
+                        }
+                    ]
+                },
+                {
+                    "price": 62,
+                    "stock": 6,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "Blue"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "XL"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-034",
+            "title": "RGB Strip #34",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-034<\/strong>. Category <em>kitchen<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1505740420928-5e560c06d30e?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1526170315870-efffd0ad46b4?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1491553895911-0055eca6402d?w=800&q=80"
+            ],
+            "categories": [
+                "kitchen"
+            ],
+            "brand": "voltgear",
+            "tags": [
+                "sale",
+                "gift-idea"
+            ],
+            "meta": {
+                "first_price": "67",
+                "second_price": "58",
+                "stock": "44",
+                "seo_title": "RGB Strip #34 | Demo Store",
+                "seo_description": "Buy RGB Strip #34 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "3.60 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2024"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-035",
+            "title": "Docking Station #35",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-035<\/strong>. Category <em>furniture<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1526170315870-efffd0ad46b4?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1491553895911-0055eca6402d?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1542291026-7eec264c27ff?w=800&q=80"
+            ],
+            "categories": [
+                "furniture"
+            ],
+            "brand": "pulse-audio",
+            "tags": [
+                "pro",
+                "limited"
+            ],
+            "meta": {
+                "first_price": "74",
+                "second_price": "64",
+                "stock": "45",
+                "seo_title": "Docking Station #35 | Demo Store",
+                "seo_description": "Buy Docking Station #35 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "3.70 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2025"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-036",
+            "title": "Earbuds Sport #36",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-036<\/strong>. Category <em>phones<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1491553895911-0055eca6402d?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1542291026-7eec264c27ff?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1560343090-f0409e92791a?w=800&q=80"
+            ],
+            "categories": [
+                "phones"
+            ],
+            "brand": "orbit-mobile",
+            "tags": [
+                "eco"
+            ],
+            "meta": {
+                "first_price": "81",
+                "second_price": "70",
+                "stock": "46",
+                "seo_title": "Earbuds Sport #36 | Demo Store",
+                "seo_description": "Buy Earbuds Sport #36 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "24 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "3.80 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2023"
+                        }
+                    ]
+                }
+            ],
+            "variations": [
+                {
+                    "price": 70,
+                    "stock": 21,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "Black"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "M"
+                        }
+                    ]
+                },
+                {
+                    "price": 80,
+                    "stock": 9,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "Blue"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "XL"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-037",
+            "title": "Over-Ear Studio #37",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-037<\/strong>. Category <em>laptops<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1542291026-7eec264c27ff?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1560343090-f0409e92791a?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1524678606370-a47ad25cb82a?w=800&q=80"
+            ],
+            "categories": [
+                "laptops"
+            ],
+            "brand": "zenith-home",
+            "tags": [
+                "new",
+                "sale"
+            ],
+            "meta": {
+                "first_price": "88",
+                "second_price": "76",
+                "stock": "47",
+                "seo_title": "Over-Ear Studio #37 | Demo Store",
+                "seo_description": "Buy Over-Ear Studio #37 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "3.90 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2024"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-038",
+            "title": "Soundbar Mini #38",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-038<\/strong>. Category <em>audio<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1560343090-f0409e92791a?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1524678606370-a47ad25cb82a?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1525547718571-030b6c236b79?w=800&q=80"
+            ],
+            "categories": [
+                "audio"
+            ],
+            "brand": "apex-tools",
+            "tags": [
+                "bestseller"
+            ],
+            "meta": {
+                "first_price": "95",
+                "second_price": "82",
+                "stock": "48",
+                "seo_title": "Soundbar Mini #38 | Demo Store",
+                "seo_description": "Buy Soundbar Mini #38 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "4.00 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2025"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-039",
+            "title": "Projector Pico #39",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-039<\/strong>. Category <em>wearables<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1524678606370-a47ad25cb82a?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1525547718571-030b6c236b79?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1523275335684-37898b6baf30?w=800&q=80"
+            ],
+            "categories": [
+                "wearables"
+            ],
+            "brand": "clearview",
+            "tags": [
+                "new",
+                "free-shipping"
+            ],
+            "meta": {
+                "first_price": "102",
+                "second_price": "88",
+                "stock": "49",
+                "seo_title": "Projector Pico #39 | Demo Store",
+                "seo_description": "Buy Projector Pico #39 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "24 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "4.10 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2023"
+                        }
+                    ]
+                }
+            ],
+            "variations": [
+                {
+                    "price": 88,
+                    "stock": 24,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "White"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "L"
+                        }
+                    ]
+                },
+                {
+                    "price": 98,
+                    "stock": 12,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "Blue"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "XL"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-040",
+            "title": "NAS Home #40",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-040<\/strong>. Category <em>accessories<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1525547718571-030b6c236b79?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1523275335684-37898b6baf30?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1505740420928-5e560c06d30e?w=800&q=80"
+            ],
+            "categories": [
+                "accessories"
+            ],
+            "brand": "steelform",
+            "tags": [
+                "sale",
+                "gift-idea"
+            ],
+            "meta": {
+                "first_price": "109",
+                "second_price": "94",
+                "stock": "50",
+                "seo_title": "NAS Home #40 | Demo Store",
+                "seo_description": "Buy NAS Home #40 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "4.20 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2024"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-041",
+            "title": "Security Cam #41",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-041<\/strong>. Category <em>kitchen<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1523275335684-37898b6baf30?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1505740420928-5e560c06d30e?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1526170315870-efffd0ad46b4?w=800&q=80"
+            ],
+            "categories": [
+                "kitchen"
+            ],
+            "brand": "nexus-labs",
+            "tags": [
+                "pro",
+                "limited"
+            ],
+            "meta": {
+                "first_price": "116",
+                "second_price": "100",
+                "stock": "51",
+                "seo_title": "Security Cam #41 | Demo Store",
+                "seo_description": "Buy Security Cam #41 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "4.30 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2025"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-042",
+            "title": "Doorbell Smart #42",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-042<\/strong>. Category <em>furniture<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1505740420928-5e560c06d30e?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1526170315870-efffd0ad46b4?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1491553895911-0055eca6402d?w=800&q=80"
+            ],
+            "categories": [
+                "furniture"
+            ],
+            "brand": "voltgear",
+            "tags": [
+                "eco"
+            ],
+            "meta": {
+                "first_price": "123",
+                "second_price": "106",
+                "stock": "52",
+                "seo_title": "Doorbell Smart #42 | Demo Store",
+                "seo_description": "Buy Doorbell Smart #42 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "24 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "4.40 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2023"
+                        }
+                    ]
+                }
+            ],
+            "variations": [
+                {
+                    "price": 106,
+                    "stock": 7,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "Black"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "M"
+                        }
+                    ]
+                },
+                {
+                    "price": 116,
+                    "stock": 5,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "Blue"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "XL"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-043",
+            "title": "Thermostat #43",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-043<\/strong>. Category <em>phones<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1526170315870-efffd0ad46b4?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1491553895911-0055eca6402d?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1542291026-7eec264c27ff?w=800&q=80"
+            ],
+            "categories": [
+                "phones"
+            ],
+            "brand": "pulse-audio",
+            "tags": [
+                "new",
+                "sale"
+            ],
+            "meta": {
+                "first_price": "130",
+                "second_price": "112",
+                "stock": "53",
+                "seo_title": "Thermostat #43 | Demo Store",
+                "seo_description": "Buy Thermostat #43 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "4.50 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2024"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-044",
+            "title": "Humidifier #44",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-044<\/strong>. Category <em>laptops<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1491553895911-0055eca6402d?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1542291026-7eec264c27ff?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1560343090-f0409e92791a?w=800&q=80"
+            ],
+            "categories": [
+                "laptops"
+            ],
+            "brand": "orbit-mobile",
+            "tags": [
+                "bestseller"
+            ],
+            "meta": {
+                "first_price": "137",
+                "second_price": "118",
+                "stock": "54",
+                "seo_title": "Humidifier #44 | Demo Store",
+                "seo_description": "Buy Humidifier #44 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "4.60 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2025"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-045",
+            "title": "Fan Tower #45",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-045<\/strong>. Category <em>audio<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1542291026-7eec264c27ff?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1560343090-f0409e92791a?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1524678606370-a47ad25cb82a?w=800&q=80"
+            ],
+            "categories": [
+                "audio"
+            ],
+            "brand": "zenith-home",
+            "tags": [
+                "new",
+                "free-shipping"
+            ],
+            "meta": {
+                "first_price": "144",
+                "second_price": "139",
+                "stock": "55",
+                "seo_title": "Fan Tower #45 | Demo Store",
+                "seo_description": "Buy Fan Tower #45 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "24 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "4.70 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2023"
+                        }
+                    ]
+                }
+            ],
+            "variations": [
+                {
+                    "price": 139,
+                    "stock": 10,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "White"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "L"
+                        }
+                    ]
+                },
+                {
+                    "price": 149,
+                    "stock": 8,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "Blue"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "XL"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-046",
+            "title": "Heater Ceramic #46",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-046<\/strong>. Category <em>wearables<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1560343090-f0409e92791a?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1524678606370-a47ad25cb82a?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1525547718571-030b6c236b79?w=800&q=80"
+            ],
+            "categories": [
+                "wearables"
+            ],
+            "brand": "apex-tools",
+            "tags": [
+                "sale",
+                "gift-idea"
+            ],
+            "meta": {
+                "first_price": "151",
+                "second_price": "145",
+                "stock": "56",
+                "seo_title": "Heater Ceramic #46 | Demo Store",
+                "seo_description": "Buy Heater Ceramic #46 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "4.80 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2024"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-047",
+            "title": "Iron Steam #47",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-047<\/strong>. Category <em>accessories<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1524678606370-a47ad25cb82a?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1525547718571-030b6c236b79?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1523275335684-37898b6baf30?w=800&q=80"
+            ],
+            "categories": [
+                "accessories"
+            ],
+            "brand": "clearview",
+            "tags": [
+                "pro",
+                "limited"
+            ],
+            "meta": {
+                "first_price": "158",
+                "second_price": "151",
+                "stock": "57",
+                "seo_title": "Iron Steam #47 | Demo Store",
+                "seo_description": "Buy Iron Steam #47 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "4.90 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2025"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-048",
+            "title": "Grill Electric #48",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-048<\/strong>. Category <em>kitchen<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1525547718571-030b6c236b79?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1523275335684-37898b6baf30?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1505740420928-5e560c06d30e?w=800&q=80"
+            ],
+            "categories": [
+                "kitchen"
+            ],
+            "brand": "steelform",
+            "tags": [
+                "eco"
+            ],
+            "meta": {
+                "first_price": "165",
+                "second_price": "157",
+                "stock": "58",
+                "seo_title": "Grill Electric #48 | Demo Store",
+                "seo_description": "Buy Grill Electric #48 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "24 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "5.00 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2023"
+                        }
+                    ]
+                }
+            ],
+            "variations": [
+                {
+                    "price": 157,
+                    "stock": 13,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "Black"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "M"
+                        }
+                    ]
+                },
+                {
+                    "price": 167,
+                    "stock": 11,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "Blue"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "XL"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-049",
+            "title": "Mixer Hand #49",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-049<\/strong>. Category <em>furniture<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1523275335684-37898b6baf30?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1505740420928-5e560c06d30e?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1526170315870-efffd0ad46b4?w=800&q=80"
+            ],
+            "categories": [
+                "furniture"
+            ],
+            "brand": "nexus-labs",
+            "tags": [
+                "new",
+                "sale"
+            ],
+            "meta": {
+                "first_price": "172",
+                "second_price": "163",
+                "stock": "59",
+                "seo_title": "Mixer Hand #49 | Demo Store",
+                "seo_description": "Buy Mixer Hand #49 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "5.10 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2024"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-050",
+            "title": "Food Processor #50",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-050<\/strong>. Category <em>phones<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1505740420928-5e560c06d30e?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1526170315870-efffd0ad46b4?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1491553895911-0055eca6402d?w=800&q=80"
+            ],
+            "categories": [
+                "phones"
+            ],
+            "brand": "voltgear",
+            "tags": [
+                "bestseller"
+            ],
+            "meta": {
+                "first_price": "179",
+                "second_price": "169",
+                "stock": "60",
+                "seo_title": "Food Processor #50 | Demo Store",
+                "seo_description": "Buy Food Processor #50 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "0.20 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2025"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-051",
+            "title": "Smartphone X #51",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-051<\/strong>. Category <em>laptops<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1526170315870-efffd0ad46b4?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1491553895911-0055eca6402d?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1542291026-7eec264c27ff?w=800&q=80"
+            ],
+            "categories": [
+                "laptops"
+            ],
+            "brand": "pulse-audio",
+            "tags": [
+                "new",
+                "free-shipping"
+            ],
+            "meta": {
+                "first_price": "186",
+                "second_price": "175",
+                "stock": "61",
+                "seo_title": "Smartphone X #51 | Demo Store",
+                "seo_description": "Buy Smartphone X #51 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "24 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "0.30 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2023"
+                        }
+                    ]
+                }
+            ],
+            "variations": [
+                {
+                    "price": 175,
+                    "stock": 16,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "White"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "L"
+                        }
+                    ]
+                },
+                {
+                    "price": 185,
+                    "stock": 4,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "Blue"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "XL"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-052",
+            "title": "Ultrabook Air #52",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-052<\/strong>. Category <em>audio<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1491553895911-0055eca6402d?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1542291026-7eec264c27ff?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1560343090-f0409e92791a?w=800&q=80"
+            ],
+            "categories": [
+                "audio"
+            ],
+            "brand": "orbit-mobile",
+            "tags": [
+                "sale",
+                "gift-idea"
+            ],
+            "meta": {
+                "first_price": "193",
+                "second_price": "181",
+                "stock": "62",
+                "seo_title": "Ultrabook Air #52 | Demo Store",
+                "seo_description": "Buy Ultrabook Air #52 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "0.40 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2024"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-053",
+            "title": "Noise-Cancel Headphones #53",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-053<\/strong>. Category <em>wearables<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1542291026-7eec264c27ff?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1560343090-f0409e92791a?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1524678606370-a47ad25cb82a?w=800&q=80"
+            ],
+            "categories": [
+                "wearables"
+            ],
+            "brand": "zenith-home",
+            "tags": [
+                "pro",
+                "limited"
+            ],
+            "meta": {
+                "first_price": "200",
+                "second_price": "187",
+                "stock": "63",
+                "seo_title": "Noise-Cancel Headphones #53 | Demo Store",
+                "seo_description": "Buy Noise-Cancel Headphones #53 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "0.50 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2025"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-054",
+            "title": "Fitness Band #54",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-054<\/strong>. Category <em>accessories<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1560343090-f0409e92791a?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1524678606370-a47ad25cb82a?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1525547718571-030b6c236b79?w=800&q=80"
+            ],
+            "categories": [
+                "accessories"
+            ],
+            "brand": "apex-tools",
+            "tags": [
+                "eco"
+            ],
+            "meta": {
+                "first_price": "207",
+                "second_price": "193",
+                "stock": "64",
+                "seo_title": "Fitness Band #54 | Demo Store",
+                "seo_description": "Buy Fitness Band #54 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "24 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "0.60 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2023"
+                        }
+                    ]
+                }
+            ],
+            "variations": [
+                {
+                    "price": 193,
+                    "stock": 19,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "Black"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "M"
+                        }
+                    ]
+                },
+                {
+                    "price": 203,
+                    "stock": 7,
+                    "options": [
+                        {
+                            "key": "Color",
+                            "value": "Blue"
+                        },
+                        {
+                            "key": "Size",
+                            "value": "XL"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sku": "DEMO-055",
+            "title": "USB-C Hub #55",
+            "description": "<p>Demo product for import. SKU <strong>DEMO-055<\/strong>. Category <em>kitchen<\/em>.<\/p>",
+            "status": "publish",
+            "image": "https:\/\/images.unsplash.com\/photo-1524678606370-a47ad25cb82a?w=800&q=80",
+            "gallery": [
+                "https:\/\/images.unsplash.com\/photo-1525547718571-030b6c236b79?w=800&q=80",
+                "https:\/\/images.unsplash.com\/photo-1523275335684-37898b6baf30?w=800&q=80"
+            ],
+            "categories": [
+                "kitchen"
+            ],
+            "brand": "clearview",
+            "tags": [
+                "new",
+                "sale"
+            ],
+            "meta": {
+                "first_price": "214",
+                "second_price": "199",
+                "stock": "65",
+                "seo_title": "USB-C Hub #55 | Demo Store",
+                "seo_description": "Buy USB-C Hub #55 — demo catalog import."
+            },
+            "attributes": [
+                {
+                    "group": "General",
+                    "attributes": [
+                        {
+                            "key": "Warranty",
+                            "value": "12 months"
+                        },
+                        {
+                            "key": "Country",
+                            "value": "Importland"
+                        }
+                    ]
+                },
+                {
+                    "group": "Specs",
+                    "attributes": [
+                        {
+                            "key": "Weight",
+                            "value": "0.70 kg"
+                        },
+                        {
+                            "key": "Model Year",
+                            "value": "2024"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
