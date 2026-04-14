@@ -23,8 +23,13 @@
 !/storage/app/.gitignore
 !/storage/framework/.gitignore
 !/storage/logs/.gitignore
-/storage/app/data/*
 !/storage/app/data/.gitignore
+
+# Explicitly allow these storage subfolders to be tracked
+!/storage/app/schema/
+!/storage/app/schema/**
+!/storage/app/import/
+!/storage/app/import/**
 
 # =========================
 # Cache / Logs
