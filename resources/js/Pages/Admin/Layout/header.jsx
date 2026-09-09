@@ -1,9 +1,9 @@
 import ActionDropdown from '@/Components/ActionDropdown'
 import PartButton from '@/Components/Admin/PartButton'
-import Checkbox from '@/Components/Checkbox'
-import Dropdown from '@/Components/Dropdown'
-import PrimaryButton from '@/Components/PrimaryButton'
-import Table from '@/Components/Table'
+import Checkbox from '@/Components/Admin/Checkbox'
+import Dropdown from '@/Components/Admin/Dropdown'
+import PrimaryButton from '@/Components/Admin/PrimaryButton'
+import Table from '@/Components/Admin/Table'
 import Textarea from '@/Components/Textarea'
 import TextInput from '@/Components/TextInput'
 import AdminLayout from '@/Layouts/AdminLayout'
@@ -192,4 +192,4 @@ function Header({ header }) {
   );
 }
 export default Header;
-Header.layout = (view) => <AdminLayout>{view}</AdminLayout>;
+Header.layout = (view) => <AdminLayout title="header">{view}</AdminLayout>;

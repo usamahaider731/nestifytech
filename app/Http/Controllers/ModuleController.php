@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Traits\ModuleHandler;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -20,10 +21,7 @@ class ModuleController extends Controller
         $user = auth()->user();
         if (!$user)
             abort(403);
-
-        // Total access for Developer / Super Admin (assuming ID 1)
-        if ($user->id === 1)
-            return;
+        $user = User::find($user->id);
 
         $permission = strtolower($type) . '-' . strtolower($action);
         if (!in_array($permission, $user->user_permissions)) {
@@ -130,6 +128,9 @@ class ModuleController extends Controller
      */
     public function edit(Request $request, $type, $id)
     {
+        if($type && is_numeric($type) && !is_numeric($id) && !empty($id)){
+        
+        }
         $this->checkPermission($type, 'write');
         // Fix for swapped parameters when using defaults() in legacy routes
         if (is_numeric($type) && !is_numeric($id) && !empty($id)) {
@@ -313,7 +314,7 @@ class ModuleController extends Controller
         if ($features['attributes'] ?? false) {
             $attrValues = DB::table('attribute_values')->where(['parent_id' => $record->id, 'parent_type' => Str::singular($tableName)])->get();
             $stuv['attributes'] = $attrValues->map(function ($val) {
-                $est = DB::table('attributes')->where('id', $val->attribute_id)->first();
+                $est = DB::table('attributes')->where('id', $val->attribute_id)->where('group', '!=', null)->first();
                 if (!$est) return null;
                 return [
                     'group' => $val->group ?? ($est->group ?? null),
@@ -322,44 +323,81 @@ class ModuleController extends Controller
                 ];
             })->filter()->values()->all();
         }
-
         // 3. Variations System
         if ($features['variations'] ?? false) {
             $variationsTable = $db['variations_table'] ?? (Str::singular($tableName) . '_variations');
-            $variations = DB::table($variationsTable)->where($metaKey, $record->id)->get();
-            $stuv['variations'] = $variations->map(function ($variation) use ($tableName) {
-                $variationValues = DB::table('product_variation_values')->where('variation_id', $variation->id)->get();
-                $formattedValues = $variationValues->map(function ($v) {
+            
+            // Query parent variations (color groups)
+            $parentVariations = DB::table($variationsTable)
+                ->where($metaKey, $record->id)
+                ->whereNull('parent_id')
+                ->get();
+            
+            $formattedVariations = [];
+            
+            foreach ($parentVariations as $parent) {
+                $vImage = DB::table('media')->where([
+                    'type'      => Str::singular($tableName) . '_variation',
+                    'parent_id' => $parent->id,
+                ])->first();
+                
+                // Get shared attributes for the parent
+                $parentValues = DB::table('product_variation_values')->where('variation_id', $parent->id)->get();
+                $sharedAttributes = $parentValues->map(function ($v) {
                     $option = DB::table('attribute_values')->where('id', $v->attribute_option_id)->first();
                     if ($option) {
                         $attr = DB::table('attributes')->where('id', $option->attribute_id)->first();
-                        return $attr ? ['key' => $attr->name, 'value' => $option->value] : null;
+                        return $attr ? ['key' => $attr->name, 'value' => $option->value, 'id' => $option->id] : null;
                     }
                     return null;
-                })->filter()->values();
-
-                $vImage = DB::table('media')->where(['type' => Str::singular($tableName) . '_variation', 'parent_id' => $variation->id])->first();
-
-                $color = '';
-                $genericAttributes = [];
-                foreach ($formattedValues as $value) {
-                    if (strtolower($value['key']) === 'color')
-                        $color = $value['value'];
-                    else
-                        $genericAttributes[] = $value;
+                })->filter()->values()->all();
+                
+                // Query child variations (combinations)
+                $childVariations = DB::table($variationsTable)
+                    ->where('parent_id', $parent->id)
+                    ->get();
+                
+                $combinations = [];
+                $totalStock = 0;
+                $minPrice = $parent->price;
+                
+                foreach ($childVariations as $child) {
+                    $childValues = DB::table('product_variation_values')->where('variation_id', $child->id)->get();
+                    $comboAttributes = $childValues->map(function ($v) {
+                        $option = DB::table('attribute_values')->where('id', $v->attribute_option_id)->first();
+                        if ($option) {
+                            $attr = DB::table('attributes')->where('id', $option->attribute_id)->first();
+                            return $attr ? ['key' => $attr->name, 'value' => $option->value, 'id' => $option->id] : null;
+                        }
+                        return null;
+                    })->filter()->values()->all();
+                    
+                    $combinations[] = [
+                        'id' => $child->id,
+                        'price' => $child->price,
+                        'stock' => $child->stock,
+                        'attributes' => $comboAttributes
+                    ];
+                    
+                    $totalStock += (int) $child->stock;
+                    if ($minPrice === 0 || ($child->price > 0 && $child->price < $minPrice)) {
+                        $minPrice = $child->price;
+                    }
                 }
-
-                return [
-                    'id' => $variation->id,
-                    'price' => $variation->price,
-                    'stock' => $variation->stock,
-                    'image' => $vImage ? $vImage->filename : null,
-                    'size' => $genericAttributes,
-                    'color' => $color
+                
+                $formattedVariations[] = [
+                    'id'                => $parent->id,
+                    'price'             => $minPrice,
+                    'stock'             => $totalStock,
+                    'color'             => $parent->color ?? '',
+                    'image'             => $vImage ? $vImage->filename : null,
+                    'combinations'      => $combinations,
+                    'shared_attributes' => $sharedAttributes,
                 ];
-            })->all();
+            }
+            
+            $stuv['variations'] = $formattedVariations;
         }
-
         return $stuv;
     }
 }

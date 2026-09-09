@@ -9,18 +9,43 @@
             "status": "required|string|max:20"
         },
         "schema": [
-            {"name": "user_id", "type": "unsignedBigInteger", "index": true},
-            {"name": "title", "type": "string"},
-            {"name": "sku", "type": "string", "unique": true},
-            {"name": "description", "type": "longText", "nullable": true},
-            {"name": "status", "type": "string", "default": "publish"},
-            {"name": "type", "type": "string", "index": true}
+            {
+                "name": "user_id",
+                "type": "unsignedBigInteger",
+                "index": true
+            },
+            {
+                "name": "title",
+                "type": "string"
+            },
+            {
+                "name": "sku",
+                "type": "string",
+                "unique": true
+            },
+            {
+                "name": "description",
+                "type": "longText",
+                "nullable": true
+            },
+            {
+                "name": "status",
+                "type": "string",
+                "default": "publish"
+            },
+            {
+                "name": "type",
+                "type": "string",
+                "index": true
+            }
         ],
         "main_fields": [
             "title",
             "sku",
             "description",
-            "status"
+            "status",
+            "updated_at",
+            "created_at"
         ],
         "fixed_fields": {
             "user_id": "auth_id",
@@ -36,7 +61,8 @@
             "brand": true,
             "attributes": true,
             "variations": false,
-            "category_filter": true
+            "category_filter": true,
+            "short_description": true
         },
         "meta_processing": {
             "category": "json_array",

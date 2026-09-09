@@ -1,9 +1,9 @@
-import Checkbox from '@/Components/Checkbox';
+import Checkbox from '@/Components/Admin/Checkbox';
 import AdminLayout from '@/Layouts/AdminLayout'
 import { Link } from '@inertiajs/react'
 import React from 'react'
 import { RiDeleteBin6Line, RiFileEditLine, RiFile3Fill, RiLayoutGridFill, RiListUnordered } from 'react-icons/ri';
-import Table from '@/Components/Table'
+import Table from '@/Components/Admin/Table'
 import { usePage } from '@inertiajs/react';
 import { hasPermission } from '@/Utils/helper';
 
@@ -58,15 +58,15 @@ function Index({ roles, table }) {
                 <h1 className='text-xl font-medium capitalize text-primary'>User Roles</h1>
                 <div className='flex items-center gap-4'>
                     <div className='flex items-center bg-accent p-1 rounded-lg border border-primary/10'>
-                        <button 
-                            onClick={() => SetLayout('grid')} 
+                        <button
+                            onClick={() => SetLayout('grid')}
                             className={`p-2 rounded-md transition-all ${Layout === 'grid' ? 'bg-primary text-white shadow-lg' : 'text-primary hover:bg-primary/5'}`}
                             title="Grid View"
                         >
                             <RiLayoutGridFill className='size-5' />
                         </button>
-                        <button 
-                            onClick={() => SetLayout('table')} 
+                        <button
+                            onClick={() => SetLayout('table')}
                             className={`p-2 rounded-md transition-all ${Layout === 'table' ? 'bg-primary text-white shadow-lg' : 'text-primary hover:bg-primary/5'}`}
                             title="Table View"
                         >
@@ -128,9 +128,9 @@ function Index({ roles, table }) {
                 >
                     <Table.THead className='w-full'>
                         <Table.TR className='w-full text-heading uppercase text-sm h-14 bg-accent'>
-                            
+
                             {Column.map((col) => (
-                                <Table.TH width={col.width} className=' font-medium' key={col.id}>{col.label}</Table.TH>
+                                <Table.TH width={col.width} className=' font-medium' key={col.id} sort={col.sort} column={col.column}>{col.label}</Table.TH>
                             ))}
                         </Table.TR>
                     </Table.THead>
@@ -153,5 +153,5 @@ function Index({ roles, table }) {
 
 export default Index
 Index.layout = (view) => (
-    <AdminLayout>{view}</AdminLayout>
+    <AdminLayout title="Role">{view}</AdminLayout>
 )

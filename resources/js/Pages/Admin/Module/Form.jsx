@@ -26,5 +26,5 @@ function ModuleForm({ data, initialData, record, category, type, mode, routes, r
     );
 }
 
-ModuleForm.layout = (page) => <AdminLayout>{page}</AdminLayout>;
+ModuleForm.layout = (page) => <AdminLayout title="Form">{page}</AdminLayout>;
 export default ModuleForm;

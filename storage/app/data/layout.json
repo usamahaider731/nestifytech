@@ -11,8 +11,10 @@
                         "name": "main_slider",
                         "attribute": "required",
                         "value": [
-                            "1761478635_6039b3ff1a895b03a0d20722190f776c_main_slider0.png",
-                            "1761478635_6039b3ff1a895b03a0d20722190f776c_main_slider1.png"
+                            "1787348116_6039b3ff1a895b03a0d20722190f776c_main_slider0.webp",
+                            "1787348536_6039b3ff1a895b03a0d20722190f776c_main_slider0.webp",
+                            "1787348634_6039b3ff1a895b03a0d20722190f776c_main_slider0.webp",
+                            "1787348634_6039b3ff1a895b03a0d20722190f776c_main_slider1.jpg"
                         ],
                         "multiple": true
                     },
@@ -47,7 +49,11 @@
                             "736",
                             "738",
                             "737",
-                            "739"
+                            "739",
+                            "722",
+                            "723",
+                            "724",
+                            "725"
                         ],
                         "searchable": true,
                         "options": {
@@ -74,6 +80,12 @@
                         "value": false
                     },
                     {
+                        "label": "Latest Products",
+                        "type": "checkbox",
+                        "name": "latest_product_toggle",
+                        "value": true
+                    },
+                    {
                         "label": "Show Popular Products",
                         "type": "checkbox",
                         "name": "popular_product_toggle",
@@ -83,7 +95,7 @@
                         "label": "Show Banner Image",
                         "type": "checkbox",
                         "name": "banner_image_toggle",
-                        "value": false
+                        "value": true
                     },
                     {
                         "label": "Show Block Images",
@@ -101,7 +113,7 @@
                         "label": "Show Categories",
                         "type": "checkbox",
                         "name": "categories_toggle",
-                        "value": false
+                        "value": true
                     },
                     {
                         "label": "Show Brands Slider",
@@ -124,18 +136,10 @@
                         "attribute": "required",
                         "searchable": true,
                         "value": [
-                            "717",
-                            "723",
-                            "724",
-                            "728",
-                            "726",
-                            "725",
-                            "727",
-                            "731",
-                            "732",
-                            "730",
-                            "729",
-                            "733"
+                            "720",
+                            "719",
+                            "721",
+                            "727"
                         ],
                         "multiple": true,
                         "use_value": false,
@@ -143,7 +147,6 @@
                         "options": {
                             "model": "Taxonomy",
                             "type": "category",
-                            "parent_id": "0",
                             "use_value": false
                         }
                     },
@@ -164,7 +167,6 @@
                         "options": {
                             "model": "Taxonomy",
                             "type": "category",
-                            "parent_id": "0",
                             "use_value": false
                         }
                     }
@@ -179,7 +181,49 @@
                         "type": "image",
                         "name": "banner_image",
                         "attribute": "required",
-                        "value": null
+                        "value": "1788372083_6039b3ff1a895b03a0d20722190f776c_banner_image.webp"
+                    }
+                ]
+            },
+            {
+                "title": "Layout Settings",
+                "style": "main",
+                "fields": [
+                    {
+                        "label": "Container Type",
+                        "type": "dropdown",
+                        "name": "container_type",
+                        "attribute": "required",
+                        "value": "container",
+                        "searchable": false,
+                        "options": [
+                            {
+                                "id": "container",
+                                "title": "Container"
+                            },
+                            {
+                                "id": "full_width",
+                                "title": "Full Width"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Latest Product Card Type",
+                        "type": "dropdown",
+                        "name": "latest_product_card_type",
+                        "attribute": "required",
+                        "value": "v1",
+                        "searchable": false,
+                        "options": [
+                            {
+                                "id": "v1",
+                                "title": "Product Card V1"
+                            },
+                            {
+                                "id": "v2",
+                                "title": "Product Card V2"
+                            }
+                        ]
                     }
                 ]
             },
@@ -191,7 +235,7 @@
                         "label": "Slider Effect",
                         "type": "dropdown",
                         "searchable": false,
-                        "name": "Banner_slider_effect",
+                        "name": "banner_slider_effect",
                         "attribute": "required",
                         "style": 2,
                         "value": "fade",
@@ -246,14 +290,331 @@
                         "type": "number",
                         "name": "banner_slider_duration",
                         "attribute": "required",
-                        "value": 5000
+                        "value": "5000"
                     },
                     {
                         "label": "Slider Transition Speed (in ms)",
                         "type": "number",
                         "name": "banner_slider_speed",
                         "attribute": "required",
-                        "value": 800
+                        "value": "25"
+                    }
+                ]
+            }
+        ],
+        "Product_Card_V1": [
+            {
+                "title": "Manage Product Card V1",
+                "style": "main",
+                "fields": [
+                    {
+                        "label": "Product Image Or Gallery",
+                        "type": "dropdown",
+                        "name": "product_image",
+                        "value": "2",
+                        "style": 2,
+                        "searchable": false,
+                        "options": [
+                            {
+                                "id": 1,
+                                "title": "Gallery"
+                            },
+                            {
+                                "id": 2,
+                                "title": "Image"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Show Product Cateogry",
+                        "type": "checkbox",
+                        "name": "show_product_category",
+                        "value": true
+                    },
+                    {
+                        "label": "Show Product Price",
+                        "type": "checkbox",
+                        "value": true,
+                        "name": "show_product_price"
+                    },
+                    {
+                        "label": "Show Product Discount Price",
+                        "type": "checkbox",
+                        "name": "show_product_discount_price",
+                        "value": true
+                    },
+                    {
+                        "label": "Show Button ( Add to Cart )",
+                        "type": "checkbox",
+                        "name": "product_add_to_cart_button",
+                        "value": true
+                    },
+                    {
+                        "label": "Show Wish List",
+                        "type": "checkbox",
+                        "name": "show_product_wishlist_button",
+                        "value": true
+                    },
+                    {
+                        "label": "Show ( Add to Compare ) Button",
+                        "type": "checkbox",
+                        "name": "show_product_compare_button",
+                        "value": true
+                    },
+                    {
+                        "label": "Product Rating",
+                        "type": "checkbox",
+                        "name": "show_product_rating",
+                        "value": true
+                    }
+                ]
+            }
+        ],
+        "Product_Card_V2": [
+            {
+                "title": "Manage Product Card V2",
+                "style": "main",
+                "fields": [
+                    {
+                        "label": "Product Image Or Gallery",
+                        "type": "dropdown",
+                        "name": "product_image",
+                        "value": "2",
+                        "style": 2,
+                        "searchable": false,
+                        "options": [
+                            {
+                                "id": 1,
+                                "title": "Gallery"
+                            },
+                            {
+                                "id": 2,
+                                "title": "Image"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Show Product Cateogry",
+                        "type": "checkbox",
+                        "name": "show_product_category",
+                        "value": true
+                    },
+                    {
+                        "label": "Show Product Price",
+                        "type": "checkbox",
+                        "value": true,
+                        "name": "show_product_price"
+                    },
+                    {
+                        "label": "Show Product Discount Price",
+                        "type": "checkbox",
+                        "name": "show_product_discount_price",
+                        "value": true
+                    },
+                    {
+                        "label": "Show Button ( View )",
+                        "type": "checkbox",
+                        "name": "show_product_view_button",
+                        "value": true
+                    },
+                    {
+                        "label": "Show Button ( Add to Cart )",
+                        "type": "checkbox",
+                        "name": "product_add_to_cart_button",
+                        "value": true
+                    },
+                    {
+                        "label": "Show Wish List",
+                        "type": "checkbox",
+                        "name": "show_product_wishlist_button",
+                        "value": true
+                    },
+                    {
+                        "label": "Show ( Add to Compare ) Button",
+                        "type": "checkbox",
+                        "name": "show_product_compare_button",
+                        "value": false
+                    },
+                    {
+                        "label": "Product Stock Info",
+                        "type": "checkbox",
+                        "name": "show_product_stock_info",
+                        "value": true
+                    },
+                    {
+                        "label": "Product Brand",
+                        "type": "checkbox",
+                        "name": "show_product_brand",
+                        "value": true
+                    },
+                    {
+                        "label": "Product Rating",
+                        "type": "checkbox",
+                        "name": "show_product_rating",
+                        "value": true
+                    },
+                    {
+                        "label": "Product Address",
+                        "type": "checkbox",
+                        "name": "product_address",
+                        "value": false
+                    }
+                ]
+            }
+        ],
+        "Header": [
+            {
+                "title": "Header Settings",
+                "style": "main",
+                "fields": [
+                    {
+                        "label": "Show Top Header",
+                        "type": "checkbox",
+                        "name": "top_header_toggle",
+                        "value": true
+                    },
+                    {
+                        "label": "Show Language Selector",
+                        "type": "checkbox",
+                        "name": "top_header_language_toggle",
+                        "value": true
+                    },
+                    {
+                        "label": "Sticky Header",
+                        "type": "checkbox",
+                        "name": "sticky_header_toggle",
+                        "value": true
+                    },
+                    {
+                        "label": "Show Message Bar",
+                        "type": "checkbox",
+                        "name": "message_bar_toggle",
+                        "value": true
+                    },
+                    {
+                        "label": "Select Header Style",
+                        "type": "dropdown",
+                        "style": 2,
+                        "name": "header_style",
+                        "attribute": "required",
+                        "searchable": false,
+                        "value": "style1",
+                        "options": [
+                            {
+                                "id": "style1",
+                                "title": "Style 1"
+                            },
+                            {
+                                "id": "style2",
+                                "title": "Style 2"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Select Header Container",
+                        "type": "dropdown",
+                        "style": 2,
+                        "name": "header_container",
+                        "attribute": "required",
+                        "value": "container",
+                        "searchable": false,
+                        "options": [
+                            {
+                                "id": "container",
+                                "title": "Boxed"
+                            },
+                            {
+                                "id": "container-fluid",
+                                "title": "Full Width"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Top Header Text",
+                        "style": 2,
+                        "type": "text",
+                        "name": "top_header_text",
+                        "value": "Welcome to Worldwide Electronics Store"
+                    }
+                ]
+            },
+            {
+                "title": "Header Logo",
+                "style": "sidebar",
+                "fields": [
+                    {
+                        "title": "Home Header Logo",
+                        "type": "dropdown",
+                        "condition": "logo_toggle",
+                        "condition_value": true,
+                        "name": "home_header_logo",
+                        "label": "Home Header Logo",
+                        "value": "logo_light",
+                        "searchable": false,
+                        "options": [
+                            {
+                                "id": "logo_light",
+                                "title": "Logo Light"
+                            },
+                            {
+                                "id": "logo_dark",
+                                "title": "Logo Dark"
+                            }
+                        ]
+                    },
+                    {
+                        "title": "Other Page Header Logo",
+                        "type": "dropdown",
+                        "condition": "logo_toggle",
+                        "condition_value": true,
+                        "searchable": false,
+                        "name": "other_page_header_logo",
+                        "label": "Other Page Header Logo",
+                        "value": "logo_dark",
+                        "options": [
+                            {
+                                "id": "logo_light",
+                                "title": "Logo Light"
+                            },
+                            {
+                                "id": "logo_dark",
+                                "title": "Logo Dark"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "title": "Header Main Setting",
+                "style": "main",
+                "fields": [
+                    {
+                        "label": "Show Categories Dropdown",
+                        "type": "checkbox",
+                        "name": "categories_dropdown",
+                        "value": true
+                    },
+                    {
+                        "label": "Show Logo",
+                        "type": "checkbox",
+                        "name": "logo_toggle",
+                        "value": true
+                    }
+                ]
+            },
+            {
+                "title": "Header Menu Lists",
+                "style": "main",
+                "fields": [
+                    {
+                        "label": "Select Menu",
+                        "type": "dropdown",
+                        "name": "header_menu",
+                        "options": {
+                            "model": "Menu",
+                            "type": "locations"
+                        },
+                        "value": "header"
                     }
                 ]
             }
@@ -326,143 +687,6 @@
                                 }
                             }
                         ]
-                    }
-                ]
-            }
-        ],
-        "Header": [
-            {
-                "title": "Header Settings",
-                "style": "main",
-                "fields": [
-                    {
-                        "label": "Show Top Header",
-                        "type": "checkbox",
-                        "name": "top_header_toggle",
-                        "value": true
-                    },
-                    {
-                        "label": "Show Language Selector",
-                        "type": "checkbox",
-                        "name": "top_header_language_toggle",
-                        "value": true
-                    },
-                    {
-                        "label": "Sticky Header",
-                        "type": "checkbox",
-                        "name": "sticky_header_toggle",
-                        "value": true
-                    },
-                    {
-                        "label": "Show Message Bar",
-                        "type": "checkbox",
-                        "name": "message_bar_toggle",
-                        "value": true
-                    },
-                    {
-                        "label": "Select Header Style",
-                        "type": "dropdown",
-                        "style": 2,
-                        "name": "header_style",
-                        "attribute": "required",
-                        "value": "style1",
-                        "options": [
-                            {
-                                "id": "style1",
-                                "title": "Style 1"
-                            },
-                            {
-                                "id": "style2",
-                                "title": "Style 2"
-                            }
-                        ]
-                    },
-                    {
-                        "label": "Select Header Container",
-                        "type": "dropdown",
-                        "style": 2,
-                        "name": "header_container",
-                        "attribute": "required",
-                        "value": "container",
-                        "options": [
-                            {
-                                "id": "container",
-                                "title": "Boxed"
-                            },
-                            {
-                                "id": "container-fluid",
-                                "title": "Full Width"
-                            }
-                        ]
-                    },
-                    {
-                        "label": "Top Header Text",
-                        "style": 2,
-                        "type": "text",
-                        "name": "top_header_text",
-                        "value": "Welcome to Worldwide Electronics Store"
-                    }
-                ]
-            },
-            {
-                "title": "Header Logo",
-                "style": "sidebar",
-                "fields": [
-                    {
-                        "title": "Home Header Logo",
-                        "type": "dropdown",
-                        "condition": "logo_toggle",
-                        "condition_value": true,
-                        "name": "home_header_logo",
-                        "label": "Home Header Logo",
-                        "value": "logo_light",
-                        "options": [
-                            {
-                                "id": "logo_light",
-                                "title": "Logo Light"
-                            },
-                            {
-                                "id": "logo_dark",
-                                "title": "Logo Dark"
-                            }
-                        ]
-                    },
-                    {
-                        "title": "Other Page Header Logo",
-                        "type": "dropdown",
-                        "condition": "logo_toggle",
-                        "condition_value": true,
-                        "name": "other_page_header_logo",
-                        "label": "Other Page Header Logo",
-                        "value": "logo_dark",
-                        "options": [
-                            {
-                                "id": "logo_light",
-                                "title": "Logo Light"
-                            },
-                            {
-                                "id": "logo_dark",
-                                "title": "Logo Dark"
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                "title": "Header Main Setting",
-                "style": "main",
-                "fields": [
-                    {
-                        "label": "Show Categories Dropdown",
-                        "type": "checkbox",
-                        "name": "categories_dropdown",
-                        "value": true
-                    },
-                    {
-                        "label": "Show Logo",
-                        "type": "checkbox",
-                        "name": "logo_toggle",
-                        "value": true
                     }
                 ]
             }

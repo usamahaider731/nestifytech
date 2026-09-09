@@ -6,7 +6,6 @@ import { RiAddLine, RiSubtractLine } from "react-icons/ri";
 import { textarea } from "@/Utils/classes";
 
 const CustomFields = ({ onChange = () => {},  value = [] }) => {
-console.log(value);
   const [fields, setFields] = useState([
     { sku: Date.now(), key: "", value: "" },
   ]);

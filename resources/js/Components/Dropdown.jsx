@@ -4,7 +4,7 @@ import { createContext, useContext, useState } from 'react';
 
 const DropDownContext = createContext();
 
-const Dropdown = ({ children }) => {
+const Dropdown = ({ children, className = '' }) => {
     const [open, setOpen] = useState(false);
 
     const toggleOpen = () => {
@@ -13,7 +13,7 @@ const Dropdown = ({ children }) => {
 
     return (
         <DropDownContext.Provider value={{ open, setOpen, toggleOpen }}>
-            <div className="relative">{children}</div>
+            <div className={`relative ${className}`}>{children}</div>
         </DropDownContext.Provider>
     );
 };
@@ -23,7 +23,9 @@ const Trigger = ({ children, className = '', ...props }) => {
 
     return (
         <>
-            <div onClick={toggleOpen} {...props} className={className}>{children}</div>
+            <div onClick={toggleOpen} {...props} className={className}>
+                {typeof children === 'function' ? children({ open }) : children}
+            </div>
 
             {open && (
                 <div
@@ -83,10 +85,15 @@ const Content = ({
     );
 };
 
-const DropdownLink = ({ className = '', children, ...props }) => {
+const DropdownLink = ({ className = '', onClick, children, ...props }) => {
+    const { open, setOpen } = useContext(DropDownContext);
     return (
         <Link
             {...props}
+            onClick={() => {
+                setOpen(false),
+                onClick ? onClick() : null
+            }}
             className={
                 'block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 transition duration-150 ease-in-out hover:bg-gray-100 focus:bg-gray-100 focus:outline-hidden dark:text-gray-300 dark:hover:bg-gray-800 dark:focus:bg-gray-800 ' +
                 className

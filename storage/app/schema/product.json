@@ -44,11 +44,14 @@
             "title",
             "description",
             "status",
-            "sku"
+            "sku",
+            "updated_at",
+            "created_at"
         ],
         "fixed_fields": {
             "user_id": "auth_id",
             "type": "product"
+            
         },
         "relations": {
             "image": "single_image",
@@ -62,6 +65,7 @@
             "brand": true,
             "attributes": true,
             "variations": true,
+            "short_description": true,
             "category_filter": true
         },
         "meta_processing": {
@@ -203,6 +207,18 @@
                     "style": 2
                 },
                 {
+                    "label": "Short Description",
+                    "name": "short_description",
+                    "type": "desc",
+                    "placeholder": "Write product short details here...",
+                    "translate": true,
+                    "generate_required": [
+                        "title",
+                        "category",
+                        "brand"
+                    ]
+                },
+                {
                     "label": "Full Description",
                     "name": "description",
                     "type": "desc",
@@ -211,8 +227,7 @@
                     "generate_required": [
                         "title",
                         "category",
-                        "brand",
-                        "attribute"
+                        "brand"
                     ]
                 }
             ]
@@ -360,27 +375,6 @@
                     "label": "Sale Price",
                     "type": "text",
                     "name": "second_price"
-                },
-                {
-                    "label": "Stock",
-                    "type": "number",
-                    "name": "stock"
-                }
-            ]
-        },
-        {
-            "title": "Publish",
-            "style": "sidebar",
-            "fields": [
-                {
-                    "label": "Status",
-                    "name": "status",
-                    "type": "dropdown",
-                    "options": [
-                        { "label": "Publish", "value": "publish" },
-                        { "label": "Draft", "value": "draft" },
-                        { "label": "Pending", "value": "pending" }
-                    ]
                 }
             ]
         }

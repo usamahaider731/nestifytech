@@ -5,14 +5,22 @@
         "direction": "ltr",
         "active": "true",
         "is_default": "true",
-        "image": "1769950506_dfb12cf2942c376e7b4157df3c2be9df_flag.png"
+        "image": "1786398356_8512ae7d57b1396273f76fe6ed341a23_en.svg"
     },
     {
         "prefix": "ur",
         "name": "Urdu",
         "direction": "rtl",
         "active": "true",
-        "is_default": false,
-        "image": "1770042076_dfb12cf2942c376e7b4157df3c2be9df_flag.png"
+        "is_default": "false",
+        "image": "1786397097_8512ae7d57b1396273f76fe6ed341a23_ur.svg"
+    },
+    {
+        "name": "Arabic",
+        "prefix": "ar",
+        "direction": "rtl",
+        "is_default": "false",
+        "active": "true",
+        "image": "1786474153_8512ae7d57b1396273f76fe6ed341a23_ar.svg"
     }
 ]

@@ -3,7 +3,7 @@ import AdminLayout from '@/Layouts/AdminLayout';
 import React from 'react';
 import { RiUserLine, RiUserAddLine, RiUser2Line, RiDeleteBin6Line, RiFile3Fill, RiFileEditLine, RiDeleteBin7Fill, RiInstagramFill } from 'react-icons/ri';
 import { Link } from '@inertiajs/react';
-import Table from '@/Components/Table'
+import Table from '@/Components/Admin/Table'
 import ImageViwer from '@/Components/Admin/ImageViwer';
 import { usePage } from '@inertiajs/react';
 import { hasPermission } from '@/Utils/helper';
@@ -166,4 +166,4 @@ function Index({ users, userStats, table }) {
 
 export default Index;
 
-Index.layout = (page) => <AdminLayout>{page}</AdminLayout>;
+Index.layout = (page) => <AdminLayout title="Users">{page}</AdminLayout>;

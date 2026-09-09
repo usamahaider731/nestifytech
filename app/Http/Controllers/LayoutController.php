@@ -24,11 +24,24 @@ class LayoutController extends Controller
 
     public function menu(Request $request)
     {
-        $allMenus = DB::table('menu')->get();
+        $allMenus = DB::table('menu')->orderBy('sort_order', 'asc')->get();
         return Inertia::render('Admin/Layout/Menu', [
             'menu' => $allMenus,
-            'menu_options' => DB::table('menu')->where('parent_id', 0)->get()
+            'menu_options' => DB::table('menu')->where('parent_id', 0)->orderBy('sort_order', 'asc')->get()
         ]);
+    }
+
+    public function menuReorder(Request $request)
+    {
+        $items = $request->input('items', []);
+        foreach ($items as $item) {
+            if (isset($item['id']) && isset($item['sort_order'])) {
+                DB::table('menu')->where('id', $item['id'])->update([
+                    'sort_order' => $item['sort_order']
+                ]);
+            }
+        }
+        return response()->json(['success' => true]);
     }
 
     public function menuDestroy(Request $request, $id)
@@ -104,8 +117,33 @@ class LayoutController extends Controller
                 $typeField = $field['type'] ?? null;
                 if (!$key || !$typeField) continue;
 
-                if ($typeField === 'image' && $request->has($key)) {
-                    $field['value'] = $this->typeRender($key, $request->$key, $field);
+                // Image handling: support upload, retain existing, and allow removal via submitted list
+                if ($typeField === 'image' && $request->hasFile($key)) {
+                    $newValue = $this->typeRender($key, $request->file($key), $field);
+                    
+                    if (is_array($request->file($key))) {
+                        // Multiple files uploaded: merge with existing
+                        $oldValue = $field['value'] ?? [];
+                        $oldArray = is_array($oldValue) ? $oldValue : ($oldValue ? [$oldValue] : []);
+                        $newArray = is_array($newValue) ? $newValue : [$newValue];
+                        $field['value'] = array_merge($oldArray, $newArray);
+                    } else {
+                        $oldValue = $field['value'] ?? null;
+                        if ($oldValue) {
+                            $oldFiles = is_array($oldValue) ? $oldValue : [$oldValue];
+                            foreach ($oldFiles as $oldFile) {
+                                if (is_string($oldFile) && File::exists(public_path('storage/uploads/image/' . $oldFile))) {
+                                    File::delete(public_path('storage/uploads/image/' . $oldFile));
+                                }
+                            }
+                        }
+                        $field['value'] = $newValue;
+                    }
+                } elseif ($typeField === 'image') {
+                    if ($request->has($key)) {
+                        $submitted = $request->input($key);
+                        $field['value'] = $submitted !== null ? $submitted : $field['value'];
+                    }
                 } elseif ($typeField === 'checkbox') {
                     $val = $request->input($key);
                     $field['value'] = ($val === "true" || $val === true);
@@ -117,7 +155,7 @@ class LayoutController extends Controller
 
         File::put($this->file, json_encode(['layout' => array_merge([$type => $currentSettings], $otherSetting)], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
-        return response()->json(['status' => true, 'message' => 'Layout updated successfully', 'data' => $currentSettings]);
+        return redirect()->back()->with('success', "{$type} updated successfully");
     }
 
     protected function typeRender($key, $value, $field = [])
@@ -133,12 +171,15 @@ class LayoutController extends Controller
                     $trq[] = $file;
                 }
             }
-            return $trq;
+            $value = $trq;
+            // return $trq;
+            return $value;
         } elseif ($field['type'] == 'image' && $value instanceof \Illuminate\Http\UploadedFile) {
             $filename = time() . '_' . md5('layout-images') . '_' . $key . '.' . $value->getClientOriginalExtension();
             $value->move(public_path('storage/uploads/image'), $filename);
             return $filename;
         }
+
         return $value;
     }
 }

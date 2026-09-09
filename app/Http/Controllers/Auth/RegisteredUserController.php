@@ -46,6 +46,6 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return Inertia::location(config('app.frontend_url') . '/dashboard');
+        return Inertia::location(config('app.frontend_url') . '/admin');
     }
 }

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import InputLabel from '@/Components/InputLabel';
 import TextInput from '@/Components/TextInput';
-import Togglebox from '@/Components/Togglebox';
+import Togglebox from '@/Components/Admin/Togglebox';
 import ImageUploader from '@/Components/Admin/ImageUploader';
 import axios from 'axios';
 import Form from '@/Components/Admin/Form';
@@ -20,5 +20,5 @@ function Edit({ user, user_rows }) {
         />
     )
 }
-Edit.layout = (page) => <AdminLayout>{page}</AdminLayout>;
+Edit.layout = (page) => <AdminLayout title="Edit">{page}</AdminLayout>;
 export default Edit;

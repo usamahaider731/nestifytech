@@ -58,4 +58,4 @@ function Detail({ role, data }) {
 
 export default Detail;
 
-Detail.layout = (page) => <AdminLayout>{page}</AdminLayout>;
+Detail.layout = (page) => <AdminLayout title="Detail">{page}</AdminLayout>;

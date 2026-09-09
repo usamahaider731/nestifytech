@@ -15,5 +15,5 @@ function Edit({ data, category, type }) {
     );
 }
 
-Edit.layout = (page) => <AdminLayout>{page}</AdminLayout>;
+Edit.layout = (page) => <AdminLayout title="Edit">{page}</AdminLayout>;
 export default Edit;

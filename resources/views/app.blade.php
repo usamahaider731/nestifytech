@@ -7,7 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title inertia>{{ config('app.name', 'Laravel') }}</title>
     <!-- Links -->
-    <link rel="stylesheet" href="{{route('backend.colors')}}">
+    <link rel="stylesheet" href="{{ route('backend.colors') }}?v={{ filemtime(storage_path('app/data/setting.json')) }}">
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -17,7 +17,8 @@
     <!-- Scripts -->
     @routes
     @viteReactRefresh
-    @vite(['resources/js/app.jsx', "resources/js/Pages/{$page['component']}.jsx"])
+    <link rel="shortcut icon" href="{{'/storage/uploads/image/' . $setting['site']['favicon']['value']}}" type="image/x-icon">
+    @vite(['resources/css/backapp.css', 'resources/js/app.jsx', "resources/js/Pages/{$page['component']}.jsx"])
     @inertiaHead
 </head>
 

@@ -71,8 +71,13 @@
         }
     },
     "backend-color": {
+        "color_type": {
+            "value": "purple",
+            "label": "Select Color Theme",
+            "type": "color_type"
+        },
         "secondary": {
-            "value": "#76778e",
+            "value": "#7983a7",
             "label": "secondary",
             "type": "color"
         },
@@ -87,7 +92,7 @@
             "type": "color"
         },
         "res": {
-            "value": "#acabc1",
+            "value": "#b6bee3",
             "label": "res",
             "type": "color"
         },
@@ -102,17 +107,22 @@
             "type": "color"
         },
         "heading": {
-            "value": "#cfcde4",
+            "value": "#d0d4f1",
             "label": "heading",
             "type": "color"
         },
         "permanent": {
-            "value": "#373b50",
+            "value": "#434968",
             "label": "permanent",
             "type": "color"
         }
     },
     "color": {
+        "color_type": {
+            "value": "yellow",
+            "label": "Select Color Theme",
+            "type": "color_type"
+        },
         "secondary": {
             "value": "#2a3746",
             "label": "secondary",

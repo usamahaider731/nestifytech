@@ -40,7 +40,7 @@ export default function EditModule({ module }) {
     };
 
     return (
-        <AdminLayout>
+        <AdminLayout title="EditModule">
             <Head title={`Editing Module: ${module.type} (${module.config_type})`} />
             
             <div className="px-5 py-7 flex flex-col gap-6">

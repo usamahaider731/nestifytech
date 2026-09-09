@@ -18,7 +18,6 @@ function DropdownSelect({
     const [localValue, setLocalValue] = useState('');
     const dropdownRef = useRef(null);
     const prevValueRef = useRef(value);
-
     const safeOptions = Array.isArray(options) ? options : [];
 
     // Sync local value with incoming value ONLY when the prop value changes
@@ -42,7 +41,7 @@ function DropdownSelect({
             const stringValue = (value ?? "").toString();
             const option = safeOptions.find((opt) => (opt.id ?? opt.value ?? "").toString() === stringValue);
             if (option) {
-                setLocalValue(option.title ?? option.name);
+                setLocalValue(option.title ?? option.name ?? option.label);
             } else {
                 setLocalValue(value || '');
             }
@@ -57,9 +56,9 @@ function DropdownSelect({
 
     const handleSelect = (option) => {
         setIsOpen(false);
-        setLocalValue(option.title);
+        setLocalValue(option.title || option.label || option.name || '');
         if (typeof onChange === 'function') {
-            onChange(option.id);
+            onChange(option.id || option.value || option.name || '');
         }
     };
 
@@ -69,7 +68,7 @@ function DropdownSelect({
         if (typeof onChange === 'function') {
             onChange(val);
         }
-        if (!isOpen && val.length > 0) setIsOpen(true);
+        if (!isOpen && val.length > 0 && !disabled && !isLoading && searchable) setIsOpen(true);
     };
 
     useEffect(() => {
@@ -81,12 +80,11 @@ function DropdownSelect({
 
     const filteredOptions = searchable
         ? safeOptions.filter(opt => {
-            const title = (opt?.title || '').toString().toLowerCase();
+            const title = (opt?.title || opt.label || '').toString().toLowerCase();
             const search = (localValue || '').toString().toLowerCase();
             return title.includes(search);
         })
         : safeOptions;
-
     return (
         <div className={`relative ${className}`} ref={dropdownRef}>
             <div className="relative h-10 w-full text-white">
@@ -97,7 +95,6 @@ function DropdownSelect({
                         value={localValue}
                         onChange={handleInput}
                         onFocus={() => !disabled && searchable && setIsOpen(true)}
-                        onClick={() => !disabled && setIsOpen(!isOpen)}
                         className={`h-10 w-full px-5 pr-10 ${disabled ? ' cursor-not-allowed' : 'cursor-text'} ${error ? 'border-red-500 hover:border-red-600' : 'border-secondary/20 hover:border-primary'} transition-all`}
                         disabled={disabled}
                         placeholder="Type or select..."
@@ -114,7 +111,7 @@ function DropdownSelect({
                         <input type="hidden" name={name} value={value} />
                     </div>
                 )}
-                
+
                 <button
                     type="button"
                     onClick={() => !disabled && setIsOpen(!isOpen)}
@@ -131,7 +128,7 @@ function DropdownSelect({
                         <li className="p-3 text-sm text-res italic">Loading...</li>
                     ) : (
                         <>
-                            {localValue.length > 0 && (
+                            {localValue?.length > 0 && (
                                 <li
                                     onClick={() => handleSelect({ id: '', title: '' })}
                                     className="p-3 text-sm cursor-pointer text-red-500 hover:bg-accent/40 italic flex justify-between"
@@ -146,11 +143,11 @@ function DropdownSelect({
                             ) : (
                                 filteredOptions.map((opt) => (
                                     <li
-                                        key={opt.id}
+                                        key={opt.id || opt.value || opt.name}
                                         onClick={() => handleSelect(opt)}
                                         className={`p-3 text-sm cursor-pointer transition-colors ${value === opt.id ? 'bg-primary text-white' : 'hover:bg-accent/40 text-res'}`}
                                     >
-                                        {opt.title}
+                                        {opt.title || opt.label || opt.name}
                                     </li>
                                 ))
                             )}

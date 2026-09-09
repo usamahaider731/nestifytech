@@ -3,11 +3,11 @@
     <div class="relative w-full nav-menu-list">
         <a class="flex w-full h-10 px-5 items-center justify-between">
             <span>{{$value->title}}</span>
-            @if(count($value->allChildren) > 0)
+            @if($value?->allChildren && count($value?->allChildren) > 0)
             <i class="ri-arrow-right-s-line text-base"></i>
             @endif
         </a>
-        @if(count($value->allChildren) > 0)
+        @if($value->allChildren && count($value->allChildren) > 0)
         <div class="absolute nav-menu-list-sub shadow-2xl flex-col w-64 border-t-2 border-primary hidden bg-white left-full top-0">
             @foreach($value->allChildren as $va)
             <div>

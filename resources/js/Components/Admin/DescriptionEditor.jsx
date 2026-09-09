@@ -13,13 +13,16 @@ const DescriptionEditor = ({
     field = {},
     data = {},
 }) => {
-    const [isTranslate, setIsTranslate] = useState(true);
+    const [aiAvailable, setAiAvailable] = useState(false);
     const [message, setMessage] = useState(null);
     const [isError, setIsError] = useState(false);
     const [loading, setLoading] = useState(false);
 
-    /* Check AI availability */
     useEffect(() => {
+        if (!translate || !type) {
+            return;
+        }
+
         fetch(route("ai.check.field"), {
             method: "POST",
             headers: {
@@ -32,11 +35,12 @@ const DescriptionEditor = ({
         })
             .then((res) => res.json())
             .then((res) => {
-                if (res.status === "success") {
-                    setIsTranslate(false);
-                }
+                setAiAvailable(res.status === "success");
+            })
+            .catch(() => {
+                setAiAvailable(false);
             });
-    }, []);
+    }, [translate, type, id]);
 
     const genrateText = () => {
         const requiredFields = field.generate_required || [];
@@ -44,18 +48,18 @@ const DescriptionEditor = ({
         const emptyFields = [];
 
         requiredFields.forEach((key) => {
-            const value = data[key];
+            const fieldValue = data?.[key];
             const isEmpty =
-                value === null ||
-                value === undefined ||
-                value === "" ||
-                value === "[]" ||
-                (Array.isArray(value) && value.length === 0);
+                fieldValue === null ||
+                fieldValue === undefined ||
+                fieldValue === "" ||
+                fieldValue === "[]" ||
+                (Array.isArray(fieldValue) && fieldValue.length === 0);
 
             if (isEmpty) {
                 emptyFields.push(key);
             } else {
-                requiredFieldsValue[key] = value;
+                requiredFieldsValue[key] = fieldValue;
             }
         });
 
@@ -84,15 +88,28 @@ const DescriptionEditor = ({
                 requiredFieldsValue,
             }),
         })
-            .then((res) => res.json())
+            .then(async (res) => {
+                const payload = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(payload?.data || payload?.message || "AI request failed");
+                }
+
+                return payload;
+            })
             .then((res) => {
-                if (res.status === "success") {
-                    setIsTranslate(true);
-                    onChange(res.text); // ✅ update editor
+                if (res.status === "success" && res.text) {
+                    onChange(res.text);
+                    setMessage("Description generated successfully.");
+                    setIsError(false);
                 } else {
                     setIsError(true);
-                    setMessage(res.data || "AI generation failed");
+                    setMessage(res.data || "AI generation failed.");
                 }
+            })
+            .catch((error) => {
+                setIsError(true);
+                setMessage(error.message || "AI generation failed.");
             })
             .finally(() => setLoading(false));
     };
@@ -119,11 +136,12 @@ const DescriptionEditor = ({
                 placeholder={`${placeholder}...`}
             />
 
-            {translate && !isTranslate && (
+            {translate && aiAvailable && (
                 <button
+                    type="button"
                     onClick={genrateText}
                     disabled={loading}
-                    className="size-7 hover:w-24 hover:h-7 overflow-hidden flex items-center group gap-1 duration-300 ease-in-out p-0.75 cursor-pointer bg-primary rounded-full absolute bottom-3 right-4"
+                    className="size-7 hover:w-24 hover:h-7 overflow-hidden flex items-center group gap-1 duration-300 ease-in-out p-0.75 cursor-pointer bg-primary rounded-full absolute bottom-3 right-4 disabled:opacity-60"
                 >
                     <span className="h-full aspect-square rounded-full bg-white/30 flex items-center justify-center">
                         <RiCodeAiLine className="text-white" />

@@ -17,7 +17,7 @@ export default function Modules({ modules }) {
     };
 
     return (
-        <AdminLayout>
+        <AdminLayout title="Modules">
             <Head title="Admin Builder - Modules" />
             
             <div className="px-5 py-7 flex flex-col gap-7">

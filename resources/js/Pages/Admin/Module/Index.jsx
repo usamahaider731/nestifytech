@@ -1,7 +1,7 @@
 import ActionDropdown from '@/Components/ActionDropdown'
 import ImageViwer from '@/Components/Admin/ImageViwer'
-import Checkbox from '@/Components/Checkbox'
-import Table from '@/Components/Table'
+import Checkbox from '@/Components/Admin/Checkbox'
+import Table from '@/Components/Admin/Table'
 import AdminLayout from '@/Layouts/AdminLayout'
 import { Link, usePage } from '@inertiajs/react'
 import React, { useEffect, useMemo, useState } from 'react'
@@ -187,7 +187,7 @@ function Index({ data, table, type }) {
               <Table.TH.Checkbox />
             </Table.TH>
             {columns.map((col) => (
-              <Table.TH width={col.width} className='font-medium' key={col.id}>{col.label}</Table.TH>
+              <Table.TH width={col.width} className='font-medium' key={col.id} sort={col.sort} column={col.column}>{col.label}</Table.TH>
             ))}
           </Table.TR>
         </Table.THead>
@@ -212,6 +212,6 @@ function Index({ data, table, type }) {
 
 export default Index
 Index.layout = (view) => (
-  <AdminLayout>{view}</AdminLayout>
+  <AdminLayout title="Module">{view}</AdminLayout>
 )
 

@@ -35,6 +35,6 @@ function LayoutSetting({ data = [], type = 'home' }) {
 export default LayoutSetting;
 LayoutSetting.layout = (view) => {
   return (
-    <AdminLayout children={view}></AdminLayout>
+    <AdminLayout title="LayoutSetting" children={view}></AdminLayout>
   );
 }

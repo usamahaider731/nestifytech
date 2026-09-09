@@ -1,8 +1,7 @@
 import React from 'react'
 import SvgViewer from './SvgViewer'
 
-function ImageViwer({ image, className = '' }) {
-    console.log(image)
+function ImageViwer({ image='', className = '' }) {
 
     const getImageUrl = (img) => {
         if (!img) return '';
@@ -23,7 +22,7 @@ function ImageViwer({ image, className = '' }) {
         )
     }
 
-    if (image.filename.endsWith('.avif') || image.filename.endsWith('webp')) {
+    if (image?.filename?.endsWith('.avif') || image?.filename.endsWith('webp')) {
         return (
             <img src={getImageUrl(image)} className={`${className}`} alt="" />
         )
@@ -32,7 +31,7 @@ function ImageViwer({ image, className = '' }) {
     if (!image.filename.endsWith('.')) {
         if (image.filename.startsWith('http')) return <img src={image.filename} className={`${className}`} alt="" />;
         return (
-            <img src={route('thumb.image', { filename: image.name, height: '300', width: '300', extension: 'jpg' })} className={`${className}`} alt="" />
+            <img src={route('thumb.image', { filename: image.filename ?? image.name ?? '', height: '300', width: '300', extension: 'jpg' })} className={`${className}`} alt="" />
         )
     }
     else {

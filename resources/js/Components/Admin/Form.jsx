@@ -28,6 +28,17 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
     const [loadingStates, setLoadingStates] = useState({});
     const [rolesList, setRolesList] = useState([]);
 
+    // Re-sync form data when Inertia delivers fresh server props after a save
+    // (happens when there's no redirectUrl and the server re-renders the same edit page)
+    const prevInitialDataRef = React.useRef(null);
+    useEffect(() => {
+        const serialized = JSON.stringify(initialData);
+        if (prevInitialDataRef.current !== null && prevInitialDataRef.current !== serialized) {
+            setData(buildInitialState());
+        }
+        prevInitialDataRef.current = serialized;
+    }, [initialData]);
+
     const id = data.id ?? null;
     const [isSaving, setIsSaving] = useState(false);
 
@@ -46,6 +57,14 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
         const formData = new FormData();
 
         Object.entries(data).forEach(([key, value]) => {
+            // Special case: variations must be sent as a single JSON string because they
+            // contain deeply nested arrays (combinations, attributes) that FormData cannot
+            // expand more than one level deep without corruption.
+            if (key === 'variations') {
+                formData.append(key, JSON.stringify(value));
+                return;
+            }
+
             if (value instanceof File) {
                 formData.append(key, value);
             }

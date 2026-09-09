@@ -99,6 +99,8 @@ class User extends Authenticatable
     public function getUserPermissionsAttribute()
     {
         $roles = $this->roles;
+        // dd($roles);
+
         if (is_string($roles)) {
             $roles = json_decode($roles, true);
         }
@@ -110,7 +112,8 @@ class User extends Authenticatable
         $rolesData = \Illuminate\Support\Facades\DB::table('roles')->whereIn('id', $roles)->get();
         foreach ($rolesData as $role) {
             // New system uses 'permissions' (plural) column
-            $permissions = isset($role->permissions) ? (is_string($role->permissions) ? json_decode($role->permissions, true) : $role->permissions) : null;
+            $permissions = isset($role->permission) ? (is_string($role->permission) ? json_decode($role->permission, true) : $role->permission) : null;
+            // dd($role);
             
             if (is_array($permissions)) {
                 // Flatten nested structure: { "content": ["Product-Read", ...], ... }

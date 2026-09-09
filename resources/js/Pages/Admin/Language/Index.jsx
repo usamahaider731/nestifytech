@@ -1,14 +1,15 @@
 import ImageViwer from '@/Components/Admin/ImageViwer'
 import SvgViewer from '@/Components/Admin/SvgViewer'
-import Checkbox from '@/Components/Checkbox'
-import Table from '@/Components/Table'
+import Checkbox from '@/Components/Admin/Checkbox'
+import Table from '@/Components/Admin/Table'
 import AdminLayout from '@/Layouts/AdminLayout'
 import { Link } from '@inertiajs/react'
 import React, { useState } from 'react'
 import { stripTags } from '@/Utils/helper'
 import { RiDeleteBin6Line, RiFile3Fill, RiFileEditLine } from 'react-icons/ri'
-function Index({ data }) {
-    const [Language, SetLanguage] = useState(data);
+function Index({ languages }) {
+    const [Language, SetLanguage] = useState(languages);
+    console.log(Language);
     return (
         <div className='w-full px-5 py-7 flex flex-col gap-7.5'>
             <Table values={Language} className='w-full'>
@@ -57,7 +58,7 @@ function Index({ data }) {
                             </Table.TD>
                             <Table.TD className='text-center'>
                                 {
-                                    Data.is_default ? <div className='bg-blue-600 text-[10px] font-medium text-white px-3 py-1.25 w-fit mx-auto rounded-full'>Default</div> : 'None'
+                                    Data.is_default == "true" ? <div className='bg-blue-600 text-[10px] font-medium text-white px-3 py-1.25 w-fit mx-auto rounded-full'>Default</div> : 'None'
                                 }
                             </Table.TD>
                             <Table.TD className='flex'>
@@ -80,6 +81,6 @@ function Index({ data }) {
 export default Index
 Index.layout = (view) => {
     return (
-        <AdminLayout>{view}</AdminLayout>
+        <AdminLayout title="Language">{view}</AdminLayout>
     )
 }

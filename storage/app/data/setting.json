@@ -52,7 +52,7 @@
         "featured_tag": {
             "label": "Featured Tag",
             "type": "dropdown",
-            "value": 1176,
+            "value": "Top Product",
             "options": {
                 "model": "App\\Models\\Taxonomy",
                 "type": "tag",
@@ -62,7 +62,7 @@
         "hot_tag": {
             "label": "Hot Tag",
             "type": "dropdown",
-            "value": 1183,
+            "value": "1183",
             "options": {
                 "model": "App\\Models\\Taxonomy",
                 "type": "tag",
@@ -98,17 +98,23 @@
         "deliviry": {
             "label": "Deviliry Package Per Order",
             "type": "text",
-            "value": 250
+            "value": "250"
         },
         "tax_fee": {
             "label": "Tax Fees Per Product",
             "type": "text",
             "value": "2.5"
         },
+        "favicon": {
+            "label": "Favicon",
+            "type": "image",
+            "value": "1788771195_28560d7113ad464752dd19ff0de702a8_favicon.svg",
+            "style": 2
+        },
         "light_logo": {
             "label": "Light Logo",
             "type": "image",
-            "value": "1755141413_28560d7113ad464752dd19ff0de702a8_light_logo.svg"
+            "value": "1755141413_28560d7113ad464752dd19ff0de702a8_dark_logo.svg"
         },
         "dark_logo": {
             "label": "Dark Logo",
@@ -117,8 +123,13 @@
         }
     },
     "backend-color": {
+        "color_type": {
+            "value": "purple",
+            "label": "Color Appearance",
+            "type": "color_type"
+        },
         "secondary": {
-            "value": "#808390",
+            "value": "#7983a7",
             "label": "secondary",
             "type": "color"
         },
@@ -133,7 +144,7 @@
             "type": "color"
         },
         "res": {
-            "value": "#acabc1",
+            "value": "#b6bee3",
             "label": "res",
             "type": "color"
         },
@@ -148,54 +159,223 @@
             "type": "color"
         },
         "heading": {
-            "value": "#cfcde4",
+            "value": "#d0d4f1",
             "label": "heading",
             "type": "color"
         },
         "permanent": {
-            "value": "#373b50",
+            "value": "#434968",
             "label": "permanent",
             "type": "color"
+        },
+        "color_types": {
+            "label": "Color Themes",
+            "type": "repeater",
+            "value": [
+                {
+                    "key": "purple",
+                    "label": "Purple",
+                    "primary": "#7367f0",
+                    "secondary": "#7983a7",
+                    "accent": "#2f3349",
+                    "res": "#b6bee3",
+                    "bg": "#25293c",
+                    "dynamic": "#3a3d53",
+                    "heading": "#d0d4f1",
+                    "permanent": "#434968"
+                },
+                {
+                    "key": "red",
+                    "label": "Red",
+                    "primary": "#ea5455",
+                    "secondary": "#7983a7",
+                    "accent": "#2f3349",
+                    "res": "#b6bee3",
+                    "bg": "#25293c",
+                    "dynamic": "#3a3d53",
+                    "heading": "#d0d4f1",
+                    "permanent": "#434968"
+                },
+                {
+                    "key": "blue",
+                    "label": "Blue",
+                    "primary": "#1e88e5",
+                    "secondary": "#7983a7",
+                    "accent": "#2f3349",
+                    "res": "#b6bee3",
+                    "bg": "#25293c",
+                    "dynamic": "#3a3d53",
+                    "heading": "#d0d4f1",
+                    "permanent": "#434968"
+                },
+                {
+                    "key": "green",
+                    "label": "Green",
+                    "primary": "#28c76f",
+                    "secondary": "#7983a7",
+                    "accent": "#2f3349",
+                    "res": "#b6bee3",
+                    "bg": "#25293c",
+                    "dynamic": "#3a3d53",
+                    "heading": "#d0d4f1",
+                    "permanent": "#434968"
+                },
+                {
+                    "key": "orange",
+                    "label": "Orange",
+                    "primary": "#ff9f43",
+                    "secondary": "#7983a7",
+                    "accent": "#2f3349",
+                    "res": "#b6bee3",
+                    "bg": "#25293c",
+                    "dynamic": "#3a3d53",
+                    "heading": "#d0d4f1",
+                    "permanent": "#434968"
+                },
+                {
+                    "key": "yellow",
+                    "label": "Yellow",
+                    "primary": "#ffc107",
+                    "secondary": "#7983a7",
+                    "accent": "#2f3349",
+                    "res": "#b6bee3",
+                    "bg": "#25293c",
+                    "dynamic": "#3a3d53",
+                    "heading": "#d0d4f1",
+                    "permanent": "#434968"
+                },
+                {
+                    "key": "pink",
+                    "label": "Pink",
+                    "primary": "#ff4c51",
+                    "secondary": "#7983a7",
+                    "accent": "#2f3349",
+                    "res": "#b6bee3",
+                    "bg": "#25293c",
+                    "dynamic": "#3a3d53",
+                    "heading": "#d0d4f1",
+                    "permanent": "#434968"
+                },
+                {
+                    "key": "teal",
+                    "label": "Teal",
+                    "primary": "#00bad1",
+                    "secondary": "#7983a7",
+                    "accent": "#2f3349",
+                    "res": "#b6bee3",
+                    "bg": "#25293c",
+                    "dynamic": "#3a3d53",
+                    "heading": "#d0d4f1",
+                    "permanent": "#434968"
+                }
+            ],
+            "fields": [
+                {
+                    "name": "key",
+                    "label": "Theme Key",
+                    "type": "text",
+                    "placeholder": "e.g. red"
+                },
+                {
+                    "name": "label",
+                    "label": "Theme Name",
+                    "type": "text",
+                    "placeholder": "e.g. Red"
+                },
+                {
+                    "name": "primary",
+                    "label": "Primary",
+                    "type": "color",
+                    "value": "#7367f0"
+                },
+                {
+                    "name": "secondary",
+                    "label": "Secondary",
+                    "type": "color",
+                    "value": "#7983a7"
+                },
+                {
+                    "name": "accent",
+                    "label": "Accent",
+                    "type": "color",
+                    "value": "#2f3349"
+                },
+                {
+                    "name": "res",
+                    "label": "Res",
+                    "type": "color",
+                    "value": "#b6bee3"
+                },
+                {
+                    "name": "bg",
+                    "label": "Background",
+                    "type": "color",
+                    "value": "#25293c"
+                },
+                {
+                    "name": "dynamic",
+                    "label": "Dynamic",
+                    "type": "color",
+                    "value": "#3a3d53"
+                },
+                {
+                    "name": "heading",
+                    "label": "Heading",
+                    "type": "color",
+                    "value": "#d0d4f1"
+                },
+                {
+                    "name": "permanent",
+                    "label": "Permanent",
+                    "type": "color",
+                    "value": "#434968"
+                }
+            ]
         }
     },
     "color": {
+        "color_type": {
+            "value": "purple",
+            "label": "Color Appearance",
+            "type": "color_type"
+        },
         "secondary": {
-            "value": "#2a3746",
+            "value": "#7983a7",
             "label": "secondary",
             "type": "color"
         },
         "primary": {
-            "value": "#fed700",
+            "value": "#7367f0",
             "label": "primary",
             "type": "color"
         },
         "accent": {
-            "value": "#f5f5f5",
+            "value": "#2f3349",
             "label": "accent",
             "type": "color"
         },
         "res": {
-            "value": "#333e48",
+            "value": "#b6bee3",
             "label": "res",
             "type": "color"
         },
         "bg": {
-            "value": "#f8f8f8",
+            "value": "#25293c",
             "label": "bg",
             "type": "color"
         },
         "dynamic": {
-            "value": "#ddd",
+            "value": "#3a3d53",
             "label": "dynamic",
             "type": "color"
         },
         "heading": {
-            "value": "#7c7c7c",
+            "value": "#d0d4f1",
             "label": "heading",
             "type": "color"
         },
         "permanent": {
-            "value": "#eaeaea",
+            "value": "#434968",
             "label": "permanent",
             "type": "color"
         },
@@ -203,6 +383,135 @@
             "value": "#7c7c7c",
             "label": "text",
             "type": "color"
+        },
+        "common": {
+            "value": "#25293c",
+            "label": "common",
+            "type": "color"
+        },
+        "border": {
+            "value": "#ebebeb",
+            "label": "border",
+            "type": "color"
+        },
+        "simple": {
+            "value": "#474747",
+            "label": "simple",
+            "type": "color"
+        },
+        "info": {
+            "value": "#e8eff4",
+            "label": "info",
+            "type": "color"
+        },
+        "color_types": {
+            "label": "Color Themes",
+            "type": "repeater",
+            "value": [
+                {
+                    "key": "Yellow",
+                    "label": "Yellow",
+                    "primary": "#fed700",
+                    "secondary": "#2242a3",
+                    "accent": "#8a8a8a",
+                    "res": "#626262",
+                    "bg": "#f8f8f8",
+                    "dynamic": "#1f1f1f",
+                    "heading": "#3a3a3a",
+                    "permanent": "#f9f9f9",
+                    "text": "#202326",
+                    "common": "#c3c3c3",
+                    "simple": "#474747",
+                    "border": "#bfbfbf",
+                    "info": "#e8eff4"
+                }
+            ],
+            "fields": [
+                {
+                    "name": "key",
+                    "label": "Theme Key",
+                    "type": "text",
+                    "placeholder": "e.g. red"
+                },
+                {
+                    "name": "label",
+                    "label": "Theme Name",
+                    "type": "text",
+                    "placeholder": "e.g. Red"
+                },
+                {
+                    "name": "primary",
+                    "label": "Primary",
+                    "type": "color",
+                    "value": "#7367f0"
+                },
+                {
+                    "name": "secondary",
+                    "label": "Secondary",
+                    "type": "color",
+                    "value": "#7983a7"
+                },
+                {
+                    "name": "accent",
+                    "label": "Accent",
+                    "type": "color",
+                    "value": "#2f3349"
+                },
+                {
+                    "name": "res",
+                    "label": "Res",
+                    "type": "color",
+                    "value": "#b6bee3"
+                },
+                {
+                    "name": "bg",
+                    "label": "Background",
+                    "type": "color",
+                    "value": "#25293c"
+                },
+                {
+                    "name": "dynamic",
+                    "label": "Dynamic",
+                    "type": "color",
+                    "value": "#3a3d53"
+                },
+                {
+                    "name": "heading",
+                    "label": "Heading",
+                    "type": "color",
+                    "value": "#d0d4f1"
+                },
+                {
+                    "name": "permanent",
+                    "label": "Permanent",
+                    "type": "color",
+                    "value": "#434968"
+                },
+                {
+                    "name": "text",
+                    "label": "Text",
+                    "type": "color",
+                    "value": "#7c7c7c"
+                },
+                {
+                    "name": "common",
+                    "label": "Common",
+                    "type": "color",
+                    "value": "#c3c3c3"
+                },
+                {
+                    "name": "simple",
+                    "label": "Simple",
+                    "value": "#474747",
+                    "type": "color"
+                },
+                {
+                    "name": "border",
+                    "label": "Border",
+                    "value": "#ebebeb",
+                    "type": "color"
+                }
+            ]
         }
     },
     "ai": {
@@ -217,6 +526,8 @@
             "label": "Ai Platform (That you will use for ai)",
             "type": "dropdown",
             "style": 2,
+            "searchable": false,
+            "search": false,
             "options": {
                 "openai": {
                     "label": "Open AI",
@@ -225,12 +536,16 @@
                 "groq": {
                     "label": "Groq",
                     "value": "groq"
+                },
+                "experientiallabs": {
+                    "label": "Experientiallabs",
+                    "value": "experientiallabs"
                 }
             },
-            "value": "groq"
+            "value": "experientiallabs"
         },
         "api_key": {
-            "value": "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",
+            "value": "xpl_4fc7c958cccd721e76cc647e1925e97ee449e184",
             "label": "Api Key",
             "type": "text",
             "style": "2"

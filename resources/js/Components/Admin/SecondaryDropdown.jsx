@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import TextInput from './TextInput';
+import TextInput from '../TextInput';
 import { RiArrowRightSLine, RiExpandUpDownLine } from 'react-icons/ri';
 
 function SecondaryDropdown({ className = '', onChange = '', none = false, placeholder = 'Select Category', options = [], value = '', valueInTitle = false }) {

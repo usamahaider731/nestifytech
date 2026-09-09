@@ -19,7 +19,7 @@
     <meta name="keywords" content="{{ $seo_keys }}">
 
     {{-- Dynamic theme variables --}}
-    <link rel="stylesheet" href="{{ route('colors') }}">
+    <link rel="stylesheet" href="{{ route('colors') }}?v={{ filemtime(storage_path('app/data/setting.json')) }}">
     {{-- Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,7 +31,7 @@
     {{-- Scripts --}}
     <script src="{{url('assets/js/function.js')}}"></script>
     {{-- Tailwind + Custom CSS --}}
-    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/app.jsx'])
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('header')
 </head>
 

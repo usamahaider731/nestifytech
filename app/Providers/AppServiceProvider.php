@@ -41,9 +41,9 @@ class AppServiceProvider extends ServiceProvider
         $layoutArr = json_decode($layout, true);
         $qes = [];
         $datas = [];
-
         if (!empty($layoutArr['layout'])) {
             foreach ($layoutArr['layout'] as $key => $value) {
+                $qes = [];
                 foreach ($value as $keys => $values) {
                     foreach ($values['fields'] as $k => $val) {
                         $qes[$val['name']] = $val['value'];
@@ -52,14 +52,20 @@ class AppServiceProvider extends ServiceProvider
                 $datas[$key] = $qes;
             }
         }
-
         $data = json_decode($settings, true) ?: [];
-        if (DB::getSchemaBuilder()->hasTable('menu')) {
-            $allMenus = DB::table('menu')->get()->toArray();
-            $menu = $this->buildMenuTree($allMenus);
-        } else {
-            $menu = [];
+        $menu = [];
+
+        if (!$this->app->runningInConsole()) {
+            try {
+                if (DB::getSchemaBuilder()->hasTable('menu')) {
+                    $allMenus = DB::table('menu')->get()->toArray();
+                    $menu = $this->buildMenuTree($allMenus);
+                }
+            } catch (\Throwable $e) {
+                $menu = [];
+            }
         }
+
         $sidebarMenu = json_decode($sidebarMenuContent, true) ?: [];
         $data = array_merge($data, ['menu' => $menu], ['layout' => $datas], ['sidebar_menu' => $sidebarMenu]);
 

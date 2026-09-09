@@ -89,15 +89,12 @@ const ImageUploader = React.memo(function ImageUploader({
         }
 
         const updatedImages = images.filter((_, i) => i !== index);
-        console.log(images);
 
         setImages(updatedImages);
-        console.log(updatedImages);
 
         const updatedValue = multiple
             ? updatedImages.map(img => img.name).filter(Boolean)
             : null;
-        console.log(updatedValue);
         onChange(updatedValue);
     };
 
@@ -124,7 +121,7 @@ const ImageUploader = React.memo(function ImageUploader({
                     {images.map((img, index) => (
                         <div
                             key={index}
-                            className="w-[180px] h-[230px] shadow-[0_0.1875rem_0.75rem_0_rgba(19,17,32,_0.2)] flex-col rounded overflow-hidden"
+                            className="w-[160px] h-[230px] shadow-[0_0.1875rem_0.75rem_0_rgba(19,17,32,_0.2)] flex-col rounded overflow-hidden"
                         >
                             <div className="w-full h-[140px] border-b border-res p-3 flex items-center justify-center shadow-[0_0.1875rem_0.75rem_0_rgba(19,17,32,_0.2)]">
                                 <img

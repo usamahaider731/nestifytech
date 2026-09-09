@@ -3,14 +3,12 @@ import React from 'react'
 import AdminLayout from '@/Layouts/AdminLayout'
 import Form from './Form'
 
-function Setting({ type, name }) {
-  
-
+function Setting({ type, name, colorPalettes = {} }) {
   return (
-   <Form Data={type} name={name} />
+   <Form Data={type} name={name} colorPalettes={colorPalettes} />
   )
 }
 
 export default Setting
 
-Setting.layout = (page) => <AdminLayout>{page}</AdminLayout>
+Setting.layout = (page) => <AdminLayout title="Setting">{page}</AdminLayout>

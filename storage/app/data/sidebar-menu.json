@@ -8,7 +8,7 @@
         "title": "Dashboard",
         "icon": "ri-dashboard-line",
         "route": "admin.dashboard",
-        "permission": "dashboard"
+        "permission": "dashboard-read"
       },
       {
         "id": "users",
@@ -50,7 +50,7 @@
               "type": "site"
             },
             "icon": "ri-global-line",
-            "permission": "site-read"
+            "permission": "setting-read"
           },
           {
             "id": "font-setting",
@@ -60,7 +60,7 @@
               "type": "font"
             },
             "icon": "ri-font-size-2",
-            "permission": "font-read"
+            "permission": "setting-read"
           },
           {
             "id": "color-setting",
@@ -70,7 +70,7 @@
               "type": "color"
             },
             "icon": "ri-palette-line",
-            "permission": "color-read"
+            "permission": "setting-read"
           },
           {
             "id": "backend-color-setting",
@@ -80,7 +80,7 @@
               "type": "backend-color"
             },
             "icon": "ri-palette-line",
-            "permission": "color-read"
+            "permission": "setting-read"
           },
           {
             "id": "ai-setting",
@@ -90,34 +90,34 @@
               "type": "ai"
             },
             "icon": "ri-sparkling-2-line",
-            "permission": "ai-write"
-          },
-          {
-            "id": "transition-setting",
-            "title": "Translation",
-            "route": "admin.translations",
-            "icon": "ri-translate-2",
-            "permission": "transition-read"
+            "permission": "setting-write"
           }
         ]
+      },
+      {
+        "id": "translation",
+        "title": "Translation",
+        "icon": "ri-translate-2",
+        "permission": "transition-read",
+        "route": "admin.translations"
       },
       {
         "id": "language",
         "title": "Language",
         "icon": "ri-translate-ai",
-        "permission": "site-read",
+        "permission": "setting-read",
         "menu": [
           {
             "id": "view-language",
             "title": "View",
             "route": "admin.lang.index",
-            "permission": "site-read"
+            "permission": "setting-read"
           },
           {
             "id": "create-language",
             "title": "Create Language",
             "route": "admin.lang.create",
-            "permission": "site-write"
+            "permission": "setting-write"
           }
         ]
       }
@@ -271,7 +271,7 @@
         "params": {
           "type": "header"
         },
-        "permission": "header-layout-setting"
+        "permission": "layout-write"
       },
       {
         "id": "footer",
@@ -281,14 +281,39 @@
         "params": {
           "type": "footer"
         },
-        "permission": "footer-layout-setting"
+        "permission": "layout-write"
       },
       {
         "id": "menu",
         "title": "Menu",
         "icon": "ri-menu-2-line",
         "route": "menu.setting",
-        "permission": "menu-setting"
+        "permission": "layout-write"
+      },
+      {
+        "id": "component",
+        "title": "Components",
+        "icon": "ri-layout-bottom-line",
+        "menu": [
+          {
+            "id": "components_product_card_v1",
+            "title": "Product Card v1",
+            "route": "layout.setting",
+            "params": {
+              "type": "Product_Card_V1"
+            },
+            "permission": "layout-write"
+          },
+          {
+            "id": "components_product_card_v2",
+            "title": "Product Card v2",
+            "route": "layout.setting",
+            "params": {
+              "type": "Product_Card_V2"
+            },
+            "permission": "layout-write"
+          }
+        ]
       },
       {
         "id": "home",
@@ -298,7 +323,7 @@
         "params": {
           "type": "home"
         },
-        "permission": "home-layout-setting"
+        "permission": "layout-write"
       }
     ]
   },
@@ -311,9 +336,8 @@
         "title": "Admin Builder",
         "icon": "ri-hammer-line",
         "route": "admin.builder.index",
-        "permission": "site-write"
+        "permission": "developer-write"
       }
     ]
   }
 ]
-

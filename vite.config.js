@@ -9,7 +9,6 @@ export default defineConfig({
                 'resources/css/app.css',
                 'resources/css/backapp.css',
                 'resources/js/app.jsx',
-                // 'resources/js/script.js',
             ],
             refresh: false,
         }),

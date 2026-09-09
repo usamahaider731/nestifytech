@@ -24,6 +24,8 @@ Route::controller(FilterController::class)->group(function () {
 });
 Route::controller(FrontendController::class)->group(function () {
     Route::get('/', 'index')->name('index');
+    Route::get('/product/{sku}/{id}', 'singleProduct')->name('singleproduct');
+    Route::get('/get_languages', 'get_languages')->name('languages');
 });
 Route::get('/image/{filename}_{height}_{width}.{extension}', [MediaController::class, 'thumbimageUrl'])
     ->where([
@@ -36,23 +38,27 @@ Route::get('/image/{filename}_{height}_{width}.{extension}', [MediaController::c
 Route::get('/search/keywords', [SearchController::class, 'search'])->name('search.keywords');
 Route::get('/backend-colors.min.css', [SettingController::class, 'backendcolors'])->name('backend.colors');
 Route::get('/colors.min.css', [SettingController::class, 'colors'])->name('colors');
+Route::get('/api/color-themes', [SettingController::class, 'publicColorThemes'])->name('color.themes');
 Route::get('/search-pages.json', [SettingController::class, 'searchPages'])->name('search.pages');
 Route::get('/updateData', [SettingController::class, 'updateData'])->name('update');
 
 Route::post('/ai/generate/text', [AiController::class, 'generateText'])->name('ai.generate.text');
-
+Route::get('prac', function () {
+    return view('prac');
+});
 Route::prefix('/admin')->middleware(['auth', 'verified'])->group(function () {
-    Route::get('/', [DashboardController::class, 'dashboard'])->name('admin.dashboard')->middleware('permission:dashboard');
+    Route::get('/', [DashboardController::class, 'dashboard'])->name('admin.dashboard');
     Route::controller(SettingController::class)->group(function () {
-        // ... (existing routes)
         Route::get('/setting/{type}', 'setting')->name('admin.setting');
         Route::post('/setting/{type}', 'settingUpdate')->name('setting.update');
+        Route::post('/setting/{type}/active-colors', 'updateActiveColors')->name('setting.update.colors');
         Route::get('/transition', 'translations')->name('admin.translations')->middleware('permission:transition-read');
         Route::get('/countryUpdate', 'updateCountry')->name('admin.country.update');
+        Route::get('/location/import-cities', 'importCities')->name('admin.location.import-cities');
         Route::post('/transition', 'updateTranslation')->name('admin.translations.update')->middleware('permission:transition-write');
     });
     // Admin Builder Routes
-    Route::prefix('/builder')->controller(AdminBuilderController::class)->middleware('permission:site-write')->group(function () {
+    Route::prefix('/builder')->controller(AdminBuilderController::class)->middleware('permission:developer-write')->group(function () {
         Route::get('/', 'index')->name('admin.builder.index');
         Route::get('/edit/{type}/{config_type}', 'edit')->name('admin.builder.edit');
         Route::post('/update/{id}', 'update')->name('admin.builder.update');
@@ -68,9 +74,9 @@ Route::prefix('/admin')->middleware(['auth', 'verified'])->group(function () {
         Route::get('/{id?}', 'index')->name('module.index.with_id');
     });
     // Keeping legacy names for backward compatibility by mapping them to ModuleController
-    Route::get('/users', [ModuleController::class, 'index'])->defaults('type', 'user')->name('users')->middleware('permission:user-read');
-    Route::get('/user/edit/{id}', [ModuleController::class, 'edit'])->defaults('type', 'user')->name('user.edit')->middleware('permission:user-write');
-    Route::post('/user/edit/{id}', [ModuleController::class, 'submit'])->defaults('type', 'user')->name('submit.user')->middleware('permission:user-write');
+    Route::get('/users', [ModuleController::class, 'index'])->defaults('type', 'user')->name('users');
+    Route::get('/{type}/edit/{id}', [ModuleController::class, 'edit'])->defaults('type', 'user')->name('user.edit');
+    Route::post('/{type}/edit/{id}', [ModuleController::class, 'submit'])->defaults('type', 'user')->name('submit.user');
     
     Route::group(['middleware' => ['permission:role-read']], function() {
         Route::get('/users-role', [ModuleController::class, 'index'])->defaults('type', 'role')->name('role');
@@ -116,7 +122,7 @@ Route::prefix('/admin')->middleware(['auth', 'verified'])->group(function () {
     Route::get('/brand', fn() => redirect()->route('taxonomy.index', ['type' => 'brand']))->name('brand.index');
     Route::get('/tags', fn() => redirect()->route('taxonomy.index', ['type' => 'tag']))->name('admin.tags.index');
  
-    Route::prefix('/language')->controller(LanguageController::class)->middleware('permission:site-read')->group(function () {
+    Route::prefix('/language')->controller(LanguageController::class)->middleware('permission:setting-read')->group(function () {
         Route::get('/', 'index')->name('admin.lang.index');
         Route::get('/create', 'create')->name('admin.lang.create');
         Route::get('/edit/{prefix}', 'edit')->name('admin.lang.edit');
@@ -125,11 +131,12 @@ Route::prefix('/admin')->middleware(['auth', 'verified'])->group(function () {
     });
     Route::prefix('/layout')->controller(LayoutController::class)->group(function () {
         Route::get('/type/{type}', 'layout')->name('layout.setting');
-        Route::get('/menu', 'menu')->name('menu.setting')->middleware('permission:menu-setting');
+        Route::get('/menu', 'menu')->name('menu.setting')->middleware('permission:layout-write');
         Route::post('/type/{type}', 'submitLayoutPages')->name('layout.submit');
-        Route::post('/menu', 'menuSubmit')->name('menu.submit')->middleware('permission:menu-setting');
-        Route::post('/menu/update/{id}', 'menuUpdate')->name('menu.update')->middleware('permission:menu-setting');
-        Route::delete('/menu/{id}', 'menuDestroy')->name('menu.destroy')->middleware('permission:menu-setting');
+        Route::post('/menu', 'menuSubmit')->name('menu.submit')->middleware('permission:layout-write');
+        Route::post('/menu/reorder', 'menuReorder')->name('menu.reorder')->middleware('permission:layout-write');
+        Route::post('/menu/update/{id}', 'menuUpdate')->name('menu.update')->middleware('permission:layout-write');
+        Route::delete('/menu/{id}', 'menuDestroy')->name('menu.destroy')->middleware('permission:layout-write');
     });
     Route::prefix('/reviews')->controller(ModuleController::class)->middleware('permission:review-read')->group(function () {
         Route::get('/', 'index')->defaults('type', 'review')->name('admin.reviews.index');
@@ -138,6 +145,9 @@ Route::prefix('/admin')->middleware(['auth', 'verified'])->group(function () {
     Route::prefix('/ai')->controller(AiController::class)->group(function () {
         Route::post('/check/field', 'checkField')->name('ai.check.field');
     });
+
+    // Temp image upload (used by VariationsSelector for async uploads)
+    Route::post('/upload-image-temp', [MediaController::class, 'uploadTemp'])->name('admin.upload.image.temp');
 });
 require __DIR__ . '/auth.php';
 // require __DIR__ . '/api.php';

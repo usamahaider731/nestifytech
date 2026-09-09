@@ -11,5 +11,5 @@ function Table() {
 
 export default Table
 Table.layout = (page)=>(
-    <AdminLayout>{page}</AdminLayout>
+    <AdminLayout title="Table">{page}</AdminLayout>
 )

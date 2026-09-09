@@ -1,0 +1,37 @@
+.embla {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.embla__viewport {
+  overflow: hidden;
+  width: 100%;
+}
+
+.embla__container {
+  display: flex;
+  will-change: transform;
+}
+
+.embla__slide {
+  position: relative;
+  min-width: 0; /* Important for flex items */
+  flex: 0 0 calc(100% / var(--slides-to-show, 1));
+}
+
+.embla__prev,
+.embla__next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  /* background: rgba(0, 0, 0, 0.5); */
+  color: #fff;
+  border: none;
+  /* padding: 0.5rem 1rem; */
+  cursor: pointer;
+  z-index: 10;
+}
+
+.embla__prev { left: 10px; }
+.embla__next { right: 10px; }

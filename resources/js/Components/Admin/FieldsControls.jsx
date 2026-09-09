@@ -6,15 +6,15 @@ import ImageUploader from '@/Components/Admin/ImageUploader';
 import DescriptionEditor from '@/Components/Admin/DescriptionEditor';
 import DropdownSelect from '@/Components/DropdownSelect';
 import CustomFields from './CustomFields';
-import SecondaryDropdown from '../SecondaryDropdown';
+import SecondaryDropdown from './SecondaryDropdown';
 import PrimaryDropdown from '../PrimaryDropdown';
-import MultipleDropdown from '../MultipleDropdown';
+import MultipleDropdown from './MultipleDropdown';
 import DynamicOptions from './DynamicOptions';
 import InputField from './InputField';
 import Textarea from '../Textarea';
 import Repeater from './Repeater';
 import DateRangePicker from './Calendar';
-import PhoneInput from '../PhoneInput';
+import PhoneInput from './PhoneInput';
 import AttributesSelector from './AttributesSelector';
 import PermissionMatrix from './PermissionMatrix';
 import VariationsSelector from './VariationsSelector';
@@ -62,7 +62,7 @@ const FieldControls = ({
     if (field.type === 'text' || field.type === 'number') {
         if (!field.show_on || data[field.show_on] === "text" || data[field.show_on] === 'color') {
 
-          let  value = getNestedValue(data, field.name)
+            let value = getNestedValue(data, field.name)
             if (typeof value === 'undefined' && field.value) {
                 value = field.value;
             }

@@ -1,4 +1,3 @@
-import '../css/backapp.css';
 import './bootstrap';
 
 import { createInertiaApp } from '@inertiajs/react';
@@ -16,7 +15,7 @@ createInertiaApp({
         ),
     setup({ el, App, props }) {
         const root = createRoot(el);
-
+        console.log(props)
         root.render(<App {...props} />);
     },
     progress: {

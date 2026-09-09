@@ -1,5 +1,8 @@
 <?php
+
 namespace App\Http\Controllers;
+
+use App\Models\PostTaxonomy;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +20,7 @@ class ApiController extends Controller
 
     public function menu(Request $request)
     {
-        $query = DB::table('menu');
+        $query = DB::table('menu')->orderBy('sort_order', 'asc');
         if ($request->location) {
             $query->where('location', $request->location);
         }
@@ -120,26 +123,109 @@ class ApiController extends Controller
 
     public function get_taxonomies(Request $request)
     {
-        $taxonomies = DB::table('taxonomies')->where('status', 'publish');
-        if ($request->id) $taxonomies->where('id', $request->id);
+        $taxonomies = PostTaxonomy::query();
+        $taxonomies->where('status', 'publish');
+
+        if ($request->id) {
+            $ids = is_array($request->id) ? $request->id : explode(',', $request->id);
+            $taxonomies->whereIn('id', $ids);
+        }
         if (isset($request->parent_id)) $taxonomies->where('parent_id', $request->parent_id);
         if ($request->type) $taxonomies->where('type', $request->type);
         if ($request->slug) $taxonomies->where('slug', $request->slug);
 
+        if ($request->post) $taxonomies->with('posts');
+        if ($request->image) $taxonomies->with('image');
+        if ($request->meta) $taxonomies->with('meta');
+
         $result = $taxonomies->get();
+
+        $result->each(function ($item) {
+            if ($item->relationLoaded('meta')) {
+                $item->setRelation('meta', $item->meta->keyBy('key'));
+            }
+        });
+
         return response()->json($result);
     }
+    public function get_products(Request $request)
+    {
+        $products = PostTaxonomy::forTable('posts')->where(['status' => 'publish', 'type' => 'product']);
+        if ($request->id) $products->where('id', $request->id);
+        if ($request->keyword) $products->where('title', 'like', "%{$request->keyword}%");
+        if ($request->latest) $products->orderBy('created_at', 'desc');
+        if ($request->limit) $products->limit($request->limit);
+        if ($request->image) $products->with('image');
+        if ($request->meta) $products->with('meta');
+        if ($request->gallery) $products->with('gallery');
+        if ($request->parent) $products->with('parent');
 
+        $result = $products->get();
+
+        $result->each(function ($item) {
+            if ($item->relationLoaded('meta')) {
+                $item->setRelation('meta', $item->meta->keyBy('key'));
+            }
+        });
+
+        return response()->json($result);
+    }
+    public function get_image($parent_id, $parent_type = 'taxonomy', $is_multiple = false)
+    {
+        if (!$is_multiple) {
+            $table = DB::table('media')->where(['type' => $parent_type, 'parent_id' => $parent_id])->first();
+        } else {
+            $table = DB::table('media')->where(['type' => $parent_type, 'parent_id' => $parent_id])->get();
+        }
+        return $table;
+    }
     public function get_posts(Request $request)
     {
-        $posts = DB::table('posts')->where('status', 'publish');
+        $posts = PostTaxonomy::forTable('posts')->where('status', 'publish');
+
         if ($request->id) $posts->where('id', $request->id);
+        if ($request->sku) $posts->where('sku', $request->sku);
         if ($request->keyword) $posts->where('title', 'like', "%{$request->keyword}%");
         if ($request->type) $posts->where('type', $request->type);
         if ($request->limit) $posts->limit($request->limit);
+        if ($request->latest) $posts->orderBy('created_at', 'desc');
+        if ($request->image) $posts->with('image');
+        if ($request->gallery) $posts->with('gallery');
+        if ($request->meta || $request->category || $request->brand || $request->tags) {
+            $posts->with('meta');
+        }
+
+        // if ($request->varation) {
+            // $posts->with('variations');
+        // }
+     
+     
+            $result = $posts->get();
         
-        $result = $posts->get();
-        return response()->json($result);
+
+        $result->each(function ($item) {
+            if ($item->relationLoaded('meta')) {
+                $item->setRelation('meta', $item->meta->keyBy('key'));
+            }
+        });
+
+        if ($request->category) {
+            $result = PostTaxonomy::get_attribute($result, 'taxonomies', '', 'from_meta', 'category', '');
+        }
+        if ($request->brand) {
+            $result = PostTaxonomy::get_attribute($result, 'taxonomies', '', 'from_meta', 'brand', '');
+        }
+        if ($request->tags) {
+            $result = PostTaxonomy::get_attribute($result, 'taxonomies', '', 'from_meta', 'tags', '');
+        }
+        if ($request->address) {
+            $result = PostTaxonomy::get_attribute($result, 'taxonomies', '', 'from_meta', ['state', 'city'], '');
+        }
+
+        if ($request->single) {
+            $result = $result->first();
+        }
+        return response()->json($result); 
     }
 
     public function setting()
@@ -168,10 +254,9 @@ class ApiController extends Controller
         }
 
         $data = json_decode($settings, true) ?: [];
-        $menu = DB::table('menu')->where('parent_id', 0)->get();
-        // Simple manual recursion for children if needed
+        $menu = DB::table('menu')->where('parent_id', 0)->orderBy('sort_order', 'asc')->get();
         foreach ($menu as $m) {
-            $m->children = DB::table('menu')->where('parent_id', $m->id)->get();
+            $m->children = DB::table('menu')->where('parent_id', $m->id)->orderBy('sort_order', 'asc')->get();
         }
 
         $data = array_merge($data, ['menu' => $menu], ['layout' => $datas]);

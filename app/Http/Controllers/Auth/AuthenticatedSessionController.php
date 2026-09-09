@@ -34,7 +34,7 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return Inertia::location('/dashboard');
+        return Inertia::location('/admin');
     }
 
     /**

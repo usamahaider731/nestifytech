@@ -1,7 +1,7 @@
-import Checkbox from '@/Components/Checkbox';
+import Checkbox from '@/Components/Admin/Checkbox';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
+import PrimaryButton from '@/Components/Admin/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';

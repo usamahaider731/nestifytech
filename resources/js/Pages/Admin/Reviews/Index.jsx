@@ -137,4 +137,4 @@ function ReviewIndex({ reviews: initialReviews }) {
 }
 
 export default ReviewIndex;
-ReviewIndex.layout = page => <AdminLayout>{page}</AdminLayout>;
+ReviewIndex.layout = page => <AdminLayout title="Reviews">{page}</AdminLayout>;

@@ -10,5 +10,5 @@ function Color({color}) {
 
 export default Color
 Color.layout = (page) => (
-    <AdminLayout>{page}</AdminLayout>
+    <AdminLayout title="Color">{page}</AdminLayout>
 )

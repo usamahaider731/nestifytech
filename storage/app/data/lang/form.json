@@ -1,0 +1,63 @@
+[
+    {
+        "title": "Language Information",
+        "style": "main",
+        "fields": [
+            {
+                "label": "Name",
+                "type": "text",
+                "style": 1,
+                "name": "name",
+                "placeholder": "Language Name"
+            },
+            {
+                "label": "Prefix",
+                "type": "text",
+                "style": 1,
+                "name": "prefix",
+                "placeholder": "Enter Language prefix"
+            },
+            {
+                "label": "Direction",
+                "type": "dropdown",
+                "name": "direction",
+                "style": 2,
+                "default": "ltr",
+                "searchable": false,
+                "options": [
+                    {
+                        "value": "ltr",
+                        "label": "Left to Right(ltr)"
+                    },
+                    {
+                        "value": "rtl",
+                        "label": "Right to Left(rtl)"
+                    }
+                ]
+            },
+            {
+                "name": "active",
+                "type": "checkbox",
+                "label": "Active"
+            },
+            {
+                "name": "is_default",
+                "type": "checkbox",
+                "label": "Default"
+            }
+        ]
+    },
+    {
+        "title": "Language Image",
+        "style": "sidebar",
+        "fields": [
+            {
+                "label": "",
+                "name": "image",
+                "type": "image",
+                "style": 1,
+                "filename": ""
+            }
+        ]
+    }
+]

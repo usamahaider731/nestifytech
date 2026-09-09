@@ -109,6 +109,7 @@
                 "id": "parent",
                 "column": "parent_id",
                 "label": "PARENT",
+                "sort": true,
                 "type": "badage",
                 "value_table": "taxonomies",
                 "value_condition": {
@@ -122,6 +123,7 @@
                 "column": "discount",
                 "type": "discount",
                 "meta": true,
+                "sort": true,
                 "meta_key": "discount",
                 "meta_value_type": "string",
                 "label": "DISCOUNT",

@@ -13,4 +13,4 @@ function Index({ site }) {
 
 export default Index
 
-Index.layout = (page) => <AdminLayout>{page}</AdminLayout>
+Index.layout = (page) => <AdminLayout title="Setting">{page}</AdminLayout>

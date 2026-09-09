@@ -108,6 +108,6 @@ function Translations({ translations, languages = [], currentLocale = 'en' }) {
     );
 }
 
-Translations.layout = (page) => <AdminLayout>{page}</AdminLayout>;
+Translations.layout = (page) => <AdminLayout title="Translations">{page}</AdminLayout>;
 
 export default Translations;

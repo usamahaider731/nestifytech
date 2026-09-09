@@ -18,5 +18,5 @@ function Create({ data, type }) {
     );
 }
 
-Create.layout = (page) => <AdminLayout>{page}</AdminLayout>;
+Create.layout = (page) => <AdminLayout title="Create">{page}</AdminLayout>;
 export default Create;

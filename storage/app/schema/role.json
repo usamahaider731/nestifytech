@@ -102,6 +102,23 @@
             ]
         },
         {
+            "title": "Dashboard",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Dashboard Access",
+                    "name": "permission.dashboard",
+                    "type": "matrix",
+                    "rows": [
+                        "Dashboard"
+                    ],
+                    "cols": [
+                        "Read"
+                    ]
+                }
+            ]
+        },
+        {
             "title": "Content Management permission",
             "style": "main",
             "fields": [
@@ -114,7 +131,7 @@
                         "Category",
                         "Brand",
                         "Tag",
-                        "Attribute"
+                        "Attributes"
                     ],
                     "cols": [
                         "Read",
@@ -136,7 +153,9 @@
                         "User",
                         "Role",
                         "Setting",
-                        "Layout"
+                        "Transition",
+                        "Layout",
+                        "Developer"
                     ],
                     "cols": [
                         "Read",

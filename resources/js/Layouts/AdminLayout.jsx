@@ -2,16 +2,25 @@ import AdminPanel from '@/Components/Admin/AdminPanel'
 import Header from '@/Components/Admin/Header'
 import React from 'react'
 import { ToastContainer } from 'react-toastify'
+import { ThemeProvider, useTheme } from '@/contexts/ThemeContext'
 
-function AdminLayout({ children }) {
+import { Head, usePage } from '@inertiajs/react'
+
+function AdminLayoutInner({ children, title }) {
+    const { theme } = useTheme();
+    const { setting } = usePage().props;
+    const siteName = setting?.site?.name?.value || 'NestifyTech';
+    const documentTitle = title ? `${title} - ${siteName}` : siteName;
+
     return (
-        <div className='flex w-full min-h-screen bg-bg font-primary text-heading'>
-            <aside className='w-[260px] min-w-[260px] h-screen sticky top-0 left-0 border-r border-r-white/5 bg-accent/60 backdrop-blur-md'>
+        <div className='flex w-full min-h-screen bg-bg font-primary text-heading antialiased selection:bg-primary selection:text-white'>
+            <Head title={documentTitle} />
+            <aside className='w-[260px] min-w-[260px] h-screen sticky top-0 left-0 border-r border-permanent/40 bg-accent z-30 shadow-lg'>
                 <AdminPanel />
             </aside>
-            <div className='flex-1 flex flex-col h-screen overflow-x-hidden'>
+            <div className='flex-1 flex flex-col min-h-screen bg-bg'>
                 <Header />
-                <main className='p-6 flex-1'>
+                <main className='px-6 pb-8 flex-1'>
                     {children}
                 </main>
             </div>
@@ -25,9 +34,16 @@ function AdminLayout({ children }) {
                 pauseOnFocusLoss
                 draggable
                 pauseOnHover
-                theme="dark" />
-
+                theme={theme} />
         </div>
+    )
+}
+
+function AdminLayout({ children, title }) {
+    return (
+        <ThemeProvider>
+            <AdminLayoutInner title={title}>{children}</AdminLayoutInner>
+        </ThemeProvider>
     )
 }
 

@@ -34,7 +34,7 @@ function AccordionPanel({ title, icon, children, defaultOpen = true }) {
     );
 }
 
-function MenuItem({ item, depth = 0, onEdit, onRemove, allItems }) {
+function MenuItem({ item, depth = 0, onEdit, onRemove, allItems, onReorder }) {
     const [expanded, setExpanded] = useState(false);
     const [name, setName] = useState(item.name);
     const [link, setLink] = useState(item.link ?? '');
@@ -63,8 +63,31 @@ function MenuItem({ item, depth = 0, onEdit, onRemove, allItems }) {
         }
     };
 
+    const handleDragStart = (e) => {
+        e.dataTransfer.setData('text/plain', item.id);
+        e.dataTransfer.effectAllowed = 'move';
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        const sourceId = e.dataTransfer.getData('text/plain');
+        if (sourceId && parseInt(sourceId) !== item.id) {
+            onReorder(parseInt(sourceId), item.id);
+        }
+    };
+
     return (
-        <div className={depth > 0 ? 'ml-8 mt-2' : 'mt-2'}>
+        <div className={depth > 0 ? 'ml-8 mt-2' : 'mt-2'}
+             draggable
+             onDragStart={handleDragStart}
+             onDragOver={handleDragOver}
+             onDrop={handleDrop}
+        >
             <div
                 className={`
                     border rounded-lg transition-all duration-150
@@ -171,6 +194,7 @@ function MenuItem({ item, depth = 0, onEdit, onRemove, allItems }) {
                     allItems={allItems}
                     onEdit={onEdit}
                     onRemove={onRemove}
+                    onReorder={onReorder}
                 />
             ))}
         </div>
@@ -324,6 +348,37 @@ function Menu({ menu, menu_options }) {
         } catch {
             toast.dismiss(r);
             toast.error('Failed to remove');
+        }
+    };
+
+    const handleReorder = async (sourceId, targetId) => {
+        const sourceIndex = allMenus.findIndex(i => i.id === sourceId);
+        const targetIndex = allMenus.findIndex(i => i.id === targetId);
+        if (sourceIndex === -1 || targetIndex === -1 || sourceId === targetId) return;
+
+        const sourceItem = allMenus[sourceIndex];
+        const targetItem = allMenus[targetIndex];
+
+        const newMenus = [...allMenus];
+        newMenus.splice(sourceIndex, 1);
+        
+        const newTargetIndex = newMenus.findIndex(i => i.id === targetId);
+        newMenus.splice(newTargetIndex, 0, {...sourceItem, parent_id: targetItem.parent_id});
+        
+        const siblings = newMenus.filter(i => i.parent_id === targetItem.parent_id);
+        siblings.forEach((sib, index) => {
+            sib.sort_order = index;
+            const idx = newMenus.findIndex(i => i.id === sib.id);
+            if(idx > -1) newMenus[idx].sort_order = index;
+        });
+
+        setAllMenus(newMenus);
+        try {
+            await axios.post(route('menu.reorder'), { 
+                items: siblings.map(s => ({ id: s.id, sort_order: s.sort_order }))
+            });
+        } catch(err) {
+            toast.error('Failed to save order');
         }
     };
 
@@ -623,6 +678,7 @@ function Menu({ menu, menu_options }) {
                                             allItems={locationItems}
                                             onEdit={handleEdit}
                                             onRemove={handleRemove}
+                                            onReorder={handleReorder}
                                         />
                                     ))}
                                 </div>
@@ -660,4 +716,4 @@ function Menu({ menu, menu_options }) {
 }
 
 export default Menu;
-Menu.layout = (view) => <AdminLayout>{view}</AdminLayout>;
+Menu.layout = (view) => <AdminLayout title="Menu">{view}</AdminLayout>;

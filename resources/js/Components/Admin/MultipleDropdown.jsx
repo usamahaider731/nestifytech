@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import TextInput from './TextInput';
+import TextInput from '../TextInput';
 import { RiCheckLine, RiExpandUpDownLine } from 'react-icons/ri';
 import { input } from '@/Utils/classes';
 

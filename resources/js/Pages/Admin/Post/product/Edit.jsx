@@ -12,4 +12,4 @@ function Edit({ Data = [], initialData = {} }) {
     );
 }
 export default Edit;
-Edit.layout = (page) => <AdminLayout>{page}</AdminLayout>;
+Edit.layout = (page) => <AdminLayout title="Edit">{page}</AdminLayout>;

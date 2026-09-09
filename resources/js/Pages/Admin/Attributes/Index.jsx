@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 import AdminLayout from '@/Layouts/AdminLayout';
-import Table from '@/Components/Table';
-import Checkbox from '@/Components/Checkbox';
+import Table from '@/Components/Admin/Table';
+import Checkbox from '@/Components/Admin/Checkbox';
 import { RiCloseLine, RiDeleteBin2Fill, RiDeleteBin3Fill, RiDropLine, RiTableView } from 'react-icons/ri';
 import { TbDots, TbDotsVertical } from 'react-icons/tb';
 import Popup from '@/Components/Admin/Popup';
-import PrimaryButton from '@/Components/PrimaryButton';
+import PrimaryButton from '@/Components/Admin/PrimaryButton';
 import axios, { Axios } from 'axios';
 import { toast } from 'react-toastify';
 import { Link } from '@inertiajs/react';
@@ -37,10 +37,10 @@ function Index({ attributes, table }) {
     return (
         <div className='w-11/12 mx-auto pt-10 gap-4 flex flex-col'>
             <div className='flex items-center'></div>
-            <Table 
-                values={attributes} 
-                onDataUpdate={SetAttributes} 
-                searchRoute="admin.attributes.index" 
+            <Table
+                values={attributes}
+                onDataUpdate={SetAttributes}
+                searchRoute="admin.attributes.index"
                 keywords={table?.keywords}
                 paginationPerPage={table?.paginationPerPage}
                 paginationList={table?.paginationList}
@@ -162,7 +162,7 @@ function Index({ attributes, table }) {
 
 export default Index
 Index.layout = (view) => (
-    <AdminLayout>
+    <AdminLayout title="Attributes">
         {view}
     </AdminLayout>
 )

@@ -10,11 +10,13 @@ class SearchController extends Controller
     public function search(Request $request)
     {
         $keyword = $request->get("keyword");
-        
-        // 1. Load Static Pages from JSON
-        $jsonPath = storage_path('app/data/search_pages.json');
-        $staticPages = \File::exists($jsonPath) ? json_decode(\File::get($jsonPath), true) : [];
-        
+        $staticPages = [];
+        if ($request->client == false) {
+            // 1. Load Static Pages from JSON
+            $jsonPath = storage_path('app/data/search_pages.json');
+            $staticPages = \File::exists($jsonPath) ? json_decode(\File::get($jsonPath), true) : [];
+        }
+
         $results = [];
 
         // Filter static pages if keyword is present
@@ -31,15 +33,22 @@ class SearchController extends Controller
                 }
             }
 
-            // 2. Search Products (Title, Description)
-            $posts = DB::table('posts')->where('type', 'product')
-                ->where(function($query) use ($keyword) {
-                    $query->where("title", "like", "%" . $keyword . "%")
-                          ->orWhere("description", "like", "%" . $keyword . "%");
+            // 2. Search Products (Title, Description, MetaField in post_meta table for seo_title, seo_description, meta_keywords, meta_title, meta_description)
+            $posts = DB::table('posts')
+                ->where('type', 'product')
+                ->where(function ($query) use ($keyword) {
+                    $query->where('title', 'like', '%' . $keyword . '%')
+                        ->orWhere('description', 'like', '%' . $keyword . '%')
+                        ->orWhereExists(function ($subQuery) use ($keyword) {
+                            $subQuery->select(DB::raw(1))
+                                ->from('post_meta')
+                                ->whereColumn('post_meta.post_id', 'posts.id')
+                                ->whereIn('post_meta.key', ['seo_title', 'seo_description', 'seo_keywords'])
+                                ->where('post_meta.value', 'like', '%' . $keyword . '%');
+                        });
                 })
                 ->limit(6)
                 ->get();
-
             foreach ($posts as $post) {
                 $results[] = [
                     'title' => $post->title,
@@ -68,34 +77,40 @@ class SearchController extends Controller
 
             // 4. AISearch (Optional: add a special suggestion item or call AI controller)
             // For now, adding a semantic suggestion entry
-            if (count($results) > 0) {
-                 $results[] = [
-                    'title' => 'Search "' . $keyword . '" with AI Agent',
-                    'route' => '#ai-search',
-                    'category' => 'AI Power',
-                    'icon' => 'RiAiGenerateText',
-                    'type' => 'AI',
-                    'is_ai' => true
-                 ];
-            }
+            if (!$request->client) {
+                if (count($results) > 0) {
+                    $results[] = [
+                        'title' => 'Search "' . $keyword . '" with AI Agent',
+                        'route' => '#ai-search',
+                        'category' => 'AI Power',
+                        'icon' => 'RiAiGenerateText',
+                        'type' => 'AI',
+                        'is_ai' => true
+                    ];
+                }
 
-            // 5. Search Users (Optional, keep it small)
-            $users = DB::table('users')->where("name", "like", "%" . $keyword . "%")
-                ->limit(3)
-                ->get();
-            foreach ($users as $user) {
-                $results[] = [
-                    'title' => $user->name,
-                    'route' => route('user.edit', ['id' => $user->id]),
-                    'category' => 'Users',
-                    'icon' => 'FaUser',
-                    'type' => 'User'
-                ];
+                // 5. Search Users (Optional, keep it small)
+                $users = DB::table('users')->where("name", "like", "%" . $keyword . "%")
+                    ->limit(3)
+                    ->get();
+                foreach ($users as $user) {
+                    $results[] = [
+                        'title' => $user->name,
+                        'route' => route('user.edit', ['id' => $user->id, 'type' => 'user']),
+                        'category' => 'Users',
+                        'icon' => 'FaUser',
+                        'type' => 'User'
+                    ];
+                }
             }
         } else {
-            // Default results
-            foreach ($staticPages as $page) {
-                $results[] = array_merge($page, ['type' => 'Page']);
+            if (!$request->client) {
+
+
+                // Default results
+                foreach ($staticPages as $page) {
+                    $results[] = array_merge($page, ['type' => 'Page']);
+                }
             }
         }
 

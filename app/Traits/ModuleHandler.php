@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 trait ModuleHandler
@@ -52,9 +53,9 @@ trait ModuleHandler
                     foreach ($db['schema'] as $column) {
                         $name = $column['name'];
                         $type = $column['type'] ?? 'string';
-                        
+
                         $col = $table->$type($name);
-                        
+
                         if ($column['nullable'] ?? false) $col->nullable();
                         if ($column['unique'] ?? false) $col->unique();
                         if (isset($column['default'])) $col->default($column['default']);
@@ -183,21 +184,22 @@ trait ModuleHandler
      */
     public function handleSubmission(Request $request, string $type, $id = null)
     {
+
         $db = $this->loadModuleConfig($type, 'DB');
         if (!$db) {
             $db = $this->loadModuleConfig($type, 'Schema');
         }
-
         $tableName = $db['table'] ?? Str::plural($type);
-        $isEdit = $request->has('id') || $id;
-        $id = $id ?? $request->id;
+        $id = $id ?? $request->input('id');
+        $isEdit = $id !== null && $id !== '';
         $rules = $db['validation'] ?? \App\Helpers\ModuleHelper::getValidationRules($db);
         if ($isEdit) {
+
             foreach ($rules as $field => &$rule) {
                 if (is_string($rule) && str_contains($rule, 'unique:')) {
                     $parts = explode(':', $rule);
                     $params = explode(',', $parts[1]);
-                    
+
                     if (count($params) === 1) {
                         $rule = $parts[0] . ':' . $params[0] . ',' . $field . ',' . $id;
                     } else {
@@ -209,13 +211,27 @@ trait ModuleHandler
         $request->validate($rules);
 
         try {
-            DB::beginTransaction();
 
+            DB::beginTransaction();
+            
             $data = [];
             foreach ($db['main_fields'] ?? [] as $field) {
-                if ($request->has($field))
+                if ($field === 'updated_at') {
+                    $data[$field] = now();
+                    continue;
+                }
+                if ($field === 'created_at') {
+                    if (!$isEdit) {
+                        $data[$field] = now();
+                    }
+                    continue;
+                }
+                if ($request->has($field)) {
                     $data[$field] = $request->input($field);
+                }
             }
+
+            // dd($data);
             if (isset($db['columns'])) {
                 foreach ($db['columns'] as $col) {
                     $field = $col['id'];
@@ -246,20 +262,21 @@ trait ModuleHandler
             }
 
             if ($isEdit) {
+                
                 DB::table($tableName)->where('id', $id)->update($data);
+               
                 $recordId = $id;
             } else {
                 $recordId = DB::table($tableName)->insertGetId($data);
             }
-            $record = (object) array_merge(['id' => $recordId], $data);
 
+            $record = (object) array_merge(['id' => $recordId], $data);
             if (method_exists($this, 'beforeSaveHook')) {
                 $this->beforeSaveHook($request, $record, $type, $isEdit);
             }
+            
 
             $mediaType = ($tableName === 'posts') ? 'post' : (($tableName === 'taxonomies') ? 'taxonomy' : $type);
-
-            // Image handling (via DB directly)
             if ($request->hasFile('image')) {
                 $this->handleDBImageUpload($request->file('image'), $recordId, $mediaType);
             }
@@ -278,7 +295,7 @@ trait ModuleHandler
             if (Schema::hasTable($metaTable)) {
                 $foreignKey = $db['meta_key'] ?? (\Illuminate\Support\Str::singular($tableName) . '_id');
                 $ignore = array_merge(
-                    $db['main_fields'] ?? [], 
+                    $db['main_fields'] ?? [],
                     ['id', '_token', 'image', 'gallery', 'attributes', 'variations', 'meta', 'created_at', 'updated_at']
                 );
                 $metaData = $request->except($ignore);
@@ -299,17 +316,11 @@ trait ModuleHandler
                 $attributes = is_string($rawAttributes) ? json_decode($rawAttributes, true) : $rawAttributes;
                 if (is_array($attributes)) {
                     DB::table('attribute_values')->where(['parent_id' => $recordId, 'parent_type' => Str::singular($tableName)])->delete();
-
-                    // Supports:
-                    // - flat: [{key,value,group?}]
-                    // - nested: [{group, attributes:[{key,value}]}]
                     $flat = [];
-                    // When sent via FormData, nested "attributes" is often JSON-stringified per-group.
                     $firstNested = (!empty($attributes) && isset($attributes[0]) && array_key_exists('attributes', $attributes[0]));
                     if ($firstNested) {
                         foreach ($attributes as $g) {
                             $gName = $g['group'] ?? null;
-
                             $inner = $g['attributes'] ?? [];
                             if (is_string($inner)) {
                                 $decoded = json_decode($inner, true);
@@ -317,9 +328,7 @@ trait ModuleHandler
                                     $inner = $decoded;
                                 }
                             }
-
                             if (!is_array($inner)) $inner = [];
-
                             foreach ($inner as $a) {
                                 $flat[] = [
                                     'group' => $gName,
@@ -331,13 +340,9 @@ trait ModuleHandler
                     } else {
                         $flat = $attributes;
                     }
-
                     foreach ($flat as $attr) {
                         if (empty($attr['key'])) continue;
-
                         $group = $attr['group'] ?? null;
-
-                        // Find or create the attribute definition
                         $attrDef = DB::table('attributes')->where('name', $attr['key'])->first();
                         if (!$attrDef) {
                             $insert = ['name' => $attr['key'], 'type' => 'text'];
@@ -345,16 +350,13 @@ trait ModuleHandler
                             $attrDefId = DB::table('attributes')->insertGetId($insert);
                             $attrDef = (object)['id' => $attrDefId];
                         } else {
-                            // If group not provided, try to inherit from definition
                             if (!$group && !empty($attrDef->group)) {
                                 $group = $attrDef->group;
                             }
                             if ($group && empty($attrDef->group)) {
-                            // Backfill group on definition when missing
-                            DB::table('attributes')->where('id', $attrDef->id)->update(['group' => $group]);
+                                DB::table('attributes')->where('id', $attrDef->id)->update(['group' => $group]);
                             }
                         }
-
                         DB::table('attribute_values')->insert([
                             'attribute_id' => $attrDef->id,
                             'parent_id' => $recordId,
@@ -368,69 +370,237 @@ trait ModuleHandler
                 }
             }
 
-            // 2. Handle Variations
             if ($request->has('variations')) {
                 $rawVariations = $request->input('variations');
                 $variations = is_string($rawVariations) ? json_decode($rawVariations, true) : $rawVariations;
+                // TEMP DEBUG - remove after confirming
+                \Log::info('RAW variations input type: ' . gettype($rawVariations));
+                \Log::info('DECODED variations:', ['data' => $variations]);
                 if (is_array($variations)) {
                     $variationsTable = $db['variations_table'] ?? (Str::singular($tableName) . '_variations');
                     if (Schema::hasTable($variationsTable)) {
                         $foreignKey = $db['meta_key'] ?? (Str::singular($tableName) . '_id');
+                        $oldVariations = DB::table($variationsTable)->where($foreignKey, $recordId)->get();
                         
-                        // Clear existing variations for this record (Simplified sync)
-                        $oldVariations = DB::table($variationsTable)->where($foreignKey, $recordId)->pluck('id');
-                        DB::table('product_variation_values')->whereIn('variation_id', $oldVariations)->delete();
-                        DB::table($variationsTable)->where($foreignKey, $recordId)->delete();
+                        // Separate existing parent and child rows by color
+                        $oldParentByColor = []; // colorKey => parent variation id
+                        $oldChildrenByColor = []; // colorKey => [child variation ids]
+                        foreach ($oldVariations as $ov) {
+                            $colorKey = $ov->color ?: 'no_color';
+                            if (is_null($ov->parent_id)) {
+                                $oldParentByColor[$colorKey] = $ov->id;
+                            } else {
+                                $oldChildrenByColor[$colorKey][] = $ov->id;
+                            }
+                        }
+                        
+                        // Fallback: old data (before parent_id migration) has no parent_id concept
+                        // In this case, treat first ID per color as parent, rest as children
+                        $oldGroupedByColor = [];
+                        foreach ($oldVariations as $ov) {
+                            $colorKey = $ov->color ?: 'no_color';
+                            $oldGroupedByColor[$colorKey][] = $ov->id;
+                        }
+
+                        $keptVariationIds = [];
 
                         foreach ($variations as $variation) {
-                            $vId = DB::table($variationsTable)->insertGetId([
-                                $foreignKey => $recordId,
-                                'price' => $variation['price'] ?? 0,
-                                'stock' => $variation['stock'] ?? 0,
+                            $color = $variation['color'] ?? null;
+                            $colorKey = $color ?: 'no_color';
+                            
+                            $combinations = $variation['combinations'] ?? [];
+                            while (is_string($combinations)) {
+                                $decoded = json_decode($combinations, true);
+                                if (json_last_error() === JSON_ERROR_NONE) {
+                                    $combinations = $decoded;
+                                } else {
+                                    break;
+                                }
+                            }
+                            if (!is_array($combinations)) $combinations = [];
+                            
+                            $sharedAttributes = $variation['shared_attributes'] ?? [];
+                            while (is_string($sharedAttributes)) {
+                                $decoded = json_decode($sharedAttributes, true);
+                                if (json_last_error() === JSON_ERROR_NONE) {
+                                    $sharedAttributes = $decoded;
+                                } else {
+                                    break;
+                                }
+                            }
+                            if (!is_array($sharedAttributes)) $sharedAttributes = [];
+                            
+                            if (empty($combinations)) {
+                                $combinations = [
+                                    [
+                                        'price' => $variation['price'] ?? 0,
+                                        'stock' => $variation['stock'] ?? 0,
+                                        'attributes' => []
+                                    ]
+                                ];
+                            }
+                            
+                            \Log::info('Flattening combinations:', [
+                                'color' => $color,
+                                'combinations' => $combinations
                             ]);
+                            
+                            $existingChildrenForColor = $oldChildrenByColor[$colorKey] ?? [];
+                            $childIdIndex = 0;
 
-                            // Save Variation Image if provided (filename from the VariationsSelector)
-                            if (!empty($variation['image'])) {
+                            // 1. Handle Parent Variation (Color Group)
+                            $parentPrice = isset($variation['price']) && $variation['price'] !== '' ? (float)$variation['price'] : 0;
+                            $parentStock = isset($variation['stock']) && $variation['stock'] !== '' ? (int)$variation['stock'] : 0;
+                            
+                            $parentDataToSave = [
+                                $foreignKey => $recordId,
+                                'price'     => $parentPrice,
+                                'stock'     => $parentStock,
+                                'color'     => $color,
+                                'parent_id' => null,
+                                'combinations' => null, 
+                                'shared_attributes' => null,
+                            ];
+                            
+                            // Reuse old parent row or insert new
+                            if (isset($oldParentByColor[$colorKey])) {
+                                $parentVId = $oldParentByColor[$colorKey];
+                                DB::table($variationsTable)->where('id', $parentVId)->update($parentDataToSave);
+                                
+                                $oldOptionIds = DB::table('product_variation_values')
+                                    ->where('variation_id', $parentVId)
+                                    ->pluck('attribute_option_id')
+                                    ->toArray();
+                                if (!empty($oldOptionIds)) {
+                                    DB::table('attribute_values')->whereIn('id', $oldOptionIds)->delete();
+                                }
+                                DB::table('product_variation_values')->where('variation_id', $parentVId)->delete();
+                            } else {
+                                $parentVId = DB::table($variationsTable)->insertGetId($parentDataToSave);
+                            }
+                            $keptVariationIds[] = $parentVId;
+                            
+                            // Save shared attributes to Parent Variation
+                            foreach ($sharedAttributes as $attr) {
+                                if (empty($attr['key'])) continue;
+                                $attrDef = DB::table('attributes')->where('name', $attr['key'])->first();
+                                if (!$attrDef) {
+                                    $attrDefId = DB::table('attributes')->insertGetId(['name' => $attr['key'], 'type' => 'text']);
+                                    $attrDef = (object)['id' => $attrDefId];
+                                }
+                                
+                                $attrValId = DB::table('attribute_values')->insertGetId([
+                                    'attribute_id' => $attrDef->id,
+                                    'parent_id' => $recordId,
+                                    'parent_type' => Str::singular($tableName),
+                                    'value' => $attr['value'] ?? '',
+                                    'created_at' => now(),
+                                    'updated_at' => now(),
+                                ]);
+                                
+                                DB::table('product_variation_values')->insert([
+                                    'variation_id' => $parentVId,
+                                    'attribute_option_id' => $attrValId
+                                ]);
+                            }
+                            
+                            // 2. Handle Child Variations (Combinations)
+                            foreach ($combinations as $combo) {
+                                $price = isset($combo['price']) && $combo['price'] !== '' ? (float)$combo['price'] : $parentPrice;
+                                $stock = isset($combo['stock']) && $combo['stock'] !== '' ? (int)$combo['stock'] : 0;
+                                
+                                $childDataToSave = [
+                                    $foreignKey => $recordId,
+                                    'price'     => $price,
+                                    'stock'     => $stock,
+                                    'color'     => $color,
+                                    'parent_id' => $parentVId,
+                                    'combinations' => null, 
+                                    'shared_attributes' => null,
+                                ];
+                                
+                                // Reuse old child rows or insert new
+                                if (isset($existingChildrenForColor[$childIdIndex])) {
+                                    $childVId = $existingChildrenForColor[$childIdIndex];
+                                    DB::table($variationsTable)->where('id', $childVId)->update($childDataToSave);
+                                    
+                                    $oldOptionIds = DB::table('product_variation_values')
+                                        ->where('variation_id', $childVId)
+                                        ->pluck('attribute_option_id')
+                                        ->toArray();
+                                    if (!empty($oldOptionIds)) {
+                                        DB::table('attribute_values')->whereIn('id', $oldOptionIds)->delete();
+                                    }
+                                    DB::table('product_variation_values')->where('variation_id', $childVId)->delete();
+                                } else {
+                                    $childVId = DB::table($variationsTable)->insertGetId($childDataToSave);
+                                }
+                                
+                                $keptVariationIds[] = $childVId;
+                                $childIdIndex++;
+                                
+                                // Save combination-specific attributes to Child Variation
+                                $comboAttrs = $combo['attributes'] ?? [];
+                                foreach ($comboAttrs as $attr) {
+                                    if (empty($attr['key'])) continue;
+                                    $attrDef = DB::table('attributes')->where('name', $attr['key'])->first();
+                                    if (!$attrDef) {
+                                        $attrDefId = DB::table('attributes')->insertGetId(['name' => $attr['key'], 'type' => 'text']);
+                                        $attrDef = (object)['id' => $attrDefId];
+                                    }
+                                    
+                                    $attrValId = DB::table('attribute_values')->insertGetId([
+                                        'attribute_id' => $attrDef->id,
+                                        'parent_id' => $recordId,
+                                        'parent_type' => Str::singular($tableName),
+                                        'value' => $attr['value'] ?? '',
+                                        'created_at' => now(),
+                                        'updated_at' => now(),
+                                    ]);
+                                    
+                                    DB::table('product_variation_values')->insert([
+                                        'variation_id' => $childVId,
+                                        'attribute_option_id' => $attrValId
+                                    ]);
+                                }
+                            }
+                            
+                            // Re-associate image to the parent variation
+                            if (!empty($variation['image']) && $parentVId) {
                                 DB::table('media')->updateOrInsert(
-                                    ['parent_id' => $vId, 'type' => Str::singular($tableName) . '_variation'],
+                                    ['parent_id' => $parentVId, 'type' => Str::singular($tableName) . '_variation'],
                                     ['filename' => $variation['image'], 'updated_at' => now()]
                                 );
                             }
-
-                            // Save Variation Attributes (Size, Color loop)
-                            $vAttrs = $variation['size'] ?? [];
-                            if (is_string($vAttrs)) $vAttrs = json_decode($vAttrs, true) ?: [];
-
-                            foreach ($vAttrs as $vAttr) {
-                                if (empty($vAttr['key'])) continue;
-
-                                $attrDef = DB::table('attributes')->where('name', $vAttr['key'])->first();
-                                if (!$attrDef) {
-                                    $attrDefId = DB::table('attributes')->insertGetId(['name' => $vAttr['key'], 'type' => 'text']);
-                                    $attrDef = (object)['id' => $attrDefId];
-                                }
-
-                                $optionId = DB::table('attribute_values')->insertGetId([
-                                    'attribute_id' => $attrDef->id,
-                                    'parent_id' => $recordId, // Link to product for context
-                                    'parent_type' => 'variation_option',
-                                    'value' => $vAttr['value'] ?? ''
-                                ]);
-
-                                DB::table('product_variation_values')->insert([
-                                    'variation_id' => $vId,
-                                    'attribute_option_id' => $optionId
-                                ]);
+                        }
+                        
+                        $allOldIds = $oldVariations->pluck('id')->toArray();
+                        $toDelete = array_diff($allOldIds, $keptVariationIds);
+                        
+                        if (!empty($toDelete)) {
+                            $oldOptionIds = DB::table('product_variation_values')
+                                ->whereIn('variation_id', $toDelete)
+                                ->pluck('attribute_option_id')
+                                ->toArray();
+                            
+                            if (!empty($oldOptionIds)) {
+                                DB::table('attribute_values')->whereIn('id', $oldOptionIds)->delete();
                             }
+                            
+                            DB::table('product_variation_values')->whereIn('variation_id', $toDelete)->delete();
+                            DB::table($variationsTable)->whereIn('id', $toDelete)->delete();
+                            
+                            DB::table('media')->whereIn('parent_id', $toDelete)
+                                ->where('type', Str::singular($tableName) . '_variation')->delete();
                         }
                     }
                 }
             }
-
             DB::commit();
             return ['success' => true, 'message' => $isEdit ? ucfirst($type) . ' updated successfully' : ucfirst($type) . ' created successfully', 'data' => $record];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
+            report($e);
             return ['success' => false, 'message' => 'Error: ' . $e->getMessage() . ' in ' . $e->getFile() . ' on line ' . $e->getLine()];
         }
     }
@@ -438,7 +608,7 @@ trait ModuleHandler
     protected function handleDBImageUpload($file, $parentId, $type)
     {
         $filename = time() . '_' . $file->getClientOriginalName();
-        $file->move(public_path('uploads/image'), $filename);
+        Storage::disk('public')->putFileAs('uploads/image', $file, $filename);
 
         DB::table('media')->updateOrInsert(
             ['parent_id' => $parentId, 'type' => $type],
@@ -449,7 +619,7 @@ trait ModuleHandler
     protected function handleDBGalleryUpload($file, $parentId, $type)
     {
         $filename = time() . '_' . uniqid() . '_' . $file->getClientOriginalName();
-        $file->move(public_path('uploads/image'), $filename);
+        Storage::disk('public')->putFileAs('uploads/image', $file, $filename);
 
         DB::table('media')->insert([
             'parent_id' => $parentId,

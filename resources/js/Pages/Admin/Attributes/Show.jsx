@@ -17,7 +17,7 @@ function Show() {
 
 export default Show
 Show.layout=(view)=>(
-    <AdminLayout>
+    <AdminLayout title="Show">
         {view}
     </AdminLayout>
 )
