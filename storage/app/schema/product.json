@@ -51,7 +51,6 @@
         "fixed_fields": {
             "user_id": "auth_id",
             "type": "product"
-            
         },
         "relations": {
             "image": "single_image",
@@ -235,6 +234,7 @@
         {
             "title": "Media Assets",
             "style": "main",
+            "tab": "Gallery",
             "fields": [
                 {
                     "label": "Featured Image",
@@ -252,6 +252,7 @@
         {
             "title": "Search Engine Optimization (SEO)",
             "style": "main",
+            "tab": "SEO",
             "fields": [
                 {
                     "label": "SEO Title",
@@ -276,14 +277,22 @@
             ]
         },
         {
-            "title": "Specifications & Variations",
+            "title": "Technical Attributes",
             "style": "main",
+            "tab": "Attributes",
             "fields": [
                 {
                     "label": "Technical Attributes",
                     "name": "attributes",
                     "type": "attributes"
-                },
+                }
+            ]
+        },
+        {
+            "title": "Product Variations",
+            "style": "main",
+            "tab": "Variations",
+            "fields": [
                 {
                     "label": "Product Variations",
                     "name": "variations",
@@ -332,6 +341,7 @@
         {
             "title": "Address",
             "style": "main",
+            "tab": "Address",
             "fields": [
                 {
                     "name": "address",
@@ -375,6 +385,11 @@
                     "label": "Sale Price",
                     "type": "text",
                     "name": "second_price"
+                },
+                {
+                    "label": "Stock Quantity",
+                    "type": "number",
+                    "name": "stock"
                 }
             ]
         }

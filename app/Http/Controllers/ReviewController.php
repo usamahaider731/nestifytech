@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ReviewController extends Controller
 {
+    public $review_table = "reviews";
     // ====== ADMIN METHODS ======
     public function index()
     {
@@ -33,17 +35,18 @@ class ReviewController extends Controller
         $request->validate([
             'post_id' => 'required|exists:posts,id',
             'rating'  => 'required|integer|min:1|max:5',
-            'comment' => 'nullable|string'
+            'comment' => 'nullable|string',
+            'type' => 'required|in:general,verified'
         ]);
 
-        $review = \App\Models\Review::create([
+        $review = DB::table($this->review_table)->insert([
             'user_id' => auth()->id() ?? null,
             'post_id' => $request->post_id,
             'rating'  => $request->rating,
             'comment' => $request->comment,
-            'status'  => 'pending' // auto-approve or pending based on settings, using pending for now
+            'status'  => 'pending',
+            'type' => $request->type
         ]);
-
         return response()->json(['message' => 'Review submitted successfully', 'review' => $review]);
     }
 

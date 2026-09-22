@@ -9,8 +9,10 @@ class SearchController extends Controller
 {
     public function search(Request $request)
     {
-        $keyword = $request->get("keyword");
+        $keyword = trim((string) $request->get('keyword', ''));
+        $type = strtolower((string) $request->get('type', 'all'));
         $staticPages = [];
+
         if ($request->client == false) {
             // 1. Load Static Pages from JSON
             $jsonPath = storage_path('app/data/search_pages.json');
@@ -21,63 +23,70 @@ class SearchController extends Controller
 
         // Filter static pages if keyword is present
         if ($keyword) {
-            foreach ($staticPages as $page) {
-                if (stripos($page['title'], $keyword) !== false || stripos($page['category'], $keyword) !== false) {
+            if (in_array($type, ['all', 'page'], true)) {
+                foreach ($staticPages as $page) {
+                    if (stripos($page['title'], $keyword) !== false || stripos($page['category'], $keyword) !== false) {
+                        $results[] = [
+                            'title' => $page['title'],
+                            'route' => $page['route'],
+                            'category' => $page['category'],
+                            'icon' => $page['icon'],
+                            'type' => 'Page'
+                        ];
+                    }
+                }
+            }
+
+            if (in_array($type, ['all', 'product'], true)) {
+                // 2. Search Products (Title, Description, MetaField in post_meta table for seo_title, seo_description, meta_keywords, meta_title, meta_description)
+                $posts = DB::table('posts')
+                    ->where('type', 'product')
+                    ->where(function ($query) use ($keyword) {
+                        $query->where('title', 'like', '%' . $keyword . '%')
+                            ->orWhere('description', 'like', '%' . $keyword . '%')
+                            ->orWhereExists(function ($subQuery) use ($keyword) {
+                                $subQuery->select(DB::raw(1))
+                                    ->from('post_meta')
+                                    ->whereColumn('post_meta.post_id', 'posts.id')
+                                    ->whereIn('post_meta.key', ['seo_title', 'seo_description', 'seo_keywords'])
+                                    ->where('post_meta.value', 'like', '%' . $keyword . '%');
+                            });
+                    })
+                    ->limit(6)
+                    ->get();
+
+                foreach ($posts as $post) {
                     $results[] = [
-                        'title' => $page['title'],
-                        'route' => $page['route'],
-                        'category' => $page['category'],
-                        'icon' => $page['icon'],
-                        'type' => 'Page'
+                        'title' => $post->title,
+                        'route' => route('post.edit', ['type' => 'product', 'id' => $post->id]),
+                        'category' => 'Products',
+                        'icon' => 'RiShoppingBag3Line',
+                        'type' => 'Product'
                     ];
                 }
             }
 
-            // 2. Search Products (Title, Description, MetaField in post_meta table for seo_title, seo_description, meta_keywords, meta_title, meta_description)
-            $posts = DB::table('posts')
-                ->where('type', 'product')
-                ->where(function ($query) use ($keyword) {
-                    $query->where('title', 'like', '%' . $keyword . '%')
-                        ->orWhere('description', 'like', '%' . $keyword . '%')
-                        ->orWhereExists(function ($subQuery) use ($keyword) {
-                            $subQuery->select(DB::raw(1))
-                                ->from('post_meta')
-                                ->whereColumn('post_meta.post_id', 'posts.id')
-                                ->whereIn('post_meta.key', ['seo_title', 'seo_description', 'seo_keywords'])
-                                ->where('post_meta.value', 'like', '%' . $keyword . '%');
-                        });
-                })
-                ->limit(6)
-                ->get();
-            foreach ($posts as $post) {
-                $results[] = [
-                    'title' => $post->title,
-                    'route' => route('post.edit', ['type' => 'product', 'id' => $post->id]),
-                    'category' => 'Products',
-                    'icon' => 'RiShoppingBag3Line',
-                    'type' => 'Product'
-                ];
-            }
+            if (in_array($type, ['all', 'category'], true)) {
+                // 3. Search Taxonomies (ONLY Categories, Brands, Tags)
+                $taxonomies = DB::table('taxonomies')->whereIn('type', ['category', 'brand', 'tag'])
+                    ->where('title', 'like', '%' . $keyword . '%')
+                    ->limit(8)
+                    ->get();
 
-            // 3. Search Taxonomies (ONLY Categories, Brands, Tags)
-            $taxonomies = DB::table('taxonomies')->whereIn('type', ['category', 'brand', 'tag'])
-                ->where("title", "like", "%" . $keyword . "%")
-                ->limit(8)
-                ->get();
-
-            foreach ($taxonomies as $tax) {
-                $results[] = [
-                    'title' => $tax->title,
-                    'route' => route('taxonomy.edit', ['type' => $tax->type, 'id' => $tax->id]),
-                    'category' => ucfirst($tax->type) . 's',
-                    'icon' => $tax->type === 'category' ? 'RiAppsLine' : ($tax->type === 'brand' ? 'RiPriceTag3Line' : 'RiPriceTag2Line'),
-                    'type' => ucfirst($tax->type)
-                ];
+                foreach ($taxonomies as $tax) {
+                    $results[] = [
+                        'title' => $tax->title,
+                        'route' => route('taxonomy.edit', ['type' => $tax->type, 'id' => $tax->id]),
+                        'category' => ucfirst($tax->type) . 's',
+                        'icon' => $tax->type === 'category' ? 'RiAppsLine' : ($tax->type === 'brand' ? 'RiPriceTag3Line' : 'RiPriceTag2Line'),
+                        'type' => ucfirst($tax->type)
+                    ];
+                }
             }
 
             // 4. AISearch (Optional: add a special suggestion item or call AI controller)
             // For now, adding a semantic suggestion entry
-            if (!$request->client) {
+            if (!$request->client && $type === 'all') {
                 if (count($results) > 0) {
                     $results[] = [
                         'title' => 'Search "' . $keyword . '" with AI Agent',
@@ -90,9 +99,10 @@ class SearchController extends Controller
                 }
 
                 // 5. Search Users (Optional, keep it small)
-                $users = DB::table('users')->where("name", "like", "%" . $keyword . "%")
+                $users = DB::table('users')->where('name', 'like', '%' . $keyword . '%')
                     ->limit(3)
                     ->get();
+
                 foreach ($users as $user) {
                     $results[] = [
                         'title' => $user->name,
@@ -104,9 +114,7 @@ class SearchController extends Controller
                 }
             }
         } else {
-            if (!$request->client) {
-
-
+            if (!$request->client && $type === 'all') {
                 // Default results
                 foreach ($staticPages as $page) {
                     $results[] = array_merge($page, ['type' => 'Page']);

@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 
 class ModuleController extends Controller
@@ -70,7 +71,6 @@ class ModuleController extends Controller
             }
         }
 
-        // Fallback for types without DB config (e.g. taxonomy defaults)
         if (!$query) {
             if ($type === 'roles') {
                 $query = DB::table('roles');
@@ -94,7 +94,7 @@ class ModuleController extends Controller
 
         // Map 'data' to plural type name for backward compatibility with frontend Index files
         $pluralType = Str::plural($type);
-
+        
         return Inertia::render($view, array_merge([
             $pluralType => $result['data'],
             'data' => $result['data'],

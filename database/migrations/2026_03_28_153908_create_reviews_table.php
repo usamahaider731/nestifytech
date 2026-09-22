@@ -15,9 +15,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
             $table->foreignId('post_id')->constrained('posts')->onDelete('cascade'); // The product ID
-            $table->integer('rating')->default(5); // 1 to 5 stars
+            $table->integer('rating')->default(5);
             $table->text('comment')->nullable();
-            $table->string('status')->default('pending'); // pending, approved, rejected
+            $table->enum('type', ['general', 'verified'])->default('general'); // general, verified
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending'); // pending, approved, rejected
             $table->timestamps();
         });
     }

@@ -96,3 +96,9 @@ Route::get('/setting', [ApiController::class, 'setting'])->name('api.setting');
 
 Route::get('/reviews/product/{postId}', [\App\Http\Controllers\ReviewController::class, 'productReviews'])->name('api.reviews.product');
 Route::middleware('web')->post('/reviews', [\App\Http\Controllers\ReviewController::class, 'store'])->name('api.reviews.store');
+
+// Cart & Orders
+Route::middleware('web')->group(function () {
+    Route::post('/cart/order', [\App\Http\Controllers\CartController::class, 'placeOrder'])->name('api.cart.order');
+    Route::get('/cart/stock', [\App\Http\Controllers\CartController::class, 'checkStock'])->name('api.cart.stock');
+});

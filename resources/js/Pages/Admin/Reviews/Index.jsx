@@ -46,7 +46,6 @@ function ReviewIndex({ reviews: initialReviews }) {
             </div>
         );
     };
-
     return (
         <div className='py-5 px-6'>
             <div className="mb-6 flex items-center justify-between">

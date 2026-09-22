@@ -19,6 +19,7 @@ class ColorThemeHelper
             ['name' => 'dynamic', 'label' => 'Dynamic', 'type' => 'color', 'value' => '#3a3d53'],
             ['name' => 'heading', 'label' => 'Heading', 'type' => 'color', 'value' => '#d0d4f1'],
             ['name' => 'permanent', 'label' => 'Permanent', 'type' => 'color', 'value' => '#434968'],
+            ['name' => 'common', 'label' => 'Common', 'type' => 'color', 'value' => '#434968'],
         ];
 
         if ($section === 'color') {
@@ -48,7 +49,7 @@ class ColorThemeHelper
                 'label' => $palette['label'] ?? Str::title($key),
             ];
 
-            foreach (['primary', 'secondary', 'accent', 'res', 'bg', 'dynamic', 'heading', 'permanent', 'text'] as $field) {
+            foreach (['primary', 'secondary', 'accent', 'res', 'bg', 'dynamic', 'heading', 'permanent', 'common', 'text'] as $field) {
                 if (isset($palette[$field])) {
                     $item[$field] = $palette[$field];
                 }
@@ -85,6 +86,7 @@ class ColorThemeHelper
                 'dynamic' => $item['dynamic'] ?? '#3a3d53',
                 'heading' => $item['heading'] ?? '#d0d4f1',
                 'permanent' => $item['permanent'] ?? '#434968',
+                'common' => $item['common'] ?? '#434968',
             ];
 
             if (isset($item['text'])) {

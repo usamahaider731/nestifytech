@@ -1,0 +1,221 @@
+{
+    "db": {
+        "model": "App\\Models\\Posts",
+        "type": "reviews",
+        "validation": {
+            "rating": "required|integer|max:100",
+            "comment": "nullable|string|max:10000",
+            "post_id": "required|integer",
+            "user_id": "required|integer"
+        },
+        "schema": [
+            {
+                "name": "post_id",
+                "type": "unsignedBigInteger",
+                "index": true
+            },
+            {
+                "name": "user_id",
+                "type": "unsignedBigInteger",
+                "index": true
+            },
+            {
+                "name": "rating",
+                "type": "integer",
+                "default": 5
+            },
+            {
+                "name": "comment",
+                "type": "text",
+                "unique": true
+            },
+            {
+                "name": "status",
+                "type": "enum",
+                "nullable": true,
+                "default": "pending",
+                "values": [
+                    "pending",
+                    "approved",
+                    "rejected"
+                ]
+            },
+            {
+                "name": "type",
+                "type": "string",
+                "index": true
+            }
+        ],
+        "main_fields": [
+            "rating",
+            "comment",
+            "post_id",
+            "user_id",
+            "status",
+            "updated_at",
+            "created_at"
+        ],
+        "fixed_fields": {
+            "user_id": "auth_id"
+        },
+        "table": "reviews"
+    },
+    "table": {
+        "keywords": true,
+        "paginationPerPage": 10,
+        "paginationList": [
+            10,
+            20,
+            50,
+            100
+        ],
+        "table": "reviews",
+        "bulk": {
+            "table": "reviews",
+            "route": "bulk.action",
+            "column": "status",
+            "is_meta": false,
+            "options": [
+                {
+                    "label": "Delete",
+                    "value": "delete"
+                },
+                {
+                    "label": "Approved",
+                    "value": "approved"
+                },
+                {
+                    "label": "Rejected",
+                    "value": "rejected"
+                }
+            ]
+        },
+        "columns": [
+            {
+                "id": "id",
+                "label": "ID",
+                "column": "id",
+                "width": "5%",
+                "sort": true
+            },
+            {
+                "id": "rating",
+                "label": "RATING",
+                "width": "5%",
+                "column": "rating",
+                "type": "text",
+                "sort": true
+            },
+            {
+                "id": "comment",
+                "label": "COMMENT",
+                "column": "comment",
+                "sort": true,
+                "width": "20%"
+            },
+            {
+                "id": "user",
+                "label": "USER",
+                "column": "user_id",
+                "type": "link",
+                "value_table": "users",
+                "value_condition": {
+                    "pass_value_of_key": "id",
+                    "return_key": "name"
+                },
+                "width": "15%"
+            },
+            {
+                "id": "post",
+                "label": "POST ID",
+                "column": "post_id",
+                "type": "link",
+                
+                "sku": true,
+                "value_table": "posts",
+                "value_condition": {
+                    "pass_value_of_key": "id",
+                    "return_key": "title"
+                },
+                "width": "15%"
+            },
+            {
+                "id": "status",
+                "label": "STATUS",
+                "column": "status",
+                "type": "text",
+                "width": "20%"
+            },
+            {
+                "id": "type",
+                "label": "TYPE",
+                "column": "type",
+                "type": "text",
+                "width": "20%"
+            },
+            {
+                "id": "action",
+                "label": "ACTION",
+                "column": "action",
+                "width": "20%",
+                "type": "action"
+            }
+        ]
+    },
+    "form": [
+        {
+            "title": "User Information",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Name",
+                    "style": 1,
+                    "name": "name",
+                    "type": "text",
+                    "placeholder": "User Name"
+                },
+                {
+                    "label": "Email",
+                    "style": 1,
+                    "name": "email",
+                    "type": "text",
+                    "placeholder": "User Email"
+                },
+                {
+                    "name": "phone",
+                    "label": "Phone Number",
+                    "type": "text",
+                    "placeholder": "Enter Phone Number"
+                }
+            ]
+        },
+        {
+            "title": "User Role",
+            "style": "main",
+            "fields": [
+                {
+                    "type": "checkbox",
+                    "name": "roles",
+                    "options": {
+                        "model": "Roles",
+                        "type": "role",
+                        "use_value": false
+                    }
+                }
+            ]
+        },
+        {
+            "title": "User Image",
+            "style": "sidebar",
+            "fields": [
+                {
+                    "label": "",
+                    "style": 1,
+                    "name": "image",
+                    "type": "image",
+                    "value": ""
+                }
+            ]
+        }
+    ]
+}

@@ -78,6 +78,11 @@ const FieldControls = ({
                         required={field.attribute === 'required'}
                         className="border px-3 py-2 w-full rounded appearance-none"
                     />
+                    {
+                        field.desc &&
+
+                        <p className="text-xs font-medium text-res italic">{field.desc}</p>
+                    }
                 </div>
             );
         }
@@ -116,6 +121,11 @@ const FieldControls = ({
                     onChange={(val) => updateField(field.name, val)}
                     placeholder={field.placeholder}
                 />
+                {
+                    field.desc &&
+
+                    <p className="text-xs font-medium text-res italic">{field.desc}</p>
+                }
             </div>
         );
     }
@@ -232,6 +242,11 @@ const FieldControls = ({
                         updateField('roles', updated);
                     }}
                 />
+                {
+                    field.desc &&
+
+                    <p className="text-xs font-medium text-res italic">{field.desc}</p>
+                }
             </div>
         ));
     }
@@ -245,6 +260,11 @@ const FieldControls = ({
                     checked={!!getNestedValue(data, field.name) || field.attribute == 'checked' || field.value == true}
                     onChange={(e) => updateField(field.name, field.value ? (field.value === true ? field.value = false : field.value = true) : e.target.checked)}
                 />
+                {
+                    field.desc &&
+
+                    <p className="text-xs font-medium text-res italic">{field.desc}</p>
+                }
             </div>
         );
     }

@@ -1,0 +1,290 @@
+NESTIFYTECH DOCUMENTATION
+==========================
+
+NestifyTech is a Laravel 12 application for managing a configurable catalog and storefront. It combines a PHP backend, an Inertia.js and React frontend, a permission-aware admin panel, JSON-backed site configuration, media management, taxonomy-driven content, product variations, reviews, and cart/order workflows.
+
+TECHNOLOGY STACK
+----------------
+- PHP 8.2+
+- Laravel 12
+- Inertia.js 2 with React 18
+- Vite 6
+- Tailwind CSS 4
+- MySQL
+- Laravel Sanctum
+- Intervention Image
+- PHPUnit 11
+- Laravel Pint
+
+The frontend also uses Redux Toolkit, FullCalendar, Chart.js, Embla Carousel, React Quill, React Icons, React Toastify, and Motion.
+
+REQUIREMENTS
+------------
+Install the following before starting development:
+
+- PHP 8.2 or newer with the required Laravel extensions
+- Composer
+- Node.js and npm
+- MySQL or a compatible database
+- A web server, or the PHP development server supplied by Artisan
+
+On Windows, XAMPP can provide PHP and MySQL. Make sure the PHP executable used by the terminal is the same version used by Composer.
+
+INSTALLATION
+------------
+Run these commands from the project root:
+
+    composer install
+    npm install
+    copy .env.example .env
+    php artisan key:generate
+
+Create the database named in DB_DATABASE, then run:
+
+    php artisan migrate
+    php artisan storage:link
+
+The default local configuration expects MySQL on 127.0.0.1:3306 with database nestifytech. Confirm that APP_URL and the database values in .env match the local environment.
+
+RUNNING LOCALLY
+---------------
+The simplest development command starts Laravel, the queue listener, and Vite together:
+
+    composer run dev
+
+Alternatively, run the processes separately:
+
+    php artisan serve
+    php artisan queue:listen --tries=1
+    npm run dev
+
+The application normally opens at:
+
+    http://127.0.0.1:8000
+
+Build frontend assets with:
+
+    npm run build
+
+APPLICATION AREAS
+-----------------
+Public storefront
+  The storefront is served from /. Product detail pages use
+  /post/{type}/{sku}/{id}. It includes navigation, search, products,
+  categories, media, themes, reviews, cart interactions, and languages.
+
+Admin panel
+  Authenticated and verified users access /admin. The dashboard is at
+  /admin. Most catalog operations are handled by ModuleController.
+
+  Admin features include users and roles, posts and products, categories,
+  brands, tags, attributes, variations, reviews, media uploads, settings,
+  themes, languages, translations, layouts, menus, the developer builder,
+  and configured AI-assisted field operations.
+
+Commerce
+  Cart and order endpoints are defined in routes/api.php. The schema includes
+  orders, order items, product variations, variation values, and catalog
+  metadata. Review creation and product review retrieval are also available.
+
+PROJECT STRUCTURE
+-----------------
+app/                 Application code, controllers, models, services, and traits
+bootstrap/            Application and route configuration
+config/               Laravel and application configuration
+database/migrations/ Database schema history
+database/seeders/    Database seeders
+public/               Public assets, data, and uploaded media
+resources/css/        Application and admin stylesheets
+resources/js/         React pages, layouts, components, and stores
+resources/views/      Blade shell views for Inertia and frontend rendering
+routes/web.php        Browser and admin routes
+routes/api.php        JSON API routes
+storage/app/data/     Runtime JSON configuration and imported data
+tests/                Feature and unit tests
+
+RUNTIME JSON FILES
+------------------
+The main files under storage/app/data are:
+
+- setting.json       Site-wide settings and application options
+- layout.json        Header, footer, page, and layout configuration
+- sidebar-menu.json  Admin sidebar menu configuration
+- dashboard.json     Dashboard widget and chart configuration
+- form.json          Dynamic form definitions
+- search_pages.json  Searchable page configuration
+- lang/              Language and translation data
+- schema/            Module schemas for users, roles, posts, products,
+                     taxonomies, and reviews
+
+These files are written by the application and should be backed up with the database. Do not replace them with files from another environment without checking the configured modules and language data first.
+
+Uploaded images are stored under public/storage/uploads/image, with thumbnails in its thumb directory.
+
+ROUTING
+-------
+Routing is registered in bootstrap/app.php.
+
+- routes/web.php contains public pages, admin pages, Inertia requests, image
+  URLs, search, settings, and authenticated workflows.
+- routes/api.php contains JSON endpoints and is registered with the /api prefix.
+- Authentication routes are loaded from routes/auth.php.
+
+Useful route families:
+
+- /                         Storefront home
+- /post/{type}/{sku}/{id}   Product or post detail
+- /admin                    Dashboard and administration
+- /admin/module/{type}      Generic module listing and forms
+- /admin/post/{type}        Post and product management
+- /admin/taxonomy/{type}    Taxonomy management
+- /admin/layout             Header, footer, page, and menu configuration
+- /api/*                    JSON data and commerce endpoints
+
+Inspect the current route table with:
+
+    php artisan route:list
+
+API REFERENCE
+-------------
+All endpoints below are prefixed with /api:
+
+GET   /taxonomy-options/{type}       Get taxonomy records or select options
+GET   /menu-options                  Get menu options and children
+GET   /menu-locations                List configured menu locations
+GET   /roles-options                 List published roles
+GET   /attribute-options             List attribute names
+GET   /header-setting                Get header configuration
+GET   /footer-setting                Get footer configuration
+GET   /get_menu                      Get navigation menu data
+GET   /language                      Get available language data
+GET   /language/{lang}               Get selected language data
+GET   /get_taxonomies                Get taxonomies
+GET   /get_posts                     Get posts and catalog records
+GET   /setting                       Get public settings
+GET   /reviews/product/{postId}      Get reviews for a product
+POST  /reviews                       Create a review
+GET   /cart/stock                    Check cart item stock
+POST  /cart/order                    Place an order
+
+Use this command when adding or changing an API endpoint:
+
+    php artisan route:list --path=api
+
+PERMISSIONS AND AUTHENTICATION
+------------------------------
+Admin routes require authenticated and verified users. Fine-grained access uses the permission middleware and this convention:
+
+    {module}-read
+    {module}-write
+    {module}-delete
+
+Examples include role-read, attribute-write, review-read, and developer-write.
+
+When adding an admin feature:
+
+1. Define or reuse the appropriate permission names.
+2. Protect the route with the permission middleware.
+3. Keep controller-level authorization for non-standard entry points.
+4. Match frontend controls to server-side permissions. Never rely on frontend visibility for authorization.
+
+DATABASE WORKFLOW
+-----------------
+Use migrations for schema changes:
+
+    php artisan make:migration describe_the_change
+    php artisan migrate
+    php artisan migrate:status
+
+For a disposable local database only:
+
+    php artisan migrate:fresh --seed
+
+This deletes all local database data. Never run it against a shared or production database.
+
+TESTING AND QUALITY CHECKS
+--------------------------
+Run the test suite:
+
+    composer test
+
+Run one test file:
+
+    php artisan test tests/Feature/ExampleTest.php
+
+Format PHP files:
+
+    vendor/bin/pint
+
+Build the production frontend bundle:
+
+    npm run build
+
+DEPLOYMENT CHECKLIST
+--------------------
+1. Provision PHP 8.2+, Composer, Node.js, MySQL, and a queue worker.
+2. Set APP_KEY, APP_ENV=production, APP_DEBUG=false, database credentials,
+   mail settings, and APP_URL in .env.
+3. Install dependencies:
+
+       composer install --no-dev --optimize-autoloader
+       npm ci
+
+4. Build assets:
+
+       npm run build
+
+5. Run migrations:
+
+       php artisan migrate --force
+
+6. Create the storage link if needed:
+
+       php artisan storage:link
+
+7. Cache configuration and routes:
+
+       php artisan config:cache
+       php artisan route:cache
+       php artisan view:cache
+
+8. Run a persistent queue worker:
+
+       php artisan queue:work --tries=3
+
+9. Back up the database, storage/app/data, and uploaded media.
+10. Verify login, permissions, storefront rendering, image URLs, API responses,
+    cart/order creation, and queue processing.
+
+TROUBLESHOOTING
+---------------
+Vite assets do not load
+  Run npm install and npm run dev. If configuration is stale, run
+  php artisan optimize:clear and restart Vite.
+
+Database connection fails
+  Confirm MySQL is running, the database exists, and DB_HOST, DB_PORT,
+  DB_DATABASE, DB_USERNAME, and DB_PASSWORD are correct. Then run
+  php artisan config:clear.
+
+Uploaded images return 404
+  Confirm the upload directories and files exist and that public/storage is
+  available. Run php artisan storage:link if the link is missing.
+
+Queue-backed work does not run
+  Run migrations and start php artisan queue:listen --tries=1 locally, or
+  configure a persistent queue worker for deployment.
+
+Permission denied in the admin panel
+  Confirm that the user is authenticated and verified. Check the role's
+  permission names against the {module}-{action} convention. Frontend button
+  visibility does not grant access.
+
+DEVELOPMENT NOTES
+-----------------
+- Keep changes scoped to the owning controller, module, page, or component.
+- Preserve existing Inertia page and prop contracts when changing responses.
+- Treat storage/app/data as application state, not disposable cache files.
+- Use migrations and validation before writing user-controlled data.
+- Check browser and JSON/AJAX requests when modifying shared handlers.
+- Do not commit .env, credentials, generated logs, or environment uploads.

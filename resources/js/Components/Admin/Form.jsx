@@ -57,9 +57,6 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
         const formData = new FormData();
 
         Object.entries(data).forEach(([key, value]) => {
-            // Special case: variations must be sent as a single JSON string because they
-            // contain deeply nested arrays (combinations, attributes) that FormData cannot
-            // expand more than one level deep without corruption.
             if (key === 'variations') {
                 formData.append(key, JSON.stringify(value));
                 return;
@@ -113,7 +110,7 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
         });
 
         formData.append('status', isDraft ? 'draft' : 'publish');
-        
+
         const csrfToken = document.head.querySelector('meta[name="csrf-token"]')?.content;
         if (csrfToken) {
             formData.append('_token', csrfToken);
@@ -127,7 +124,7 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
             } catch (_) {
                 // routes is already a relative path, use as-is
             }
-            
+
             router.post(relativeRoute, formData, {
                 forceFormData: true,
                 onSuccess: (page) => {
@@ -180,7 +177,7 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
                 if (field.type === 'dropdown' && field.options?.model) {
                     const hasDependency = field.depends_on;
                     const canFetch = !hasDependency || (hasDependency && data[hasDependency]);
-                    
+
                     const shouldFetch =
                         override[field.name] || (canFetch && !dropdownOptions[field.name]);
 
@@ -195,7 +192,7 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
                         if (f.type === 'dropdown' && f.options?.model) {
                             const hasDependency = f.depends_on;
                             const canFetch = !hasDependency || (hasDependency && data[hasDependency]);
-                            
+
                             const shouldFetch =
                                 override[f.name] || (canFetch && !dropdownOptions[f.name]);
 
@@ -260,7 +257,7 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
     const prevDataRef = React.useRef(data);
     useEffect(() => {
         // Find which field actually changed
-        const changedKeys = Object.keys(data).filter(k => 
+        const changedKeys = Object.keys(data).filter(k =>
             JSON.stringify(data[k]) !== JSON.stringify(prevDataRef.current[k])
         );
 
@@ -274,11 +271,11 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
                     if (field.depends_on && changedKeys.includes(field.depends_on)) {
                         fieldsToRefetch[field.name] = true;
                         hasDependencyChanges = true;
-                        
+
                         // 1. Clear the current value (City becomes empty when State changes)
                         const currentVal = data[field.name];
                         if (currentVal && (Array.isArray(currentVal) ? currentVal.length > 0 : true)) {
-                           updateField(field.name, field.multiple ? [] : '');
+                            updateField(field.name, field.multiple ? [] : '');
                         }
                     }
                 });
@@ -306,7 +303,6 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
         tabbed: rows.filter(r => r.tab),
     };
 
-    // Tab icon map
     const tabIcons = {
         'Attributes': (
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
@@ -319,6 +315,17 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
         'SEO': (
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                 <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.099zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+            </svg>
+        ),
+        'Gallery': (
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M4.502 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/>
+                <path d="M14.002 13a2 2 0 0 1-2 2h-10a2 2 0 0 1-2-2V5A2 2 0 0 1 2 3a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2zM14 2H4a1 1 0 0 0-1 1h9.002a2 2 0 0 1 2 2v7A1 1 0 0 0 15 11V3a1 1 0 0 0-1-1zM2.002 4a1 1 0 0 0-1 1v8l2.646-2.354a.5.5 0 0 1 .63-.062l2.66 1.773 3.71-3.71a.5.5 0 0 1 .577-.094l1.777 1.947V5a1 1 0 0 0-1-1h-10z"/>
+            </svg>
+        ),
+        'Address': (
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
             </svg>
         ),
     };
@@ -379,25 +386,25 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
 
                 {groupedSections.sidebar.length > 0 && (
                     <div className="w-3/10 sticky top-0 right-0 h-fit flex flex-col gap-5 pl-5">
-                    {groupedSections.sidebar.map((section, idx) => (
-                        <div key={idx} className="bg-accent rounded p-6">
-                            <h2 className="text-lg font-medium font-roboto text-heading mb-4">{section.title}</h2>
-                            <div className="grid-cols-2 grid gap-4">
-                                {section.fields.map(field => (
-                                    <FieldControls
-                                        key={field.name}
-                                        field={field}
-                                        data={data}
-                                        updateField={updateField}
-                                        normalizeImageValue={normalizeImageValue}
-                                        rolesList={rolesList}
-                                        dropdownOptions={dropdownOptions}
-                                        loadingStates={loadingStates}
-                                    />
-                                ))}
+                        {groupedSections.sidebar.map((section, idx) => (
+                            <div key={idx} className="bg-accent rounded p-6">
+                                <h2 className="text-lg font-medium font-roboto text-heading mb-4">{section.title}</h2>
+                                <div className="grid-cols-2 grid gap-4">
+                                    {section.fields.map(field => (
+                                        <FieldControls
+                                            key={field.name}
+                                            field={field}
+                                            data={data}
+                                            updateField={updateField}
+                                            normalizeImageValue={normalizeImageValue}
+                                            rolesList={rolesList}
+                                            dropdownOptions={dropdownOptions}
+                                            loadingStates={loadingStates}
+                                        />
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
                     </div>
                 )}
 

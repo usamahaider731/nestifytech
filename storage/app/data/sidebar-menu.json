@@ -324,6 +324,16 @@
           "type": "home"
         },
         "permission": "layout-write"
+      },
+      {
+        "id": "single",
+        "title": "Single Page",
+        "icon": "ri-shopping-bag-2-line",
+        "route": "layout.setting",
+        "params": {
+          "type": "Single"
+        },
+        "permission": "layout-write"
       }
     ]
   },

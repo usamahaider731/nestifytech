@@ -125,6 +125,12 @@
                     "name": "email",
                     "type": "text",
                     "placeholder": "User Email"
+                },
+                {
+                    "name": "phone",
+                    "label": "Phone Number",
+                    "type": "text",
+                    "placeholder": "Enter Phone Number"
                 }
             ]
         },

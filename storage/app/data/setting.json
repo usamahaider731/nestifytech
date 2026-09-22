@@ -53,6 +53,7 @@
             "label": "Featured Tag",
             "type": "dropdown",
             "value": "Top Product",
+            "searchable": false,
             "options": {
                 "model": "App\\Models\\Taxonomy",
                 "type": "tag",
@@ -63,6 +64,7 @@
             "label": "Hot Tag",
             "type": "dropdown",
             "value": "1183",
+            "searchable": false,
             "options": {
                 "model": "App\\Models\\Taxonomy",
                 "type": "tag",
@@ -79,29 +81,13 @@
             "type": "textarea",
             "value": "123 Tech Street, Silicon Valley, CA"
         },
-        "tax_fee_type": {
-            "label": "Tax Fee in Price or persentage",
-            "type": "dropdown",
-            "value": "'persentage",
-            "style": 2,
-            "options": {
-                "Persentage": {
-                    "label": "Persentage",
-                    "value": "'persentage"
-                },
-                "Price": {
-                    "label": "Price",
-                    "value": "Price"
-                }
-            }
-        },
         "deliviry": {
             "label": "Deviliry Package Per Order",
             "type": "text",
             "value": "250"
         },
-        "tax_fee": {
-            "label": "Tax Fees Per Product",
+        "default_tax_fee": {
+            "label": "Default Tax Fees Per Product",
             "type": "text",
             "value": "2.5"
         },
@@ -413,16 +399,16 @@
                     "label": "Yellow",
                     "primary": "#fed700",
                     "secondary": "#2242a3",
-                    "accent": "#8a8a8a",
+                    "accent": "#7c7c7c",
                     "res": "#626262",
                     "bg": "#f8f8f8",
                     "dynamic": "#1f1f1f",
                     "heading": "#3a3a3a",
                     "permanent": "#f9f9f9",
-                    "text": "#202326",
-                    "common": "#c3c3c3",
+                    "text": "#333e48",
+                    "common": "#eaeaea",
                     "simple": "#474747",
-                    "border": "#bfbfbf",
+                    "border": "#ddd",
                     "info": "#e8eff4"
                 }
             ],

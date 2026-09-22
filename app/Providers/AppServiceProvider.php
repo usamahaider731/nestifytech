@@ -6,7 +6,6 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\Facades\DB;
 
 class AppServiceProvider extends ServiceProvider
@@ -69,8 +68,12 @@ class AppServiceProvider extends ServiceProvider
         $sidebarMenu = json_decode($sidebarMenuContent, true) ?: [];
         $data = array_merge($data, ['menu' => $menu], ['layout' => $datas], ['sidebar_menu' => $sidebarMenu]);
 
-        // Prefetch Vite assets
-        Vite::prefetch(concurrency: 3);
+        // Never expose the AI provider secret in shared browser props.
+        unset($data['ai']['api_key']);
+
+        if (! request()->is('admin', 'admin/*')) {
+            unset($data['ai'], $data['backend-color'], $data['sidebar_menu']);
+        }
 
         // Share with Inertia & Blade
         Inertia::share(['setting' => $data]);

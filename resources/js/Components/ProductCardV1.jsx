@@ -4,6 +4,7 @@ import Slider from './Slider';
 import { RiArrowRightLine, RiEyeLine, RiHeart2Line, RiMapPin2Fill, RiShoppingBagLine, RiStackLine, RiStarFill, RiStarHalfFill } from 'react-icons/ri';
 import { usePage, Link } from '@inertiajs/react';
 import { useCart } from '@/contexts/CartContext';
+import { useLang } from '@/contexts/LanguageContext';
 import { normalizeProduct } from '@/Utils/normalizeProduct';
 
 const ProductCardV1 = ({ className = '', product = {} }) => {
@@ -11,6 +12,7 @@ const ProductCardV1 = ({ className = '', product = {} }) => {
     const cardSetting = setting.layout.Product_Card_V1;
     const currency = setting.site.currency.value ?? 'PKR';
     const { addItem } = useCart();
+    const { __ } = useLang();
     const [Categories, setCategories] = useState(product.category ?? []);
     const [Stock, SetStock] = useState(0);
     const [discount, setDiscount] = useState(0);
@@ -110,7 +112,7 @@ const ProductCardV1 = ({ className = '', product = {} }) => {
                 </div>
 
                 {/* Title */}
-                <Link href={route('singleproduct', { sku: product.sku, id: product.id })}>
+                <Link href={route('post', { sku: product.sku, id: product.id, type: "product" })} className="block">
                     <h3 className="text-md font-bold text-slate-800 line-clamp-2 hover:text-primary transition-colors leading-snug cursor-pointer">
                         {product.title}
                     </h3>
@@ -135,7 +137,7 @@ const ProductCardV1 = ({ className = '', product = {} }) => {
                             onClick={handleAddToCart}
                             className="flex-1 bg-primary backdrop-blur-sm text-text py-2.5 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-colors shadow-lg"
                         >
-                            <RiShoppingBagLine className="size-4" /> Add to Cart
+                            <RiShoppingBagLine className="size-4" /> {__('Add to Cart')}
                         </button>
                     )}
                 </div>

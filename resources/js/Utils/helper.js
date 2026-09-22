@@ -5,7 +5,12 @@ export function stripTags(html = "") {
 }
 
 export function hasPermission(user, permission) {
-    if (!user || !permission) return false;
-    const permissions = user?.user_permissions || [];
-    return permissions.includes(permission.toLowerCase());
+  if (!user || !permission) return false;
+  const permissions = user?.user_permissions || [];
+  return permissions.includes(permission.toLowerCase());
+}
+export function html_print(html = "") {
+  const div = document.createElement("div");
+  div.innerHTML = html;
+  return div.innerHTML || "";
 }

@@ -1,10 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useLang } from '@/contexts/LanguageContext';
+import { usePage } from '@inertiajs/react';
 import TextInput from '../TextInput';
 import Dropdown from '../Dropdown';
-import { RiAiGenerateText, RiAppsLine, RiBubbleChartFill, RiDashboardLine, RiFontSize2, RiFunctionLine, RiGlobalLine, RiLayoutTop2Line, RiMenu2Line, RiPaletteLine, RiPriceTag2Line, RiPriceTag3Line, RiSearch2Line, RiSettingsLine, RiShieldUserLine, RiShoppingBag3Line, RiShoppingCart2Line, RiTranslate2, RiTranslateAi } from 'react-icons/ri';
+import { RiAiGenerateText, RiAppsLine, RiArrowUpDownFill, RiBubbleChartFill, RiDashboardLine, RiExpandUpDownFill, RiFontSize2, RiFunctionLine, RiGlobalLine, RiLayoutTop2Line, RiMenu2Line, RiPaletteLine, RiPriceTag2Line, RiPriceTag3Line, RiSearch2Line, RiSettingsLine, RiShieldUserLine, RiShoppingBag3Line, RiShoppingCart2Line, RiTranslate2, RiTranslateAi } from 'react-icons/ri';
 import { FaUser } from 'react-icons/fa';
 
 const HeaderSearch = () => {
+    const { __ } = useLang();
+    const { searchCategories = [] } = usePage().props;
     const IconMap = {
         RiDashboardLine: <RiDashboardLine className="text-blue-400" />,
         FaUser: <FaUser className="text-green-400" />,
@@ -26,58 +30,107 @@ const HeaderSearch = () => {
         RiSettingsLine: <RiSettingsLine className="text-gray-400" />,
         RiShoppingCart2Line: <RiShoppingCart2Line className="text-green-400" />,
     };
-    const [Keywords, SetKeyWords] = useState("");
-    const [SearchResults, SetSearchResults] = useState([]);
-    const [Open, SetOpen] = useState(false)
+
+    const [productKeyword, setProductKeyword] = useState("");
+    const [categoryValue, setcategoryValue] = useState("");
+    const [productResults, setProductResults] = useState([]);
+    const [productDropdownOpen, setProductDropdownOpen] = useState(false);
+    const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
+    const showSearchBackdrop = productDropdownOpen || categoryDropdownOpen;
+    const productSearchTimer = useRef(null);
+
     useEffect(() => {
-        if (Keywords.length > 2) {
-            let Route = "search.keywords";
-            fetch(route(Route, { keyword: Keywords, client: true })).then((response) => response.json()).then((data) => {
-                SetSearchResults(data);
-            });
+        if (!productKeyword.trim()) {
+            setProductDropdownOpen(false);
+            setProductResults([]);
+            return;
         }
-        else {
-            SetSearchResults([]);
+
+        if (productKeyword.trim().length <= 2) {
+            setProductDropdownOpen(false);
+            setProductResults([]);
+            return;
         }
-    }, [Keywords])
+
+        clearTimeout(productSearchTimer.current);
+        productSearchTimer.current = setTimeout(() => {
+            setProductDropdownOpen(true);
+            fetch(route('search.keywords', { keyword: productKeyword, type: 'product', client: true }))
+                .then((response) => response.json())
+                .then((data) => setProductResults(data));
+        }, 250);
+
+        return () => clearTimeout(productSearchTimer.current);
+    }, [productKeyword]);
+
     return (
         <>
-        
-        <div onClick={()=> SetOpen(true)} className='mr-14.5 z-50 bg-white rounded-full flex items-center min-w-62.5 flex-1'>
-            <Dropdown className="w-full">
-                <Dropdown.Trigger className='relative z-50 h-12.5 rounded-l-full rounded-r-none border-r-0 border text-sm text-text !border-border '>
-                    {({ open }) => (
-                        <TextInput
-                            value={Keywords}
-                            onClick={(e) => {
-                                if (open) {
-                                    e.stopPropagation();
-                                }
-                            }}
-                            onChange={(e) => SetKeyWords(e.target.value)}
-                            className="min-h-full py-2.5 px-7.5 border-0 !shadow-none bg-transparent min-w-full"
-                            placeholder="Search"
-                        />
-                    )}
-                </Dropdown.Trigger>
-                <Dropdown.Content className='min-w-full bg-white border-border' contentClasses='!border-border !ring-0 rounded-none'>
-                    {
-                        SearchResults.map((item, index) => (
-                            <Dropdown.Link key={index} onClick={() => { SetKeyWords(item.title) }} className='flex items-center gap-3 border-b border-border'>
+            <div className='ltr:mr-18.5 rtl:ml-18.5 z-50 bg-white rounded-full flex items-center min-w-62.5 flex-1'>
+                <Dropdown className="flex-1">
+                    <Dropdown.Trigger className='relative z-50 h-10 ltr:rounded-l-full ltr:rounded-r-none rtl:rounded-r-full rtl:rounded-l-none ltr:border-r-0 rtl:border-l-0 border-2 text-sm text-text !border-primary '>
+                        {({ open }) => (
+                            <TextInput
+                                value={productKeyword}
+                                onClick={(e) => {
+                                    setProductDropdownOpen(!productDropdownOpen);
+                                    if (open) {
+                                        e.stopPropagation();
+                                    }
+                                }}
+                                onChange={(e) => setProductKeyword(e.target.value)}
+                                className="min-h-full text-sm font-medium h-full py-2.5 px-7.5 border-0 !shadow-none bg-transparent min-w-full"
+                                placeholder={__('Search For Product')}
+                            />
+                        )}
+                    </Dropdown.Trigger>
+                    <Dropdown.Content className='min-w-full bg-white border-border' contentClasses='!border-border !ring-0 rounded-none'>
+                        {productResults.map((item, index) => (
+                            <Dropdown.List key={index} onClick={() => { setProductKeyword(item.title) }} className='flex items-center cursor-pointer gap-3 border-b border-border'>
+                                <span>
+
+                                {IconMap[item.icon] || null}
+                                </span>
+                                <span className="line-clamp-1">
+
+                                {item.title}
+                                </span>
+                            </Dropdown.List>
+                        ))}
+                    </Dropdown.Content>
+                </Dropdown>
+
+                <Dropdown className="flex-1">
+                    <Dropdown.Trigger className='relative z-50 h-10 rounded-r-none border-r-0 border-l-border border-l border-2 text-sm text-text !border-y-primary '>
+                        {({ open }) => (
+                            <div
+                                value={categoryValue}
+                                onClick={(e) => {
+                                    setCategoryDropdownOpen(!categoryDropdownOpen);
+                                    
+                                }}
+                                className="min-h-full font-medium text-text h-full py-2.5 px-7.5 border-0 flex items-center justify-between relative !shadow-none bg-transparent min-w-full"
+                            >
+                                {categoryValue || __('Select Category')}
+                                <RiExpandUpDownFill className={`ml-2 ${categoryDropdownOpen ? 'rotate-180' : ''} transition-transform duration-300`} />
+                            </div>
+                        )}
+                    </Dropdown.Trigger>
+                    <Dropdown.Content className='min-w-full bg-white border-border' contentClasses='!border-border !ring-0 rounded-none'>
+                        {searchCategories.map((item, index) => (
+                            <Dropdown.List key={index} onClick={() => { setcategoryValue(item.title); setCategoryDropdownOpen(false); setProductDropdownOpen(false); }} className='flex items-center cursor-pointer gap-3 border-b border-border'>
                                 {IconMap[item.icon] || null}
                                 {item.title}
-                            </Dropdown.Link>
-                        ))
-                    }
-                </Dropdown.Content>
-            </Dropdown>
-            <button className='bg-primary border cursor-pointer border-primary h-12.5 flex items-center justify-center rounded-r-full text-white w-16.5 text-md font-semibold'>
-                <RiSearch2Line size={16} />
-            </button>
-        </div>
-        {Open &&
-        <div onClick={()=>SetOpen(false)} className='flex w-full z-30 min-h-screen fixed inset-0 bg-black/10'></div>
-        }
+                            </Dropdown.List>
+                        ))}
+                    </Dropdown.Content>
+                </Dropdown>
+                <button className='bg-primary border cursor-pointer border-primary h-10 flex items-center justify-center ltr:rounded-r-full rtl:rounded-l-full text-white w-12.5 text-md font-semibold'>
+                    <RiSearch2Line size={16} />
+                </button>
+            </div>
+            {showSearchBackdrop && (
+                <div onClick={() => { setProductDropdownOpen(false); setCategoryDropdownOpen(false); }} className='fixed inset-0 z-30 min-h-screen bg-black/10'></div>
+            )}
         </>
     );
 }

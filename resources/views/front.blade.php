@@ -1,5 +1,5 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<!DOCTYPE html class="scroll-smooth">
+<html lang="{{ $currentLanguage['prefix'] ?? str_replace('_', '-', app()->getLocale()) }}" dir="{{ $currentLanguage['direction'] ?? 'ltr' }}" class="scroll-smooth">
 
 <head>
     <meta charset="utf-8">
@@ -8,6 +8,7 @@
     <title inertia>{{ $setting['site']['name']['value'] ?? config('app.name', 'Laravel') }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="{{ route('colors') }}?v={{ filemtime(storage_path('app/data/setting.json')) }}">

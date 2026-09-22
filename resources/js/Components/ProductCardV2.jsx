@@ -4,6 +4,7 @@ import { usePage } from '@inertiajs/react';
 import ImageViwer from './Admin/ImageViwer';
 import Slider from './Slider';
 import { useCart } from '@/contexts/CartContext';
+import { useLang } from '@/contexts/LanguageContext';
 import { normalizeProduct } from '@/Utils/normalizeProduct';
 import {
     RiArrowRightLine,
@@ -20,6 +21,7 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
     const cardSetting = setting.layout.Product_Card_V2;
     const currency = setting.site.currency.value ?? 'PKR';
     const { addItem } = useCart();
+    const { __ } = useLang();
 
     const [categories] = useState(product.category ?? []);
     const [stock, setStock] = useState(0);
@@ -187,7 +189,7 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
                         </div>
                         {cardSetting.show_product_discount_price && discount > 0 && (
                             <span className="rounded-md bg-green-500 px-2 py-1 text-xs font-bold text-text">
-                                {Math.round(discount)}% Off
+                                {Math.round(discount)}% {__('Off')}
                             </span>
                         )}
                     </div>
@@ -201,7 +203,7 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
                             className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-xs font-bold text-text transition-all duration-200 hover:opacity-90 active:scale-[0.98] shadow-sm"
                         >
                             <RiShoppingBagLine className="size-4" />
-                            Add to Cart
+                            {__('Add to Cart')}
                         </button>
                     )}
                     {cardSetting.show_product_view_button && productHref && (
@@ -210,7 +212,7 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
                             className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg border border-primary px-4 py-2.5 text-xs font-bold text-primary transition-all duration-200 hover:bg-primary/5"
                         >
                             <RiArrowRightLine className="size-4" />
-                            View Product
+                            {__('View Product')}
                         </Link>
                     )}
                 </div>

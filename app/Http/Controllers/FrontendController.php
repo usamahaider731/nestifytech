@@ -3,15 +3,15 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
-use App\Http\Controllers\ApiController;
 
 class FrontendController extends Controller
 {
     public $settings;
     public $header;
+
     function __construct()
     {
         parent::__construct();
@@ -22,50 +22,46 @@ class FrontendController extends Controller
         $allMenus = DB::table('menu')->orderBy('sort_order', 'asc')->get()->toArray();
         $this->header = $this->buildMenuTree($allMenus, 0, $headerLocation);
     }
-    public function index()
 
+    private function productQuery(array $extra = []): array
+    {
+        return array_merge([
+            'type' => 'product',
+            'image' => true,
+            'meta' => true,
+            'category' => true,
+            'brand' => true,
+            'gallery' => true,
+            'parent' => true,
+            'variation' => true,
+            'address' => true,
+        ], $extra);
+    }
+
+    public function index()
     {
         $data = [];
-        $api_controller = new ApiController();
-
         $index_settings = $this->settings['layout']['Home'];
+
         if ($index_settings['slider_toggle'] && count($index_settings['main_slider']) > 0) {
-           $data['main_slider'] =  $index_settings['main_slider'];
+            $data['main_slider'] = $index_settings['main_slider'];
         }
+
         if ($index_settings['categories_toggle']) {
-            $categories_ids = $index_settings['home_categories'];
-            $categories = $api_controller->get_taxonomies(Request::create(
-                '/api/get_taxonomies',
-                'GET',
-                [
-                    'type' => 'category',
-                    'limit' => 10,
-                    'id' => $categories_ids,
-                    'image' => true,
-                    'meta' => true,
-                ]
-            ))->getData(true);
-            $data['categories'] = $categories;
+            $data['categories'] = get_taxonomy([
+                'type' => 'category',
+                'id' => $index_settings['home_categories'],
+                'limit' => 10,
+                'image' => true,
+                'meta' => true,
+            ]);
         }
+
         if ($index_settings['latest_product_toggle']) {
-            $request = Request::create(
-                '/api/get_posts',
-                'GET',
-                [
-                    'type' => 'product',
-                    'limit' => 10,
-                    'image' => true,
-                    'meta' => true,
-                    'category' =>true,
-                    'brand' => true,
-                    'gallery' => true,
-                    'parent' => true,
-                    'variation' => true,
-                    'address' => true
-                ]
-            );
-            $latest_products = $api_controller->get_posts($request)->getData(true);
-            $data['latest_products'] = $latest_products;
+            $data['latest_products'] = get_posts($this->productQuery([
+                'limit' => 10,
+                'latest' => true,
+            ]));
         }
 
         $blockImages = $index_settings['block_images'] ?? [];
@@ -82,43 +78,115 @@ class FrontendController extends Controller
         ];
 
         return Inertia::render('Frontend/Index/Index', [
-            'data' => $data
+            'data' => $data,
         ]);
     }
-    public function singleProduct(Request $request){
-        $api_controller = new ApiController();
-        $product = $api_controller->get_posts(Request::create(
-            '/api/get_posts',
-            'GET',
-            [
-                'type' => 'product',
-                'limit' => 10,
-                'single' => true,
-                'image' => true,
-                'meta' => true,
-                'category' =>true,
-                'brand' => true,
-                'gallery' => true,
-                'parent' => true,
-                'variation' => true,
-                'address' => true,
-                'sku' => $request->sku,
-                'id' => $request->id
-            ]
-        ))->getData(true);
-        dd($product);
+
+    public function singleProduct(Request $request)
+    {
+        $product = get_posts($this->productQuery([
+            'single' => true,
+            'attributes' => true,
+            'sku' => $request->sku,
+            'id' => $request->id,
+        ]));
+
+        if (! $product) {
+            abort(404);
+        }
+
+        $latest_products = get_posts($this->productQuery([
+            'limit' => 4,
+            'latest' => true,
+            'exclude_id' => $product->id ?? null,
+        ]));
+
+        $categoryId = $product->category[0]->id ?? $product->category[0]['id'] ?? null;
+
+        $related_products = get_posts($this->productQuery([
+            'limit' => 10,
+            'category_id' => $categoryId,
+            'exclude_id' => $product->id ?? null,
+        ]));
+
+        $popular_products = get_posts($this->productQuery([
+            'limit' => 10,
+            'popular' => true,
+            'views' => 'desc',
+            'exclude_id' => $product->id,
+        ]));
+
+        $this->recordProductView($request, (int) $product->id);
+
+        return Inertia::render('Frontend/Single/Index', [
+            'product' => $product,
+            'latest_products' => $latest_products,
+            'related_products' => $related_products,
+            'popular_products' => $popular_products,
+        ]);
     }
+
+    private function recordProductView(Request $request, int $productId): void
+    {
+        $userId = Auth::id();
+        if ($userId) {
+            $viewed = DB::table('user_meta')
+                ->where('user_id', $userId)
+                ->where('key', 'viewed_products')
+                ->first();
+
+            if ($viewed) {
+                $viewedIds = array_filter(explode(',', (string) $viewed->value));
+                if (! in_array((string) $productId, $viewedIds, true)) {
+                    DB::table('user_meta')
+                        ->where('id', $viewed->id)
+                        ->update(['value' => $productId.','.$viewed->value]);
+                }
+            } else {
+                DB::table('user_meta')->insert([
+                    'user_id' => $userId,
+                    'key' => 'viewed_products',
+                    'value' => (string) $productId,
+                ]);
+            }
+
+        $sessionKey = 'viewed_product_'.$productId;
+        if ($request->session()->has($sessionKey)) {
+            return;
+        }
+
+        $request->session()->put($sessionKey, true);
+                if (! in_array((string) $productId, $viewedIds, true)) {
+                 $updated = DB::table('post_meta')
+            ->where('post_id', $productId)
+            ->where('key', 'views')
+            ->increment('value');
+
+        if ($updated === 0) {
+            DB::table('post_meta')->insert([
+                'post_id' => $productId,
+                'key' => 'views',
+                'value' => 1,
+            ]);
+        }
+                }
+        }
+
+       
+    }
+
     private function buildMenuTree($elements, $parentId = 0, $location = null)
     {
         $branch = [];
         foreach ($elements as $element) {
             $element = (array) $element;
-            if ($element['parent_id'] == $parentId && (!$location || $element['location'] == $location)) {
+            if ($element['parent_id'] == $parentId && (! $location || $element['location'] == $location)) {
                 $children = $this->buildMenuTree($elements, $element['id']);
                 $element['children'] = $children ?: [];
                 $branch[] = $element;
             }
         }
+
         return $branch;
     }
 
@@ -132,36 +200,23 @@ class FrontendController extends Controller
         return $this->settings;
     }
 
-
-    public function get_taxonomies(Request $request)
-    {
-        $taxonomies = DB::table('taxonomies')->where([
-            'type' => $request->type,
-            'status' => 'publish',
-        ]);
-
-        if (!is_null($request->limit)) {
-            $taxonomies->limit($request->limit);
-        }
-        if (!is_null($request->id)) {
-            $taxonomies->whereIn('id', $request->id);
-        }
-        $result = $taxonomies->get()->map(function ($item) {
-            $item->image = DB::table('media')->where('parent_id', $item->id)->where('type', $item->type)->first();
-            // Handle simple list children if needed
-            $item->children = DB::table('taxonomies')->where('parent_id', $item->id)->get();
-            return $item;
-        });
-
-        return response()->json($result);
-    }
     public function get_languages()
     {
         $file_location = $this->json_file_location . '/lang/language.json';
         if (file_exists($file_location)) {
             $languages = file_get_contents($file_location);
+
             return response()->json(json_decode($languages));
         }
+
         return response()->json([]);
+    }
+
+    public function setLanguage(Request $request, string $prefix)
+    {
+        $prefix = preg_replace('/[^a-z0-9]/i', '', $prefix) ?: 'en';
+        $redirect = $request->headers->get('referer') ?: route('index');
+
+        return redirect($redirect)->cookie('locale', $prefix, 60 * 24 * 365);
     }
 }

@@ -15,6 +15,7 @@ export function normalizeAppearanceColors(colors = {}) {
         dynamic: '#3a3d53',
         heading: '#d0d4f1',
         permanent: '#434968',
+        common: '#434968',
     };
     // Start with the default fallbacks
     const result = { ...defaults };

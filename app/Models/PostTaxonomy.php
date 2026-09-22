@@ -72,10 +72,22 @@ class PostTaxonomy extends Model
         // Step 2: Batch fetch related records
         $related = [];
         if (!empty($allIds) && !empty($table)) {
-            $related = \Illuminate\Support\Facades\DB::table($table)
+            $fetched = \Illuminate\Support\Facades\DB::table($table)
                 ->whereIn('id', $allIds)
                 ->get()
                 ->keyBy('id');
+                
+            $mediaType = ($table === 'posts') ? 'post' : (($table === 'taxonomies') ? 'taxonomy' : \Illuminate\Support\Str::singular($table));
+            $media = \Illuminate\Support\Facades\DB::table('media')
+                ->whereIn('parent_id', $allIds)
+                ->where('type', $mediaType)
+                ->get()
+                ->keyBy('parent_id');
+
+            foreach ($fetched as $id => $item) {
+                $item->image = $media[$id] ?? null;
+                $related[$id] = $item;
+            }
         }
 
         // Step 3: Map related records back to collection items

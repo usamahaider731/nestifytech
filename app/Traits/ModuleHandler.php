@@ -276,13 +276,16 @@ trait ModuleHandler
             }
             
 
+            $existingRecord = $isEdit ? DB::table($tableName)->where('id', $recordId)->first() : null;
+            $recordTitle = $data['title'] ?? $data['name'] ?? ($existingRecord->title ?? ($existingRecord->name ?? null));
+
             $mediaType = ($tableName === 'posts') ? 'post' : (($tableName === 'taxonomies') ? 'taxonomy' : $type);
             if ($request->hasFile('image')) {
-                $this->handleDBImageUpload($request->file('image'), $recordId, $mediaType);
+                $this->handleDBImageUpload($request->file('image'), $recordId, $mediaType, $recordTitle);
             }
             if ($request->hasFile('gallery')) {
-                foreach ($request->file('gallery') as $file) {
-                    $this->handleDBGalleryUpload($file, $recordId, $mediaType . '_gallery');
+                foreach ($request->file('gallery') as $index => $file) {
+                    $this->handleDBGalleryUpload($file, $recordId, $mediaType . '_gallery', $recordTitle, $index);
                 }
             }
 
@@ -605,9 +608,16 @@ trait ModuleHandler
         }
     }
 
-    protected function handleDBImageUpload($file, $parentId, $type)
+    protected function handleDBImageUpload($file, $parentId, $type, $recordTitle = null)
     {
-        $filename = time() . '_' . $file->getClientOriginalName();
+        $baseName = $recordTitle ? Str::slug($recordTitle) : pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $extension = $file->getClientOriginalExtension();
+        $filename = $baseName . '.' . $extension;
+        
+        if (Storage::disk('public')->exists('uploads/image/' . $filename)) {
+            $filename = $baseName . '-' . time() . '.' . $extension;
+        }
+
         Storage::disk('public')->putFileAs('uploads/image', $file, $filename);
 
         DB::table('media')->updateOrInsert(
@@ -616,9 +626,16 @@ trait ModuleHandler
         );
     }
 
-    protected function handleDBGalleryUpload($file, $parentId, $type)
+    protected function handleDBGalleryUpload($file, $parentId, $type, $recordTitle = null, $index = 0)
     {
-        $filename = time() . '_' . uniqid() . '_' . $file->getClientOriginalName();
+        $baseName = $recordTitle ? Str::slug($recordTitle) : pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $extension = $file->getClientOriginalExtension();
+        $filename = $baseName . '-' . ($index + 1) . '.' . $extension;
+
+        if (Storage::disk('public')->exists('uploads/image/' . $filename)) {
+            $filename = $baseName . '-' . ($index + 1) . '-' . time() . '.' . $extension;
+        }
+
         Storage::disk('public')->putFileAs('uploads/image', $file, $filename);
 
         DB::table('media')->insert([

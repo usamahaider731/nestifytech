@@ -23,6 +23,7 @@ class MediaController extends Controller
         }
 
         if (!file_exists($originalPath)) {
+            
             abort(404, 'Original image not found');
         }
 

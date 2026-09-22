@@ -20,6 +20,7 @@
   --color-primary: var(--primary);
   --color-permanent: var(--permanent);
   --color-dynamic: var(--dynamic);
+  
 
 }
 
@@ -205,26 +206,26 @@
 }
 
 .vuexy-active-glow {
-  background: linear-gradient(72.47deg, #7367f0 0%, #9e95f5 100%);
-  box-shadow: 0 2px 6px 0 rgba(115, 103, 240, 0.48);
+  background: var(--primary);
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--primary) 48%, transparent);
   color: #ffffff !important;
 }
 
 .vuexy-btn-primary {
-  background-color: #7367f0;
+  background-color: var(--primary);
   color: #ffffff;
-  box-shadow: 0 2px 6px 0 rgba(115, 103, 240, 0.4);
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--primary) 40%, transparent);
   transition: all 0.2s ease-in-out;
 }
 .vuexy-btn-primary:hover {
-  background-color: #685dd8;
-  box-shadow: 0 4px 12px 0 rgba(115, 103, 240, 0.55);
+  background-color: color-mix(in srgb, var(--primary) 88%, black);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--primary) 55%, transparent);
 }
 
 /* Vuexy Status Badges */
 .badge-vuexy-primary {
-  background-color: rgba(115, 103, 240, 0.15);
-  color: #7367f0;
+  background-color: color-mix(in srgb, var(--primary) 15%, transparent);
+  color: var(--primary);
 }
 .badge-vuexy-success {
   background-color: rgba(40, 199, 111, 0.15);
@@ -258,9 +259,9 @@ textarea {
 }
 
 input:focus, select:focus, textarea:focus {
-  border-color: #7367f0 !important;
+  border-color: var(--primary) !important;
   outline: none !important;
-  box-shadow: 0 0 0 3px rgba(115, 103, 240, 0.25) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 25%, transparent) !important;
 }
 
 /* Custom Scrollbar for Vuexy Dark */
@@ -276,5 +277,5 @@ input:focus, select:focus, textarea:focus {
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #7367f0;
+  background: var(--primary);
 }

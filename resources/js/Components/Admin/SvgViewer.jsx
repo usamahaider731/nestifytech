@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-export default function SvgViewer({ src, key, className = '' }) {
+export default function SvgViewer({ width, height, src, key, className = '' }) {
   const [svgContent, setSvgContent] = useState('');
   const svgRef = useRef();
 
@@ -19,6 +19,7 @@ export default function SvgViewer({ src, key, className = '' }) {
       const svgEl = svgRef.current.querySelector('svg');
       if (svgEl) {
         svgEl.classList.add('fill-heading', 'w-full', 'text-primary', 'h-full');
+        svgEl.setAttribute('width', width);
       }
     }
   }, [svgContent]);
@@ -27,6 +28,8 @@ export default function SvgViewer({ src, key, className = '' }) {
     <div
       ref={svgRef}
       key={key}
+      width={width}
+      height={height}
       className={`svg-viewer ${className} fill-primary`}
       dangerouslySetInnerHTML={{ __html: svgContent }}
     />

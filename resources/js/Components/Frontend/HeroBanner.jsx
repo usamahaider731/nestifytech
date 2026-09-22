@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from '@inertiajs/react';
 import { RiArrowRightLine, RiSparkling2Line } from 'react-icons/ri';
 import ImageViwer from '@/Components/Admin/ImageViwer';
+import { useLang } from '@/contexts/LanguageContext';
 
 const DEFAULT_HERO = {
     badge: 'New Arrivals',
@@ -35,6 +36,7 @@ export default function HeroBanner({
     image = DEFAULT_HERO.image,
     className = '',
 }) {
+    const { __ } = useLang();
     const isExternal = ctaHref?.startsWith('http');
     const isHashLink = ctaHref?.startsWith('#');
 
@@ -44,12 +46,12 @@ export default function HeroBanner({
     const ctaButton =
         isExternal || isHashLink ? (
             <a href={ctaHref} className={ctaClasses}>
-                {ctaText}
+                {__(ctaText)}
                 <RiArrowRightLine className="size-5" />
             </a>
         ) : (
             <Link href={ctaHref} className={ctaClasses}>
-                {ctaText}
+                {__(ctaText)}
                 <RiArrowRightLine className="size-5" />
             </Link>
         );
@@ -64,22 +66,22 @@ export default function HeroBanner({
                 <div className="flex flex-col gap-4 md:gap-5 z-10">
                     <span className="inline-flex w-fit items-center gap-2 rounded-full bg-white/10 backdrop-blur px-3 py-1.5 text-xs md:text-sm font-semibold text-primary border border-white/10">
                         <RiSparkling2Line className="size-4" />
-                        {badge}
+                        {__(badge)}
                     </span>
 
                     {subtitle && (
                         <p className="text-sm md:text-base font-medium text-slate-300 uppercase tracking-wider">
-                            {subtitle}
+                            {__(subtitle)}
                         </p>
                     )}
 
                     <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight text-white">
-                        {title}
+                        {__(title)}
                     </h1>
 
                     {description && (
                         <p className="text-sm md:text-base text-slate-300 max-w-xl leading-relaxed">
-                            {description}
+                            {__(description)}
                         </p>
                     )}
 

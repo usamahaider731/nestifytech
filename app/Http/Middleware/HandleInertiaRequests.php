@@ -2,7 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\LanguageHelper;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\View;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -38,11 +40,32 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        return [
+        $language = LanguageHelper::resolve($request->cookie('locale'));
+        $currentLanguage = $language['current'];
+
+        if (! empty($currentLanguage['prefix'])) {
+            app()->setLocale($currentLanguage['prefix']);
+        }
+
+        View::share('currentLanguage', $currentLanguage);
+
+        $shared = [
             ...parent::share($request),
             'auth' => [
                 'user' => $request->user(),
             ],
+            'languages' => $language['languages'],
+            'currentLanguage' => $currentLanguage,
+            'translations' => $request->is('admin', 'admin/*') ? [] : $language['translations'],
         ];
+
+        if (! $request->is('admin', 'admin/*')) {
+            $shared['searchCategories'] = get_taxonomy([
+                'type' => 'category',
+                'status' => 'publish',
+            ]);
+        }
+
+        return $shared;
     }
 }

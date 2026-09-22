@@ -245,6 +245,8 @@ function Form({ Data = [], name = '', link = '', type = '', colorPalettes = {} }
                     options={processOptions(setting.options)}
                     onChange={(value) => handleDropdownChange(value, key)}
                     error={errors[key]}
+                    searchable={setting.searchable ?? true}
+                    
                     isLoading={loadingStates[key]}
                     disabled={processing}
                 />

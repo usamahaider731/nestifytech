@@ -9,6 +9,7 @@ export function normalizeAppearanceColors(colors = {}) {
         dynamic: colors.dynamic || '#3a3d53',
         heading: colors.heading || '#d0d4f1',
         permanent: colors.permanent || '#434968',
+        common: colors.common || '#434968',
     };
 }
 

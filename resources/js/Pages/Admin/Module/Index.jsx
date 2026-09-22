@@ -9,6 +9,7 @@ import { hasPermission, stripTags } from '@/Utils/helper'
 import { TbDotsVertical } from 'react-icons/tb'
 
 function Index({ data, table, type }) {
+
   const { auth } = usePage().props
   const [Rows, setRows] = useState(data?.data || data || [])
 
@@ -81,7 +82,21 @@ function Index({ data, table, type }) {
     if (value === null || typeof value === 'undefined' || value === '') return 'None'
     return String(value)
   }
+  const renderLink = (row, column) => {
+    const value = row?.[column.column]
+    const title = value?.[column.value_condition.return_key] ?? value.name;
+    let link = "#"
+    if (column.value_table === 'posts') {
+      link = route('post', {"type": 'product', sku: value.sku, "id": value.id })
+    }
 
+    if (!value || value === 'null') return 'None'
+    return (
+      <div className='text-[10px] font-medium text-primary px-3 py-1.25 w-fit mx-auto rounded-full'>
+        <Link aria-label={`View ${title}`} target={'_blank'} rel="noopener noreferrer"  href={link}>{title}</Link>
+      </div>
+    )
+  }
   const renderDiscount = (row, column) => {
     const discount = row?.[column.column]
     if (!discount || discount === 'null') return 'None'
@@ -151,6 +166,8 @@ function Index({ data, table, type }) {
         return renderStatusDot(row, column)
       case 'action':
         return renderAction(row)
+      case 'link':
+        return renderLink(row, column)
       default:
         return row?.[column.column]
     }

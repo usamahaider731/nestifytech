@@ -185,22 +185,24 @@ class ApiController extends Controller
 
         if ($request->id) $posts->where('id', $request->id);
         if ($request->sku) $posts->where('sku', $request->sku);
+        if ($request->slug) $posts->where('slug', $request->slug);
         if ($request->keyword) $posts->where('title', 'like', "%{$request->keyword}%");
         if ($request->type) $posts->where('type', $request->type);
         if ($request->limit) $posts->limit($request->limit);
         if ($request->latest) $posts->orderBy('created_at', 'desc');
         if ($request->image) $posts->with('image');
         if ($request->gallery) $posts->with('gallery');
+        if ($request->parent) $posts->with('parent');
         if ($request->meta || $request->category || $request->brand || $request->tags) {
             $posts->with('meta');
         }
 
-        // if ($request->varation) {
-            // $posts->with('variations');
-        // }
+        if ($request->variation) {
+            // variations are appended automatically via getVariationsAttribute, but if not we could append here
+            // We just ensure it's loaded if it were a relation, but it's an accessor.
+        }
      
-     
-            $result = $posts->get();
+        $result = $posts->get();
         
 
         $result->each(function ($item) {
@@ -220,6 +222,25 @@ class ApiController extends Controller
         }
         if ($request->address) {
             $result = PostTaxonomy::get_attribute($result, 'taxonomies', '', 'from_meta', ['state', 'city'], '');
+        }
+
+        if ($request->attributes) {
+            $result->each(function ($item) {
+                $attrValues = DB::table('attribute_values')
+                    ->where(['parent_id' => $item->id, 'parent_type' => 'post'])
+                    ->get();
+                $item->attributes = $attrValues->map(function ($val) {
+                    $def = DB::table('attributes')->where('id', $val->attribute_id)->first();
+                    if (!$def || $def->group === null) {
+                        return null;
+                    }
+                    return [
+                        'group' => $val->group ?? $def->group,
+                        'key' => $def->name,
+                        'value' => $val->value,
+                    ];
+                })->filter()->values()->all();
+            });
         }
 
         if ($request->single) {

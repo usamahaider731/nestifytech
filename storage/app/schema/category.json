@@ -203,15 +203,22 @@
             ]
         },
         {
-            "title": "Category Discount",
+            "title": "Category Price Adjustment",
             "style": "main",
             "fields": [
                 {
                     "label": "Set Discount",
                     "type": "checkbox",
-                    "style": 2,
+                    "style": 1,
                     "name": "discount_toggle",
                     "placeholder": "Category Discount (%)"
+                },
+                {
+                    "label": "Set Tax",
+                    "type": "checkbox",
+                    "style": 1,
+                    "name": "tax_toggle",
+                    "placeholder": "Category Tax (%)"
                 },
                 {
                     "label": "Category Discount",
@@ -220,6 +227,15 @@
                     "name": "discount",
                     "placeholder": "Category Discount (%)",
                     "condition": "discount_toggle",
+                    "condition_value": true
+                },
+                {
+                    "label": "Category Tax",
+                    "type": "number",
+                    "style": 2,
+                    "name": "category_tax",
+                    "placeholder": "Category Tax (%)",
+                    "condition": "tax_toggle",
                     "condition_value": true
                 },
                 {

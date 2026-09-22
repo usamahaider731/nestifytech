@@ -619,6 +619,72 @@
                 ]
             }
         ],
+        "Single": [
+            {
+                "title": "Single Page Layout Settings",
+                "style": "main",
+                "fields":[
+                    {
+                        "label": "Width Layout Type",
+                        "type": "dropdown",
+                        "style": 1,
+                        "name": "width_layout",
+                        "searchable": false,
+                        "value": "container",
+                        "options": [
+                            {
+                                "id": "full_width",
+                                "title": "Full Width"
+                            },
+                            {
+                                "id": "container",
+                                "title": "Container"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Page Style Type",
+                        "type": "dropdown",
+                        "style": 1,
+                        "name": "page_layout",
+                        "searchable": false,
+                        "value": "style1",
+                        "options": [
+                            {
+                                "id": "style1",
+                                "title": "Style 1"
+                            },
+                            {
+                                "id": "style2",
+                                "title": "Style 2"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Show Product Properties",
+                        "name": "product_proerties",
+                        "type":"checkbox",
+                        "value":true,
+                        "desc": "Do You Want to Show Product Properties Like (Hard, Ram etc)"
+                    },
+                    {
+                        "label": "Show Similar Products",
+                        "name": "similar",
+                        "type":"checkbox",
+                        "value":true,
+                        "desc": "Do you want to show similar products"
+                    },
+                    {
+                        "label": "Show Popular Products",
+                        "name": "popular",
+                        "type":"checkbox",
+                        "value":true,
+                        "desc": "Do you want to show popular products"
+                    }
+
+                ]
+            }
+        ],
         "Footer": [
             {
                 "title": "Footer Main Settings",

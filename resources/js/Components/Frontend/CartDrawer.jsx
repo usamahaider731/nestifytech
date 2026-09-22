@@ -9,14 +9,21 @@ import {
 } from 'react-icons/ri';
 import { usePage } from '@inertiajs/react';
 import { useCart } from '@/contexts/CartContext';
+import { useLang } from '@/contexts/LanguageContext';
 import ImageViwer from '@/Components/Admin/ImageViwer';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectCartItems, selectCartCount, selectCartTotal, setComboQty, removeFromCart } from '@/store/cartSlice';
 
 export default function CartDrawer() {
     const { setting } = usePage().props;
     const currency = setting?.site?.currency?.value ?? 'PKR';
-    const { items, isOpen, setIsOpen, subtotal, itemCount, updateQuantity, removeItem } =
-        useCart();
-
+    const { isOpen, setIsOpen } = useCart();
+    const { __ } = useLang();
+    
+    const dispatch = useDispatch();
+    const items = useSelector(selectCartItems);
+    const itemCount = useSelector(selectCartCount);
+    const subtotal = useSelector(selectCartTotal);
     return (
         <Transition show={isOpen} as={Fragment}>
             <Dialog as="div" className="relative z-[1000]" onClose={() => setIsOpen(false)}>
@@ -49,7 +56,7 @@ export default function CartDrawer() {
                                         <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
                                             <Dialog.Title className="flex items-center gap-2 text-lg font-bold text-heading">
                                                 <RiShoppingBag3Line className="size-5 text-primary" />
-                                                Your Cart
+                                                {__('Your Cart')}
                                                 <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-text">
                                                     {itemCount}
                                                 </span>
@@ -58,7 +65,7 @@ export default function CartDrawer() {
                                                 type="button"
                                                 onClick={() => setIsOpen(false)}
                                                 className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 transition-colors"
-                                                aria-label="Close cart"
+                                                aria-label={__('Close cart')}
                                             >
                                                 <RiCloseLine className="size-5" />
                                             </button>
@@ -69,27 +76,27 @@ export default function CartDrawer() {
                                                 <div className="flex h-full flex-col items-center justify-center gap-3 text-center py-16">
                                                     <RiShoppingBag3Line className="size-12 text-slate-300" />
                                                     <p className="text-sm font-medium text-slate-500">
-                                                        Your cart is empty
+                                                        {__('Your cart is empty')}
                                                     </p>
                                                     <button
                                                         type="button"
                                                         onClick={() => setIsOpen(false)}
                                                         className="text-sm font-semibold text-primary hover:underline"
                                                     >
-                                                        Continue shopping
+                                                        {__('Continue shopping')}
                                                     </button>
                                                 </div>
                                             ) : (
                                                 <ul className="space-y-4">
                                                     {items.map((item) => (
                                                         <li
-                                                            key={item.id}
+                                                            key={item.comboId}
                                                             className="flex gap-3 rounded-xl border border-slate-100 p-3"
                                                         >
                                                             <div className="size-16 shrink-0 rounded-lg bg-slate-50 overflow-hidden flex items-center justify-center">
                                                                 {typeof item.image === 'string' ? (
-                                                                    <img
-                                                                        src={item.image}
+                                                                    <ImageViwer
+                                                                        image={item.image}
                                                                         alt={item.title}
                                                                         className="size-full object-contain"
                                                                     />
@@ -104,6 +111,7 @@ export default function CartDrawer() {
                                                             <div className="flex flex-1 flex-col gap-2 min-w-0">
                                                                 <p className="text-sm font-semibold text-heading line-clamp-2">
                                                                     {item.title}
+                                                                    {item.color && <span className="block text-xs text-slate-500">{item.color}</span>}
                                                                 </p>
                                                                 <p className="text-sm font-bold text-primary">
                                                                     {currency}{' '}
@@ -115,29 +123,23 @@ export default function CartDrawer() {
                                                                         <button
                                                                             type="button"
                                                                             onClick={() =>
-                                                                                updateQuantity(
-                                                                                    item.id,
-                                                                                    item.quantity - 1,
-                                                                                )
+                                                                                dispatch(setComboQty({ comboId: item.comboId, qty: item.qty - 1 }))
                                                                             }
                                                                             className="p-1.5 text-slate-600 hover:bg-slate-100 rounded-l-lg"
-                                                                            aria-label="Decrease quantity"
+                                                                            aria-label={__('Decrease quantity')}
                                                                         >
                                                                             <RiSubtractLine className="size-4" />
                                                                         </button>
                                                                         <span className="min-w-8 text-center text-sm font-semibold">
-                                                                            {item.quantity}
+                                                                            {item.qty}
                                                                         </span>
                                                                         <button
                                                                             type="button"
                                                                             onClick={() =>
-                                                                                updateQuantity(
-                                                                                    item.id,
-                                                                                    item.quantity + 1,
-                                                                                )
+                                                                                dispatch(setComboQty({ comboId: item.comboId, qty: item.qty + 1 }))
                                                                             }
                                                                             className="p-1.5 text-slate-600 hover:bg-slate-100 rounded-r-lg"
-                                                                            aria-label="Increase quantity"
+                                                                            aria-label={__('Increase quantity')}
                                                                         >
                                                                             <RiAddLine className="size-4" />
                                                                         </button>
@@ -145,9 +147,9 @@ export default function CartDrawer() {
 
                                                                     <button
                                                                         type="button"
-                                                                        onClick={() => removeItem(item.id)}
+                                                                        onClick={() => dispatch(removeFromCart(item.comboId))}
                                                                         className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                                                        aria-label="Remove item"
+                                                                        aria-label={__('Remove item')}
                                                                     >
                                                                         <RiDeleteBin6Line className="size-4" />
                                                                     </button>
@@ -162,7 +164,7 @@ export default function CartDrawer() {
                                         {items.length > 0 && (
                                             <div className="border-t border-slate-200 px-5 py-4 space-y-4">
                                                 <div className="flex items-center justify-between">
-                                                    <span className="text-sm text-slate-500">Subtotal</span>
+                                                    <span className="text-sm text-slate-500">{__('Subtotal')}</span>
                                                     <span className="text-lg font-bold text-heading">
                                                         {currency} {subtotal.toLocaleString()}
                                                     </span>
@@ -171,7 +173,7 @@ export default function CartDrawer() {
                                                     type="button"
                                                     className="w-full rounded-xl bg-primary py-3 text-sm font-bold text-text transition-all hover:opacity-90 active:scale-[0.98]"
                                                 >
-                                                    Proceed to Checkout
+                                                    {__('Proceed to Checkout')}
                                                 </button>
                                             </div>
                                         )}

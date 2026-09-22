@@ -7,7 +7,7 @@
 @theme {
 
   --font-sans: var(--font-primary);
-  --font-primary: "Inter", "Roboto", sans-serif;
+  --font-primary: "Inter","Open Sans","HelveticaNeue-Light","Helvetica Neue Light","Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;
   --font-josefin: "Josefin Sans", sans-serif;
   --font-oswald: "Oswald", sans-serif;
   --color-secondary: var(--secondary);
@@ -25,9 +25,8 @@
   --font-roboto: "Inter", "Roboto", sans-serif;
 }
 
-/* 🌐 Global Smooth Scroll */
+/* Keep wheel and touch scrolling native and responsive. */
 html {
-  scroll-behavior: smooth;
   -webkit-tap-highlight-color: transparent;
 }
 body{

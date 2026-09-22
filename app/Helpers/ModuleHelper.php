@@ -54,11 +54,11 @@ class ModuleHelper
     public static function transformList($items, $config)
     {
         $columns = $config['columns'] ?? [];
-        
+
         $items->getCollection()->transform(function ($item) use ($columns) {
             foreach ($columns as $col) {
                 $id = $col['id'];
-                
+
                 // 0. If a table column is sourced from meta, map meta -> row property
                 // This is needed for modules where data is stored in *_meta tables (e.g., taxonomies discount fields).
                 if (($col['meta'] ?? false) && !isset($col['value_table'])) {
@@ -82,14 +82,13 @@ class ModuleHelper
                     }
                 }
 
-                // 1. Dynamic Database Lookup logic (value_table + value_condition)
                 if (isset($col['value_table']) && isset($col['value_condition'])) {
                     $lookupTable = $col['value_table'];
                     $condition = $col['value_condition'];
                     $passKey = $condition['pass_value_of_key'] ?? 'id';
                     $returnKey = $condition['return_key'] ?? 'title';
+
                     $targetProp = $col['column'] ?? $id;
-                    
                     // Get the base value to look up
                     $baseValue = null;
                     if ($col['meta'] ?? false) {
@@ -107,6 +106,7 @@ class ModuleHelper
 
                     // Normalize to ID array (supports json strings, scalar, or arrays)
                     $values = [];
+
                     if (is_array($baseValue)) {
                         $values = $baseValue;
                     } elseif (is_string($baseValue)) {
@@ -120,7 +120,6 @@ class ModuleHelper
                     } else {
                         $values = [$baseValue];
                     }
-
                     // Flatten any accidental object arrays like [{id:1}, {id:2}]
                     $values = array_values(array_filter(array_map(function ($v) use ($passKey) {
                         if (is_array($v) && array_key_exists($passKey, $v)) return $v[$passKey];
@@ -131,15 +130,43 @@ class ModuleHelper
                     if (empty($values)) {
                         continue;
                     }
-
                     // Perform lookup
+
+                        if (isset($col['sku'])) {
+                            $rows = DB::table($lookupTable)
+                        ->whereIn($passKey, $values)
+                        ->get([$passKey, $returnKey, 'sku']);
+                        }
+                        else{
                     $rows = DB::table($lookupTable)
                         ->whereIn($passKey, $values)
                         ->get([$passKey, $returnKey]);
+                        }
+                        if ($col['type'] == 'link') {
+                            if (isset($col['sku'])) {
+                                $titles = $rows->map(function ($r) use ($passKey, $returnKey) {
+                                return [
+                                    $passKey => $r->{$passKey} ?? null,
+                                    $returnKey => $r->{$returnKey} ?? null,
+                                    'sku' => $r->sku ?? null,
+                                ];
+                            })->values()->all();
+                            }
+                            else if (!isset($col['sku'])) {
+                                
+                                $titles = $rows->map(function ($r) use ($passKey, $returnKey) {
+                                return [
+                                    $passKey => $r->{$passKey} ?? null,
+                                    $returnKey => $r->{$returnKey} ?? null,
+                                    
+                                ];
+                            })->values()->all();
+                        }
+                        }
+                        else{
+                            $titles = $rows->pluck($returnKey)->filter()->values()->all();
+                        }
 
-                    $titles = $rows->pluck($returnKey)->filter()->values()->all();
-
-                    // Schema-driven brand image object mapping
                     if (($col['type'] ?? null) === 'brand_image') {
                         $first = $rows->first();
                         if ($first) {
@@ -148,7 +175,6 @@ class ModuleHelper
                                 ->where('parent_id', $first->{$passKey})
                                 ->where('type', $mediaType)
                                 ->first();
-
                             $item->{$id} = [
                                 $passKey => $first->{$passKey} ?? null,
                                 $returnKey => $first->{$returnKey} ?? null,
@@ -157,8 +183,6 @@ class ModuleHelper
                         }
                         continue;
                     }
-
-                    // If the column is an array, expose an array of objects (for badge UIs)
                     if (($col['is_array'] ?? false) || (($col['meta_value_type'] ?? '') === 'json')) {
                         $item->{$targetProp} = $rows->map(function ($r) use ($passKey, $returnKey) {
                             return [
@@ -166,16 +190,12 @@ class ModuleHelper
                                 $returnKey => $r->{$returnKey} ?? null,
                             ];
                         })->values()->all();
-
-                        // Also set a string fallback on the column id (useful for generic tables)
                         $item->{$id} = implode(', ', $titles);
                     } else {
                         $item->{$targetProp} = $titles[0] ?? null;
                         $item->{$id} = $item->{$targetProp};
                     }
                 }
-
-                // 2. Legacy Transformation logic
                 $transform = $col['list']['transform'] ?? null;
                 if ($transform && isset($item->{$id})) {
                     $item->{$id} = self::applyTransform($item->{$id}, $transform);
@@ -186,15 +206,11 @@ class ModuleHelper
 
         return $items;
     }
-
-    /**
-     * Transform a single item for detailed view/edit.
-     */
     public static function transformOutput($item, $config)
     {
         $itemArray = (array)$item;
         $columns = $config['columns'] ?? [];
-        
+
         foreach ($columns as $col) {
             $field = $col['id'];
             if (!isset($itemArray[$field])) continue;
@@ -228,7 +244,7 @@ class ModuleHelper
     public static function buildQuery($tableName, $config)
     {
         $query = DB::table($tableName);
-        
+
         // Handle Joins
         if (!empty($config['join'])) {
             foreach ($config['join'] as $join) {

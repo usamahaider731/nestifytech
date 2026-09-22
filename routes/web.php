@@ -24,12 +24,13 @@ Route::controller(FilterController::class)->group(function () {
 });
 Route::controller(FrontendController::class)->group(function () {
     Route::get('/', 'index')->name('index');
-    Route::get('/product/{sku}/{id}', 'singleProduct')->name('singleproduct');
+    Route::get('/post/{type}/{sku}/{id}', 'singleProduct')->name('post');
     Route::get('/get_languages', 'get_languages')->name('languages');
+    Route::get('/set-language/{prefix}', 'setLanguage')->name('language.set');
 });
 Route::get('/image/{filename}_{height}_{width}.{extension}', [MediaController::class, 'thumbimageUrl'])
     ->where([
-        'filename' => '.*', // to allow long filenames with underscores
+        'filename' => '.*',
         'height' => '[0-9]+',
         'width' => '[0-9]+',
         'extension' => '[a-zA-Z0-9]+'
@@ -139,8 +140,8 @@ Route::prefix('/admin')->middleware(['auth', 'verified'])->group(function () {
         Route::delete('/menu/{id}', 'menuDestroy')->name('menu.destroy')->middleware('permission:layout-write');
     });
     Route::prefix('/reviews')->controller(ModuleController::class)->middleware('permission:review-read')->group(function () {
-        Route::get('/', 'index')->defaults('type', 'review')->name('admin.reviews.index');
-        Route::delete('/{id}', 'destroy')->defaults('type', 'review')->name('admin.reviews.destroy')->middleware('permission:review-write');
+        Route::get('/', 'index')->defaults('type', 'reviews')->name('admin.reviews.index');
+        Route::delete('/{id}', 'destroy')->defaults('type', 'reviews')->name('admin.reviews.destroy')->middleware('permission:review-write');
     });
     Route::prefix('/ai')->controller(AiController::class)->group(function () {
         Route::post('/check/field', 'checkField')->name('ai.check.field');
