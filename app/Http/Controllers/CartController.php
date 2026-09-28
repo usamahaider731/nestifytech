@@ -92,7 +92,7 @@ class CartController extends Controller
             $paymentIntentId = $request->input('payment_intent_id');
             
             // Get user id, checking web guard if default api guard is empty
-            $userId = Auth::id() ?? Auth::guard('web')->id() ?? 0;
+            $userId = Auth::id() ?? optional(Auth::guard('web')->user())->id;
 
             $orderId = DB::table('orders')->insertGetId([
                 'product_id'     => $items[0]['productId'],   // primary product (first item)

@@ -5,7 +5,7 @@ import { useLang } from '@/contexts/LanguageContext';
 import { RiDeleteBinLine, RiSecurePaymentLine, RiTruckLine, RiShieldCheckLine } from 'react-icons/ri';
 import ImageViwer from '@/Components/Admin/ImageViwer';
 import { useCart } from '@/contexts/CartContext';
-import { selectCartItems, selectCartCount, selectCartTotal, setComboQty, removeFromCart } from '@/store/cartSlice';
+import { selectCartItems, selectCartCount, selectCartTotal, setComboQty, removeFromCart, clearCart } from '@/store/cartSlice';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { loadStripe } from '@stripe/stripe-js';
@@ -128,7 +128,7 @@ function CheckoutFormContent() {
                         setIsProcessing(false);
                         return;
                     }
-
+                    dispatch(clearCart());
                     alert(`Payment successful! Your order #${orderData.order_id} has been placed.`);
                 }
 

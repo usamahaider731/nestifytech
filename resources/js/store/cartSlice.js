@@ -100,7 +100,10 @@ const cartSlice = createSlice({
                 saveToLocalStorage(state.items);
             }
         },
-
+        clearCart(state){
+            state.items = [];
+            saveToLocalStorage(state.items);
+        },
         /** Remove a single combo line */
         removeFromCart(state, { payload: comboId }) {
             state.items = state.items.filter(i => i.comboId !== comboId);
@@ -112,11 +115,8 @@ const cartSlice = createSlice({
             state.items = state.items.filter(i => i.productId !== productId);
             saveToLocalStorage(state.items);
         },
+        
 
-        clearCart(state) {
-            state.items = [];
-            saveToLocalStorage(state.items);
-        },
     },
     extraReducers: (builder) => {
         builder
