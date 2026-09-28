@@ -15,6 +15,8 @@
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
+        "maatwebsite/excel": "^4.0",
+        "stripe/stripe-php": "^21.3",
         "tightenco/ziggy": "^2.0"
     },
     "require-dev": {

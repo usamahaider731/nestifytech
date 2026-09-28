@@ -30,11 +30,12 @@ class CartController extends Controller
      */
     public function placeOrder(Request $request)
     {
+        
         $request->validate([
             'items'                  => 'required|array|min:1',
             'items.*.comboId'        => 'required|integer',
             'items.*.productId'      => 'required|integer',
-            'items.*.colorId'        => 'required|integer',
+            'items.*.colorId'        => 'nullable|integer',
             'items.*.qty'            => 'required|integer|min:1',
             'items.*.price'          => 'required|numeric|min:0',
         ]);
@@ -45,22 +46,40 @@ class CartController extends Controller
         try {
             // 1. Verify stock is available for every combo before touching anything
             foreach ($items as $item) {
-                $variation = DB::table('post_variations')->where('id', $item['comboId'])->lockForUpdate()->first();
+                if (!empty($item['colorId'])) {
+                    $variation = DB::table('post_variations')->where('id', $item['comboId'])->lockForUpdate()->first();
 
-                if (!$variation) {
-                    DB::rollBack();
-                    return response()->json([
-                        'success' => false,
-                        'message' => "Variation #{$item['comboId']} not found.",
-                    ], 422);
-                }
+                    if (!$variation) {
+                        DB::rollBack();
+                        return response()->json([
+                            'success' => false,
+                            'message' => "Variation #{$item['comboId']} not found.",
+                        ], 422);
+                    }
 
-                if ((int) $variation->stock < (int) $item['qty']) {
-                    DB::rollBack();
-                    return response()->json([
-                        'success' => false,
-                        'message' => "Not enough stock for variation #{$item['comboId']}. Available: {$variation->stock}.",
-                    ], 422);
+                    if ((int) $variation->stock < (int) $item['qty']) {
+                        DB::rollBack();
+                        return response()->json([
+                            'success' => false,
+                            'message' => "Not enough stock for variation #{$item['comboId']}. Available: {$variation->stock}.",
+                        ], 422);
+                    }
+                } else {
+                    $stockMeta = DB::table('post_meta')
+                        ->where('post_id', $item['productId'])
+                        ->where('key', 'stock')
+                        ->lockForUpdate()
+                        ->first();
+
+                    $stock = $stockMeta ? (int) $stockMeta->value : 0;
+
+                    if ($stock < (int) $item['qty']) {
+                        DB::rollBack();
+                        return response()->json([
+                            'success' => false,
+                            'message' => "Not enough stock for product #{$item['productId']}. Available: {$stock}.",
+                        ], 422);
+                    }
                 }
             }
 
@@ -68,15 +87,23 @@ class CartController extends Controller
             $total = collect($items)->sum(fn($i) => $i['price'] * $i['qty']);
 
             // 3. Create the parent order record
+            $paymentMethod = $request->input('payment_method', 'cod');
+            $paymentStatus = $paymentMethod === 'card' ? 'paid' : 'unpaid';
+            $paymentIntentId = $request->input('payment_intent_id');
+            
+            // Get user id, checking web guard if default api guard is empty
+            $userId = Auth::id() ?? Auth::guard('web')->id() ?? 0;
+
             $orderId = DB::table('orders')->insertGetId([
                 'product_id'     => $items[0]['productId'],   // primary product (first item)
-                'user_id'        => Auth::id() ?? 0,
+                'user_id'        => $userId,
                 'quantity'       => collect($items)->sum('qty'),
                 'price'          => $items[0]['price'],
                 'total_price'    => $total,
                 'status'         => 'pending',
-                'payment_method' => $request->input('payment_method', 'cod'),
-                'payment_status' => 'unpaid',
+                'payment_method' => $paymentMethod,
+                'payment_status' => $paymentStatus,
+                'stripe_payment_intent_id' => $paymentIntentId,
                 'order_date'     => now(),
                 'completed_date' => null,
             ]);
@@ -97,10 +124,26 @@ class CartController extends Controller
                     'updated_at' => now(),
                 ]);
 
-                // Decrement stock on the child variation (combo)
-                DB::table('post_variations')
-                    ->where('id', $item['comboId'])
-                    ->decrement('stock', $item['qty']);
+                if (!empty($item['colorId'])) {
+                    // Decrement stock on the child variation (combo)
+                    DB::table('post_variations')
+                        ->where('id', $item['comboId'])
+                        ->decrement('stock', $item['qty']);
+                } else {
+                    // Decrement stock on the simple product
+                    $stockMeta = DB::table('post_meta')
+                        ->where('post_id', $item['productId'])
+                        ->where('key', 'stock')
+                        ->first();
+
+                    if ($stockMeta) {
+                        $newStock = max(0, (int) $stockMeta->value - $item['qty']);
+                        DB::table('post_meta')
+                            ->where('post_id', $item['productId'])
+                            ->where('key', 'stock')
+                            ->update(['value' => (string) $newStock]);
+                    }
+                }
             }
 
             DB::commit();

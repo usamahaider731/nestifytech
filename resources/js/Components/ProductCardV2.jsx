@@ -51,7 +51,7 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
 
     const productHref =
         product.sku && product.id
-            ? route('singleproduct', { sku: product.sku, id: product.id })
+            ? route('post', { sku: product.sku, id: product.id, type: 'product' })
             : null;
 
     const handleAddToCart = () => {
@@ -63,9 +63,9 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
 
     return (
         <article
-            className={`group flex flex-col bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 ${className}`}
+            className={`group flex bg-white border border-border shadow-sm overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 ${className}`}
         >
-            <div className="relative aspect-[4/3] bg-slate-50 flex items-center justify-center p-4 overflow-hidden">
+            <div className="relative  bg-white flex items-center justify-center p-4 overflow-hidden">
                 {cardSetting.show_product_brand && product.brand?.title && (
                     <span className="absolute top-3 right-3 z-10 rounded-full bg-primary px-2.5 py-1 text-[10px] font-bold text-text uppercase tracking-wide">
                         {product.brand.title}
@@ -200,7 +200,7 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
                         <button
                             type="button"
                             onClick={handleAddToCart}
-                            className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-xs font-bold text-text transition-all duration-200 hover:opacity-90 active:scale-[0.98] shadow-sm"
+                            className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-xs font-bold text-text transition-all duration-200 hover:opacity-90 active:scale-[0.98] shadow-sm"
                         >
                             <RiShoppingBagLine className="size-4" />
                             {__('Add to Cart')}
@@ -209,7 +209,7 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
                     {cardSetting.show_product_view_button && productHref && (
                         <Link
                             href={productHref}
-                            className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg border border-primary px-4 py-2.5 text-xs font-bold text-primary transition-all duration-200 hover:bg-primary/5"
+                            className="inline-flex items-center justify-center gap-2 rounded-lg border border-primary px-5 py-2.5 text-xs font-bold text-primary transition-all duration-200 hover:bg-primary/5"
                         >
                             <RiArrowRightLine className="size-4" />
                             {__('View Product')}

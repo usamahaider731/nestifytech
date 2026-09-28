@@ -72,6 +72,8 @@ Route::get('/hello', function () {
         \Illuminate\Support\Facades\DB::table('roles')->where('status', 'publish')->get()
     );
 });
+Route::get('/ads', [ApiController::class, 'ads'])->name('api.ads');
+Route::get('/geocode', [ApiController::class, 'geocode'])->name('api.geocode');
 Route::get('/banners-message', [
     ApiController::class,
     'bannersMessage'
@@ -101,4 +103,8 @@ Route::middleware('web')->post('/reviews', [\App\Http\Controllers\ReviewControll
 Route::middleware('web')->group(function () {
     Route::post('/cart/order', [\App\Http\Controllers\CartController::class, 'placeOrder'])->name('api.cart.order');
     Route::get('/cart/stock', [\App\Http\Controllers\CartController::class, 'checkStock'])->name('api.cart.stock');
+
+    // Order cancellation & refund
+    Route::post('/orders/{orderId}/cancel', [\App\Http\Controllers\StripeController::class, 'cancelOrder'])->name('api.orders.cancel');
+    Route::post('/orders/{orderId}/attach-payment', [\App\Http\Controllers\StripeController::class, 'attachPaymentIntent'])->name('api.orders.attach-payment');
 });

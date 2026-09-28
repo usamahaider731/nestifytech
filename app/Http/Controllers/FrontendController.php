@@ -37,6 +37,20 @@ class FrontendController extends Controller
             'address' => true,
         ], $extra);
     }
+    private function taxonomyQuery(array $extra = []): array
+    {
+        return array_merge([
+            'type' => 'product',
+            'image' => true,
+            'meta' => true,
+            'category' => true,
+            'brand' => true,
+            'gallery' => true,
+            'parent' => true,
+            'variation' => true,
+            'address' => true,
+        ], $extra);
+    }
 
     public function index()
     {
@@ -53,6 +67,7 @@ class FrontendController extends Controller
                 'id' => $index_settings['home_categories'],
                 'limit' => 10,
                 'image' => true,
+                'children' => true,
                 'meta' => true,
             ]);
         }
@@ -63,7 +78,10 @@ class FrontendController extends Controller
                 'latest' => true,
             ]));
         }
-
+            $data['popluar_products'] = get_posts($this->productQuery([
+                'limit' => 10,
+            'views' => 'desc',
+            ]));
         $blockImages = $index_settings['block_images'] ?? [];
         $heroImage = is_array($blockImages) && count($blockImages) > 0 ? $blockImages[0] : null;
 
@@ -81,7 +99,35 @@ class FrontendController extends Controller
             'data' => $data,
         ]);
     }
-
+    
+    public function checkout()
+    {
+        return Inertia::render('Frontend/Checkout/Index');
+    }
+    public function taxonomyView(Request $request)
+    {
+        $id = $request->id;
+        $type = $request->type;
+        $taxonomy = get_taxonomy([
+            'type' => $type,
+            'id' => $id,
+            'limit' => 1,
+            'image' => true,
+            'meta' => true,
+            'parent' => true,
+        ]);
+        if ($type == "category") {
+            $products = get_posts($this->productQuery([
+                'category_id' => $id,
+                'limit' => 20,
+                'paginate' => true,
+            ]));
+            return Inertia::render("Frontend/Category/Index", [
+                'category' => $taxonomy,
+                'products' => $products
+            ]);
+        }
+    }
     public function singleProduct(Request $request)
     {
         $product = get_posts($this->productQuery([
@@ -95,14 +141,16 @@ class FrontendController extends Controller
             abort(404);
         }
 
-        $latest_products = get_posts($this->productQuery([
+        $latest_product = get_posts($this->productQuery([
             'limit' => 4,
             'latest' => true,
             'exclude_id' => $product->id ?? null,
+            'single' => true
         ]));
 
-        $categoryId = $product->category[0]->id ?? $product->category[0]['id'] ?? null;
-
+$categoryId = array_map(function ($cat) {
+    return is_object($cat) ? $cat->id : $cat;
+}, $product->category ?? []);
         $related_products = get_posts($this->productQuery([
             'limit' => 10,
             'category_id' => $categoryId,
@@ -120,7 +168,7 @@ class FrontendController extends Controller
 
         return Inertia::render('Frontend/Single/Index', [
             'product' => $product,
-            'latest_products' => $latest_products,
+            'latest_product' => $latest_product,
             'related_products' => $related_products,
             'popular_products' => $popular_products,
         ]);
@@ -140,7 +188,7 @@ class FrontendController extends Controller
                 if (! in_array((string) $productId, $viewedIds, true)) {
                     DB::table('user_meta')
                         ->where('id', $viewed->id)
-                        ->update(['value' => $productId.','.$viewed->value]);
+                        ->update(['value' => $productId . ',' . $viewed->value]);
                 }
             } else {
                 DB::table('user_meta')->insert([
@@ -150,29 +198,27 @@ class FrontendController extends Controller
                 ]);
             }
 
-        $sessionKey = 'viewed_product_'.$productId;
-        if ($request->session()->has($sessionKey)) {
-            return;
-        }
+            $sessionKey = 'viewed_product_' . $productId;
+            if ($request->session()->has($sessionKey)) {
+                return;
+            }
 
-        $request->session()->put($sessionKey, true);
-                if (! in_array((string) $productId, $viewedIds, true)) {
-                 $updated = DB::table('post_meta')
-            ->where('post_id', $productId)
-            ->where('key', 'views')
-            ->increment('value');
+            $request->session()->put($sessionKey, true);
+            if (! in_array((string) $productId, $viewedIds, true)) {
+                $updated = DB::table('post_meta')
+                    ->where('post_id', $productId)
+                    ->where('key', 'views')
+                    ->increment('value');
 
-        if ($updated === 0) {
-            DB::table('post_meta')->insert([
-                'post_id' => $productId,
-                'key' => 'views',
-                'value' => 1,
-            ]);
-        }
+                if ($updated === 0) {
+                    DB::table('post_meta')->insert([
+                        'post_id' => $productId,
+                        'key' => 'views',
+                        'value' => 1,
+                    ]);
                 }
+            }
         }
-
-       
     }
 
     private function buildMenuTree($elements, $parentId = 0, $location = null)

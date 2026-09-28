@@ -22,7 +22,8 @@ function Table({
   onDataUpdate,
   links = EMPTY_ARRAY,
   paginationPerPage = 10,
-  paginationList = [10, 20, 50, 100]
+  paginationList = [10, 20, 50, 100],
+  onCheckChange
 }) {
   const [Values, SetValues] = useState([]);
   const [Links, SetLinks] = useState(links);
@@ -42,6 +43,12 @@ function Table({
       if (values.links !== Links) SetLinks(values.links);
     }
   }, [values, links]);
+
+  useEffect(() => {
+    if (onCheckChange) {
+      onCheckChange(Check);
+    }
+  }, [Check]);
 
   const SetAllCheck = () => {
     if (Check.length === Values.length) {

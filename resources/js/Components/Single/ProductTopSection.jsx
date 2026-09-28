@@ -31,19 +31,21 @@ const ProductTopSection = ({ product }) => {
                     <button title='Add to Wish List' className='flex text-primary hover:text-white hover:bg-primary transition-all cursor-pointer size-7.5 rounded items-center justify-center border-2 border-primary'>
                         <RiHeartLine className='size-4' />
                     </button>
+                    {product.meta?.views?.value > 0 && (
                     <button className='flex text-secondary text-xs font-semibold hover:text-white gap-1.5 hover:bg-secondary transition-all cursor-pointer h-7.5 w-auto px-1.5 rounded items-center justify-center border-2 border-secondary'>
                         <FaRegEye  className='size-4' />
                         <span>
-                            {product.meta.views.value} Views
+                            {product.meta?.views?.value} Views
                         </span>
                     </button>
+                    )}
                 </div>
             </div>
-            <div className='flex w-full mt-10 gap-10'>
+            <div className='flex w-full mt-10 relative gap-10'>
                 <div className='flex flex-col flex-1'>
                     <SingleProductSlider product={product} />
                 </div>
-                <div className='flex-1'>
+                <div className='flex-1 h-fit sticky top-20'>
                     <div className='flex flex-col gap-5'>
                         <div className='flex flex-col gap-5'>
                             <h1 className='text-primary font-bold text-2xl'>

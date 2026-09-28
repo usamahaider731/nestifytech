@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
+import { Button, Dialog, Transition } from '@headlessui/react';
 import {
     RiAddLine,
     RiCloseLine,
@@ -7,12 +7,13 @@ import {
     RiShoppingBag3Line,
     RiSubtractLine,
 } from 'react-icons/ri';
-import { usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { useCart } from '@/contexts/CartContext';
 import { useLang } from '@/contexts/LanguageContext';
 import ImageViwer from '@/Components/Admin/ImageViwer';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectCartItems, selectCartCount, selectCartTotal, setComboQty, removeFromCart } from '@/store/cartSlice';
+import { IoBagCheckOutline } from 'react-icons/io5';
 
 export default function CartDrawer() {
     const { setting } = usePage().props;
@@ -169,12 +170,15 @@ export default function CartDrawer() {
                                                         {currency} {subtotal.toLocaleString()}
                                                     </span>
                                                 </div>
-                                                <button
-                                                    type="button"
-                                                    className="w-full rounded-xl bg-primary py-3 text-sm font-bold text-text transition-all hover:opacity-90 active:scale-[0.98]"
+                                                {/* go to checkout page */}
+                                                <Link
+                                                    href={route('checkout')}
+                                                    onClick={() => setIsOpen(false)}
+                                                    className="w-full rounded-xl flex items-center justify-center gap-2 px-3 bg-primary py-3 text-sm font-bold text-text transition-all hover:opacity-90 active:scale-[0.98]"
                                                 >
+                                                    <IoBagCheckOutline className='size-4' />
                                                     {__('Proceed to Checkout')}
-                                                </button>
+                                                </Link>
                                             </div>
                                         )}
                                     </div>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import InputLabel from '@/Components/InputLabel';
 import TextInput from '@/Components/TextInput';
 import Togglebox from '@/Components/Togglebox';
@@ -18,6 +18,7 @@ import PhoneInput from './PhoneInput';
 import AttributesSelector from './AttributesSelector';
 import PermissionMatrix from './PermissionMatrix';
 import VariationsSelector from './VariationsSelector';
+import MapField from './MapField';
 
 const FieldControls = ({
     field,
@@ -36,7 +37,7 @@ const FieldControls = ({
     };
 
     const colSpan =
-        field.style === 2 ? 'col-span-6' :
+        field.style === 2 ? (field.type === 'checkbox' ? 'col-span-1' : 'col-span-6') :
             field.type === 'checkbox' ? 'col-span-2' : 'col-span-3';
 
     const processOptions = (options, name) => {
@@ -48,15 +49,18 @@ const FieldControls = ({
         return [];
     };
     let fieldClass = '';
-    // isset condition
     if (field.condition) {
         fieldClass = 'hidden';
 
         if (data[field.condition] == field.condition_value || data[field.condition]) {
+            console.log(field.condition_value, data[field.condition], field.condition)
             fieldClass = 'flex';
         }
 
     }
+
+    // isset condition
+
 
     // === TEXT FIELD ===
     if (field.type === 'text' || field.type === 'number') {
@@ -145,7 +149,7 @@ const FieldControls = ({
         const value = normalizeImageValue(field, data);
 
         return (
-            <div className="col-span-6" key={field.name}>
+            <div className={`col-span-6 ${fieldClass} flex-col`} key={field.name}>
                 <InputLabel className="text-heading">
                     {field.label}
                 </InputLabel>
@@ -156,6 +160,19 @@ const FieldControls = ({
                     multiple={!!field.multiple}
                     value={value}
                     onChange={(files) => updateField(field.name, files)}
+                />
+            </div>
+        );
+    }
+
+    // === MAP ===
+    if (field.type === 'map') {
+        return (
+            <div className={`flex flex-col gap-2 ${colSpan} ${fieldClass}`} key={field.name}>
+                <InputLabel className='text-heading'>{field.label}</InputLabel>
+                <MapField
+                    address={getNestedValue(data, field.source || 'address') || ''}
+                    coordinates={getNestedValue(data, field.coordinates_field || field.name) || []}
                 />
             </div>
         );
@@ -220,6 +237,16 @@ const FieldControls = ({
                     searchable={field.searchable}
                     value={data[field.name] || field.value || ''}
                     options={processOptions(field.options, field.name)}
+                    apiConfig={field.options?.api ? {
+                        api: field.options.api,
+                        endpoint: field.options.endpoint,
+                        proxy: field.options.proxy,
+                    } : null}
+                    onLocationChange={(coordinates) => {
+                        if (field.options?.location_field) {
+                            updateField(field.options.location_field, coordinates || '');
+                        }
+                    }}
                     onChange={(val) => updateField(field.name, val)}
                     isLoading={loadingStates[field.name]}
                 />

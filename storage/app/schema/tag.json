@@ -2,6 +2,7 @@
     "db": {
         "model": "App\\Models\\Taxonomy",
         "type": "tag",
+        "auto_slug": "slug",
         "validation": {
             "title": "required|string|max:255",
             "description": "nullable|string",

@@ -213,7 +213,7 @@ trait ModuleHandler
         try {
 
             DB::beginTransaction();
-            
+
             $data = [];
             foreach ($db['main_fields'] ?? [] as $field) {
                 if ($field === 'updated_at') {
@@ -246,25 +246,24 @@ trait ModuleHandler
             }
             $autoSlugField = $db['auto_slug'] ?? null;
             if ($autoSlugField && isset($data['title'])) {
-                if (empty($data[$autoSlugField]) && (!$isEdit || empty($request->input($autoSlugField)))) {
+                if ((empty($data[$autoSlugField]) || ($data[$autoSlugField] != null))  && (empty($request->input($autoSlugField)) ||$request->input($autoSlugField) != null)) {
                     $data[$autoSlugField] = Str::slug($data['title']);
                 }
+                else {
+                   dd($data[$autoSlugField]);
+
+                }
             }
-
-            // Apply transformations
             $data = \App\Helpers\ModuleHelper::transformInput($data, $db);
-
             // Automatically JSON encode arrays for longText/json storage
-            foreach ($data as $key => &$val) {
+            foreach ($data as $key => $val) {
                 if (is_array($val)) {
                     $val = json_encode($val);
                 }
             }
-
             if ($isEdit) {
-                
                 DB::table($tableName)->where('id', $id)->update($data);
-               
+
                 $recordId = $id;
             } else {
                 $recordId = DB::table($tableName)->insertGetId($data);
@@ -274,7 +273,7 @@ trait ModuleHandler
             if (method_exists($this, 'beforeSaveHook')) {
                 $this->beforeSaveHook($request, $record, $type, $isEdit);
             }
-            
+
 
             $existingRecord = $isEdit ? DB::table($tableName)->where('id', $recordId)->first() : null;
             $recordTitle = $data['title'] ?? $data['name'] ?? ($existingRecord->title ?? ($existingRecord->name ?? null));
@@ -384,7 +383,7 @@ trait ModuleHandler
                     if (Schema::hasTable($variationsTable)) {
                         $foreignKey = $db['meta_key'] ?? (Str::singular($tableName) . '_id');
                         $oldVariations = DB::table($variationsTable)->where($foreignKey, $recordId)->get();
-                        
+
                         // Separate existing parent and child rows by color
                         $oldParentByColor = []; // colorKey => parent variation id
                         $oldChildrenByColor = []; // colorKey => [child variation ids]
@@ -396,7 +395,7 @@ trait ModuleHandler
                                 $oldChildrenByColor[$colorKey][] = $ov->id;
                             }
                         }
-                        
+
                         // Fallback: old data (before parent_id migration) has no parent_id concept
                         // In this case, treat first ID per color as parent, rest as children
                         $oldGroupedByColor = [];
@@ -410,7 +409,7 @@ trait ModuleHandler
                         foreach ($variations as $variation) {
                             $color = $variation['color'] ?? null;
                             $colorKey = $color ?: 'no_color';
-                            
+
                             $combinations = $variation['combinations'] ?? [];
                             while (is_string($combinations)) {
                                 $decoded = json_decode($combinations, true);
@@ -421,7 +420,7 @@ trait ModuleHandler
                                 }
                             }
                             if (!is_array($combinations)) $combinations = [];
-                            
+
                             $sharedAttributes = $variation['shared_attributes'] ?? [];
                             while (is_string($sharedAttributes)) {
                                 $decoded = json_decode($sharedAttributes, true);
@@ -432,7 +431,7 @@ trait ModuleHandler
                                 }
                             }
                             if (!is_array($sharedAttributes)) $sharedAttributes = [];
-                            
+
                             if (empty($combinations)) {
                                 $combinations = [
                                     [
@@ -442,34 +441,34 @@ trait ModuleHandler
                                     ]
                                 ];
                             }
-                            
+
                             \Log::info('Flattening combinations:', [
                                 'color' => $color,
                                 'combinations' => $combinations
                             ]);
-                            
+
                             $existingChildrenForColor = $oldChildrenByColor[$colorKey] ?? [];
                             $childIdIndex = 0;
 
                             // 1. Handle Parent Variation (Color Group)
                             $parentPrice = isset($variation['price']) && $variation['price'] !== '' ? (float)$variation['price'] : 0;
                             $parentStock = isset($variation['stock']) && $variation['stock'] !== '' ? (int)$variation['stock'] : 0;
-                            
+
                             $parentDataToSave = [
                                 $foreignKey => $recordId,
                                 'price'     => $parentPrice,
                                 'stock'     => $parentStock,
                                 'color'     => $color,
                                 'parent_id' => null,
-                                'combinations' => null, 
+                                'combinations' => null,
                                 'shared_attributes' => null,
                             ];
-                            
+
                             // Reuse old parent row or insert new
                             if (isset($oldParentByColor[$colorKey])) {
                                 $parentVId = $oldParentByColor[$colorKey];
                                 DB::table($variationsTable)->where('id', $parentVId)->update($parentDataToSave);
-                                
+
                                 $oldOptionIds = DB::table('product_variation_values')
                                     ->where('variation_id', $parentVId)
                                     ->pluck('attribute_option_id')
@@ -482,7 +481,7 @@ trait ModuleHandler
                                 $parentVId = DB::table($variationsTable)->insertGetId($parentDataToSave);
                             }
                             $keptVariationIds[] = $parentVId;
-                            
+
                             // Save shared attributes to Parent Variation
                             foreach ($sharedAttributes as $attr) {
                                 if (empty($attr['key'])) continue;
@@ -491,7 +490,7 @@ trait ModuleHandler
                                     $attrDefId = DB::table('attributes')->insertGetId(['name' => $attr['key'], 'type' => 'text']);
                                     $attrDef = (object)['id' => $attrDefId];
                                 }
-                                
+
                                 $attrValId = DB::table('attribute_values')->insertGetId([
                                     'attribute_id' => $attrDef->id,
                                     'parent_id' => $recordId,
@@ -500,33 +499,33 @@ trait ModuleHandler
                                     'created_at' => now(),
                                     'updated_at' => now(),
                                 ]);
-                                
+
                                 DB::table('product_variation_values')->insert([
                                     'variation_id' => $parentVId,
                                     'attribute_option_id' => $attrValId
                                 ]);
                             }
-                            
+
                             // 2. Handle Child Variations (Combinations)
                             foreach ($combinations as $combo) {
                                 $price = isset($combo['price']) && $combo['price'] !== '' ? (float)$combo['price'] : $parentPrice;
                                 $stock = isset($combo['stock']) && $combo['stock'] !== '' ? (int)$combo['stock'] : 0;
-                                
+
                                 $childDataToSave = [
                                     $foreignKey => $recordId,
                                     'price'     => $price,
                                     'stock'     => $stock,
                                     'color'     => $color,
                                     'parent_id' => $parentVId,
-                                    'combinations' => null, 
+                                    'combinations' => null,
                                     'shared_attributes' => null,
                                 ];
-                                
+
                                 // Reuse old child rows or insert new
                                 if (isset($existingChildrenForColor[$childIdIndex])) {
                                     $childVId = $existingChildrenForColor[$childIdIndex];
                                     DB::table($variationsTable)->where('id', $childVId)->update($childDataToSave);
-                                    
+
                                     $oldOptionIds = DB::table('product_variation_values')
                                         ->where('variation_id', $childVId)
                                         ->pluck('attribute_option_id')
@@ -538,10 +537,10 @@ trait ModuleHandler
                                 } else {
                                     $childVId = DB::table($variationsTable)->insertGetId($childDataToSave);
                                 }
-                                
+
                                 $keptVariationIds[] = $childVId;
                                 $childIdIndex++;
-                                
+
                                 // Save combination-specific attributes to Child Variation
                                 $comboAttrs = $combo['attributes'] ?? [];
                                 foreach ($comboAttrs as $attr) {
@@ -551,7 +550,7 @@ trait ModuleHandler
                                         $attrDefId = DB::table('attributes')->insertGetId(['name' => $attr['key'], 'type' => 'text']);
                                         $attrDef = (object)['id' => $attrDefId];
                                     }
-                                    
+
                                     $attrValId = DB::table('attribute_values')->insertGetId([
                                         'attribute_id' => $attrDef->id,
                                         'parent_id' => $recordId,
@@ -560,14 +559,14 @@ trait ModuleHandler
                                         'created_at' => now(),
                                         'updated_at' => now(),
                                     ]);
-                                    
+
                                     DB::table('product_variation_values')->insert([
                                         'variation_id' => $childVId,
                                         'attribute_option_id' => $attrValId
                                     ]);
                                 }
                             }
-                            
+
                             // Re-associate image to the parent variation
                             if (!empty($variation['image']) && $parentVId) {
                                 DB::table('media')->updateOrInsert(
@@ -576,23 +575,23 @@ trait ModuleHandler
                                 );
                             }
                         }
-                        
+
                         $allOldIds = $oldVariations->pluck('id')->toArray();
                         $toDelete = array_diff($allOldIds, $keptVariationIds);
-                        
+
                         if (!empty($toDelete)) {
                             $oldOptionIds = DB::table('product_variation_values')
                                 ->whereIn('variation_id', $toDelete)
                                 ->pluck('attribute_option_id')
                                 ->toArray();
-                            
+
                             if (!empty($oldOptionIds)) {
                                 DB::table('attribute_values')->whereIn('id', $oldOptionIds)->delete();
                             }
-                            
+
                             DB::table('product_variation_values')->whereIn('variation_id', $toDelete)->delete();
                             DB::table($variationsTable)->whereIn('id', $toDelete)->delete();
-                            
+
                             DB::table('media')->whereIn('parent_id', $toDelete)
                                 ->where('type', Str::singular($tableName) . '_variation')->delete();
                         }
@@ -613,7 +612,7 @@ trait ModuleHandler
         $baseName = $recordTitle ? Str::slug($recordTitle) : pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
         $extension = $file->getClientOriginalExtension();
         $filename = $baseName . '.' . $extension;
-        
+
         if (Storage::disk('public')->exists('uploads/image/' . $filename)) {
             $filename = $baseName . '-' . time() . '.' . $extension;
         }

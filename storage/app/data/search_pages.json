@@ -8,7 +8,7 @@
   { "title": "Color Settings", "route": "/admin/setting/color", "category": "Settings", "icon": "RiPaletteLine" },
   { "title": "Backend Color Settings", "route": "/admin/setting/backend-color", "category": "Settings", "icon": "RiPaletteLine" },
   { "title": "AI Settings", "route": "/admin/setting/ai", "category": "Settings", "icon": "RiAiGenerateText" },
-  { "title": "Translations", "route": "/admin/transition", "category": "Settings", "icon": "RiTranslate2" },
+  { "title": "Ads", "route": "/admin/setting/ads", "category": "Settings", "icon": "RiAdvertisementLine" },
   { "title": "Languages", "route": "/admin/language", "category": "Settings", "icon": "RiTranslateAi" },
   { "title": "Products", "route": "/admin/post/product", "category": "E-commerce", "icon": "RiShoppingBag3Line" },
   { "title": "Add Product", "route": "/admin/post/product/create", "category": "E-commerce", "icon": "RiShoppingBag3Line" },

@@ -8,11 +8,12 @@ import ProductCardV2 from './ProductCardV2';
  */
 export default function ProductCard(props) {
     const { setting } = usePage().props;
-    const cardType = setting?.layout?.Home?.product_card_type ?? 'v1';
+    const { cardType: passedCardType, ...restProps } = props;
+    const cardType = passedCardType || setting?.layout?.Home?.product_card_type || 'v1';
 
     if (cardType === 'v2') {
-        return <ProductCardV2 {...props} />;
+        return <ProductCardV2 {...restProps} />;
     }
 
-    return <ProductCardV1 {...props} />;
+    return <ProductCardV1 {...restProps} />;
 }

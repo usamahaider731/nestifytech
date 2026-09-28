@@ -3,15 +3,23 @@ import ImageViwer from '@/Components/Admin/ImageViwer'
 import Checkbox from '@/Components/Admin/Checkbox'
 import Table from '@/Components/Admin/Table'
 import AdminLayout from '@/Layouts/AdminLayout'
-import { Link, usePage } from '@inertiajs/react'
+import { Link, usePage, router } from '@inertiajs/react'
 import React, { useEffect, useMemo, useState } from 'react'
 import { hasPermission, stripTags } from '@/Utils/helper'
-import { TbDotsVertical } from 'react-icons/tb'
+import { TbDotsVertical, TbCloudDownload, TbCloudUpload, TbFileZip, TbDatabaseImport, TbDatabaseExport } from 'react-icons/tb'
+import { Dialog, Transition } from '@headlessui/react'
+import { Fragment } from 'react'
 
 function Index({ data, table, type }) {
 
   const { auth } = usePage().props
   const [Rows, setRows] = useState(data?.data || data || [])
+  const [exportFormat, setExportFormat] = useState('csv')
+  const [importing, setImporting] = useState(false)
+  const [selectedIds, setSelectedIds] = useState([])
+  const [showAdvancedModal, setShowAdvancedModal] = useState(false)
+  const [activeTab, setActiveTab] = useState('export') // export or import
+  const [importFile, setImportFile] = useState(null)
 
   useEffect(() => {
     setRows(data?.data || data || [])
@@ -35,13 +43,14 @@ function Index({ data, table, type }) {
   }, [table?.columns, data])
 
   const canWrite = hasPermission(auth?.user, `${type}-write`)
-  console.log(canWrite)
+  const canDelete = hasPermission(auth?.user, `${type}-delete`)
   const baseRoutes = useMemo(() => {
     // Prefer unified module routes everywhere
     return {
       index: 'module.index',
       create: 'module.create',
       edit: 'module.edit',
+      delete: 'module.delete'
     }
   }, [])
 
@@ -87,13 +96,13 @@ function Index({ data, table, type }) {
     const title = value?.[column.value_condition.return_key] ?? value.name;
     let link = "#"
     if (column.value_table === 'posts') {
-      link = route('post', {"type": 'product', sku: value.sku, "id": value.id })
+      link = route('post', { "type": 'product', sku: value.sku, "id": value.id })
     }
 
     if (!value || value === 'null') return 'None'
     return (
       <div className='text-[10px] font-medium text-primary px-3 py-1.25 w-fit mx-auto rounded-full'>
-        <Link aria-label={`View ${title}`} target={'_blank'} rel="noopener noreferrer"  href={link}>{title}</Link>
+        <Link aria-label={`View ${title}`} target={'_blank'} rel="noopener noreferrer" href={link}>{title}</Link>
       </div>
     )
   }
@@ -114,7 +123,7 @@ function Index({ data, table, type }) {
 
     return (
       <div className='w-full h-full flex items-center justify-center'>
-        {brand?.image ? <ImageViwer image={brand.image} className='max-w-3/5' /> : (brand?.title ?? 'None')}
+        {brand?.image ? <ImageViwer image={brand.image} width={80} height={40} className='h-10 w-auto max-w-[80px] object-contain' /> : (brand?.title ?? 'None')}
       </div>
     )
   }
@@ -139,6 +148,11 @@ function Index({ data, table, type }) {
             {canWrite && (
               <ActionDropdown.Link href={route(baseRoutes.edit, { type, id: row.id })}>
                 Edit
+              </ActionDropdown.Link>
+            )}
+            {canDelete && (
+              <ActionDropdown.Link method={"POST"} href={route(baseRoutes.delete, { type, id: row.id })}>
+                Delete
               </ActionDropdown.Link>
             )}
           </ActionDropdown.Context>
@@ -173,18 +187,68 @@ function Index({ data, table, type }) {
     }
   }
 
+  const handleExport = () => {
+    // Determine table name. Default to plural of type if not provided explicitly in table schema.
+    const tableName = table?.table || (type + 's');
+    let exportUrl = route('admin.export') + '?table=' + tableName + '&type=' + type + '&format=' + exportFormat;
+    if (selectedIds.length > 0) {
+      exportUrl += '&ids=' + selectedIds.join(',');
+    }
+    window.location.href = exportUrl;
+  }
+
+  const handleImport = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setImporting(true);
+    const tableName = table?.table || (type + 's');
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('table', tableName);
+    formData.append('type', type);
+    formData.append('format', exportFormat);
+
+    router.post(route('admin.import'), formData, {
+      onSuccess: () => alert('Import successful'),
+      onError: (err) => alert(err.file || err.table || 'Import failed'),
+      onFinish: () => setImporting(false)
+    });
+  }
+
   return (
     <div className='w-full px-5 py-7 flex flex-col gap-7.5'>
       <div className='flex justify-between items-center'>
         <h1 className='text-xl font-medium capitalize text-primary'>{type}</h1>
-        {canWrite && (
-          <Link
-            href={route(baseRoutes.create, { type })}
-            className='bg-primary text-white px-4 py-2 rounded-md text-sm font-medium'
+        <div className='flex gap-3 items-center'>
+          <select
+            value={exportFormat}
+            onChange={(e) => setExportFormat(e.target.value)}
+            className='border-gray-300 rounded-md text-sm py-1.5 focus:ring-primary focus:border-primary'
           >
-            Create New {type}
-          </Link>
-        )}
+            <option value="csv">CSV</option>
+            <option value="xlsx">Excel</option>
+            <option value="json">JSON</option>
+            <option value="xml">XML</option>
+          </select>
+          {canWrite && (
+            <label className={`cursor-pointer px-4 py-2 rounded-md text-sm font-medium text-white transition-opacity ${importing ? 'bg-gray-400 opacity-70' : 'bg-green-600 hover:bg-green-700'}`}>
+              {importing ? 'Importing...' : 'Import'}
+              <input type="file" className="hidden" onChange={handleImport} disabled={importing} />
+            </label>
+          )}
+          <span type='button' onClick={(e) => { e.preventDefault(); handleExport(); }} className='bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium'>
+            Export
+          </span>
+          {canWrite && (
+            <Link
+              href={route(baseRoutes.create, { type })}
+              className='bg-primary text-white px-4 py-2 rounded-md text-sm font-medium'
+            >
+              Create New {type}
+            </Link>
+          )}
+        </div>
       </div>
 
       <Table
@@ -195,6 +259,7 @@ function Index({ data, table, type }) {
         type={type}
         searchRoute="module.index"
         onDataUpdate={setRows}
+        onCheckChange={setSelectedIds}
         paginationPerPage={table?.paginationPerPage}
         paginationList={table?.paginationList}
       >

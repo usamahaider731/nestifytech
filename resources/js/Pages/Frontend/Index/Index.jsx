@@ -9,6 +9,8 @@ import HeroBanner from '@/Components/Frontend/HeroBanner';
 import AnimatedScrollSection from '@/Components/Index/AnimatedScrollSection';
 import { RiCustomerService2Line, RiRefund2Line, RiSecurePaymentLine, RiTruckLine } from 'react-icons/ri';
 import { useLang } from '@/contexts/LanguageContext';
+import AdsRender from '@/Components/Frontend/AdsRender';
+import PopularProducts from '@/Components/Index/PopluarProducts';
 
 function Index({ data }) {
     const { setting } = usePage().props;
@@ -62,16 +64,28 @@ function Index({ data }) {
 
             <AnimatedScrollSection />
 
-            <div className="w-full overflow-hidden bg-bg py-12 md:py-20">
-                <div className={`${containerClass} px-4 sm:px-6 lg:px-8`}>
+            <div className="w-full overflow-hidden">
+                <div className={``}>
                     {setting.layout.Home.banner_image_toggle && (
-                        <div className="group mx-auto w-full max-w-6xl overflow-hidden rounded-xl border border-border bg-accent shadow-sm transition-shadow duration-300 hover:shadow-lg">
+                        <div className="group mx-auto w-full overflow-hidden">
                             <ImageViwer
                                 image={setting.layout.Home.banner_image}
-                                className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
+                                className="w-full h-auto"
                             />
                         </div>
                     )}
+                </div>
+            </div>
+            <div className="relative z-10 w-full border-y border-border bg-white">
+                <div className={`${containerClass} px-4 sm:px-6 lg:px-8`}>
+                    {data.popluar_products && (
+                        <PopularProducts products={data.popluar_products} />
+                    )}
+                </div>
+            </div>
+            <div className='w-full py-5'>
+                <div className={`${containerClass}  px-4 sm:px-6 lg:px-8`}>
+                    <AdsRender type='main' placement='home_bottom' className='w-full'  />
                 </div>
             </div>
         </div>

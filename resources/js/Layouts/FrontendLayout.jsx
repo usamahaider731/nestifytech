@@ -26,7 +26,7 @@ export default function FrontendLayout({ children, title }) {
             
                 theme={'light'} />
             <CartProvider>
-                <div className="min-h-screen font-primary text-res antialiased w-full overflow-x-hidden flex flex-col">
+                <div className="min-h-screen font-primary text-res antialiased w-full flex flex-col">
                     <Header title={title} />
                     <ThemeSwitcher />
                     <main className="flex-grow">{children}</main>

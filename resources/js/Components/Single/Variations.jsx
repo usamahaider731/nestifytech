@@ -40,7 +40,7 @@ const Variations = ({ product }) => {
         if (variations.length > 0 && (!selectedColor || !selectedCombo)) return;
         
         let addQty = qty;
-        let maxStock = 100;
+        let maxStock = product.meta?.stock?.value || 0;
         let pId = product.id;
         let pTitle = product.title;
         let pImage = product.thumbnail || product.image || '';
@@ -60,7 +60,7 @@ const Variations = ({ product }) => {
              pPrice = selectedCombo.price;
              combo_id = selectedCombo.id;
         } else {
-             const pStock = product.stock ?? 100;
+             const pStock = product.meta?.stock?.value ?? 100;
              if (addQty < 1 || pStock < 1) return;
              maxStock = pStock;
              pPrice = (first_price > second_price ? second_price : first_price) || product.price;

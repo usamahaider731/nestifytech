@@ -42,7 +42,6 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
     const id = data.id ?? null;
     const [isSaving, setIsSaving] = useState(false);
 
-    // Collect unique tab names from sections that have a "tab" property
     const tabNames = [...new Set(rows.filter(r => r.tab).map(r => r.tab))];
     const [activeTab, setActiveTab] = useState(tabNames[0] ?? null);
 
@@ -174,7 +173,7 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
 
         rows.forEach(section => {
             section.fields.forEach(field => {
-                if (field.type === 'dropdown' && field.options?.model) {
+                if (field.type === 'dropdown' && field.options?.model ) {
                     const hasDependency = field.depends_on;
                     const canFetch = !hasDependency || (hasDependency && data[hasDependency]);
 

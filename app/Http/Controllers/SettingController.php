@@ -37,6 +37,7 @@ class SettingController extends Controller
             'color' => 'setting-read',
             'backend-color' => 'setting-read',
             'ai' => 'setting-write',
+            'ads' => 'ads-read',
         ];
 
         $permissionKey = strtolower($request->type);
@@ -148,6 +149,7 @@ class SettingController extends Controller
             'color' => 'setting-write',
             'backend-color' => 'setting-write',
             'ai' => 'setting-write',
+            'ads' => 'ads-write',
         ];
 
         $permissionKey = strtolower($request->type);
@@ -198,7 +200,9 @@ class SettingController extends Controller
 
             if (isset($currentSettings[$request->type][$key])) {
                 $settingItem = $currentSettings[$request->type][$key];
-                if ($settingItem['type'] === 'image' && $request->hasFile($key)) {
+                if ($settingItem['type'] === 'repeater') {
+                    $settingItem['value'] = $this->normalizeRepeaterValue($request, $key, $value, $settingItem['fields'] ?? []);
+                } elseif ($settingItem['type'] === 'image' && $request->hasFile($key)) {
                     if (!empty($settingItem['value']) && Storage::disk('public')->exists('uploads/image/' . $settingItem['value'])) {
                         Storage::disk('public')->delete('uploads/image/' . $settingItem['value']);
                     }
@@ -614,5 +618,55 @@ class SettingController extends Controller
             File::put($this->file, json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
             $this->data = $settings;
         }
+    }
+
+    private function normalizeRepeaterValue(Request $request, string $key, mixed $value, array $fields): array
+    {
+        $items = is_array($value) ? $value : [];
+        $imageFields = collect($fields)
+            ->filter(fn ($field) => ($field['type'] ?? '') === 'image')
+            ->pluck('name')
+            ->filter()
+            ->all();
+
+        foreach ($items as $index => $item) {
+            if (! is_array($item)) {
+                continue;
+            }
+
+            foreach ($imageFields as $imageKey) {
+                $file = $request->file("{$key}.{$index}.{$imageKey}");
+                if ($file instanceof \Illuminate\Http\UploadedFile) {
+                    $filename = time().'_'.md5($key.$index.$imageKey).'_'.$file->getClientOriginalName();
+                    Storage::disk('public')->putFileAs('uploads/image', $file, $filename);
+                    $items[$index][$imageKey] = $filename;
+                    continue;
+                }
+
+                if (is_array($file)) {
+                    $uploaded = $file[0] ?? null;
+                    if ($uploaded instanceof \Illuminate\Http\UploadedFile) {
+                        $filename = time().'_'.md5($key.$index.$imageKey).'_'.$uploaded->getClientOriginalName();
+                        Storage::disk('public')->putFileAs('uploads/image', $uploaded, $filename);
+                        $items[$index][$imageKey] = $filename;
+                        continue;
+                    }
+                }
+
+                $current = $item[$imageKey] ?? '';
+                if (is_array($current)) {
+                    $items[$index][$imageKey] = $current[0] ?? '';
+                }
+            }
+
+            if (isset($item['active'])) {
+                $items[$index]['active'] = filter_var($item['active'], FILTER_VALIDATE_BOOLEAN);
+            }
+            if (isset($item['open_new_tab'])) {
+                $items[$index]['open_new_tab'] = filter_var($item['open_new_tab'], FILTER_VALIDATE_BOOLEAN);
+            }
+        }
+
+        return array_values($items);
     }
 }

@@ -19,6 +19,7 @@ export default function ProductGrid({
     className = '',
     useMockFallback = false,
     headingStyle = 'default',
+    cardType = null,
 }) {
     const titleRef = useRef(null);
     const textRef = useRef(null);
@@ -35,15 +36,22 @@ export default function ProductGrid({
     }
     const [classN, SetClassN] = useState("grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-8 gap-6 md:gap-8");
     useEffect(() => {
-        if (widthType === 100) {
-            SetClassN('grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-8 gap-6 md:gap-8');
-
+        if (cardType === 'v2') {
+            // "List" style grid (fewer columns, wider cards)
+            if (widthType === 100) {
+                SetClassN('grid grid-cols-1 gap-6 md:gap-8');
+            } else if (widthType === 75) {
+                SetClassN('grid grid-cols-1 gap-6 md:gap-8');
+            }
+        } else {
+            // "Grid" style (tighter columns, more items)
+            if (widthType === 100) {
+                SetClassN('grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-8 gap-6 md:gap-8');
+            } else if (widthType === 75) {
+                SetClassN('grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7 gap-6 md:gap-8');
+            }
         }
-        if (widthType === 75) {
-            SetClassN('grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7 gap-6 md:gap-8');
-        }
-    }
-        , [classN])
+    }, [widthType, cardType]);
 
     console.log(widthType)
     const titleClass = headingStyle === 'underline'
@@ -145,7 +153,7 @@ export default function ProductGrid({
             <div className={classN} ref={gridRef}>
                 {displayProducts.map((product, index) => (
                     <div key={product.id ?? index} className="product-card-gsap-wrapper h-full">
-                        <ProductCard product={product} className="h-full" />
+                        <ProductCard product={product} cardType={cardType} className="h-full" />
                     </div>
                 ))}
             </div>

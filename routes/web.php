@@ -14,6 +14,7 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\TaxonomyController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\Admin\ImportExportController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
@@ -24,10 +25,14 @@ Route::controller(FilterController::class)->group(function () {
 });
 Route::controller(FrontendController::class)->group(function () {
     Route::get('/', 'index')->name('index');
-    Route::get('/post/{type}/{sku}/{id}', 'singleProduct')->name('post');
+    Route::get('/checkout', 'checkout')->name('checkout');
+    Route::get('/view/specific/classification/{type}/{id}/{slug}', 'taxonomyView')->name('taxonomy.view');
+    Route::get('/view/post/{type}/{sku}/{id}', 'singleProduct')->name('post');
     Route::get('/get_languages', 'get_languages')->name('languages');
     Route::get('/set-language/{prefix}', 'setLanguage')->name('language.set');
 });
+
+Route::post('/checkout/create-payment-intent', [\App\Http\Controllers\StripeController::class, 'createPaymentIntent'])->name('checkout.payment-intent');
 Route::get('/image/{filename}_{height}_{width}.{extension}', [MediaController::class, 'thumbimageUrl'])
     ->where([
         'filename' => '.*',
@@ -73,6 +78,7 @@ Route::prefix('/admin')->middleware(['auth', 'verified'])->group(function () {
         Route::get('/edit/{id}', 'edit')->name('module.edit');
         Route::post('/submit/{id?}', 'submit')->name('module.submit');
         Route::get('/{id?}', 'index')->name('module.index.with_id');
+        Route::post('/{id}/destroy', 'destroy')->name('module.delete');
     });
     // Keeping legacy names for backward compatibility by mapping them to ModuleController
     Route::get('/users', [ModuleController::class, 'index'])->defaults('type', 'user')->name('users');
@@ -149,6 +155,12 @@ Route::prefix('/admin')->middleware(['auth', 'verified'])->group(function () {
 
     // Temp image upload (used by VariationsSelector for async uploads)
     Route::post('/upload-image-temp', [MediaController::class, 'uploadTemp'])->name('admin.upload.image.temp');
+
+    Route::prefix('/import-export')->controller(ImportExportController::class)->group(function () {
+        Route::get('/', 'index')->name('admin.import-export.index');
+        Route::post('/import', 'import')->name('admin.import');
+        Route::get('/export', 'export')->name('admin.export');
+    });
 });
 require __DIR__ . '/auth.php';
 // require __DIR__ . '/api.php';

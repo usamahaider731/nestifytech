@@ -2,6 +2,7 @@
     "db": {
         "model": "App\\Models\\Taxonomy",
         "type": "category",
+        "auto_slug": "slug",
         "validation": {
             "title": "required|string|max:255",
             "description": "nullable|string",
@@ -11,6 +12,10 @@
         "schema": [
             {
                 "name": "title",
+                "type": "string"
+            },
+            {
+                "name": "slug",
                 "type": "string"
             },
             {
@@ -39,7 +44,8 @@
             "title",
             "description",
             "status",
-            "parent_id"
+            "parent_id",
+            "slug"
         ],
         "fixed_fields": {
             "type": "category"

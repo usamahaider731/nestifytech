@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\Http;
 
 class ApiController extends Controller
 {
@@ -17,7 +18,35 @@ class ApiController extends Controller
         parent::__construct();
         $this->file_location = $this->json_file_location;
     }
+    public function ads(Request $request)
+    {
+        $settings = json_decode(file_get_contents($this->file_location . "/setting.json"), true);
+        $ads = $settings['ads']['items'] ?? [];
+        if ($request->placement) {
+            $ads = array_filter($ads, function ($ad) use ($request) {
+                return $ad['placement'] === $request->placement && $ad['active'];
+            });
+        }
+        return response()->json(array_values($ads));
+    }
 
+    public function geocode(Request $request)
+    {
+        $validated = $request->validate([
+            'q' => ['required', 'string', 'min:3', 'max:200'],
+            'limit' => ['nullable', 'integer', 'min:1', 'max:10'],
+        ]);
+
+        $response = Http::retry([100, 300])
+            ->timeout(5)
+            ->connectTimeout(3)
+            ->get('https://photon.komoot.io/api/', [
+                'q' => $validated['q'],
+                'limit' => $validated['limit'] ?? 5,
+            ]);
+
+        return response()->json($response->successful() ? $response->json() : [], $response->status());
+    }
     public function menu(Request $request)
     {
         $query = DB::table('menu')->orderBy('sort_order', 'asc');

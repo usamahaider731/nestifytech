@@ -101,7 +101,7 @@ export default function AnimatedScrollSection() {
     };
 
     return (
-        <section ref={sectionRef} className="relative w-full overflow-hidden bg-gradient-to-br from-bg to-white py-24 my-10 border-y border-border shadow-sm">
+        <section ref={sectionRef} className="relative w-full overflow-hidden bg-gradient-to-br from-bg to-white py-24 mt-10 border-y border-border shadow-sm">
             {/* Animated Background Shapes */}
             <div className="bg-shape absolute top-10 left-10 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10"></div>
             <div className="bg-shape absolute bottom-10 right-10 w-96 h-96 bg-secondary/5 rounded-full blur-3xl -z-10"></div>

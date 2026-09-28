@@ -94,7 +94,7 @@ class ModuleController extends Controller
 
         // Map 'data' to plural type name for backward compatibility with frontend Index files
         $pluralType = Str::plural($type);
-        
+
         return Inertia::render($view, array_merge([
             $pluralType => $result['data'],
             'data' => $result['data'],
@@ -187,7 +187,6 @@ class ModuleController extends Controller
         }
 
         $response = $this->handleSubmission($request, $type, $id);
-
         if (($request->ajax() || $request->wantsJson()) && !$request->hasHeader('X-Inertia')) {
             return response()->json($response, $response['success'] ? 200 : 500);
         }
@@ -216,8 +215,9 @@ class ModuleController extends Controller
     /**
      * Unified Destroy handler.
      */
-    public function destroy(Request $request, $id)
+    public function destroy(Request $request)
     {
+        $id = $request->id;
         try {
             $type = $request->route('type');
             $this->checkPermission($type, 'delete');

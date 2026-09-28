@@ -2,7 +2,6 @@
     "db": {
         "model": "App\\Models\\Posts",
         "type": "product",
-        "auto_slug": "sku",
         "validation": {
             "title": "required|string|max:100",
             "description": "nullable|string|max:10000",
@@ -346,7 +345,22 @@
                 {
                     "name": "address",
                     "label": "Address",
-                    "type": "text",
+                    "type": "dropdown",
+                    "searchable": true,
+                    "options": {
+                        "api": "https://photon.komoot.io",
+                        "endpoint": "/api/?q={query}&limit=5",
+                        "proxy": "/api/geocode",
+                        "location_field": "address_coordinates"
+                    },
+                    "style": 2
+                },
+                {
+                    "name": "address_coordinates",
+                    "label": "Selected Location",
+                    "type": "map",
+                    "source": "address",
+                    "coordinates_field": "address_coordinates",
                     "style": 2
                 },
                 {

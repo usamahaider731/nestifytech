@@ -38,7 +38,7 @@ const ProductCardV1 = ({ className = '', product = {} }) => {
                 return acc + Number(variation.stock || 0);
             }, 0));
         } else {
-            SetStock(product.stock ?? 0);
+            SetStock(product?.meta?.stock?.value ?? 0);
         }
         if (first_price > second_price) {
             setDiscount(((first_price - second_price) / first_price) * 100);
@@ -55,14 +55,18 @@ const ProductCardV1 = ({ className = '', product = {} }) => {
     };
 
     return (
-        <div className={`bg-white hover-lift overflow-hidden relative group ${className}`}>
+        <div className={`bg-white hover-lift overflow-hidden shadow relative group ${className}`}>
 
             {/* Image & Badges Section */}
             <div className="relative w-full aspect-square bg-white flex items-center justify-center p-4 overflow-hidden group-hover:bg-slate-50/50 transition-colors duration-300">
 
                 {/* Floating Badges */}
                 <div className="absolute top-0 left-0 right-0 flex justify-between items-start z-30 size-full pointer-events-none">
-
+                    {cardSetting.show_product_stock_info && (
+                        <span className={`absolute top-3 left-3 ${Stock > 0 ? 'bg-primary' : 'bg-secondary'} text-white px-1.5 py-0.25 text-[9px] font-semibold rounded shadow-sm`}>
+                            {Stock > 0 ? 'In Stock' : 'Out of Stock'}
+                        </span>
+                    )}
 
                     {cardSetting.show_product_discount_price && discount > 0 && (
                         <span className='bottom-5 right-5 absolute bg-primary/90 text-white px-2.5 py-1 text-xs font-bold rounded-full shadow-sm'>
@@ -89,19 +93,25 @@ const ProductCardV1 = ({ className = '', product = {} }) => {
                 </div>
             </div>
 
-            <div className="p-4 flex flex-col border-t border-t-border transition-transform z-30 bg-white gap-2">
+            <div className="p-4 flex flex-col border-t border-t-border transition-transform z-30 bg-white gap-1.25">
 
                 <div className='flex items-center justify-between'>
+
                     {cardSetting.show_product_category && Categories.length > 0 && (
                         <div className='flex flex-wrap items-center gap-x-1'>
                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest line-clamp-1">
-                                {Categories[0]?.title}
+                                {Categories.map((category, index) => (
+                                    <React.Fragment key={index}>
+                                        {category?.title}
+                                        {index < Categories.length - 1 && ', '}
+                                    </React.Fragment>
+                                ))}
                             </span>
                         </div>
                     )}
 
                     {cardSetting.show_product_rating && (
-                        <div className="flex items-center gap-0.5">
+                        <div className="flex items-center gap-0.25">
                             <RiStarFill className="text-amber-400 text-[10px]" />
                             <RiStarFill className="text-amber-400 text-[10px]" />
                             <RiStarFill className="text-amber-400 text-[10px]" />

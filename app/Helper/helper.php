@@ -90,7 +90,7 @@ function helper_ids($value): array
         $value = [$value];
     }
 
-    return array_values(array_filter($value, fn ($id) => $id !== null && $id !== ''));
+    return array_values(array_filter($value, fn($id) => $id !== null && $id !== ''));
 }
 
 function apply_post_meta_id_filter($query, string $metaKey, array $ids): void
@@ -102,11 +102,56 @@ function apply_post_meta_id_filter($query, string $metaKey, array $ids): void
             ->where('post_meta.key', $metaKey)
             ->where(function ($inner) use ($ids) {
                 foreach ($ids as $id) {
-                    $inner->orWhere('post_meta.value', 'like', '%"'.$id.'"%')
+                    $inner->orWhere('post_meta.value', 'like', '%"' . $id . '"%')
                         ->orWhere('post_meta.value', (string) $id);
                 }
             });
     });
+}
+
+function attach_taxonomy_children_products($items)
+{
+    foreach ($items as $item) {
+        $children = DB::table('taxonomies')->where('parent_id', $item->id)->get();
+
+        foreach ($children as $child) {
+            $child->products = get_posts([
+                'type' => 'product',
+                'category' => true,
+                'category_id' => $child->id,
+                'limit' => 12,
+                'image' => true,
+                'meta' => true,
+                'brand' => true,
+                'gallery' => true,
+                'parent' => true,
+                'variation' => true,
+                'address' => true,
+            ]);
+        }
+        $item->products = get_posts([
+            'type' => 'product',
+            'category' => true,
+            'category_id' => $item->id,
+            'limit' => 12,
+            'image' => true,
+            'meta' => true,
+            'brand' => true,
+            'gallery' => true,
+            'parent' => true,
+            'variation' => true,
+            'address' => true,
+        ]);
+        $allProducts = $item->products->merge(
+            $children->flatMap(function ($child) {
+                return $child->products;
+            })
+        )->unique('id')->values()->toArray();
+        $item->all_products = $allProducts;
+        $item->children = attach_taxonomy_children_products($children);
+    }
+
+    return $items;
 }
 
 function get_taxonomy($type = null, $key = null, $value = null, $limit = null)
@@ -138,7 +183,7 @@ function get_taxonomy($type = null, $key = null, $value = null, $limit = null)
     }
 
     if (! empty($args['keyword'])) {
-        $query->where('title', 'like', '%'.$args['keyword'].'%');
+        $query->where('title', 'like', '%' . $args['keyword'] . '%');
     }
     if (! empty($args['limit'])) {
         $query->limit((int) $args['limit']);
@@ -153,7 +198,9 @@ function get_taxonomy($type = null, $key = null, $value = null, $limit = null)
     if (($args['limit'] ?? null) == 1 || ! empty($args['single'])) {
         $item = $query->first();
         if ($item) {
-            $item->children = DB::table('taxonomies')->where('parent_id', $item->id)->get();
+            $item->children = attach_taxonomy_children_products(
+                DB::table('taxonomies')->where('parent_id', $item->id)->get()
+            );
             if ($item->relationLoaded('meta')) {
                 $item->setRelation('meta', $item->meta->keyBy('key'));
             }
@@ -163,13 +210,12 @@ function get_taxonomy($type = null, $key = null, $value = null, $limit = null)
     }
 
     $items = $query->get();
+    $items = attach_taxonomy_children_products($items);
     foreach ($items as $item) {
-        $item->children = DB::table('taxonomies')->where('parent_id', $item->id)->get();
         if ($item->relationLoaded('meta')) {
             $item->setRelation('meta', $item->meta->keyBy('key'));
         }
     }
-
     return $items;
 }
 
@@ -188,28 +234,27 @@ function get_posts(array $args = [])
     }
 
     if (! empty($args['sku'])) {
-        $posts->where('sku', $args['sku']);
+        $posts->where('posts.sku', $args['sku']);
     }
     if (! empty($args['slug'])) {
-        $posts->where('slug', $args['slug']);
+        $posts->where('posts.slug', $args['slug']);
     }
     if (! empty($args['keyword'])) {
-        $posts->where('title', 'like', '%'.$args['keyword'].'%');
+        $posts->where('posts.title', 'like', '%' . $args['keyword'] . '%');
     }
     if (! empty($args['type'])) {
-        $posts->where('type', $args['type']);
+        $posts->where('posts.type', $args['type']);
     }
     if (!empty($args['popular']) || array_key_exists('views', $args)) {
         $direction = strtolower((string) ($args['views'] ?? 'desc')) === 'asc' ? 'asc' : 'desc';
-        
+
         $posts->leftJoin('post_meta as view', function ($join) {
             $join->on('posts.id', '=', 'view.post_id')
-                 ->where('view.key', '=', 'views');
+                ->where('view.key', '=', 'views');
         })
-        ->select('posts.*')
-        ->orderByRaw('CAST(COALESCE(view.value, 0) AS UNSIGNED) ' . $direction);
-    }
-    elseif (! empty($args['latest'])) {
+            ->select('posts.*')
+            ->orderByRaw('CAST(COALESCE(view.value, 0) AS UNSIGNED) ' . $direction);
+    } elseif (! empty($args['latest'])) {
         $posts->orderBy('created_at', 'desc');
     }
     if (! empty($args['limit'])) {

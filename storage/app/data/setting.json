@@ -398,7 +398,7 @@
                     "key": "Yellow",
                     "label": "Yellow",
                     "primary": "#fed700",
-                    "secondary": "#2242a3",
+                    "secondary": "#ff0000",
                     "accent": "#7c7c7c",
                     "res": "#626262",
                     "bg": "#f8f8f8",
@@ -559,6 +559,140 @@
             "label": "Chatbot Prompt",
             "type": "textarea",
             "placeholder": "Enter Chatbot Prompt"
+        }
+    },
+    "ads": {
+        "items": {
+            "label": "Advertisement",
+            "type": "repeater",
+            "value": [
+                {
+                    "title": "Sale Banner In Sidebar",
+                    "active": true,
+                    "placement": "product_sidebar",
+                    "ad_type": "image",
+                    "link": "http:\/\/nestifytech.localhost\/post\/product\/NT-1326932\/2",
+                    "open_new_tab": true,
+                    "iframe": null,
+                    "html": null,
+                    "image": "1790057432_67a1288f89c3bf186c3d765f7ab8b1ca_Adidas Samba Shoes.jpg"
+                },
+                {
+                    "title": "Product Bottom Banner of Sale",
+                    "active": true,
+                    "placement": "product_bottom",
+                    "ad_type": "image",
+                    "link": "http:\/\/nestifytech.localhost\/post\/product\/NT-1326932\/2",
+                    "open_new_tab": true,
+                    "iframe": null,
+                    "html": null,
+                    "image": "1790072874_3e63ceb9692ef57fac81becca83cd2c3_Add a heading (1).png"
+                },
+                {
+                    "title": "Home Bottom Banner",
+                    "active": true,
+                    "placement": "home_bottom",
+                    "ad_type": "image",
+                    "link": "http:\/\/nestifytech.localhost\/view\/post\/product\/NST-1260900004\/6",
+                    "open_new_tab": true,
+                    "iframe": null,
+                    "html": null,
+                    "image": "1790318796_03be58c579881cc455b0a5a1f800d9c0_Your paragraph text.png"
+                }
+            ],
+            "fields": [
+                {
+                    "name": "title",
+                    "label": "Title",
+                    "type": "text",
+                    "placeholder": "Summer Sale Banner"
+                },
+                {
+                    "name": "active",
+                    "label": "Active",
+                    "type": "checkbox",
+                    "value": true
+                },
+                {
+                    "name": "placement",
+                    "label": "Placement",
+                    "type": "dropdown",
+                    "options": [
+                        {
+                            "id": "home_top",
+                            "title": "Home - After Slider"
+                        },
+                        {
+                            "id": "home_after_categories",
+                            "title": "Home - After Categories"
+                        },
+                        {
+                            "id": "home_after_products",
+                            "title": "Home - After Products"
+                        },
+                        {
+                            "id": "home_bottom",
+                            "title": "Home - Bottom"
+                        },
+                        {
+                            "id": "product_sidebar",
+                            "title": "Product - Sidebar"
+                        },
+                        {
+                            "id": "product_bottom",
+                            "title": "Product - Bottom"
+                        }
+                    ]
+                },
+                {
+                    "name": "ad_type",
+                    "label": "Ad Type",
+                    "type": "dropdown",
+                    "options": [
+                        {
+                            "id": "image",
+                            "title": "Image"
+                        },
+                        {
+                            "id": "iframe",
+                            "title": "Iframe \/ Embed"
+                        },
+                        {
+                            "id": "html",
+                            "title": "HTML"
+                        }
+                    ]
+                },
+                {
+                    "name": "link",
+                    "label": "Ad Link",
+                    "type": "text",
+                    "placeholder": "https:\/\/example.com"
+                },
+                {
+                    "name": "open_new_tab",
+                    "label": "Open Link In New Tab",
+                    "type": "checkbox",
+                    "value": true
+                },
+                {
+                    "name": "image",
+                    "label": "Image",
+                    "type": "image"
+                },
+                {
+                    "name": "iframe",
+                    "label": "Iframe URL or Embed Code",
+                    "type": "textarea",
+                    "placeholder": "https:\/\/... or <iframe src=\"...\"><\/iframe>"
+                },
+                {
+                    "name": "html",
+                    "label": "HTML Code",
+                    "type": "textarea",
+                    "placeholder": "<div>Your ad HTML<\/div>"
+                }
+            ]
         }
     },
     "font": {

@@ -120,6 +120,16 @@
             "permission": "setting-write"
           }
         ]
+      },
+      {
+        "id": "ads",
+        "title": "Ads",
+        "permission": "ads-read",
+        "icon": "ri-advertisement-line",
+        "route": "admin.setting",
+        "params": {
+          "type": "ads"
+        }
       }
     ]
   },
@@ -332,6 +342,16 @@
         "route": "layout.setting",
         "params": {
           "type": "Single"
+        },
+        "permission": "layout-write"
+      },
+      {
+        "id": "single_category",
+        "title": "Single Category Page",
+        "icon": "ri-t-box-fill",
+        "route": "layout.setting",
+        "params": {
+          "type": "Single_Category"
         },
         "permission": "layout-write"
       }
