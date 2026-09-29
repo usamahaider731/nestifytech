@@ -53,10 +53,11 @@ const ProductTopSection = ({ product }) => {
                             </h1>
                             <div className='flex flex-col gap-2 font-roboto'>
                                 <div className='flex gap-4 items-center'>
+                                    {product?.brand && 
                                     <div className='flex gap-2 items-center text-center'>
                                         <span className='text-lg text-heading font-semibold'>{__('Brand:')}</span>
                                         <Link href={route('taxonomy.view', {type: "brand", id: product.brand?.id, slug: product.brand?.slug, time: new Date().getTime()})} title={product.brand?.title}><ImageViwer image={product.brand?.image?.filename} alt={product.brand?.title} className='w-auto cursor-pointer h-4' /></Link>
-                                    </div>
+                                    </div>}
                                     <div className='flex gap-2 items-center'>
                                         <span className='text-lg text-heading font-semibold'>{__('SKU:')}</span>
                                         <span className='text-text font-semibold text-lg'>{product.sku}</span>

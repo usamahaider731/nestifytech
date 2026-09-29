@@ -88,7 +88,7 @@ function Index({ data }) {
             <div className="relative z-10 w-full border-y border-border bg-white">
                 <div className={`${containerClass} px-4 sm:px-6 lg:px-8`}>
                     {data.popluar_products && (
-                        <PopularProducts products={data.popluar_products} />
+                        <PopularProducts products={data.popluar_products} cardType ={setting.layout.Home.popular_product_card_type} />
                     )}
                 </div>
             </div>

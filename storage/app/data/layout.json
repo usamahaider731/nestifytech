@@ -1,91 +1,5 @@
 {
     "layout": {
-        "Single_Category": [
-            {
-                "title": "Single Category Layout",
-                "style": "main",
-                "fields": [
-                    {
-                        "label": "Width Layout Type",
-                        "type": "dropdown",
-                        "name": "width_layout",
-                        "value": "container",
-                        "searchable": false,
-                        "options": [
-                            {
-                                "id": "container",
-                                "title": "Container"
-                            },
-                            {
-                                "id": "full_width",
-                                "title": "Full Width"
-                            }
-                        ]
-                    },
-                    {
-                        "label": "Product Card Style",
-                        "name": "product_card_style",
-                        "type": "dropdown",
-                        "value": "v1",
-                        "searchable": false,
-                        "options": [
-                            {
-                                "id": "v1",
-                                "title": "V1"
-                            },
-                            {
-                                "id": "v2",
-                                "title": "V2"
-                            },
-                            {
-                                "id": "both",
-                                "title": "Both (V1 & V2)"
-                            }
-                        ]
-                    },
-                    {
-                        "label": "Show Banner",
-                        "name": "show_banner",
-                        "type": "checkbox",
-                        "value": true
-                    },
-                    {
-                        "label": "Show Sidebar",
-                        "name": "show_sidebar",
-                        "type": "checkbox",
-                        "value": true
-                    },
-                    {
-                        "label": "Show Products",
-                        "name": "show_products",
-                        "type": "checkbox",
-                        "value": true
-                    },
-                    {
-                        "label": "Show Pagination",
-                        "name": "show_pagination",
-                        "type": "checkbox",
-                        "value": true
-                    }
-                ]
-            },
-            {
-                "style": "sidebar",
-                "title": "Information",
-                "fields": [
-                    {
-                        "type": "image",
-                        "title": "Banner Image",
-                        "style": 1,
-                        "condition": "show_banner",
-                        "condition_value": true,
-                        "name": "banner_image",
-                        "value": "1790606552_6039b3ff1a895b03a0d20722190f776c_banner_image.jpg",
-                        "single": true
-                    }
-                ]
-            }
-        ],
         "Home": [
             {
                 "title": "Gallery Settings",
@@ -367,7 +281,7 @@
                         "type": "dropdown",
                         "name": "popular_product_card_type",
                         "attribute": "required",
-                        "value": "v1",
+                        "value": "v2",
                         "searchable": false,
                         "options": [
                             {
@@ -453,6 +367,184 @@
                         "name": "banner_slider_speed",
                         "attribute": "required",
                         "value": "25"
+                    }
+                ]
+            }
+        ],
+        "Product_Card_V2": [
+            {
+                "title": "Manage Product Card V2",
+                "style": "main",
+                "fields": [
+                    {
+                        "label": "Product Image Or Gallery",
+                        "type": "dropdown",
+                        "name": "product_image",
+                        "value": "2",
+                        "style": 2,
+                        "searchable": false,
+                        "options": [
+                            {
+                                "id": 1,
+                                "title": "Gallery"
+                            },
+                            {
+                                "id": 2,
+                                "title": "Image"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Show Product Cateogry",
+                        "type": "checkbox",
+                        "name": "show_product_category",
+                        "value": true
+                    },
+                    {
+                        "label": "Show Product Price",
+                        "type": "checkbox",
+                        "value": true,
+                        "name": "show_product_price"
+                    },
+                    {
+                        "label": "Show Product Discount Price",
+                        "type": "checkbox",
+                        "name": "show_product_discount_price",
+                        "value": true
+                    },
+                    {
+                        "label": "Show Button ( View )",
+                        "type": "checkbox",
+                        "name": "show_product_view_button",
+                        "value": true
+                    },
+                    {
+                        "label": "Show Button ( Add to Cart )",
+                        "type": "checkbox",
+                        "name": "product_add_to_cart_button",
+                        "value": true
+                    },
+                    {
+                        "label": "Show Wish List",
+                        "type": "checkbox",
+                        "name": "show_product_wishlist_button",
+                        "value": true
+                    },
+                    {
+                        "label": "Show ( Add to Compare ) Button",
+                        "type": "checkbox",
+                        "name": "show_product_compare_button",
+                        "value": true
+                    },
+                    {
+                        "label": "Product Stock Info",
+                        "type": "checkbox",
+                        "name": "show_product_stock_info",
+                        "value": true
+                    },
+                    {
+                        "label": "Product Brand",
+                        "type": "checkbox",
+                        "name": "show_product_brand",
+                        "value": true
+                    },
+                    {
+                        "label": "Product Rating",
+                        "type": "checkbox",
+                        "name": "show_product_rating",
+                        "value": true
+                    },
+                    {
+                        "label": "Product Address",
+                        "type": "checkbox",
+                        "name": "product_address",
+                        "value": false
+                    }
+                ]
+            }
+        ],
+        "Single_Category": [
+            {
+                "title": "Single Category Layout",
+                "style": "main",
+                "fields": [
+                    {
+                        "label": "Width Layout Type",
+                        "type": "dropdown",
+                        "name": "width_layout",
+                        "value": "container",
+                        "searchable": false,
+                        "options": [
+                            {
+                                "id": "container",
+                                "title": "Container"
+                            },
+                            {
+                                "id": "full_width",
+                                "title": "Full Width"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Product Card Style",
+                        "name": "product_card_style",
+                        "type": "dropdown",
+                        "value": "v1",
+                        "searchable": false,
+                        "options": [
+                            {
+                                "id": "v1",
+                                "title": "V1"
+                            },
+                            {
+                                "id": "v2",
+                                "title": "V2"
+                            },
+                            {
+                                "id": "both",
+                                "title": "Both (V1 & V2)"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Show Banner",
+                        "name": "show_banner",
+                        "type": "checkbox",
+                        "value": true
+                    },
+                    {
+                        "label": "Show Sidebar",
+                        "name": "show_sidebar",
+                        "type": "checkbox",
+                        "value": true
+                    },
+                    {
+                        "label": "Show Products",
+                        "name": "show_products",
+                        "type": "checkbox",
+                        "value": true
+                    },
+                    {
+                        "label": "Show Pagination",
+                        "name": "show_pagination",
+                        "type": "checkbox",
+                        "value": true
+                    }
+                ]
+            },
+            {
+                "style": "sidebar",
+                "title": "Information",
+                "fields": [
+                    {
+                        "type": "image",
+                        "title": "Banner Image",
+                        "style": 1,
+                        "condition": "show_banner",
+                        "condition_value": true,
+                        "name": "banner_image",
+                        "value": "1790606552_6039b3ff1a895b03a0d20722190f776c_banner_image.jpg",
+                        "single": true
                     }
                 ]
             }
@@ -613,98 +705,6 @@
                         "type": "checkbox",
                         "name": "show_product_rating",
                         "value": true
-                    }
-                ]
-            }
-        ],
-        "Product_Card_V2": [
-            {
-                "title": "Manage Product Card V2",
-                "style": "main",
-                "fields": [
-                    {
-                        "label": "Product Image Or Gallery",
-                        "type": "dropdown",
-                        "name": "product_image",
-                        "value": "2",
-                        "style": 2,
-                        "searchable": false,
-                        "options": [
-                            {
-                                "id": 1,
-                                "title": "Gallery"
-                            },
-                            {
-                                "id": 2,
-                                "title": "Image"
-                            }
-                        ]
-                    },
-                    {
-                        "label": "Show Product Cateogry",
-                        "type": "checkbox",
-                        "name": "show_product_category",
-                        "value": true
-                    },
-                    {
-                        "label": "Show Product Price",
-                        "type": "checkbox",
-                        "value": true,
-                        "name": "show_product_price"
-                    },
-                    {
-                        "label": "Show Product Discount Price",
-                        "type": "checkbox",
-                        "name": "show_product_discount_price",
-                        "value": true
-                    },
-                    {
-                        "label": "Show Button ( View )",
-                        "type": "checkbox",
-                        "name": "show_product_view_button",
-                        "value": true
-                    },
-                    {
-                        "label": "Show Button ( Add to Cart )",
-                        "type": "checkbox",
-                        "name": "product_add_to_cart_button",
-                        "value": true
-                    },
-                    {
-                        "label": "Show Wish List",
-                        "type": "checkbox",
-                        "name": "show_product_wishlist_button",
-                        "value": true
-                    },
-                    {
-                        "label": "Show ( Add to Compare ) Button",
-                        "type": "checkbox",
-                        "name": "show_product_compare_button",
-                        "value": false
-                    },
-                    {
-                        "label": "Product Stock Info",
-                        "type": "checkbox",
-                        "name": "show_product_stock_info",
-                        "value": true
-                    },
-                    {
-                        "label": "Product Brand",
-                        "type": "checkbox",
-                        "name": "show_product_brand",
-                        "value": true
-                    },
-                    {
-                        "label": "Product Rating",
-                        "type": "checkbox",
-                        "name": "show_product_rating",
-                        "value": true
-                    },
-                    {
-                        "label": "Product Address",
-                        "type": "checkbox",
-                        "name": "product_address",
-                        "value": false
                     }
                 ]
             }
