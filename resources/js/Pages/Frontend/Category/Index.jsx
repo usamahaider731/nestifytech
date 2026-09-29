@@ -62,7 +62,7 @@ export default function Category({ category, products, filters = {}, filterOptio
         </div>
       </div>
 
-      <div className="flex flex-col container mx-auto px-4 gap-6 lg:flex-row lg:items-start">
+      <div className="flex flex-col pb-5 container mx-auto px-4 gap-6 lg:flex-row lg:items-start">
         <ProductFilters
           filters={filters}
           options={filterOptions}

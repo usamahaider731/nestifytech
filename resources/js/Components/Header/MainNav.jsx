@@ -5,16 +5,21 @@ import { RiHeartLine, RiMenuLine, RiMessage2Line, RiRepeat2Line, RiShoppingBag3L
 import HeaderSearch from './HeaderSearch';
 import { useCart } from '@/contexts/CartContext';
 import { useLang } from '@/contexts/LanguageContext';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { selectCartCount, selectCartTotal } from '@/store/cartSlice';
+import { selectWishlistCount, toggleWishlist } from '@/store/wishListSlice';
+import { selectCompareCount, toggleCompare } from '@/store/compareSlice';
 
 const MainNav = ({ ContainerType, isScrolled = false }) => {
     const { setting } = usePage().props;
     const { setIsOpen } = useCart();
     const { __ } = useLang();
+    const dispatch = useDispatch();
 
     const itemCount = useSelector(selectCartCount);
     const subtotal = useSelector(selectCartTotal);
+    const wishlistCount = useSelector(selectWishlistCount);
+    const compareCount = useSelector(selectCompareCount);
 
     const currency = setting?.site?.currency?.value ?? 'PKR';
     const is_index = location.href === 'http://nestifytech.localhost/' || location.href === 'http://nestifytech.localhost';
@@ -64,18 +69,35 @@ const MainNav = ({ ContainerType, isScrolled = false }) => {
 
                     {/* Action icons */}
                     <div className="flex gap-4 text-text lg:gap-6">
-                        {/* Hide extra icons in sticky to keep it tight */}
-                                <div className="flex text-text cursor-pointer items-center">
-                                    <RiHeartLine size={20} className="fill-text text-text" />
-                                </div>
+                        {/* Wishlist */}
+                        <button
+                            type="button"
+                            onClick={() => dispatch(toggleWishlist(true))}
+                            className="relative flex cursor-pointer items-center text-text transition hover:text-primary"
+                            aria-label={__('Open Wishlist')}
+                        >
+                            <RiHeartLine size={20} />
+                            {wishlistCount > 0 && (
+                                <span className="absolute -right-1.5 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-center text-[10px] font-semibold text-white">
+                                    {wishlistCount}
+                                </span>
+                            )}
+                        </button>
 
-                                <div className="flex text-text cursor-pointer items-center">
-                                    <RiMessage2Line size={20} className="fill-text text-text" />
-                                </div>
-                      
-                        <div className="flex text-text cursor-pointer items-center">
-                            <RiRepeat2Line size={20} className="fill-text text-text" />
-                        </div>
+                        {/* Compare */}
+                        <button
+                            type="button"
+                            onClick={() => dispatch(toggleCompare(true))}
+                            className="relative flex cursor-pointer items-center text-text transition hover:text-primary"
+                            aria-label={__('Open Compare')}
+                        >
+                            <RiRepeat2Line size={20} />
+                            {compareCount > 0 && (
+                                <span className="absolute -right-1.5 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-info px-1 text-center text-[10px] font-semibold text-text">
+                                    {compareCount}
+                                </span>
+                            )}
+                        </button>
                         {/* Cart — always shown */}
                         <button
                             type="button"

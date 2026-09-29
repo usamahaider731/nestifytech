@@ -109,6 +109,11 @@ class FrontendController extends Controller
     {
         return Inertia::render('Frontend/Checkout/Index');
     }
+
+    public function compare()
+    {
+        return Inertia::render('Frontend/Compare/Index');
+    }
     public function taxonomyView(Request $request)
     {
         $validated = $request->validate([

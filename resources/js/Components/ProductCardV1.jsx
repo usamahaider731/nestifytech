@@ -6,6 +6,10 @@ import { useCart } from '@/contexts/CartContext';
 import { useLang } from '@/contexts/LanguageContext';
 import { normalizeProduct } from '@/Utils/normalizeProduct';
 import { FaEye } from 'react-icons/fa';
+import { useSelector, useDispatch } from 'react-redux';
+import { addToCompare, removeFromCompare, selectIsInCompare } from '@/store/compareSlice';
+import { addToWishlist, removeFromWishlist, selectIsInWishlist } from '@/store/wishListSlice';
+import { RiHeart2Fill } from 'react-icons/ri';
 
 const ProductCardV1 = ({ className = '', product = {} }) => {
     const { setting } = usePage().props;
@@ -16,7 +20,26 @@ const ProductCardV1 = ({ className = '', product = {} }) => {
     const categories = product.category ?? [];
     const [stock, setStock] = useState(0);
     const [discount, setDiscount] = useState(0);
+    const dispatch = useDispatch();
 
+    const isCompare = useSelector(selectIsInCompare(product.id));
+    const isWishlist = useSelector(selectIsInWishlist(product.id));
+
+    const compareHandle = () => {
+        if(isCompare){
+            dispatch(removeFromCompare(product.id));
+        }else{
+            dispatch(addToCompare({ productId: product.id, product }));
+        }
+    }
+
+    const wishlistHandle = () => {
+        if(isWishlist){
+            dispatch(removeFromWishlist(product.id));
+        }else{
+            dispatch(addToWishlist({ productId: product.id, product }));
+        }
+    }
     const parsePrice = (priceVal) => {
         if (typeof priceVal === 'number') return priceVal;
         if (!priceVal) return 0;
@@ -79,12 +102,12 @@ const ProductCardV1 = ({ className = '', product = {} }) => {
 
                 <div className="absolute top-18 right-3 z-30 flex translate-x-3 flex-col gap-2 opacity-0 transition duration-300 group-hover:translate-x-0 group-hover:opacity-100">
                     {cardSetting.show_product_wishlist_button && (
-                        <button type="button" className="flex size-9 items-center justify-center rounded-full bg-white text-res shadow-md transition hover:bg-red-50 hover:text-red-500" aria-label={__('Add to Wish List')}>
-                            <RiHeart2Line className="size-4" />
+                        <button type="button" onClick={wishlistHandle} className={`flex size-9 items-center justify-center rounded-full text-res shadow-md transition hover:bg-red-50 hover:text-red-500 ${isWishlist ? 'bg-red-50 text-red-500' : 'bg-white'}`} aria-label={__('Add to Wish List')}>
+                            {isWishlist ? <RiHeart2Fill className="size-4" /> : <RiHeart2Line className="size-4" />}
                         </button>
                     )}
                     {cardSetting.show_product_compare_button && (
-                        <button type="button" className="flex size-9 items-center justify-center rounded-full bg-white text-res shadow-md transition hover:bg-primary/10 hover:text-heading" aria-label={__('Add to Compare')}>
+                        <button type="button" onClick={compareHandle} className={`flex size-9 items-center justify-center rounded-full text-res shadow-md transition hover:bg-primary/10 hover:text-heading ${isCompare ? 'bg-primary/10 text-heading' : 'bg-white'}`} aria-label={__('Add to Compare')}>
                             <RiStackLine className="size-4" />
                         </button>
                     )}

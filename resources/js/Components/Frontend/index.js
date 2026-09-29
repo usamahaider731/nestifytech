@@ -4,4 +4,6 @@ export { default as ProductCardV2 } from '@/Components/ProductCardV2';
 export { default as ProductGrid } from './ProductGrid';
 export { default as HeroBanner } from './HeroBanner';
 export { default as CartDrawer } from './CartDrawer';
+export { default as WishlistDrawer } from './WishlistDrawer';
+export { default as CompareDrawer } from './CompareDrawer';
 export { MOCK_PRODUCTS } from './mockProducts';

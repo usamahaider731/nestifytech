@@ -16,12 +16,37 @@ import {
 import { FaCompass, FaEye } from 'react-icons/fa';
 import { MdCompareArrows } from 'react-icons/md';
 
+import { useSelector, useDispatch } from 'react-redux';
+import { addToCompare, removeFromCompare, selectIsInCompare } from '@/store/compareSlice';
+import { addToWishlist, removeFromWishlist, selectIsInWishlist } from '@/store/wishListSlice';
+import { RiHeart2Fill } from 'react-icons/ri';
+
 const ProductCardV2 = ({ className = '', product = {} }) => {
     const { setting } = usePage().props;
     const cardSetting = setting.layout.Product_Card_V2;
     const currency = setting.site.currency.value ?? 'PKR';
     const { addItem } = useCart();
     const { __ } = useLang();
+    const dispatch = useDispatch();
+
+    const isCompare = useSelector(selectIsInCompare(product.id));
+    const isWishlist = useSelector(selectIsInWishlist(product.id));
+
+    const compareHandle = () => {
+        if(isCompare){
+            dispatch(removeFromCompare(product.id));
+        }else{
+            dispatch(addToCompare({ productId: product.id, product }));
+        }
+    }
+
+    const wishlistHandle = () => {
+        if(isWishlist){
+            dispatch(removeFromWishlist(product.id));
+        }else{
+            dispatch(addToWishlist({ productId: product.id, product }));
+        }
+    }
 
     const categories = product.category ?? [];
     const [stock, setStock] = useState(0);
@@ -116,8 +141,8 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
 
                     <div className="ml-auto flex items-center gap-1">
                         {cardSetting.show_product_wishlist_button && (
-                            <button type="button" title={__('Add to Wish List')} className=" text-res transition hover:text-red-500">
-                                <RiHeart2Line className="size-4" />
+                            <button type="button" onClick={wishlistHandle} title={__('Add to Wish List')} className={`transition hover:text-red-500 ${isWishlist ? 'text-red-500' : 'text-res'}`}>
+                                {isWishlist ? <RiHeart2Fill className="size-4" /> : <RiHeart2Line className="size-4" />}
                             </button>
                         )}
                     </div>
@@ -177,8 +202,8 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
                     {cardSetting.show_product_compare_button && productHref && (
                         <button
                             type='button'
-                            onClick={() => handleAddToCart()}
-                            className="inline-flex items-center justify-center gap-2 rounded border border-border px-2.5  py-2 text-xs font-semibold transition hover:border-primary bg-primary text-white hover:bg-primary"
+                            onClick={compareHandle}
+                            className={`inline-flex items-center justify-center gap-2 rounded border border-border px-2.5 py-2 text-xs font-semibold transition hover:border-primary hover:bg-primary hover:text-white ${isCompare ? 'bg-primary text-white border-primary' : 'bg-white text-heading'}`}
                         >
                             <RiRepeat2Line className="size-4" />
                             {__('Add To Comapre')}

@@ -26,6 +26,7 @@ Route::controller(FilterController::class)->group(function () {
 Route::controller(FrontendController::class)->group(function () {
     Route::get('/', 'index')->name('index');
     Route::get('/checkout', 'checkout')->name('checkout');
+    Route::get('/compare', 'compare')->name('compare');
     Route::get('/view/specific/classification/{type}/{id}/{slug}', 'taxonomyView')->name('taxonomy.view');
     Route::get('/view/post/{type}/{sku}/{id}', 'singleProduct')->name('post');
     Route::get('/get_languages', 'get_languages')->name('languages');

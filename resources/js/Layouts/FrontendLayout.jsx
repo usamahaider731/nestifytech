@@ -3,6 +3,8 @@ import ThemeSwitcher from '@/Components/ThemeSwitcher';
 import Header from '@/Components/Header';
 import Footer from '@/Components/Footer';
 import CartDrawer from '@/Components/Frontend/CartDrawer';
+import WishlistDrawer from '@/Components/Frontend/WishlistDrawer';
+import CompareDrawer from '@/Components/Frontend/CompareDrawer';
 import { CartProvider } from '@/contexts/CartContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import BrandSlider from '@/Components/BrandSlider';
@@ -32,6 +34,8 @@ export default function FrontendLayout({ children, title }) {
                     <main className="flex-grow">{children}</main>
                     <Footer />
                     <CartDrawer />
+                    <WishlistDrawer />
+                    <CompareDrawer />
                 </div>
             </CartProvider>
         </LanguageProvider>
