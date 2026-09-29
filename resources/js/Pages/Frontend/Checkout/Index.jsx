@@ -165,9 +165,6 @@ function CheckoutFormContent() {
             }
         }
     };
-
-
-    console.log(items)
     return (
         <div className="bg-bg min-h-screen py-10">
             <Head title="Secure Checkout" />

@@ -9,7 +9,6 @@ import { stripTags } from '@/Utils/helper'
 import { RiDeleteBin6Line, RiFile3Fill, RiFileEditLine } from 'react-icons/ri'
 function Index({ languages }) {
     const [Language, SetLanguage] = useState(languages);
-    console.log(Language);
     return (
         <div className='w-full px-5 py-7 flex flex-col gap-7.5'>
             <Table values={Language} className='w-full'>

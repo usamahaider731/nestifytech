@@ -4,7 +4,6 @@ import ImageViwer from '../Admin/ImageViwer';
 import Slider from '../Slider';
 
 const MainSlider = ({ data }) => {
-    console.log(data)
     const { setting } = usePage().props;
     const [Setting, SetSetting] = useState(setting || [])
     const effect = Setting.layout.Home.banner_slider_effect

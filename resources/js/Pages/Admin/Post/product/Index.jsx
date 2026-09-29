@@ -12,7 +12,6 @@ import { TbDotsVertical } from 'react-icons/tb'
 function Index({ products, table }) {
     const [Product, SetProduct] = useState(products.data || products);
     const Column = table?.columns || [];
-    console.log(products);
     useEffect(() => {
         SetProduct(products.data || products);
     }, [products]);

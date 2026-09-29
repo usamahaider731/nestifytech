@@ -27,7 +27,20 @@ export default function ComparePage() {
         items.flatMap(item => Object.keys(item.product?.meta ?? {}))
             .filter(key => !['stock', 'first_price', 'second_price', 'images', 'category', 'brand', 'user_id', 'type', 'state', 'city', 'address_coordinates', 'short_description'].includes(key))
     )];
-
+    const getStock = (product) => {
+        if (product?.variations?.length > 0) {
+            return product.variations.reduce((acc, variation) => {
+                if (variation.combinations?.length > 0) {
+                    return acc + variation.combinations.reduce((cAcc, c) => cAcc + Number(c.stock || 0), 0);
+                }
+                if (variation.sizes?.length > 0) {
+                    return acc + variation.sizes.reduce((sAcc, s) => sAcc + Number(s.stock || 0), 0);
+                }
+                return acc + Number(variation.stock || 0);
+            }, 0);
+        }
+        return Number(product?.meta?.stock?.value ?? 0);
+    };
     return (
         <FrontendLayout title={__('Compare Products')}>
             <Head title={__('Compare Products')} />
@@ -58,7 +71,7 @@ export default function ComparePage() {
                         </Link>
                     </div>
                 ) : (
-                    <div className="overflow-x-auto rounded-xl border border-border shadow-sm">
+                    <div className="overflow-x-auto rounded border border-border shadow-sm">
                         <table className="w-full min-w-[640px] border-collapse">
                             <thead>
                                 <tr className="border-b border-border bg-common">
@@ -105,7 +118,7 @@ export default function ComparePage() {
                                 <tr className="border-b border-border even:bg-common/40">
                                     <td className="p-4 text-sm font-medium text-res">{__('Stock')}</td>
                                     {items.map(item => {
-                                        const stock = Number(item.product?.meta?.stock?.value ?? 0);
+                                        const stock = getStock(item.product);
                                         return (
                                             <td key={item.productId} className="p-4 text-center">
                                                 <span className={`rounded px-2 py-0.5 text-xs font-semibold ${stock > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
@@ -121,7 +134,7 @@ export default function ComparePage() {
                                     <tr key={key} className="border-b border-border even:bg-common/40">
                                         <td className="p-4 text-sm font-medium capitalize text-res">{key.replace(/_/g, ' ')}</td>
                                         {items.map(item => {
-                                            if (item.product.meta[key],key != "seo_description") {
+                                            if (item.product.meta[key], key != "seo_description") {
                                                 return (
                                                     <td key={item.productId} className="p-4 text-center text-sm text-heading">
                                                         {item.product?.meta?.[key]?.value ?? <span className="text-slate-300">—</span>}
@@ -138,8 +151,6 @@ export default function ComparePage() {
                                         })}
                                     </tr>
                                 ))}
-
-                                {/* Action Row */}
                                 <tr>
                                     <td className="p-4 text-sm font-medium text-res">{__('Action')}</td>
                                     {items.map(item => (

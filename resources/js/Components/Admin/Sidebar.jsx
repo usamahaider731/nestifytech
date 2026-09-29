@@ -13,7 +13,6 @@ function Sidebar() {
   const [open, setOpen] = useState(null);
 
   const menuData = setting?.sidebar_menu || [];
-console.log(menuData)
   const menuStructure = useMemo(() => {
     return menuData.map(group => ({
       ...group,
@@ -46,7 +45,6 @@ console.log(menuData)
           if (filteredSubmenu.length > 0) {
             acc.push({ ...item, menu: filteredSubmenu });
           } else if (!item.permission || hasPermission(auth.user, item.permission)) {
-            console.log(item)    
           }
         } else {
           // No submenu, just check item.permission
@@ -81,7 +79,6 @@ console.log(menuData)
   const toggleMenu = (id) => {
     setOpen(open === id ? null : id);
   };
-  console.log(menu)
   return (
     <div className="flex flex-col px-3.5 gap-4 overflow-y-auto scroll-hidden pt-3 pb-10">
       {menu.map((group) => (

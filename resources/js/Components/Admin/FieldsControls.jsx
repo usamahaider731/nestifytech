@@ -53,7 +53,6 @@ const FieldControls = ({
         fieldClass = 'hidden';
 
         if (data[field.condition] == field.condition_value || data[field.condition]) {
-            console.log(field.condition_value, data[field.condition], field.condition)
             fieldClass = 'flex';
         }
 

@@ -10,7 +10,6 @@ const BrandSlider = () => {
     const [brands, setBrands] = useState([]); // Fixed camelCase convention
     const { setting } = usePage().props;
     const id = setting.layout.Home.home_brands;
-    console.log(id)
     useEffect(() => {
         axios.get(route('api.get_taxonomies', { type: 'brand', image: true, id: id })).then((res) => {
             setBrands(res.data);

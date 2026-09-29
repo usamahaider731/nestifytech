@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
 export default function SvgViewer({ width, height, src, key, className = '' }) {
-  console.log(width)
   const [svgContent, setSvgContent] = useState('');
   const svgRef = useRef();
 

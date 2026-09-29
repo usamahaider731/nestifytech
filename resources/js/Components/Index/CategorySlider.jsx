@@ -8,7 +8,6 @@ const CategorySlider = ({categories}) => {
     const { setting } = usePage().props;
     const { __ } = useLang();
     const [Categories, setCategories] = useState(categories);
-    console.log(Categories)
     return (
         <div className='flex flex-col items-center justify-between'>
             <div className='flex justify-between items-end w-full mb-8'>

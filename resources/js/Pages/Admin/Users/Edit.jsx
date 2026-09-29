@@ -9,7 +9,6 @@ import axios from 'axios';
 import Form from '@/Components/Admin/Form';
 function Edit({ user, user_rows }) {
     const { post } = useForm();
-    console.log(user.id)
     return (
         <Form
             initialData={user}

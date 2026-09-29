@@ -274,7 +274,6 @@ const VariationsSelector = ({ value = [], onChange = () => { } }) => {
         setVariations(updated);
         onChange(updated);
     };
-    console.log(variations)
     return (
         <div className="space-y-6">
             {variations.map((v) => {
