@@ -20,6 +20,8 @@ export default function ProductGrid({
     useMockFallback = false,
     headingStyle = 'default',
     cardType = null,
+    showHeader = true,
+    compact = false,
 }) {
     const titleRef = useRef(null);
     const textRef = useRef(null);
@@ -34,26 +36,16 @@ export default function ProductGrid({
     if (displayProducts.length === 0) {
         return null;
     }
-    const [classN, SetClassN] = useState("grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-8 gap-6 md:gap-8");
+    const [classN, SetClassN] = useState("grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5");
     useEffect(() => {
         if (cardType === 'v2') {
-            // "List" style grid (fewer columns, wider cards)
-            if (widthType === 100) {
-                SetClassN('grid grid-cols-1 gap-6 md:gap-8');
-            } else if (widthType === 75) {
-                SetClassN('grid grid-cols-1 gap-6 md:gap-8');
-            }
+            SetClassN('grid grid-cols-1 gap-4 md:gap-5');
+        } else if (widthType === 75) {
+            SetClassN('grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 md:gap-5');
         } else {
-            // "Grid" style (tighter columns, more items)
-            if (widthType === 100) {
-                SetClassN('grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-8 gap-6 md:gap-8');
-            } else if (widthType === 75) {
-                SetClassN('grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7 gap-6 md:gap-8');
-            }
+            SetClassN('grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5');
         }
     }, [widthType, cardType]);
-
-    console.log(widthType)
     const titleClass = headingStyle === 'underline'
         ? 'relative inline-block pb-2 text-2xl font-extrabold text-heading before:absolute before:-bottom-1 before:left-0 before:h-1 before:w-14 before:rounded-full before:bg-primary before:content-[""] md:text-3xl'
         : 'text-2xl font-extrabold tracking-tight text-heading md:text-4xl';
@@ -63,6 +55,9 @@ export default function ProductGrid({
     useEffect(() => {
         if (!displayProducts.length) return;
         let ctx = gsap.context(() => {
+            if (!titleRef.current) {
+                return;
+            }
             const chars = titleRef.current.querySelectorAll('.char');
             gsap.from(chars, {
                 yPercent: "random(-200, 200)",
@@ -79,6 +74,9 @@ export default function ProductGrid({
             });
 
             // Text effect for description
+            if (!textRef.current) {
+                return;
+            }
             gsap.fromTo(textRef.current,
                 { opacity: 0.4, filter: "blur(3px)", x: -50 },
                 {
@@ -133,7 +131,8 @@ export default function ProductGrid({
         ));
     };
     return (
-        <section id={id} ref={sectionRef} className={`py-16 md:py-24 ${className}`}>
+        <section id={id} ref={sectionRef} className={`${compact ? 'py-2' : 'py-16 md:py-24'} ${className}`}>
+            {showHeader && (
             <div className="mb-10 flex flex-col gap-5 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between md:mb-12">
                 <div className="max-w-2xl">
                     <h2 className={titleClass} ref={titleRef}>{renderSplitText(__(translatedTitle))}</h2>
@@ -144,11 +143,12 @@ export default function ProductGrid({
                     )}
                 </div>
                 <div className="flex items-center">
-                    <span className="rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-sm font-semibold text-primary">
+                    <span className="rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-sm font-semibold text-heading">
                         {__(':count items', { count: displayProducts.length })}
                     </span>
                 </div>
             </div>
+            )}
 
             <div className={classN} ref={gridRef}>
                 {displayProducts.map((product, index) => (

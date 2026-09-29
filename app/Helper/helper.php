@@ -109,6 +109,85 @@ function apply_post_meta_id_filter($query, string $metaKey, array $ids): void
     });
 }
 
+function catalog_sale_price_sql(string $postIdColumn = 'posts.id'): string
+{
+    return "CAST(REPLACE(COALESCE(
+        (SELECT pm.value FROM post_meta pm WHERE pm.post_id = {$postIdColumn} AND pm.`key` = 'second_price' LIMIT 1),
+        (SELECT pm.value FROM post_meta pm WHERE pm.post_id = {$postIdColumn} AND pm.`key` = 'first_price' LIMIT 1),
+        '0'
+    ), ',', '') AS DECIMAL(12,2))";
+}
+
+function catalog_price_bounds(): array
+{
+    $row = DB::table('post_meta')
+        ->whereIn('key', ['first_price', 'second_price'])
+        ->selectRaw('MIN(CAST(REPLACE(value, ",", "") AS DECIMAL(12,2))) as min_price, MAX(CAST(REPLACE(value, ",", "") AS DECIMAL(12,2))) as max_price')
+        ->first();
+
+    $min = (float) ($row->min_price ?? 0);
+    $max = (float) ($row->max_price ?? 0);
+
+    if ($max <= $min) {
+        $max = $min > 0 ? $min : 100000;
+        $min = 0;
+    }
+
+    return ['min' => (int) floor($min), 'max' => (int) ceil($max)];
+}
+
+function hydrate_posts($result, array $args, bool $attachCategory, bool $attachBrand, bool $attachTags, bool $attachAddress)
+{
+    $result->each(function ($item) {
+        if ($item->relationLoaded('meta')) {
+            $item->setRelation('meta', $item->meta->keyBy('key'));
+        }
+    });
+
+    if ($attachCategory) {
+        $result = \App\Models\PostTaxonomy::get_attribute($result, 'taxonomies', '', 'from_meta', 'category', '');
+    }
+    if ($attachBrand) {
+        $result = \App\Models\PostTaxonomy::get_attribute($result, 'taxonomies', '', 'from_meta', 'brand', '');
+    }
+    if ($attachTags) {
+        $result = \App\Models\PostTaxonomy::get_attribute($result, 'taxonomies', '', 'from_meta', 'tags', '');
+    }
+    if ($attachAddress) {
+        $result = \App\Models\PostTaxonomy::get_attribute($result, 'taxonomies', '', 'from_meta', ['state', 'city'], '');
+    }
+
+    if (! empty($args['attributes']) && $result->isNotEmpty()) {
+        $postIds = $result->pluck('id');
+        $attrValues = DB::table('attribute_values')
+            ->whereIn('parent_id', $postIds)
+            ->where('parent_type', 'post')
+            ->get()
+            ->groupBy('parent_id');
+        $definitions = DB::table('attributes')
+            ->whereIn('id', $attrValues->flatten()->pluck('attribute_id')->unique()->filter())
+            ->get()
+            ->keyBy('id');
+
+        $result->each(function ($item) use ($attrValues, $definitions) {
+            $item->attributes = collect($attrValues[$item->id] ?? [])->map(function ($val) use ($definitions) {
+                $def = $definitions[$val->attribute_id] ?? null;
+                if (! $def || $def->group === null) {
+                    return null;
+                }
+
+                return [
+                    'group' => $val->group ?? $def->group,
+                    'key' => $def->name,
+                    'value' => $val->value,
+                ];
+            })->filter()->values()->all();
+        });
+    }
+
+    return $result;
+}
+
 function attach_taxonomy_children_products($items)
 {
     foreach ($items as $item) {
@@ -245,7 +324,25 @@ function get_posts(array $args = [])
     if (! empty($args['type'])) {
         $posts->where('posts.type', $args['type']);
     }
-    if (!empty($args['popular']) || array_key_exists('views', $args)) {
+    if (! empty($args['trending'])) {
+        // Trending = most units sold in the current calendar month.
+        // Dates are from Carbon (now()), not user input — safe to interpolate directly.
+        // Using toSql() would drop the bindings and corrupt the outer query's ? slots.
+        $monthStart = now()->startOfMonth()->toDateTimeString();
+        $monthEnd   = now()->endOfMonth()->toDateTimeString();
+
+        $subSql = "SELECT product_id, COALESCE(SUM(quantity), 0) as total_sold"
+                . " FROM order_items"
+                . " WHERE created_at BETWEEN '{$monthStart}' AND '{$monthEnd}'"
+                . " GROUP BY product_id";
+
+        $posts->leftJoin(
+                \Illuminate\Support\Facades\DB::raw("({$subSql}) as oi_agg"),
+                'posts.id', '=', 'oi_agg.product_id'
+            )
+            ->select('posts.*', \Illuminate\Support\Facades\DB::raw('COALESCE(oi_agg.total_sold, 0) as total_sold'))
+            ->orderByDesc('total_sold');
+    } elseif (!empty($args['popular']) || array_key_exists('views', $args)) {
         $direction = strtolower((string) ($args['views'] ?? 'desc')) === 'asc' ? 'asc' : 'desc';
 
         $posts->leftJoin('post_meta as view', function ($join) {
@@ -256,18 +353,6 @@ function get_posts(array $args = [])
             ->orderByRaw('CAST(COALESCE(view.value, 0) AS UNSIGNED) ' . $direction);
     } elseif (! empty($args['latest'])) {
         $posts->orderBy('created_at', 'desc');
-    }
-    if (! empty($args['limit'])) {
-        $posts->limit((int) $args['limit']);
-    }
-    if (! empty($args['image'])) {
-        $posts->with('image');
-    }
-    if (! empty($args['gallery'])) {
-        $posts->with('gallery');
-    }
-    if (! empty($args['parent'])) {
-        $posts->with('parent');
     }
 
     $categoryIds = helper_ids($args['category_id'] ?? ($args['category_ids'] ?? []));
@@ -294,6 +379,62 @@ function get_posts(array $args = [])
         apply_post_meta_id_filter($posts, 'tags', $tagIds);
     }
 
+    $priceSql = catalog_sale_price_sql();
+    $minPrice = isset($args['min_price']) ? (float) $args['min_price'] : null;
+    $maxPrice = isset($args['max_price']) ? (float) $args['max_price'] : null;
+    if ($minPrice !== null) {
+        $posts->whereRaw("{$priceSql} >= ?", [$minPrice]);
+    }
+    if ($maxPrice !== null) {
+        $posts->whereRaw("{$priceSql} <= ?", [$maxPrice]);
+    }
+
+    if (! empty($args['in_stock'])) {
+        $posts->where(function ($query) {
+            $query->whereExists(function ($sub) {
+                $sub->select(DB::raw(1))
+                    ->from('post_meta as stock_meta')
+                    ->whereColumn('stock_meta.post_id', 'posts.id')
+                    ->where('stock_meta.key', 'stock')
+                    ->whereRaw('CAST(REPLACE(stock_meta.value, ",", "") AS SIGNED) > 0');
+            })->orWhereExists(function ($sub) {
+                $sub->select(DB::raw(1))
+                    ->from('post_variations')
+                    ->whereColumn('post_variations.post_id', 'posts.id')
+                    ->where('post_variations.stock', '>', 0);
+            });
+        });
+    }
+
+    $sort = $args['sort'] ?? null;
+    if ($sort === 'price_asc') {
+        $posts->select('posts.*')->orderByRaw("{$priceSql} asc");
+    } elseif ($sort === 'price_desc') {
+        $posts->select('posts.*')->orderByRaw("{$priceSql} desc");
+    } elseif ($sort === 'popular') {
+        $posts->leftJoin('post_meta as view', function ($join) {
+            $join->on('posts.id', '=', 'view.post_id')
+                ->where('view.key', '=', 'views');
+        })
+            ->select('posts.*')
+            ->orderByRaw('CAST(COALESCE(view.value, 0) AS UNSIGNED) desc');
+    } elseif ($sort === 'latest' && empty($args['trending']) && empty($args['popular']) && ! array_key_exists('views', $args) && empty($args['latest'])) {
+        $posts->orderByDesc('posts.created_at');
+    }
+
+    if (! empty($args['limit']) && empty($args['paginate'])) {
+        $posts->limit((int) $args['limit']);
+    }
+    if (! empty($args['image'])) {
+        $posts->with('image');
+    }
+    if (! empty($args['gallery'])) {
+        $posts->with('gallery');
+    }
+    if (! empty($args['parent'])) {
+        $posts->with('parent');
+    }
+
     $attachCategory = ! empty($args['category']) || $categoryIds !== [];
     $attachBrand = ! empty($args['brand']) || $brandIds !== [];
     $attachTags = ! empty($args['tags']) || $tagIds !== [];
@@ -303,54 +444,16 @@ function get_posts(array $args = [])
         $posts->with('meta');
     }
 
-    $result = $posts->get();
+    if (! empty($args['paginate'])) {
+        $perPage = (int) ($args['per_page'] ?? $args['limit'] ?? 20);
+        $paginator = $posts->paginate($perPage)->withQueryString();
+        $hydrated = hydrate_posts($paginator->getCollection(), $args, $attachCategory, $attachBrand, $attachTags, $attachAddress);
+        $paginator->setCollection(collect($hydrated->values()));
 
-    $result->each(function ($item) {
-        if ($item->relationLoaded('meta')) {
-            $item->setRelation('meta', $item->meta->keyBy('key'));
-        }
-    });
-
-    if ($attachCategory) {
-        $result = \App\Models\PostTaxonomy::get_attribute($result, 'taxonomies', '', 'from_meta', 'category', '');
-    }
-    if ($attachBrand) {
-        $result = \App\Models\PostTaxonomy::get_attribute($result, 'taxonomies', '', 'from_meta', 'brand', '');
-    }
-    if ($attachTags) {
-        $result = \App\Models\PostTaxonomy::get_attribute($result, 'taxonomies', '', 'from_meta', 'tags', '');
-    }
-    if ($attachAddress) {
-        $result = \App\Models\PostTaxonomy::get_attribute($result, 'taxonomies', '', 'from_meta', ['state', 'city'], '');
+        return $paginator;
     }
 
-    if (! empty($args['attributes']) && $result->isNotEmpty()) {
-        $postIds = $result->pluck('id');
-        $attrValues = DB::table('attribute_values')
-            ->whereIn('parent_id', $postIds)
-            ->where('parent_type', 'post')
-            ->get()
-            ->groupBy('parent_id');
-        $definitions = DB::table('attributes')
-            ->whereIn('id', $attrValues->flatten()->pluck('attribute_id')->unique()->filter())
-            ->get()
-            ->keyBy('id');
-
-        $result->each(function ($item) use ($attrValues, $definitions) {
-            $item->attributes = collect($attrValues[$item->id] ?? [])->map(function ($val) use ($definitions) {
-                $def = $definitions[$val->attribute_id] ?? null;
-                if (! $def || $def->group === null) {
-                    return null;
-                }
-
-                return [
-                    'group' => $val->group ?? $def->group,
-                    'key' => $def->name,
-                    'value' => $val->value,
-                ];
-            })->filter()->values()->all();
-        });
-    }
+    $result = hydrate_posts($posts->get(), $args, $attachCategory, $attachBrand, $attachTags, $attachAddress);
 
     if (! empty($args['single'])) {
         return $result->first();

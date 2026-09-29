@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import ImageViwer from './Admin/ImageViwer';
-import Slider from './Slider';
-import { RiArrowRightLine, RiEyeLine, RiHeart2Line, RiMapPin2Fill, RiShoppingBagLine, RiStackLine, RiStarFill, RiStarHalfFill } from 'react-icons/ri';
+import { RiEyeLine, RiHeart2Line, RiShoppingBagLine, RiStackLine, RiStarFill, RiStarHalfFill } from 'react-icons/ri';
 import { usePage, Link } from '@inertiajs/react';
 import { useCart } from '@/contexts/CartContext';
 import { useLang } from '@/contexts/LanguageContext';
 import { normalizeProduct } from '@/Utils/normalizeProduct';
+import { FaEye } from 'react-icons/fa';
 
 const ProductCardV1 = ({ className = '', product = {} }) => {
     const { setting } = usePage().props;
@@ -13,37 +13,44 @@ const ProductCardV1 = ({ className = '', product = {} }) => {
     const currency = setting.site.currency.value ?? 'PKR';
     const { addItem } = useCart();
     const { __ } = useLang();
-    const [Categories, setCategories] = useState(product.category ?? []);
-    const [Stock, SetStock] = useState(0);
+    const categories = product.category ?? [];
+    const [stock, setStock] = useState(0);
     const [discount, setDiscount] = useState(0);
+
     const parsePrice = (priceVal) => {
         if (typeof priceVal === 'number') return priceVal;
         if (!priceVal) return 0;
-        const cleanedValue = String(priceVal).replace(/,/g, '');
-        const parsed = Number(cleanedValue);
-        return isNaN(parsed) ? 0 : parsed;
+        const parsed = Number(String(priceVal).replace(/,/g, ''));
+        return Number.isNaN(parsed) ? 0 : parsed;
     };
 
-    const first_price = parsePrice(product.meta?.first_price?.value);
-    const second_price = parsePrice(product.meta?.second_price?.value);
+    const firstPrice = parsePrice(product.meta?.first_price?.value);
+    const secondPrice = parsePrice(product.meta?.second_price?.value);
+    const salePrice = firstPrice > secondPrice && secondPrice > 0 ? secondPrice : firstPrice;
+    const productHref = product.sku && product.id
+        ? route('post', { sku: product.sku, id: product.id, type: 'product' })
+        : null;
+
     useEffect(() => {
         if (product.variations?.length > 0) {
-            SetStock(product.variations.reduce((acc, variation) => {
-                if (variation.combinations && variation.combinations.length > 0) {
+            setStock(product.variations.reduce((acc, variation) => {
+                if (variation.combinations?.length > 0) {
                     return acc + variation.combinations.reduce((cAcc, c) => cAcc + Number(c.stock || 0), 0);
                 }
-                if (variation.sizes && variation.sizes.length > 0) {
+                if (variation.sizes?.length > 0) {
                     return acc + variation.sizes.reduce((sAcc, s) => sAcc + Number(s.stock || 0), 0);
                 }
                 return acc + Number(variation.stock || 0);
             }, 0));
         } else {
-            SetStock(product?.meta?.stock?.value ?? 0);
+            setStock(product?.meta?.stock?.value ?? 0);
         }
-        if (first_price > second_price) {
-            setDiscount(((first_price - second_price) / first_price) * 100);
+        if (firstPrice > secondPrice && firstPrice > 0) {
+            setDiscount(((firstPrice - secondPrice) / firstPrice) * 100);
+        } else {
+            setDiscount(0);
         }
-    }, [product]);
+    }, [product, firstPrice, secondPrice]);
 
     const handleAddToCart = (e) => {
         e.preventDefault();
@@ -55,107 +62,97 @@ const ProductCardV1 = ({ className = '', product = {} }) => {
     };
 
     return (
-        <div className={`bg-white hover-lift overflow-hidden shadow relative group ${className}`}>
-
-            {/* Image & Badges Section */}
-            <div className="relative w-full aspect-square bg-white flex items-center justify-center p-4 overflow-hidden group-hover:bg-slate-50/50 transition-colors duration-300">
-
-                {/* Floating Badges */}
-                <div className="absolute top-0 left-0 right-0 flex justify-between items-start z-30 size-full pointer-events-none">
+        <article className={`group relative flex h-full flex-col overflow-hidden rounded border border-border bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl ${className}`}>
+            <div className="relative aspect-square overflow-hidden bg-white">
+                <div className="pointer-events-none absolute inset-x-3 top-3 z-20 flex items-start justify-between">
                     {cardSetting.show_product_stock_info && (
-                        <span className={`absolute top-3 left-3 ${Stock > 0 ? 'bg-primary' : 'bg-secondary'} text-white px-1.5 py-0.25 text-[9px] font-semibold rounded shadow-sm`}>
-                            {Stock > 0 ? 'In Stock' : 'Out of Stock'}
+                        <span className={`rounded-md px-2.5 text-[9px] font-semibold uppercase tracking-wide ${stock > 0 ? 'bg-primary text-white' : 'bg-secondary text-white'}`}>
+                            {stock > 0 ? __('In Stock') : __('Out of Stock')}
                         </span>
                     )}
-
                     {cardSetting.show_product_discount_price && discount > 0 && (
-                        <span className='bottom-5 right-5 absolute bg-primary/90 text-white px-2.5 py-1 text-xs font-bold rounded-full shadow-sm'>
+                        <span className="rounded-md bg-primary px-2 text-[9px] font-semibold text-white">
                             -{Math.round(discount)}%
                         </span>
                     )}
                 </div>
 
-                {/* Floating Actions (Right Side) */}
-                <div className="absolute top-3 -right-12 group-hover:right-3 flex flex-col gap-2 z-30 transition-all duration-300 ease-in-out opacity-0 group-hover:opacity-100">
+                <div className="absolute top-18 right-3 z-30 flex translate-x-3 flex-col gap-2 opacity-0 transition duration-300 group-hover:translate-x-0 group-hover:opacity-100">
                     {cardSetting.show_product_wishlist_button && (
-                        <button className="w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors">
-                            <RiHeart2Line className='size-4' />
+                        <button type="button" className="flex size-9 items-center justify-center rounded-full bg-white text-res shadow-md transition hover:bg-red-50 hover:text-red-500" aria-label={__('Add to Wish List')}>
+                            <RiHeart2Line className="size-4" />
                         </button>
                     )}
                     {cardSetting.show_product_compare_button && (
-                        <button className="w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center text-slate-400 hover:text-primary hover:bg-primary/10 transition-colors delay-75">
-                            <RiStackLine className='size-4' />
+                        <button type="button" className="flex size-9 items-center justify-center rounded-full bg-white text-res shadow-md transition hover:bg-primary/10 hover:text-heading" aria-label={__('Add to Compare')}>
+                            <RiStackLine className="size-4" />
                         </button>
                     )}
                 </div>
-                <div className='h-full w-full'>
-                    <ImageViwer image={product.image} className="max-h-full max-w-full object-cover mx-auto img-scale-hover" />
-                </div>
+
+                {productHref ? (
+                    <Link href={productHref} className="block size-full">
+                        <ImageViwer image={product.image} height={450} width={450} className="size-full object-cover transition duration-500 group-hover:scale-105" />
+                    </Link>
+                ) : (
+                    <ImageViwer image={product.image} height={450} width={450} className="size-full object-cover" />
+                )}
             </div>
 
-            <div className="p-4 flex flex-col border-t border-t-border transition-transform z-30 bg-white gap-1.25">
-
-                <div className='flex items-center justify-between'>
-
-                    {cardSetting.show_product_category && Categories.length > 0 && (
-                        <div className='flex flex-wrap items-center gap-x-1'>
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest line-clamp-1">
-                                {Categories.map((category, index) => (
-                                    <React.Fragment key={index}>
-                                        {category?.title}
-                                        {index < Categories.length - 1 && ', '}
-                                    </React.Fragment>
-                                ))}
-                            </span>
-                        </div>
+            <div className="flex flex-1 border-t border-border flex-col gap-2 p-4">
+                <div className="flex items-center justify-between gap-2">
+                    {cardSetting.show_product_category && categories.length > 0 && (
+                        <p className="line-clamp-1 text-[10px] font-bold uppercase tracking-widest text-res">
+                            {categories.map((category) => category?.title).filter(Boolean).join(', ')}
+                        </p>
                     )}
-
                     {cardSetting.show_product_rating && (
-                        <div className="flex items-center gap-0.25">
-                            <RiStarFill className="text-amber-400 text-[10px]" />
-                            <RiStarFill className="text-amber-400 text-[10px]" />
-                            <RiStarFill className="text-amber-400 text-[10px]" />
-                            <RiStarFill className="text-amber-400 text-[10px]" />
-                            <RiStarHalfFill className="text-amber-400 text-[10px]" />
+                        <div className="flex items-center gap-0.5 text-amber-400">
+                            <RiStarFill className="size-3" />
+                            <RiStarFill className="size-3" />
+                            <RiStarFill className="size-3" />
+                            <RiStarFill className="size-3" />
+                            <RiStarHalfFill className="size-3" />
                         </div>
                     )}
                 </div>
 
-                {/* Title */}
-                <Link href={route('post', { sku: product.sku, id: product.id, type: "product" })} className="block">
-                    <h3 className="text-md font-bold text-slate-800 line-clamp-2 hover:text-primary transition-colors leading-snug cursor-pointer">
-                        {product.title}
-                    </h3>
-                </Link>
+                {productHref ? (
+                    <Link href={productHref}>
+                        <h3 className="line-clamp-2 font-poppins min-h-10 text-sm font-semibold leading-snug text-heading transition hover:text-primary">
+                            {product.title}
+                        </h3>
+                    </Link>
+                ) : (
+                    <h3 className="line-clamp-2 font-poppins min-h-10 text-sm font-bold leading-snug text-heading">{product.title}</h3>
+                )}
 
-                {/* Price */}
-                <div className="mt-1 flex items-center gap-2">
-                    {/* if aready a number then fix this satuation */}
-                    {first_price > second_price ? (
-                        <div className="flex items-baseline gap-3">
-                            <span className="text-sm font-bold text-slate-900">{currency} {second_price?.toLocaleString()}</span>
-                            <span className="text-[12px] font-medium text-slate-400 line-through decoration-slate-300">{currency} {first_price?.toLocaleString()}</span>
-                        </div>
-                    ) : (
-                        <span className="text-sm font-extrabold text-slate-900">{currency} {first_price?.toLocaleString()}</span>
-                    )}
-                </div>
-                <div className='flex gap-2 items-center absolute bottom-0 px-5 pb-5 left-0 right-0 translate-y-full group-hover:translate-y-0 transition-all duration-300 ease-in-out'>
+                <div className="mt-auto flex flex-col items-end justify-between gap-2 pt-1">
+                    <div className="flex flex-wrap w-full items-baseline gap-x-2">
+                        <span className="text-sm font-bold font-oswald text-heading">
+                            {currency} {salePrice.toLocaleString()}
+                        </span>
+                        {firstPrice > secondPrice && secondPrice > 0 && (
+                            <span className="text-xs font-medium text-res font-oswald line-through">
+                                {currency} {firstPrice.toLocaleString()}
+                            </span>
+                        )}
+                    </div>
                     {cardSetting.product_add_to_cart_button && (
-                        <button
+                        <Link
+                            href={productHref}
                             type="button"
-                            onClick={handleAddToCart}
-                            className="flex-1 bg-primary backdrop-blur-sm text-text py-2.5 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-colors shadow-lg"
+                            className="h-10 w-full flex gap-2 shrink-0 items-center justify-center rounded bg-primary text-heading shadow-sm transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
+                            aria-label={__('Add to Cart')}
                         >
-                            <RiShoppingBagLine className="size-4" /> {__('Add to Cart')}
-                        </button>
+                            <FaEye className="size-4" />
+                            <span className='text-sm font-semibold font-poppins text-heading'>{__('Show Details')}</span>
+                        </Link>
                     )}
                 </div>
-
-
             </div>
-        </div>
+        </article>
     );
-}
+};
 
 export default ProductCardV1;

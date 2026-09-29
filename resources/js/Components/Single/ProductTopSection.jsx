@@ -12,14 +12,14 @@ const ProductTopSection = ({ product }) => {
     return (
         <div className='flex flex-col w-full'>
             <div className='flex justify-between mx-auto w-full'>
-                <div className='flex gap-3 items-center'>
+                <div className='flex font-oswald gap-3 items-center'>
                     <span className='text-dynamic text-sm font-medium'>{__('Home')}</span>
                     <span className=''>
                         <RiArrowRightSLine className='text-base' />
                     </span>
-                    <span className='bg-bg p-2 text-xs rounded font-medium'>
+                    <Link href={route('taxonomy.view', {type: "category", id: product.category[0].id, slug: product.category[0].slug, time: new Date().getTime()})} className='bg-bg p-2 text-xs rounded font-oswald font-medium'>
                         {product.category[0].title}
-                    </span>
+                    </Link>
                     <span className=''>
                         <RiArrowRightSLine className='text-base' />
                     </span>
@@ -48,14 +48,14 @@ const ProductTopSection = ({ product }) => {
                 <div className='flex-1 h-fit sticky top-20'>
                     <div className='flex flex-col gap-5'>
                         <div className='flex flex-col gap-5'>
-                            <h1 className='text-primary font-bold text-2xl'>
+                            <h1 className='text-primary font-semibold font-poppins text-2xl'>
                                 {product.title}
                             </h1>
-                            <div className='flex flex-col gap-2'>
+                            <div className='flex flex-col gap-2 font-roboto'>
                                 <div className='flex gap-4 items-center'>
                                     <div className='flex gap-2 items-center text-center'>
                                         <span className='text-lg text-heading font-semibold'>{__('Brand:')}</span>
-                                        <span title={product.brand?.title}><ImageViwer image={product.brand?.image?.filename} alt={product.brand?.title} className='w-auto h-4' /></span>
+                                        <Link href={route('taxonomy.view', {type: "brand", id: product.brand?.id, slug: product.brand?.slug, time: new Date().getTime()})} title={product.brand?.title}><ImageViwer image={product.brand?.image?.filename} alt={product.brand?.title} className='w-auto cursor-pointer h-4' /></Link>
                                     </div>
                                     <div className='flex gap-2 items-center'>
                                         <span className='text-lg text-heading font-semibold'>{__('SKU:')}</span>

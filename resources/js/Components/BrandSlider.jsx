@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLang } from '@/contexts/LanguageContext'; // Fixed typo if applicable
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import Slider from 'react-infinite-logo-slider';
 import axios from 'axios'; // Added missing import
 import ImageViwer from './Admin/ImageViwer';
@@ -8,9 +8,11 @@ import ImageViwer from './Admin/ImageViwer';
 const BrandSlider = () => {
     const { __ } = useLang();
     const [brands, setBrands] = useState([]); // Fixed camelCase convention
-
+    const { setting } = usePage().props;
+    const id = setting.layout.Home.home_brands;
+    console.log(id)
     useEffect(() => {
-        axios.get(route('api.get_taxonomies', { type: 'brand', image: true })).then((res) => {
+        axios.get(route('api.get_taxonomies', { type: 'brand', image: true, id: id })).then((res) => {
             setBrands(res.data);
         });
     }, []);

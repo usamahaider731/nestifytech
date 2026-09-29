@@ -183,7 +183,7 @@ const FieldControls = ({
     if (field.type === 'dropdown') {
         if (field.multiple) {
             return (
-                <div className={`flex flex-col gap-2 ${colSpan}`} key={field.name}>
+                <div className={`flex flex-col gap-2 ${colSpan} ${fieldClass}`} key={field.name}>
                     <InputLabel className='text-heading'>{field.label}</InputLabel>
                     <MultipleDropdown
                         name={field.name}
@@ -200,7 +200,7 @@ const FieldControls = ({
         }
         if (field.children) {
             return (
-                <div className={`flex flex-col gap-3 ${colSpan}`} key={field.name}>
+                <div className={`flex flex-col gap-3 ${colSpan} ${fieldClass}`} key={field.name}>
                     <InputLabel className='text-heading'>{field.label}</InputLabel>
                     <SecondaryDropdown
                         name={field.name}
@@ -216,7 +216,7 @@ const FieldControls = ({
         }
         if (field.withChildren) {
             return (
-                <div className={`flex flex-col gap-2 ${colSpan}`} key={field.name}>
+                <div className={`flex flex-col gap-2 ${colSpan} ${fieldClass}`} key={field.name}>
                     <InputLabel className='text-heading'>{field.label}</InputLabel>
                     <PrimaryDropdown
                         name={field.name}
@@ -230,7 +230,7 @@ const FieldControls = ({
             );
         }
         return (
-            <div className={`flex flex-col gap-2 ${colSpan}`} key={field.name}>
+            <div className={`flex flex-col gap-2 ${colSpan} ${fieldClass}`} key={field.name}>
                 <InputLabel className='text-heading'>{field.label}</InputLabel>
                 <DropdownSelect
                     name={field.name}

@@ -11,6 +11,8 @@ import { RiCustomerService2Line, RiRefund2Line, RiSecurePaymentLine, RiTruckLine
 import { useLang } from '@/contexts/LanguageContext';
 import AdsRender from '@/Components/Frontend/AdsRender';
 import PopularProducts from '@/Components/Index/PopluarProducts';
+import TrendingProducts from '@/Components/Index/TrendingProducts';
+import BrandSlider from '@/Components/BrandSlider';
 
 function Index({ data }) {
     const { setting } = usePage().props;
@@ -78,6 +80,13 @@ function Index({ data }) {
             </div>
             <div className="relative z-10 w-full border-y border-border bg-white">
                 <div className={`${containerClass} px-4 sm:px-6 lg:px-8`}>
+                    {data.trending_products && data.trending_products.length > 0 && (
+                        <TrendingProducts products={data.trending_products} />
+                    )}
+                </div>
+            </div>
+            <div className="relative z-10 w-full border-y border-border bg-white">
+                <div className={`${containerClass} px-4 sm:px-6 lg:px-8`}>
                     {data.popluar_products && (
                         <PopularProducts products={data.popluar_products} />
                     )}
@@ -88,6 +97,10 @@ function Index({ data }) {
                     <AdsRender type='main' placement='home_bottom' className='w-full'  />
                 </div>
             </div>
+            <div className='bg-white'>
+                    <BrandSlider />
+                    </div>
+
         </div>
     );
 }

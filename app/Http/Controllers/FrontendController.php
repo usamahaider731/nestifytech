@@ -82,6 +82,10 @@ class FrontendController extends Controller
                 'limit' => 10,
             'views' => 'desc',
             ]));
+            $data['trending_products'] = get_posts($this->productQuery([
+                'limit' => 10,
+                'trending' => true,
+            ]));
         $blockImages = $index_settings['block_images'] ?? [];
         $heroImage = is_array($blockImages) && count($blockImages) > 0 ? $blockImages[0] : null;
 
@@ -106,6 +110,16 @@ class FrontendController extends Controller
     }
     public function taxonomyView(Request $request)
     {
+        $validated = $request->validate([
+            'min_price' => ['nullable', 'numeric', 'min:0'],
+            'max_price' => ['nullable', 'numeric', 'min:0'],
+            'brands' => ['nullable', 'string'],
+            'subcategory' => ['nullable', 'string'],
+            'in_stock' => ['nullable'],
+            'sort' => ['nullable', 'in:latest,price_asc,price_desc,popular'],
+            'page' => ['nullable', 'integer', 'min:1'],
+        ]);
+
         $id = $request->id;
         $type = $request->type;
         $taxonomy = get_taxonomy([
@@ -116,17 +130,72 @@ class FrontendController extends Controller
             'meta' => true,
             'parent' => true,
         ]);
-        if ($type == "category") {
-            $products = get_posts($this->productQuery([
-                'category_id' => $id,
-                'limit' => 20,
-                'paginate' => true,
-            ]));
-            return Inertia::render("Frontend/Category/Index", [
-                'category' => $taxonomy,
-                'products' => $products
-            ]);
+
+        if (! $taxonomy) {
+            abort(404);
         }
+
+        $brandIds = helper_ids($validated['brands'] ?? []);
+        $subcategoryIds = helper_ids($validated['subcategory'] ?? []);
+        $priceBounds = catalog_price_bounds();
+        $applied = [
+            'min_price' => $validated['min_price'] ?? null,
+            'max_price' => $validated['max_price'] ?? null,
+            'brands' => $brandIds,
+            'subcategory' => $subcategoryIds,
+            'in_stock' => filter_var($validated['in_stock'] ?? false, FILTER_VALIDATE_BOOLEAN),
+            'sort' => $validated['sort'] ?? 'latest',
+        ];
+
+        $query = $this->productQuery([
+            'limit' => 20,
+            'paginate' => true,
+            'sort' => $applied['sort'],
+            'min_price' => $applied['min_price'],
+            'max_price' => $applied['max_price'],
+            'in_stock' => $applied['in_stock'],
+        ]);
+
+        if ($type === 'brand') {
+            $query['brand_id'] = $id;
+        } elseif ($type === 'tag') {
+            $query['tag_id'] = $id;
+        } else {
+            $query['category_id'] = $subcategoryIds !== [] ? $subcategoryIds : $id;
+        }
+
+        if ($brandIds !== [] && $type !== 'brand') {
+            $query['brand_id'] = $brandIds;
+        }
+
+        $products = get_posts($query);
+        $filterBrands = $type === 'brand'
+            ? collect()
+            : get_taxonomy([
+                'type' => 'brand',
+                'status' => 'publish',
+                'limit' => 40,
+            ]);
+
+        $children = collect($taxonomy->children ?? [])->map(fn ($child) => [
+            'id' => $child->id,
+            'title' => $child->title,
+            'slug' => $child->slug ?? null,
+        ])->values();
+
+        return Inertia::render('Frontend/Category/Index', [
+            'category' => $taxonomy,
+            'products' => $products,
+            'filters' => $applied,
+            'filterOptions' => [
+                'brands' => collect($filterBrands)->map(fn ($brand) => [
+                    'id' => $brand->id,
+                    'title' => $brand->title,
+                ])->values(),
+                'categories' => $children,
+                'price' => $priceBounds,
+            ],
+        ]);
     }
     public function singleProduct(Request $request)
     {

@@ -100,12 +100,12 @@
         "light_logo": {
             "label": "Light Logo",
             "type": "image",
-            "value": "1755141413_28560d7113ad464752dd19ff0de702a8_dark_logo.svg"
+            "value": "1790605208_28560d7113ad464752dd19ff0de702a8_light_logo.png"
         },
         "dark_logo": {
             "label": "Dark Logo",
             "type": "image",
-            "value": "1755141413_28560d7113ad464752dd19ff0de702a8_dark_logo.svg"
+            "value": "1790605208_28560d7113ad464752dd19ff0de702a8_dark_logo.png"
         }
     },
     "backend-color": {

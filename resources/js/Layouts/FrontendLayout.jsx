@@ -30,7 +30,6 @@ export default function FrontendLayout({ children, title }) {
                     <Header title={title} />
                     <ThemeSwitcher />
                     <main className="flex-grow">{children}</main>
-                    <BrandSlider />
                     <Footer />
                     <CartDrawer />
                 </div>

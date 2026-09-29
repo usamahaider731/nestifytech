@@ -8,7 +8,7 @@
 
   --font-sans: var(--font-primary);
   --font-primary: "Inter","Open Sans","HelveticaNeue-Light","Helvetica Neue Light","Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;
-  --font-josefin: "Josefin Sans", sans-serif;
+  --font-poppins: "Poppins", sans-serif;
   --font-oswald: "Oswald", sans-serif;
   --color-secondary: var(--secondary);
   --color-text: var(--text);
@@ -22,15 +22,12 @@
   --color-permanent: var(--permanent);
   --color-dynamic: var(--dynamic);
   --color-info: var(--info);
-  --font-roboto: "Inter", "Roboto", sans-serif;
+  --font-roboto:  "Roboto","Inter", sans-serif;
 }
 
 /* Keep wheel and touch scrolling native and responsive. */
 html {
   -webkit-tap-highlight-color: transparent;
-}
-body{
-  font-family: var(--font-roboto);
 }
 /* 🌀 Premium Site Preloader */
 #preloader {

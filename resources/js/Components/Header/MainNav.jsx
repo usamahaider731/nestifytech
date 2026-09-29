@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import React, { useEffect } from 'react';
+import React from 'react';
 import ImageViwer from '../Admin/ImageViwer';
 import { RiHeartLine, RiMenuLine, RiMessage2Line, RiRepeat2Line, RiShoppingBag3Line } from 'react-icons/ri';
 import HeaderSearch from './HeaderSearch';
@@ -8,62 +8,75 @@ import { useLang } from '@/contexts/LanguageContext';
 import { useSelector } from 'react-redux';
 import { selectCartCount, selectCartTotal } from '@/store/cartSlice';
 
-const MainNav = ({ ContainerType }) => {
+const MainNav = ({ ContainerType, isScrolled = false }) => {
     const { setting } = usePage().props;
     const { setIsOpen } = useCart();
     const { __ } = useLang();
-    
-    // Get item count and subtotal from Redux instead of old Context
+
     const itemCount = useSelector(selectCartCount);
     const subtotal = useSelector(selectCartTotal);
 
     const currency = setting?.site?.currency?.value ?? 'PKR';
-    const is_index = location.href === "http://nestifytech.localhost/" || location.href === "http://nestifytech.localhost";
+    const is_index = location.href === 'http://nestifytech.localhost/' || location.href === 'http://nestifytech.localhost';
 
     const getLogoName = (logo_name) => {
-        if (logo_name === "logo_light") {
-            return "light_logo";
-        } else if (logo_name === "logo_dark") {
-            return "dark_logo";
-        }
+        if (logo_name === 'logo_light') return 'light_logo';
+        if (logo_name === 'logo_dark') return 'dark_logo';
         return logo_name;
     };
-    
+
     let home_header_logo = setting?.layout?.Header?.home_header_logo;
     let other_header_logo = setting?.layout?.Header?.other_page_header_logo;
-    let logo_path = "";
-    
+    let logo_path = '';
+
     if (is_index && home_header_logo) {
         home_header_logo = getLogoName(home_header_logo);
-        console.log(home_header_logo);
-        logo_path = setting?.site?.[home_header_logo].value || "";
-    }
-    else{
-        other_header_logo =getLogoName(other_header_logo)
-        logo_path = setting?.site?.[other_header_logo].value || "";
+        logo_path = setting?.site?.[home_header_logo]?.value || '';
+    } else {
+        other_header_logo = getLogoName(other_header_logo);
+        logo_path = setting?.site?.[other_header_logo]?.value || '';
     }
 
     return (
-        <div className='w-full border-b border-border bg-white'>
-            <div className={` ${ContainerType === "container" ? "container mx-auto" : ""}  px-5 relative`}>
-                <div className='flex flex-1 items-center gap-5 py-5 lg:gap-10 lg:py-7'>
-                    <div className="logo">
+        <div
+            className={`w-full border-b border-border transition-all duration-300 ${isScrolled ? 'py-0 shadow-none bg-white' : 'bg-white'
+                }`}
+        >
+            <div className={`${ContainerType === 'container' ? 'container mx-auto' : ''} px-5 relative`}>
+                <div className={`flex flex-1 items-center gap-5 lg:gap-10 transition-all duration-300 ${isScrolled ? 'py-2.5' : 'py-5 lg:py-7'
+                    }`}>
+
+                    {/* Logo */}
+                    <div className="logo shrink-0">
                         <Link href="/">
-                            <ImageViwer className="w-40" image={logo_path} alt={setting?.site_name} />
+                            <ImageViwer
+                                className={`transition-all max-h-12 duration-300 ${isScrolled ? 'max-w-48' : 'max-w-56'}`}
+                                image={logo_path}
+                                alt={setting?.site_name}
+                            />
                         </Link>
                     </div>
-                    <RiMenuLine size={21} className='mr-1 cursor-pointer text-text transition-colors hover:text-primary lg:mr-4' />
+
+                    <RiMenuLine size={21} className="mr-1 cursor-pointer text-text transition-colors hover:text-primary lg:mr-4" />
+
+                    {/* Search — always shown */}
                     <HeaderSearch />
-                    <div className='flex gap-4 text-text lg:gap-6'>
-                        <div className='flex text-text cursor-pointer items-center'>
-                            <RiHeartLine size={20} className='fill-text text-text' />
+
+                    {/* Action icons */}
+                    <div className="flex gap-4 text-text lg:gap-6">
+                        {/* Hide extra icons in sticky to keep it tight */}
+                                <div className="flex text-text cursor-pointer items-center">
+                                    <RiHeartLine size={20} className="fill-text text-text" />
+                                </div>
+
+                                <div className="flex text-text cursor-pointer items-center">
+                                    <RiMessage2Line size={20} className="fill-text text-text" />
+                                </div>
+                      
+                        <div className="flex text-text cursor-pointer items-center">
+                            <RiRepeat2Line size={20} className="fill-text text-text" />
                         </div>
-                        <div className='flex text-text cursor-pointer items-center'>
-                            <RiRepeat2Line size={20} className='fill-text text-text' />
-                        </div>
-                        <div className='flex text-text cursor-pointer items-center'>
-                            <RiMessage2Line size={20} className='fill-text text-text' />
-                        </div>
+                        {/* Cart — always shown */}
                         <button
                             type="button"
                             onClick={() => setIsOpen(true)}
@@ -78,11 +91,12 @@ const MainNav = ({ ContainerType }) => {
                                     </span>
                                 )}
                             </div>
-                            <div className="flex flex-col">
-                                <span className="text-md font-semibold">
-                                    {currency} {subtotal.toLocaleString()}
-                                </span>
-                            </div>
+                            {/* Show subtotal only in non-sticky mode */}
+                                <div className="flex flex-col">
+                                    <span className="text-md font-semibold">
+                                        {currency} {subtotal.toLocaleString()}
+                                    </span>
+                                </div>
                         </button>
                     </div>
                 </div>

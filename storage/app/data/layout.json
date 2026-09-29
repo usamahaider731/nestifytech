@@ -80,94 +80,8 @@
                         "condition": "show_banner",
                         "condition_value": true,
                         "name": "banner_image",
-                        "value": "1790391379_6039b3ff1a895b03a0d20722190f776c_banner_image.jpg",
+                        "value": "1790606552_6039b3ff1a895b03a0d20722190f776c_banner_image.jpg",
                         "single": true
-                    }
-                ]
-            }
-        ],
-        "Single": [
-            {
-                "title": "Single Page Layout Settings",
-                "style": "main",
-                "fields": [
-                    {
-                        "label": "Width Layout Type",
-                        "type": "dropdown",
-                        "style": 1,
-                        "name": "width_layout",
-                        "searchable": false,
-                        "value": "container",
-                        "options": [
-                            {
-                                "id": "full_width",
-                                "title": "Full Width"
-                            },
-                            {
-                                "id": "container",
-                                "title": "Container"
-                            }
-                        ]
-                    },
-                    {
-                        "label": "Page Style Type",
-                        "type": "dropdown",
-                        "style": 1,
-                        "name": "page_layout",
-                        "searchable": false,
-                        "value": "style1",
-                        "options": [
-                            {
-                                "id": "style1",
-                                "title": "Style 1"
-                            },
-                            {
-                                "id": "style2",
-                                "title": "Style 2"
-                            }
-                        ]
-                    },
-                    {
-                        "label": "Show Product Properties",
-                        "name": "product_proerties",
-                        "type": "checkbox",
-                        "value": true,
-                        "desc": "Do You Want to Show Product Properties Like (Hard, Ram etc)"
-                    },
-                    {
-                        "label": "Show Similar Products",
-                        "name": "similar",
-                        "type": "checkbox",
-                        "value": true,
-                        "desc": "Do you want to show similar products"
-                    },
-                    {
-                        "label": "Show Popular Products",
-                        "name": "popular",
-                        "type": "checkbox",
-                        "value": true,
-                        "desc": "Do you want to show popular products"
-                    },
-                    {
-                        "label": "Show Product Address & Map",
-                        "name": "address",
-                        "type": "checkbox",
-                        "value": true,
-                        "desc": "Do you want to show Address"
-                    },
-                    {
-                        "label": "Show Product Share Content",
-                        "name": "share",
-                        "type": "checkbox",
-                        "value": true,
-                        "desc": "Do you want to show Share Links & Share Icons"
-                    },
-                    {
-                        "label": "Show Product Information Content",
-                        "name": "information",
-                        "type": "checkbox",
-                        "value": true,
-                        "desc": "Do you want to show Information Content"
                     }
                 ]
             }
@@ -249,7 +163,13 @@
                         "label": "Show Trending Products",
                         "type": "checkbox",
                         "name": "trending_product_toggle",
-                        "value": false
+                        "value": true
+                    },
+                    {
+                        "label": "Show Featured Products",
+                        "type": "checkbox",
+                        "name": "featured_product_toggle",
+                        "value": true
                     },
                     {
                         "label": "Latest Products",
@@ -261,7 +181,7 @@
                         "label": "Show Popular Products",
                         "type": "checkbox",
                         "name": "popular_product_toggle",
-                        "value": false
+                        "value": true
                     },
                     {
                         "label": "Show Banner Image",
@@ -369,6 +289,7 @@
                         "label": "Container Type",
                         "type": "dropdown",
                         "name": "container_type",
+                        "style": 2,
                         "attribute": "required",
                         "value": "container",
                         "searchable": false,
@@ -387,6 +308,64 @@
                         "label": "Latest Product Card Type",
                         "type": "dropdown",
                         "name": "latest_product_card_type",
+                        "attribute": "required",
+                        "value": "v1",
+                        "searchable": false,
+                        "options": [
+                            {
+                                "id": "v1",
+                                "title": "Product Card V1"
+                            },
+                            {
+                                "id": "v2",
+                                "title": "Product Card V2"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Featured Product Card Type",
+                        "type": "dropdown",
+                        "name": "featured_product_card_type",
+                        "attribute": "required",
+                        "value": "v1",
+                        "searchable": false,
+                        "condition": "featured_product_toggle",
+                        "condition_value": true,
+                        "options": [
+                            {
+                                "id": "v1",
+                                "title": "Product Card V1"
+                            },
+                            {
+                                "id": "v2",
+                                "title": "Product Card V2"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Trending Product Card Type",
+                        "type": "dropdown",
+                        "name": "trending_product_card_type",
+                        "attribute": "required",
+                        "value": "v1",
+                        "condition": "trending_product_toggle",
+                        "condition_value": true,
+                        "searchable": false,
+                        "options": [
+                            {
+                                "id": "v1",
+                                "title": "Product Card V1"
+                            },
+                            {
+                                "id": "v2",
+                                "title": "Product Card V2"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Popular Product Card Type",
+                        "type": "dropdown",
+                        "name": "popular_product_card_type",
                         "attribute": "required",
                         "value": "v1",
                         "searchable": false,
@@ -478,6 +457,92 @@
                 ]
             }
         ],
+        "Single": [
+            {
+                "title": "Single Page Layout Settings",
+                "style": "main",
+                "fields": [
+                    {
+                        "label": "Width Layout Type",
+                        "type": "dropdown",
+                        "style": 1,
+                        "name": "width_layout",
+                        "searchable": false,
+                        "value": "container",
+                        "options": [
+                            {
+                                "id": "full_width",
+                                "title": "Full Width"
+                            },
+                            {
+                                "id": "container",
+                                "title": "Container"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Page Style Type",
+                        "type": "dropdown",
+                        "style": 1,
+                        "name": "page_layout",
+                        "searchable": false,
+                        "value": "style1",
+                        "options": [
+                            {
+                                "id": "style1",
+                                "title": "Style 1"
+                            },
+                            {
+                                "id": "style2",
+                                "title": "Style 2"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Show Product Properties",
+                        "name": "product_proerties",
+                        "type": "checkbox",
+                        "value": true,
+                        "desc": "Do You Want to Show Product Properties Like (Hard, Ram etc)"
+                    },
+                    {
+                        "label": "Show Similar Products",
+                        "name": "similar",
+                        "type": "checkbox",
+                        "value": true,
+                        "desc": "Do you want to show similar products"
+                    },
+                    {
+                        "label": "Show Popular Products",
+                        "name": "popular",
+                        "type": "checkbox",
+                        "value": true,
+                        "desc": "Do you want to show popular products"
+                    },
+                    {
+                        "label": "Show Product Address & Map",
+                        "name": "address",
+                        "type": "checkbox",
+                        "value": true,
+                        "desc": "Do you want to show Address"
+                    },
+                    {
+                        "label": "Show Product Share Content",
+                        "name": "share",
+                        "type": "checkbox",
+                        "value": true,
+                        "desc": "Do you want to show Share Links & Share Icons"
+                    },
+                    {
+                        "label": "Show Product Information Content",
+                        "name": "information",
+                        "type": "checkbox",
+                        "value": true,
+                        "desc": "Do you want to show Information Content"
+                    }
+                ]
+            }
+        ],
         "Product_Card_V1": [
             {
                 "title": "Manage Product Card V1",
@@ -507,7 +572,7 @@
                         "name": "show_product_category",
                         "value": true
                     },
-                                        {
+                    {
                         "label": "Product Stock Info",
                         "type": "checkbox",
                         "name": "show_product_stock_info",
