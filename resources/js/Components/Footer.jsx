@@ -107,7 +107,7 @@ const Footer = () => {
                 <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-12">
                     <div className="space-y-6 lg:col-span-4">
                         <Link href="/" className="inline-flex items-center gap-3 text-2xl font-black uppercase tracking-tight text-white">
-                          <ImageViwer image={logo_path} />
+                          <ImageViwer image={logo_path} className='max-w-40' />
                         </Link>
 
                         <div className="space-y-4">

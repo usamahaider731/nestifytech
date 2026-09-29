@@ -135,7 +135,7 @@ export default function ProductGrid({
             {showHeader && (
             <div className="mb-10 flex flex-col gap-5 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between md:mb-12">
                 <div className="max-w-2xl">
-                    <h2 className={titleClass} ref={titleRef}>{renderSplitText(__(translatedTitle))}</h2>
+                    <h2 className={titleClass} ref={titleRef}>{(__(translatedTitle))}</h2>
                     {translatedSubtitle && (
                         <p ref={textRef} className="mt-4 text-sm leading-relaxed text-res md:text-base">
                             {__(translatedSubtitle)}

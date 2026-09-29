@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo } from 'react';
 import { router, usePage } from '@inertiajs/react';
 import { applyDocumentLanguage, applyReplacements } from '@/Utils/lang';
+import axios from 'axios';
 
 const LanguageContext = createContext(null);
 
@@ -15,6 +16,30 @@ export function LanguageProvider({ children }) {
         (key, replacements) => {
             if (!key) {
                 return '';
+            }
+
+            if (translations && typeof translations[key] === 'undefined' && key.trim() !== '') {
+                // If key is missing, batch it and send to backend
+                if (!window.missingTranslationKeys) {
+                    window.missingTranslationKeys = new Set();
+                }
+                
+                if (!window.missingTranslationKeys.has(key)) {
+                    window.missingTranslationKeys.add(key);
+                    
+                    if (window.translationTimeout) {
+                        clearTimeout(window.translationTimeout);
+                    }
+                    
+                    window.translationTimeout = setTimeout(() => {
+                        const keysToSave = Array.from(window.missingTranslationKeys);
+                        window.missingTranslationKeys.clear();
+                        
+                        // Ignore standard validation or internal keys if needed
+                        axios.post('/api/add-lang-key', { keys: keysToSave })
+                            .catch(err => console.error("Error saving lang keys:", err));
+                    }, 2000);
+                }
             }
 
             return applyReplacements(translations?.[key] || key, replacements);

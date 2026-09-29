@@ -312,4 +312,40 @@ class ApiController extends Controller
         $data = array_merge($data, ['menu' => $menu], ['layout' => $datas]);
         return response()->json($data);
     }
+
+    public function addLangKey(Request $request)
+    {
+        $keys = $request->input('keys', []);
+        if (empty($keys) || !is_array($keys)) {
+            return response()->json(['success' => false]);
+        }
+
+        $langDir = storage_path('app/data/lang');
+        if (!\Illuminate\Support\Facades\File::exists($langDir)) {
+            return response()->json(['success' => false]);
+        }
+
+        $files = \Illuminate\Support\Facades\File::files($langDir);
+        
+        foreach ($files as $file) {
+            if ($file->getExtension() === 'json' && $file->getFilename() !== 'language.json' && $file->getFilename() !== 'form.json') {
+                $filePath = $file->getPathname();
+                $translations = json_decode(file_get_contents($filePath), true) ?: [];
+                $updated = false;
+                
+                foreach ($keys as $key) {
+                    if (!isset($translations[$key])) {
+                        $translations[$key] = $key;
+                        $updated = true;
+                    }
+                }
+                
+                if ($updated) {
+                    file_put_contents($filePath, json_encode($translations, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+                }
+            }
+        }
+
+        return response()->json(['success' => true]);
+    }
 }

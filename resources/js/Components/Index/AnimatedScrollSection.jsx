@@ -7,7 +7,7 @@ import { RiRocketLine, RiSpeedUpLine, RiShieldCheckLine } from 'react-icons/ri';
 gsap.registerPlugin(ScrollTrigger);
 
 export default function AnimatedScrollSection() {
-    const { __ } = useLang();
+    const { __, locale } = useLang();
     const sectionRef = useRef(null);
     const titleRef = useRef(null);
     const textRef = useRef(null);
@@ -38,7 +38,7 @@ export default function AnimatedScrollSection() {
                     scrollTrigger: {
                         trigger: sectionRef.current,
                         start: "top 75%",
-                    scrub: 1,
+                        scrub: 1,
                         toggleActions: "play reverse play reverse",
                     },
                     opacity: 1,
@@ -61,10 +61,10 @@ export default function AnimatedScrollSection() {
                 opacity: 0,
                 duration: 0.8,
                 stagger: 0.2,
-                
+
                 ease: "back.out(1.2)"
             });
-            
+
             // Parallax effect on background elements
             gsap.to('.bg-shape', {
                 scrollTrigger: {
@@ -106,11 +106,11 @@ export default function AnimatedScrollSection() {
             <div className="bg-shape absolute top-10 left-10 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10"></div>
             <div className="bg-shape absolute bottom-10 right-10 w-96 h-96 bg-secondary/5 rounded-full blur-3xl -z-10"></div>
             <div className="bg-shape absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-accent/5 rounded-full blur-3xl -z-10"></div>
-            
+
             <div className="container mx-auto px-5 z-10">
                 <div className="text-center max-w-3xl mx-auto mb-20 relative">
                     <h2 ref={titleRef} className="text-3xl md:text-5xl font-extrabold text-heading tracking-tight mb-6">
-                        {renderSplitText(__('Experience the Next Generation'))}
+                        {(__('Experience the Next Generation'))}
                     </h2>
                     <p ref={textRef} className="text-lg text-res">
                         {__('Discover our curated collection of premium electronics designed to elevate your everyday life with cutting-edge innovation and uncompromised performance.')}

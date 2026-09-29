@@ -31,6 +31,7 @@ class FrontendController extends Controller
             'meta' => true,
             'category' => true,
             'brand' => true,
+            'tags' => true,
             'gallery' => true,
             'parent' => true,
             'variation' => true,

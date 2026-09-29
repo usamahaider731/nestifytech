@@ -52,11 +52,10 @@ const ProductTopSection = ({ product }) => {
                                 {product.title}
                             </h1>
                             <div className='flex flex-col gap-2 font-roboto'>
-                                <div className='flex gap-4 items-center'>
+                                <div className='flex gap-4 items-start flex-col'>
                                     {product?.brand && 
-                                    <div className='flex gap-2 items-center text-center'>
-                                        <span className='text-lg text-heading font-semibold'>{__('Brand:')}</span>
-                                        <Link href={route('taxonomy.view', {type: "brand", id: product.brand?.id, slug: product.brand?.slug, time: new Date().getTime()})} title={product.brand?.title}><ImageViwer image={product.brand?.image?.filename} alt={product.brand?.title} className='w-auto cursor-pointer h-4' /></Link>
+                                    <div className='flex flex-col items-start'>
+                                        <Link href={route('taxonomy.view', {type: "brand", id: product.brand?.id, slug: product.brand?.slug, time: new Date().getTime()})} title={product.brand?.title}><ImageViwer image={product.brand?.image?.filename} alt={product.brand?.title} className='cursor-pointer max-w-36 flex items-start text-start justify-start h-12' /></Link>
                                     </div>}
                                     <div className='flex gap-2 items-center'>
                                         <span className='text-lg text-heading font-semibold'>{__('SKU:')}</span>
@@ -74,6 +73,19 @@ const ProductTopSection = ({ product }) => {
                                             ))
                                         }</div>
                                 </div>
+                                {product?.tags && 
+                                <div className='flex gap-2 items-center'>
+                                    <span className='text-sm text-heading font-semibold'>{__('Tags:')}</span>
+                                    <div className='flex gap-2'>
+                                        {
+                                            product?.tags?.map((tag, index) => (
+                                                <Link key={tag.id} className='flex gap-2 text-xs items-center py-0.75 px-2 rounded-md bg-bg text-primary   font-medium'>
+                                                    {tag.title}
+                                                </Link>
+                                            ))
+                                        }</div>
+                                </div>
+                                }
                                 <div className=''>
                                     <Variations product={product} />
                                 </div>
