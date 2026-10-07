@@ -246,17 +246,201 @@ class ModuleController extends Controller
     private function getAdditionalTableData($type, $result)
     {
         if ($type === 'user') {
-            $totalUsers = DB::table('users')->count();
+            $totalUsers        = DB::table('users')->count();
+            $activeUsers       = DB::table('users')->where('active', 1)->count();
+            $inactiveUsers     = $totalUsers - $activeUsers;
+            $recentlyActive    = DB::table('users')->where('updated_at', '>=', now()->subDays(7))->count();
+            $onlineUsers       = DB::table('users')->where('last_seen_at', '>=', now()->subMinutes(5))->count();
+
+            $previousTotal     = DB::table('users')->where('created_at', '<', now()->subDays(7))->count();
+            $percentChange     = $previousTotal > 0 ? round((($totalUsers - $previousTotal) / $previousTotal) * 100, 1) : ($totalUsers > 0 ? 100 : 0);
+            $activePercentage  = $totalUsers > 0 ? round(($recentlyActive / $totalUsers) * 100, 1) : 0;
+            $onlinePercentage  = $totalUsers > 0 ? round(($onlineUsers / $totalUsers) * 100, 1) : 0;
+
             return [
-                'users' => $result['data'],
+                'users'     => $result['data'],
                 'userStats' => [
-                    'total' => $totalUsers,
-                    // ... other stats could be calculated here via DB if needed
+                    'total'                 => $totalUsers,
+                    'active_count'          => $activeUsers,
+                    'inactive_count'        => $inactiveUsers,
+                    'recently_active_count' => $recentlyActive,
+                    'online_count'          => $onlineUsers,
+                    'percent_change'        => $percentChange,
+                    'active_percentage'     => $activePercentage,
+                    'online_percentage'     => $onlinePercentage,
                 ],
-                'table' => $result['table']['user'] ?? $result['table']
+                'table' => $result['table']['user'] ?? $result['table'],
             ];
         }
-        return [];
+
+        // Helper for percentage change
+        $calcChange = function ($currentActivity, $pastActivity) {
+            if ($pastActivity == 0) return $currentActivity > 0 ? 100 : 0;
+            return round((($currentActivity - $pastActivity) / $pastActivity) * 100, 1);
+        };
+
+        $dbConfig  = $this->loadModuleConfig($type, 'DB');
+        $tableName = $dbConfig['table'] ?? null;
+
+        $now = now();
+        $oneWeekAgo = now()->subDays(7);
+        $twoWeeksAgo = now()->subDays(14);
+
+        // ── Posts-based modules (product, listing, etc.) ────────────────────
+        if ($tableName === 'posts') {
+            $base     = DB::table('posts')->where('type', $type);
+            $thisWeek = (clone $base)->where('updated_at', '>=', $oneWeekAgo);
+            $lastWeek = (clone $base)->where('updated_at', '>=', $twoWeeksAgo)->where('updated_at', '<', $oneWeekAgo);
+
+            $total       = (clone $base)->count();
+            $publish     = (clone $base)->where('status', 'publish')->count();
+            $draft       = (clone $base)->where('status', 'draft')->count();
+            $other       = $total - $publish - $draft;
+
+            $thisWeekTotal   = (clone $thisWeek)->count();
+            $thisWeekPublish = (clone $thisWeek)->where('status', 'publish')->count();
+            $thisWeekDraft   = (clone $thisWeek)->where('status', 'draft')->count();
+            $thisWeekOther   = $thisWeekTotal - $thisWeekPublish - $thisWeekDraft;
+
+            $lastWeekTotal   = (clone $lastWeek)->count();
+            $lastWeekPublish = (clone $lastWeek)->where('status', 'publish')->count();
+            $lastWeekDraft   = (clone $lastWeek)->where('status', 'draft')->count();
+            $lastWeekOther   = $lastWeekTotal - $lastWeekPublish - $lastWeekDraft;
+            
+            $stats = [
+                'total'            => $thisWeekTotal,
+                'total_change'     => $calcChange($thisWeekTotal, $lastWeekTotal),
+                'published'        => $thisWeekPublish,
+                'published_change' => $calcChange($thisWeekPublish, $lastWeekPublish),
+                'draft'            => $thisWeekDraft,
+                'draft_change'     => $calcChange($thisWeekDraft, $lastWeekDraft),
+                'other'            => $thisWeekOther,
+                'other_change'     => $calcChange($thisWeekOther, $lastWeekOther),
+            ];
+            
+            if ($type === 'product') {
+                $checkStock = function($query) {
+                    $inStock = 0;
+                    $postIds = $query->pluck('id')->toArray();
+                    if (empty($postIds)) return 0;
+                    
+                    $meta = DB::table('post_meta')
+                        ->whereIn('post_id', $postIds)
+                        ->whereIn('key', ['stock', 'variations'])
+                        ->get()
+                        ->groupBy('post_id');
+                        
+                    foreach ($postIds as $pid) {
+                        $pMeta = $meta->get($pid, collect());
+                        $stockMeta = $pMeta->where('key', 'stock')->first();
+                        $varMeta = $pMeta->where('key', 'variations')->first()?->value;
+                        
+                        $inStockFlag = true; // Assume in stock by default (e.g. no stock tracking)
+                        
+                        // If there is a direct stock value, check if it is 0 or less
+                        if ($stockMeta !== null && trim($stockMeta->value) !== '') {
+                            if ((int)$stockMeta->value <= 0) {
+                                $inStockFlag = false;
+                            }
+                        }
+                        
+                        // If variations exist, they override the simple stock check
+                        if ($varMeta) {
+                            $variations = json_decode($varMeta, true);
+                            if (is_array($variations) && count($variations) > 0) {
+                                $hasVariationStock = false;
+                                foreach ($variations as $var) {
+                                    if (isset($var['stock']) && (int)$var['stock'] > 0) {
+                                        $hasVariationStock = true;
+                                        break;
+                                    }
+                                }
+                                $inStockFlag = $hasVariationStock;
+                            }
+                        }
+                        
+                        if ($inStockFlag) {
+                            $inStock++;
+                        }
+                    }
+                    return $inStock;
+                };
+
+                $thisWeekInStock = $checkStock(clone $thisWeek);
+                $thisWeekOutStock = $thisWeekTotal - $thisWeekInStock;
+
+                $lastWeekInStock = $checkStock(clone $lastWeek);
+                $lastWeekOutStock = $lastWeekTotal - $lastWeekInStock;
+
+                $stats['in_stock'] = $thisWeekInStock;
+                $stats['in_stock_change'] = $calcChange($thisWeekInStock, $lastWeekInStock);
+                $stats['out_stock'] = $thisWeekOutStock;
+                $stats['out_stock_change'] = $calcChange($thisWeekOutStock, $lastWeekOutStock);
+            }
+
+            return [
+                'stats' => $stats,
+            ];
+        }
+
+        // ── Taxonomy-based modules (category, brand, tag, state, city, …) ───
+        if ($tableName === 'taxonomies' || !$tableName) {
+            $base     = DB::table('taxonomies')->where('type', $type);
+            $thisWeek = (clone $base)->where('updated_at', '>=', $oneWeekAgo);
+            $lastWeek = (clone $base)->where('updated_at', '>=', $twoWeeksAgo)->where('updated_at', '<', $oneWeekAgo);
+
+            $total      = (clone $base)->count();
+            $active     = (clone $base)->where('status', 'active')->count();
+            $other      = $total - $active;
+            
+            $thisWeekTotal  = (clone $thisWeek)->count();
+            $thisWeekActive = (clone $thisWeek)->where('status', 'active')->count();
+            $thisWeekOther  = $thisWeekTotal - $thisWeekActive;
+
+            $lastWeekTotal  = (clone $lastWeek)->count();
+            $lastWeekActive = (clone $lastWeek)->where('status', 'active')->count();
+            $lastWeekOther  = $lastWeekTotal - $lastWeekActive;
+
+            return [
+                'stats' => [
+                    'total'         => $total,
+                    'total_change'  => $calcChange($thisWeekTotal, $lastWeekTotal),
+                    'active'        => $active,
+                    'active_change' => $calcChange($thisWeekActive, $lastWeekActive),
+                    'other'         => $other,
+                    'other_change'  => $calcChange($thisWeekOther, $lastWeekOther),
+                ],
+            ];
+        }
+
+        // ── Generic fallback for any other table ─────────────────────────────
+        $hasUpdatedAt = Schema::hasColumn($tableName, 'updated_at');
+        
+        $total = DB::table($tableName)->count();
+        
+        $thisWeekTotal = $hasUpdatedAt ? DB::table($tableName)->where('updated_at', '>=', $oneWeekAgo)->count() : 0;
+        $lastWeekTotal = $hasUpdatedAt ? DB::table($tableName)->where('updated_at', '>=', $twoWeeksAgo)->where('updated_at', '<', $oneWeekAgo)->count() : 0;
+        
+        $hasStatus = Schema::hasColumn($tableName, 'status');
+        $active = $hasStatus ? DB::table($tableName)->where('status', 'active')->count() : null;
+        $other  = $active !== null ? $total - $active : null;
+
+        $thisWeekActive = ($hasStatus && $hasUpdatedAt) ? DB::table($tableName)->where('status', 'active')->where('updated_at', '>=', $oneWeekAgo)->count() : 0;
+        $lastWeekActive = ($hasStatus && $hasUpdatedAt) ? DB::table($tableName)->where('status', 'active')->where('updated_at', '>=', $twoWeeksAgo)->where('updated_at', '<', $oneWeekAgo)->count() : 0;
+        
+        $thisWeekOther = $hasUpdatedAt ? $thisWeekTotal - $thisWeekActive : 0;
+        $lastWeekOther = $hasUpdatedAt ? $lastWeekTotal - $lastWeekActive : 0;
+
+        return [
+            'stats' => [
+                'total'         => $total,
+                'total_change'  => $hasUpdatedAt ? $calcChange($thisWeekTotal, $lastWeekTotal) : 0,
+                'active'        => $active,
+                'active_change' => $active !== null && $hasUpdatedAt ? $calcChange($thisWeekActive, $lastWeekActive) : null,
+                'other'         => $other,
+                'other_change'  => $other !== null && $hasUpdatedAt ? $calcChange($thisWeekOther, $lastWeekOther) : null,
+            ],
+        ];
     }
 
     private function transformForEdit($record, $type, $db)

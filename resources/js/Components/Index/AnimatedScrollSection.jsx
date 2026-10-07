@@ -18,26 +18,26 @@ export default function AnimatedScrollSection() {
             // Custom SplitText animation
             const chars = titleRef.current.querySelectorAll('.char');
             gsap.from(chars, {
-                yPercent: "random(-200, 200)",
-                rotation: "random(-20, 20)",
-                opacity: 0,
-                stagger: 0.02,
-                ease: "back.out(1.2)",
-                scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: "top 85%",
-                    end: "top 20%",
-                    scrub: 1
-                }
+              yPercent: "random(-200, 200)",
+                    rotation: "random(-20, 20)",
+                    opacity: 0,
+                    stagger: 0.02,
+                    ease: "back.out(1.2)",
+                    scrollTrigger: {
+                        trigger: sectionRef.current,
+                        start: "top 75%",
+                        end: "top 20%",
+                        scrub: 1
+                    }
             });
 
             // Text effect for description
             gsap.fromTo(textRef.current,
-                { opacity: 0, filter: "blur(5px)", x: -150 },
+                { opacity: 0, filter: "blur(3px)", x: -100 },
                 {
                     scrollTrigger: {
                         trigger: sectionRef.current,
-                        start: "top 75%",
+                        start: "top 95%",
                         scrub: 1,
                         toggleActions: "play reverse play reverse",
                     },
@@ -53,16 +53,15 @@ export default function AnimatedScrollSection() {
             gsap.from(cardsRef.current, {
                 scrollTrigger: {
                     trigger: sectionRef.current,
-                    start: "top 60%",
+                    start: "top 98%",
                     scrub: 1,
                     toggleActions: "play reverse play reverse",
                 },
-                x: -60,
+                x: -40,
                 opacity: 0,
-                duration: 0.8,
+                duration: 0.5,
                 stagger: 0.2,
-
-                ease: "back.out(1.2)"
+                ease: "power2.out"
             });
 
             // Parallax effect on background elements
@@ -101,18 +100,18 @@ export default function AnimatedScrollSection() {
     };
 
     return (
-        <section ref={sectionRef} className="relative w-full overflow-hidden bg-gradient-to-br from-bg to-white py-24 mt-10 border-y border-border shadow-sm">
+        <section ref={sectionRef} className="relative w-full overflow-hidden bg-gradient-to-br from-bg to-white py-10 border-y border-border shadow-sm">
             {/* Animated Background Shapes */}
             <div className="bg-shape absolute top-10 left-10 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10"></div>
             <div className="bg-shape absolute bottom-10 right-10 w-96 h-96 bg-secondary/5 rounded-full blur-3xl -z-10"></div>
             <div className="bg-shape absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-accent/5 rounded-full blur-3xl -z-10"></div>
 
             <div className="container mx-auto px-5 z-10">
-                <div className="text-center max-w-3xl mx-auto mb-20 relative">
-                    <h2 ref={titleRef} className="text-3xl md:text-5xl font-extrabold text-heading tracking-tight mb-6">
-                        {(__('Experience the Next Generation'))}
+                <div className="text-center mx-auto mb-20 relative">
+                    <h2 ref={titleRef} className="text-3xl md:text-5xl font-extrabold text-heading tracking-tight font-poppins mb-6">
+                        {renderSplitText(__('Experience the Next Generation'))}
                     </h2>
-                    <p ref={textRef} className="text-lg text-res">
+                    <p ref={textRef} className="text-base max-w-3xl mx-auto text-res">
                         {__('Discover our curated collection of premium electronics designed to elevate your everyday life with cutting-edge innovation and uncompromised performance.')}
                     </p>
                 </div>

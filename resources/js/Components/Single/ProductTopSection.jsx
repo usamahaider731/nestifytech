@@ -7,6 +7,8 @@ import Variations from './Variations';
 import { stripTags } from '@/Utils/helper';
 import { useLang } from '@/contexts/LanguageContext';
 import { FaEye, FaRegEye } from 'react-icons/fa';
+import ProductQRCode from './ProductQRCode';
+
 const ProductTopSection = ({ product }) => {
     const { __ } = useLang();
     return (
@@ -39,7 +41,9 @@ const ProductTopSection = ({ product }) => {
                         </span>
                     </button>
                     )}
+                    <ProductQRCode product={product} />
                 </div>
+
             </div>
             <div className='flex w-full mt-10 relative gap-10'>
                 <div className='flex flex-col flex-1'>

@@ -112,17 +112,67 @@ class LayoutController extends Controller
 
         foreach ($currentSettings as &$section) {
             if (empty($section['fields']) || !is_array($section['fields'])) continue;
+
             foreach ($section['fields'] as &$field) {
                 $key = $field['name'] ?? null;
                 $typeField = $field['type'] ?? null;
                 if (!$key || !$typeField) continue;
 
-                // Image handling: support upload, retain existing, and allow removal via submitted list
+                // ── Repeater ─────────────────────────────────────────────────
+                if ($typeField === 'repeater') {
+                    $submittedItems = $request->input($key, []);
+                    if (!is_array($submittedItems)) {
+                        $submittedItems = [];
+                    }
+
+                    $subFieldDefs  = $field['fields'] ?? [];
+                    $existingItems = $field['value'] ?? [];
+                    $processedItems = [];
+
+                    foreach ($submittedItems as $itemIndex => $itemData) {
+                        // Start from existing item so we don't lose untouched values
+                        $existingItem = $existingItems[$itemIndex] ?? [];
+                        $newItem = is_array($existingItem) ? $existingItem : [];
+
+                        foreach ($subFieldDefs as $subField) {
+                            $subKey  = $subField['name']  ?? null;
+                            $subType = $subField['type']  ?? null;
+                            if (!$subKey || !$subType) continue;
+
+                            // Dot-notation key for nested file: key.itemIndex.subKey
+                            $fileKey = "{$key}.{$itemIndex}.{$subKey}";
+
+                            if ($subType === 'image') {
+                                if ($request->hasFile($fileKey)) {
+                                    // A new file was uploaded for this item slot
+                                    $uploadedFile = $request->file($fileKey);
+                                    $newItem[$subKey] = $this->typeRender($subKey, $uploadedFile, $subField);
+                                } elseif (array_key_exists($subKey, $itemData)) {
+                                    // No new file – keep whatever was submitted (existing filename or null)
+                                    $submitted = $itemData[$subKey];
+                                    $newItem[$subKey] = $submitted !== null ? $submitted : ($existingItem[$subKey] ?? null);
+                                }
+                                // else: untouched – keep existing value already in $newItem
+                            } else {
+                                // Regular scalar field
+                                if (array_key_exists($subKey, $itemData)) {
+                                    $newItem[$subKey] = $itemData[$subKey];
+                                }
+                            }
+                        }
+
+                        $processedItems[] = $newItem;
+                    }
+
+                    $field['value'] = $processedItems;
+                    continue;
+                }
+
+                // ── Image ─────────────────────────────────────────────────────
                 if ($typeField === 'image' && $request->hasFile($key)) {
                     $newValue = $this->typeRender($key, $request->file($key), $field);
-                    
+
                     if (is_array($request->file($key))) {
-                        // Multiple files uploaded: merge with existing
                         $oldValue = $field['value'] ?? [];
                         $oldArray = is_array($oldValue) ? $oldValue : ($oldValue ? [$oldValue] : []);
                         $newArray = is_array($newValue) ? $newValue : [$newValue];
@@ -151,6 +201,7 @@ class LayoutController extends Controller
                     $field['value'] = $request->input($key);
                 }
             }
+            unset($field); // break reference
         }
 
         File::put($this->file, json_encode(['layout' => array_merge([$type => $currentSettings], $otherSetting)], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));

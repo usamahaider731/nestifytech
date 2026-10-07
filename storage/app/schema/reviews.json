@@ -44,6 +44,16 @@
                 "name": "type",
                 "type": "string",
                 "index": true
+            },
+            {
+                "name": "created_at",
+                "type": "timestamp",
+                "nullable": true
+            },
+            {
+                "name": "updated_at",
+                "type": "timestamp",
+                "nullable": true
             }
         ],
         "main_fields": [
@@ -130,7 +140,6 @@
                 "label": "POST ID",
                 "column": "post_id",
                 "type": "link",
-                
                 "sku": true,
                 "value_table": "posts",
                 "value_condition": {
@@ -159,7 +168,6 @@
                 "column": "action",
                 "width": "20%",
                 "type": "action"
-
             }
         ]
     },

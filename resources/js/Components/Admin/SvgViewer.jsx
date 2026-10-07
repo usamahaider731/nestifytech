@@ -18,7 +18,7 @@ export default function SvgViewer({ width, height, src, key, className = '' }) {
     if (svgRef.current) {
       const svgEl = svgRef.current.querySelector('svg');
       if (svgEl) {
-        svgEl.classList.add('fill-heading', 'w-full', 'text-primary', 'h-full');
+        svgEl.classList.add('w-full', 'h-full');
         svgEl.setAttribute('width', width);
       }
     }
@@ -30,7 +30,7 @@ export default function SvgViewer({ width, height, src, key, className = '' }) {
       key={key}
       width={width}
       height={height}
-      className={`svg-viewer ${className} fill-primary`}
+      className={`svg-viewer ${className}`}
       dangerouslySetInnerHTML={{ __html: svgContent }}
     />
   );

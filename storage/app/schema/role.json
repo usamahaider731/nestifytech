@@ -19,6 +19,16 @@
                 "name": "permission",
                 "type": "longText",
                 "nullable": true
+            },
+            {
+                "name": "created_at",
+                "type": "timestamp",
+                "nullable": true
+            },
+            {
+                "name": "updated_at",
+                "type": "timestamp",
+                "nullable": true
             }
         ],
         "main_fields": [

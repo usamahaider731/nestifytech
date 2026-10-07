@@ -25,7 +25,7 @@ export default function ComparePage() {
     // Collect all unique attribute keys across compared products
     const allAttributeKeys = [...new Set(
         items.flatMap(item => Object.keys(item.product?.meta ?? {}))
-            .filter(key => !['stock', 'first_price', 'second_price', 'images', 'category', 'brand', 'user_id', 'type', 'state', 'city', 'address_coordinates', 'short_description'].includes(key))
+            .filter(key => !['stock', 'first_price', 'second_price', 'images', 'category', 'brand', 'tags', 'city', 'state', 'user_id', 'type', 'address_coordinates', 'short_description'].includes(key) && !key.startsWith('seo'))
     )];
     const getStock = (product) => {
         if (product?.variations?.length > 0) {
@@ -129,26 +129,121 @@ export default function ComparePage() {
                                     })}
                                 </tr>
 
+                                {/* Category Row */}
+                                <tr className="border-b border-border even:bg-common/40">
+                                    <td className="p-4 text-sm font-medium text-res">{__('Category')}</td>
+                                    {items.map(item => {
+                                        const categories = item.product?.category ?? [];
+                                        return (
+                                            <td key={item.productId} className="p-4 text-center text-sm text-heading">
+                                                {categories.length > 0 ? categories.map(c => c?.title).filter(Boolean).join(', ') : <span className="text-slate-300">—</span>}
+                                            </td>
+                                        );
+                                    })}
+                                </tr>
+
+                                {/* Brand Row */}
+                                <tr className="border-b border-border even:bg-common/40">
+                                    <td className="p-4 text-sm font-medium text-res">{__('Brand')}</td>
+                                    {items.map(item => {
+                                        const brand = item.product?.brand;
+                                        return (
+                                            <td key={item.productId} className="p-4 text-center text-sm text-heading">
+                                                {brand?.title ? brand.title : <span className="text-slate-300">—</span>}
+                                            </td>
+                                        );
+                                    })}
+                                </tr>
+
+                                {/* Tags Row */}
+                                <tr className="border-b border-border even:bg-common/40">
+                                    <td className="p-4 text-sm font-medium text-res">{__('Tags')}</td>
+                                    {items.map(item => {
+                                        const tags = item.product?.tags ?? [];
+                                        return (
+                                            <td key={item.productId} className="p-4 text-center text-sm text-heading">
+                                                {tags.length > 0 ? tags.map(t => t?.title).filter(Boolean).join(', ') : <span className="text-slate-300">—</span>}
+                                            </td>
+                                        );
+                                    })}
+                                </tr>
+
+                                {/* City Row */}
+                                <tr className="border-b border-border even:bg-common/40">
+                                    <td className="p-4 text-sm font-medium text-res">{__('City')}</td>
+                                    {items.map(item => {
+                                        const city = item.product?.city;
+                                        return (
+                                            <td key={item.productId} className="p-4 text-center text-sm text-heading">
+                                                {city?.title ? city.title : <span className="text-slate-300">—</span>}
+                                            </td>
+                                        );
+                                    })}
+                                </tr>
+
+                                {/* State Row */}
+                                <tr className="border-b border-border even:bg-common/40">
+                                    <td className="p-4 text-sm font-medium text-res">{__('State')}</td>
+                                    {items.map(item => {
+                                        const state = item.product?.state;
+                                        return (
+                                            <td key={item.productId} className="p-4 text-center text-sm text-heading">
+                                                {state?.title ? state.title : <span className="text-slate-300">—</span>}
+                                            </td>
+                                        );
+                                    })}
+                                </tr>
+
+                                {/* Color Row */}
+                                <tr className="border-b border-border even:bg-common/40">
+                                    <td className="p-4 text-sm font-medium text-res">{__('Color')}</td>
+                                    {items.map(item => {
+                                        const variations = item.product?.variations ?? [];
+                                        const colors = [...new Set(variations.map(v => v.color).filter(Boolean))];
+                                        return (
+                                            <td key={item.productId} className="p-4 text-center text-sm text-heading">
+                                                {colors.length > 0 ? (
+                                                    <div className="flex flex-wrap items-center justify-center gap-1">
+                                                        {colors.map((c, i) => (
+                                                            <span key={i} className="px-2 py-0.5 bg-bg border border-border text-xs rounded">{c}</span>
+                                                        ))}
+                                                    </div>
+                                                ) : <span className="text-slate-300">—</span>}
+                                            </td>
+                                        );
+                                    })}
+                                </tr>
+
+                                {/* Properties / Attributes Row */}
+                                <tr className="border-b border-border even:bg-common/40">
+                                    <td className="p-4 text-sm font-medium text-res">{__('Properties')}</td>
+                                    {items.map(item => {
+                                        const attributes = item.product?.attributes ?? [];
+                                        return (
+                                            <td key={item.productId} className="p-4 text-center text-xs text-heading">
+                                                {attributes.length > 0 ? (
+                                                    <div className="flex flex-col items-center justify-center gap-1">
+                                                        {attributes.map((attr, i) => (
+                                                            <span key={i} className="whitespace-nowrap">
+                                                                <span className="font-semibold">{attr.key}:</span> {attr.value}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                ) : <span className="text-slate-300">—</span>}
+                                            </td>
+                                        );
+                                    })}
+                                </tr>
+
                                 {/* Dynamic attribute rows */}
                                 {allAttributeKeys.map(key => (
                                     <tr key={key} className="border-b border-border even:bg-common/40">
                                         <td className="p-4 text-sm font-medium capitalize text-res">{key.replace(/_/g, ' ')}</td>
-                                        {items.map(item => {
-                                            if (item.product.meta[key], key != "seo_description") {
-                                                return (
-                                                    <td key={item.productId} className="p-4 text-center text-sm text-heading">
-                                                        {item.product?.meta?.[key]?.value ?? <span className="text-slate-300">—</span>}
-                                                    </td>
-                                                )
-                                            }
-                                            else {
-                                                return (
-                                                    <td key={item.productId} className="p-4 text-sm text-heading">
-                                                        <span dangerouslySetInnerHTML={{ __html: item.product?.meta?.[key]?.value ?? '-' }} />
-                                                    </td>
-                                                )
-                                            }
-                                        })}
+                                        {items.map(item => (
+                                            <td key={item.productId} className="p-4 text-center text-sm text-heading">
+                                                {item.product?.meta?.[key]?.value ?? <span className="text-slate-300">—</span>}
+                                            </td>
+                                        ))}
                                     </tr>
                                 ))}
                                 <tr>

@@ -37,6 +37,16 @@
                 "name": "type",
                 "type": "string",
                 "index": true
+            },
+            {
+                "name": "created_at",
+                "type": "timestamp",
+                "nullable": true
+            },
+            {
+                "name": "updated_at",
+                "type": "timestamp",
+                "nullable": true
             }
         ],
         "main_fields": [

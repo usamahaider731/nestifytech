@@ -9,8 +9,9 @@ import { hasPermission, stripTags } from '@/Utils/helper'
 import { TbDotsVertical, TbCloudDownload, TbCloudUpload, TbFileZip, TbDatabaseImport, TbDatabaseExport } from 'react-icons/tb'
 import { Dialog, Transition } from '@headlessui/react'
 import { Fragment } from 'react'
+import { RiBarChartBoxLine, RiCheckboxCircleLine, RiDraftLine, RiStackLine } from 'react-icons/ri'
 
-function Index({ data, table, type }) {
+function Index({ data, table, type, stats }) {
 
   const { auth } = usePage().props
   const [Rows, setRows] = useState(data?.data || data || [])
@@ -20,7 +21,6 @@ function Index({ data, table, type }) {
   const [showAdvancedModal, setShowAdvancedModal] = useState(false)
   const [activeTab, setActiveTab] = useState('export') // export or import
   const [importFile, setImportFile] = useState(null)
-
   useEffect(() => {
     setRows(data?.data || data || [])
   }, [data, type])
@@ -216,8 +216,113 @@ function Index({ data, table, type }) {
     });
   }
 
+  // Determine if this is a posts-type or taxonomy-type module for stat labels
+  const isPostModule  = stats && 'published' in stats
+  const statCards     = stats ? [
+    {
+      label: 'Total',
+      value: stats.total ?? 0,
+      change: stats.total_change,
+      icon: <RiStackLine />,
+      bg: 'bg-blue-500/15 text-blue-600',
+      border: 'border-blue-200',
+      note: stats.total_change > 0 ? `+${stats.total_change}% from last week` : `${stats.total_change}% from last week`,
+    },
+    isPostModule ? {
+      label: 'Published',
+      value: stats.published ?? 0,
+      change: stats.published_change,
+      icon: <RiCheckboxCircleLine />,
+      bg: 'bg-green-500/15 text-green-600',
+      border: 'border-green-200',
+      note: 'Last week analytics',
+    } : {
+      label: 'Active',
+      value: stats.active ?? 0,
+      icon: <RiCheckboxCircleLine />,
+      bg: 'bg-green-500/15 text-green-600',
+      border: 'border-green-200',
+      note: 'Last week analytics',
+      change: stats.active_change
+    },
+    isPostModule ? {
+      label: 'Draft',
+      value: stats.draft ?? 0,
+      icon: <RiDraftLine />,
+      change: stats.draft_change,
+      bg: 'bg-amber-500/15 text-amber-600',
+      border: 'border-amber-200',
+      note: 'Last week analytics',
+    } : {
+      label: 'Inactive',
+      value: stats.other ?? 0,
+      icon: <RiDraftLine />,
+      change: stats.other_change,
+      bg: 'bg-amber-500/15 text-amber-600',
+      border: 'border-amber-200',
+      note: 'Last week analytics',
+    }
+  ] : []
+
+  if (stats && 'in_stock' in stats) {
+    statCards.push(
+      {
+        label: 'In Stock',
+        value: stats.in_stock ?? 0,
+        change: stats.in_stock_change,
+        icon: <RiCheckboxCircleLine />,
+        bg: 'bg-green-500/15 text-green-600',
+        border: 'border-green-200',
+        note: 'Last week analytics',
+      },
+      {
+        label: 'Out of Stock',
+        value: stats.out_stock ?? 0,
+        change: stats.out_stock_change,
+        icon: <RiDraftLine />,
+        bg: 'bg-red-500/15 text-red-600',
+        border: 'border-red-200',
+        note: 'Last week analytics',
+      }
+    );
+  }
+
+  console.log(stats)
   return (
-    <div className='w-full px-5 py-7 flex flex-col gap-7.5'>
+    <div className='w-full py-7 flex flex-col gap-7.5'>
+
+      {/* ── Stat Cards ── */}
+      {statCards.length > 0 && (
+        <div className='grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-4'>
+          {statCards.map((card, i) => (
+            <div key={i} className={`p-5 flex col-span-1 justify-between flex-col gap-10 items-start shadow bg-accent ${card.border}`}>
+              <div className='flex text-heading flex-col w-full'>
+                <div className='flex items-center w-full justify-between'>
+                  <div className={`${card.bg} rounded-lg size-9 flex items-center justify-center`}>
+                    {card.icon}
+                  </div>
+                  {card.change !== undefined && (
+                    <span
+                      className={`text-base mb-2 font-medium ${card.change >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                    >
+                      ({card.change >= 0 ? '+' : ''}{card.change}%)
+                    </span>
+                  )}
+                </div>
+
+                <span className='text-2xl mt-2 font-medium font-primary'>{card.value}</span>
+
+                <div className='flex w-full flex-col'>
+                  <span className='text-secondary mt-1 font-primary text-sm font-medium capitalize'>{card.label} {type}s</span>
+                  {card.note && <span className='text-xs text-res mt-0.5'>{card.note}</span>}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+
       <div className='flex justify-between items-center'>
         <h1 className='text-xl font-medium capitalize text-primary'>{type}</h1>
         <div className='flex gap-3 items-center'>

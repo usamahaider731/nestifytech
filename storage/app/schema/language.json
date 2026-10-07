@@ -7,10 +7,35 @@
             "prefix": "required|string|max:10"
         },
         "schema": [
-            {"name": "title", "type": "string"},
-            {"name": "sku", "type": "string", "unique": true},
-            {"name": "status", "type": "string", "default": "active"},
-            {"name": "type", "type": "string", "default": "language"}
+            {
+                "name": "title",
+                "type": "string"
+            },
+            {
+                "name": "sku",
+                "type": "string",
+                "unique": true
+            },
+            {
+                "name": "status",
+                "type": "string",
+                "default": "active"
+            },
+            {
+                "name": "type",
+                "type": "string",
+                "default": "language"
+            },
+            {
+                "name": "created_at",
+                "type": "timestamp",
+                "nullable": true
+            },
+            {
+                "name": "updated_at",
+                "type": "timestamp",
+                "nullable": true
+            }
         ],
         "main_fields": [
             "title",

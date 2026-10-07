@@ -369,6 +369,70 @@
                         "value": "25"
                     }
                 ]
+            },
+            {
+                "title": "Services Settings",
+                "style": "main",
+                "fields": [
+                    {
+                        "label": "Services",
+                        "type": "repeater",
+                        "name": "services",
+                        "value": [
+                            {
+                                "title": "Fast Delivery",
+                                "description": "Experience lightning-fast shipping on all our premium products, delivered straight to your doorstep.",
+                                "service_icon": "1791208334_6039b3ff1a895b03a0d20722190f776c_service_icon.svg",
+                                "service_background_image": "1791208334_6039b3ff1a895b03a0d20722190f776c_service_background_image.jpg"
+                            },
+                            {
+                                "title": "Secure Checkout",
+                                "description": "Shop with confidence using our state-of-the-art encrypted payment gateway for 100% secure transactions.",
+                                "service_icon": "1791208219_6039b3ff1a895b03a0d20722190f776c_service_icon.svg",
+                                "service_background_image": "1791208219_6039b3ff1a895b03a0d20722190f776c_service_background_image.jpg"
+                            },
+                            {
+                                "title": "Hassle-Free Returns",
+                                "description": "Not satisfied? Return your products easily within 30 days for a full refund, no questions asked.",
+                                "service_icon": "1791208050_6039b3ff1a895b03a0d20722190f776c_service_icon.svg",
+                                "service_background_image": "1791208050_6039b3ff1a895b03a0d20722190f776c_service_background_image.jpg"
+                            },
+                            {
+                                "title": "24\/7 Support",
+                                "description": "Our dedicated customer service team is always ready to assist you with any inquiries or issues.",
+                                "service_icon": "1791207586_6039b3ff1a895b03a0d20722190f776c_service_icon.svg",
+                                "service_background_image": "1791207865_6039b3ff1a895b03a0d20722190f776c_service_background_image.jpg"
+                            }
+                        ],
+                        "fields": [
+                            {
+                                "name": "title",
+                                "label": "Title",
+                                "type": "text",
+                                "style": 2,
+                                "placeholder": "Enter title"
+                            },
+                            {
+                                "name": "description",
+                                "label": "Description",
+                                "type": "textarea",
+                                "placeholder": "Enter Description of service"
+                            },
+                            {
+                                "name": "service_icon",
+                                "label": "Select Icon",
+                                "type": "image",
+                                "style": 2
+                            },
+                            {
+                                "name": "service_background_image",
+                                "label": "Select Background",
+                                "type": "image",
+                                "style": 2
+                            }
+                        ]
+                    }
+                ]
             }
         ],
         "Product_Card_V2": [

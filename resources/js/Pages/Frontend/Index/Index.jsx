@@ -13,6 +13,7 @@ import AdsRender from '@/Components/Frontend/AdsRender';
 import PopularProducts from '@/Components/Index/PopluarProducts';
 import TrendingProducts from '@/Components/Index/TrendingProducts';
 import BrandSlider from '@/Components/BrandSlider';
+import Services from '@/Components/Index/Services';
 
 function Index({ data }) {
     const { setting } = usePage().props;
@@ -85,6 +86,9 @@ function Index({ data }) {
                     )}
                 </div>
             </div>
+
+            <Services />
+
             <div className="relative z-10 w-full border-y border-border bg-white">
                 <div className={`${containerClass} px-4 sm:px-6 lg:px-8`}>
                     {data.popluar_products && (

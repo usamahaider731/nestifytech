@@ -7,18 +7,41 @@
             "email": "required|email|unique:users"
         },
         "schema": [
-            {"name": "name", "type": "string"},
-            {"name": "email", "type": "string", "unique": true},
-            {"name": "password", "type": "string"},
-            {"name": "active", "type": "boolean", "default": true}
+            {
+                "name": "name",
+                "type": "string"
+            },
+            {
+                "name": "email",
+                "type": "string",
+                "unique": true
+            },
+            {
+                "name": "password",
+                "type": "string"
+            },
+            {
+                "name": "active",
+                "type": "boolean",
+                "default": true
+            },
+            {
+                "name": "created_at",
+                "type": "timestamp",
+                "nullable": true
+            },
+            {
+                "name": "updated_at",
+                "type": "timestamp",
+                "nullable": true
+            }
         ],
         "main_fields": [
             "name",
             "email"
         ],
         "meta_fields": "auto",
-        "fixed_fields": {
-        },
+        "fixed_fields": {},
         "table": "users"
     },
     "table": {

@@ -76,7 +76,7 @@ class PostTaxonomy extends Model
                 ->whereIn('id', $allIds)
                 ->get()
                 ->keyBy('id');
-                
+
             $mediaType = ($table === 'posts') ? 'post' : (($table === 'taxonomies') ? 'taxonomy' : \Illuminate\Support\Str::singular($table));
             $media = \Illuminate\Support\Facades\DB::table('media')
                 ->whereIn('parent_id', $allIds)
@@ -133,21 +133,21 @@ class PostTaxonomy extends Model
         }
 
         $rftl = [];
-        
+
         // Query parent variations (color groups)
         $parentVariations = DB::table('post_variations')
             ->where('post_id', $this->id)
             ->whereNull('parent_id')
             ->get();
-        
+
         $formattedVariations = [];
-        
+
         foreach ($parentVariations as $parent) {
             $vImage = DB::table('media')->where([
                 'type'      => 'post_variation', // or whatever type you use for variations
                 'parent_id' => $parent->id,
             ])->first();
-            
+
             // Get shared attributes for the parent
             $parentValues = DB::table('product_variation_values')->where('variation_id', $parent->id)->get();
             $sharedAttributes = [];
@@ -160,16 +160,16 @@ class PostTaxonomy extends Model
                     }
                 }
             }
-            
+
             // Query child variations (combinations)
             $childVariations = DB::table('post_variations')
                 ->where('parent_id', $parent->id)
                 ->get();
-            
+
             $combinations = [];
             $totalStock = 0;
             $minPrice = $parent->price;
-            
+
             foreach ($childVariations as $child) {
                 $childValues = DB::table('product_variation_values')->where('variation_id', $child->id)->get();
                 $comboAttributes = [];
@@ -182,20 +182,20 @@ class PostTaxonomy extends Model
                         }
                     }
                 }
-                
+
                 $combinations[] = [
                     'id' => $child->id,
                     'price' => $child->price,
                     'stock' => $child->stock,
                     'attributes' => $comboAttributes
                 ];
-                
+
                 $totalStock += (int) $child->stock;
                 if ($minPrice === 0 || ($child->price > 0 && $child->price < $minPrice)) {
                     $minPrice = $child->price;
                 }
             }
-            
+
             $formattedVariations[] = [
                 'id'                => $parent->id,
                 'price'             => $minPrice,
@@ -207,12 +207,44 @@ class PostTaxonomy extends Model
                 'attributes'        => [] // some legacy code might expect this on the root object
             ];
         }
-        
+
         // Convert to objects if needed by the frontend (previously it returned object representations of DB rows)
         foreach ($formattedVariations as $grp) {
             $rftl[] = (object) $grp;
         }
 
         return $rftl;
+    }
+
+    public function getPriceAttribute()
+    {
+        $variations = $this->variations;
+        $meta = $this->meta;
+        if (empty($variations)) {
+            if (empty($meta)) return 0.0;
+            else {
+                foreach ($meta as  $value) {
+                    if($value->key === 'first_price'){
+                        return $value->value;
+                    }
+                }
+                return 0.0;
+            }
+        }
+
+        $grandTotal = 0.0;
+
+        foreach ($variations as $parent) {
+            if (isset($parent->combinations) && is_array($parent->combinations)) {
+                foreach ($parent->combinations as $child) {
+                    $price = isset($child['price']) ? (float) $child['price'] : 0.0;
+                    $stock = isset($child['stock']) ? (int) $child['stock'] : 0;
+
+                    $grandTotal += ($price * $stock);
+                }
+            }
+        }
+
+        return $grandTotal;
     }
 }

@@ -1,12 +1,36 @@
 import AdminLayout from '@/Layouts/AdminLayout'
-import React, { useEffect, useState } from 'react'
-import Icon from '@/Components/Icon'
+import React, { useState } from 'react'
 import { Link, usePage } from '@inertiajs/react'
-import axios from 'axios'
-// chart.js
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend, Filler } from 'chart.js';
-import { Line, Bar, Pie, Doughnut } from 'react-chartjs-2';
-import { RiAddLine, RiStore2Line, RiSettings3Line, RiUser3Line } from 'react-icons/ri';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js'
+import { Line, Bar, Doughnut } from 'react-chartjs-2'
+import {
+  RiShoppingBag3Line,
+  RiUser3Line,
+  RiStore2Line,
+  RiMoneyDollarCircleLine,
+  RiArrowRightUpLine,
+  RiArrowRightDownLine,
+  RiAddLine,
+  RiSettings3Line,
+  RiBankCardLine,
+  RiPaypalLine,
+  RiMore2Fill,
+  RiCheckboxCircleFill,
+  RiTimeLine,
+  RiTrophyLine
+} from 'react-icons/ri'
 
 ChartJS.register(
   CategoryScale,
@@ -19,257 +43,490 @@ ChartJS.register(
   Tooltip,
   Legend,
   Filler
-);
+)
 
-function Dashboard({ data }) {
-  const { auth } = usePage().props;
-  const [resolvedColors, setResolvedColors] = useState({});
-  const [recentProducts, setRecentProducts] = useState([]);
+function Dashboard({ data, ecommerce }) {
+  const { auth } = usePage().props
+  const [reportYear, setReportYear] = useState('2026')
+  const [reportTab, setReportTab] = useState('all') // 'all' | 'earnings' | 'expenses'
 
-  useEffect(() => {
-    // Fetch recent products for the dashboard table
-    axios.get('/api/get_posts?type=product&limit=5')
-      .then(res => setRecentProducts(res.data))
-      .catch(err => console.error(err));
-  }, []);
+  // Safe fallbacks from backend
+  const stats = ecommerce?.stats || {
+    sales: { value: '230k', label: 'Sales', change: '+18.2%', color: '#7367f0' },
+    customers: { value: '8.5k', label: 'Customers', change: '+24.5%', color: '#00bad1' },
+    products: { value: '1.4k', label: 'Products', change: '+12.8%', color: '#ff4c51' },
+    revenue: { value: '$97,450', label: 'Revenue', change: '+28.4%', color: '#28c76f' },
+  }
 
-  useEffect(() => {
-    if (typeof document !== 'undefined') {
-      const tempDiv = document.createElement('div');
-      document.body.appendChild(tempDiv);
-      const newColors = {};
-      data?.chart?.forEach((item) => {
-        if (item.color && item.color.includes('var(')) {
-          tempDiv.style.color = item.color;
-          newColors[item.color] = getComputedStyle(tempDiv).color;
+  const revenueReport = ecommerce?.revenue_report || {
+    months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
+    earnings: [18000, 24000, 29000, 22000, 31000, 38000, 34000, 42000, 48000, 52000],
+    expenses: [12000, 15000, 18000, 14000, 21000, 22000, 20000, 24000, 26000, 28000],
+    budget: '$56,800',
+    budget_growth: '+24.8%',
+    deposit: '$25,852'
+  }
+
+  const popularProducts = ecommerce?.popular_products || []
+  const recentOrders = ecommerce?.recent_orders || []
+  const categoriesChart = ecommerce?.categories_chart || {
+    labels: ['Smartphones', 'Laptops', 'Audio', 'Accessories'],
+    series: [45, 28, 18, 9]
+  }
+
+  // ─── Revenue Bar Chart Config ──────────────────────────────
+  const revenueChartData = {
+    labels: revenueReport.months,
+    datasets: [
+      ...(reportTab === 'all' || reportTab === 'earnings' ? [{
+        label: 'Earnings',
+        data: revenueReport.earnings,
+        backgroundColor: '#7367f0',
+        borderRadius: 6,
+        barThickness: 12,
+      }] : []),
+      ...(reportTab === 'all' || reportTab === 'expenses' ? [{
+        label: 'Expenses',
+        data: revenueReport.expenses,
+        backgroundColor: '#00bad1',
+        borderRadius: 6,
+        barThickness: 12,
+      }] : []),
+    ]
+  }
+
+  const revenueChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false
+      },
+      tooltip: {
+        backgroundColor: '#2f3349',
+        titleColor: '#e1def5',
+        bodyColor: '#e1def5',
+        borderColor: '#434968',
+        borderWidth: 1,
+        padding: 10,
+        cornerRadius: 8,
+        callbacks: {
+          label: (context) => ` ${context.dataset.label}: $${context.raw?.toLocaleString()}`
         }
-      });
-      document.body.removeChild(tempDiv);
-      setResolvedColors(newColors);
+      }
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: { color: '#828699', font: { size: 11 } }
+      },
+      y: {
+        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+        ticks: {
+          color: '#828699',
+          font: { size: 11 },
+          callback: (value) => `$${value / 1000}k`
+        }
+      }
     }
-  }, [data]);
+  }
+
+  // ─── Mini Sparkline Chart (Profit) ─────────────────────────
+  const profitSparkline = {
+    labels: ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7'],
+    datasets: [{
+      data: [12, 18, 14, 25, 22, 32, 28],
+      borderColor: '#28c76f',
+      borderWidth: 2.5,
+      tension: 0.45,
+      pointRadius: 0,
+      fill: true,
+      backgroundColor: (context) => {
+        const chart = context.chart
+        const { ctx, chartArea } = chart
+        if (!chartArea) return 'transparent'
+        const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top)
+        gradient.addColorStop(0, 'rgba(40, 199, 111, 0)')
+        gradient.addColorStop(1, 'rgba(40, 199, 111, 0.25)')
+        return gradient
+      }
+    }]
+  }
+
+  const miniChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { enabled: false } },
+    scales: { x: { display: false }, y: { display: false } }
+  }
+
+  // ─── Expenses Mini Sparkline ───────────────────────────────
+  const expensesSparkline = {
+    labels: ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7'],
+    datasets: [{
+      data: [24, 21, 28, 19, 23, 17, 15],
+      borderColor: '#ff9f43',
+      borderWidth: 2.5,
+      tension: 0.45,
+      pointRadius: 0,
+      fill: true,
+      backgroundColor: (context) => {
+        const chart = context.chart
+        const { ctx, chartArea } = chart
+        if (!chartArea) return 'transparent'
+        const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top)
+        gradient.addColorStop(0, 'rgba(255, 159, 67, 0)')
+        gradient.addColorStop(1, 'rgba(255, 159, 67, 0.22)')
+        return gradient
+      }
+    }]
+  }
+
+  // ─── Category Breakdown Doughnut ───────────────────────────
+  const doughnutColors = ['#7367f0', '#28c76f', '#00bad1', '#ff9f43', '#ff4c51']
+  const doughnutData = {
+    labels: categoriesChart.labels,
+    datasets: [{
+      data: categoriesChart.series,
+      backgroundColor: doughnutColors,
+      borderWidth: 0,
+      cutout: '76%'
+    }]
+  }
+
+  const doughnutOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#2f3349',
+        titleColor: '#e1def5',
+        bodyColor: '#e1def5',
+        borderColor: '#434968',
+        borderWidth: 1,
+        padding: 10,
+        cornerRadius: 8
+      }
+    }
+  }
 
   return (
-    <div className='flex flex-col gap-6 pt-3 pb-10'>
-      {/* Welcome Banner & Summary Row */}
-      <div className='grid grid-cols-1 md:grid-cols-12 gap-6'>
-        {/* Vuexy Welcome Card */}
-        <div className='md:col-span-8 bg-accent p-6 rounded-xl relative overflow-hidden shadow-[0_4px_18px_0_rgba(15,20,34,0.36)] border border-permanent/40'>
-          <div className='flex flex-col justify-between h-full max-w-sm relative z-10'>
-            <div className='flex flex-col gap-2 w-full'>
-              <h4 className="text-xl font-bold text-primary tracking-tight mb-0.5">
-                Congratulations {auth.user.name.split(' ')[0]}! 🎉
-              </h4>
-              <p className="text-xs text-res font-medium leading-relaxed">Best seller of the month. You have achieved 72% more sales today. Check your badge in your profile.</p>
-            </div>
-            <div className='mt-6'>
-              <div className='flex items-baseline gap-2 mb-3'>
-                <h2 className='text-3xl font-extrabold text-heading tracking-tight'>$48.9k</h2>
-                <span className='text-xs font-semibold text-green-400 bg-green-500/15 px-2 py-0.5 rounded-full'>+18.2%</span>
-              </div>
-              <button className='bg-primary px-4 py-2 text-white text-xs font-semibold rounded-lg hover:bg-[#685dd8] transition-all shadow-[0_2px_6px_0_rgba(115,103,240,0.48)] cursor-pointer'>
-                View Badges
-              </button>
-            </div>
+    <div className='flex flex-col gap-6 pt-3 pb-12 font-sans'>
+
+      {/* ── ROW 1: Congratulations Card & Statistics ───────── */}
+      <div className='grid grid-cols-1 lg:grid-cols-12 gap-6'>
+
+        {/* Congratulations Card (Vuexy Style) */}
+        <div className='lg:col-span-4 bg-accent p-6 rounded relative overflow-hidden shadow-[0_4px_18px_0_rgba(15,20,34,0.36)] border border-permanent/30 flex flex-col justify-between group'>
+          <div className='relative z-10 flex flex-col gap-2 max-w-[240px]'>
+            <span className='text-[11px] font-bold uppercase tracking-wider text-primary'>eCommerce Champion</span>
+            <h3 className='text-lg font-semibold text-heading tracking-tight leading-snug'>
+              Congratulations {auth?.user?.name ? auth.user.name.split(' ')[0] : 'Admin'}! 🎉
+            </h3>
+            <p className='text-xs text-secondary leading-relaxed'>
+              Best seller of the month. You have achieved <strong className='text-heading font-semibold'>78%</strong> more sales today!
+            </p>
           </div>
-          <div className='absolute -bottom-2 -right-2 w-64 h-48 opacity-20 md:opacity-30 pointer-events-none flex items-end justify-end text-primary'>
-            <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-              <circle cx="150" cy="150" r="100" fill="url(#violetGlow)" />
-              <path d="M120 70L160 110L140 160L90 140Z" fill="currentColor" fillOpacity="0.4" />
-              <circle cx="100" cy="80" r="25" fill="#7367f0" fillOpacity="0.5" />
-              <defs>
-                <radialGradient id="violetGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(150 150) rotate(90) scale(100)">
-                  <stop stopColor="#7367f0" stopOpacity="0.8"/>
-                  <stop offset="1" stopColor="#7367f0" stopOpacity="0"/>
-                </radialGradient>
-              </defs>
-            </svg>
-          </div>
-        </div>
 
-        {/* Vuexy Small Stat Summary Grid */}
-        <div className='md:col-span-4 grid grid-cols-2 gap-4'>
-          {data?.main?.slice(0, 4).map((item, key) => (
-            <div key={key} className='bg-accent p-4 rounded-xl border border-permanent/40 shadow-[0_4px_18px_0_rgba(15,20,34,0.36)] group hover:-translate-y-0.5 transition-all duration-300'>
-              <div className='flex flex-col gap-3'>
-                <div className='size-10 rounded-lg flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform' style={{ backgroundColor: `${item.color || '#7367f0'}20` }}>
-                  <Icon name={item.icon} className='size-5' style={{ color: item.color || '#7367f0', fill: item.color || '#7367f0' }} />
-                </div>
-                <div className='flex flex-col'>
-                  <h3 className='text-lg font-bold text-heading leading-tight'>{item.counts}</h3>
-                  <p className='text-[11px] font-semibold text-secondary truncate uppercase tracking-wider'>{item.title.split(' ')[0]}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Main Charts & Analytics */}
-      <div className='grid grid-cols-10 gap-6'>
-        {data?.chart?.map((item, key) => {
-          const pieColors = {
-            primary: '#7367f0',
-            success: '#28c76f',
-            warning: '#ff9f43',
-            danger: '#ff4c51',
-            info: '#00bad1',
-            secondary: '#7983a7'
-          };
-
-          const actualColor = resolvedColors[item.color] || item.color || pieColors.primary;
-
-          const chartData = {
-            labels: Object.keys(item.counts || {}),
-            datasets: [
-              {
-                label: item.title,
-                data: Object.values(item.counts || {}),
-                borderColor: actualColor,
-                borderWidth: item.chart === 'line' ? 3 : 0,
-                tension: 0.45,
-                fill: item.chart === 'line',
-                pointRadius: 0,
-                pointHoverRadius: 6,
-                pointHoverBackgroundColor: actualColor,
-                pointHoverBorderColor: '#fff',
-                pointHoverBorderWidth: 3,
-                backgroundColor: (context) => {
-                  if (item.chart !== 'line') return item.is_line ? actualColor : [pieColors.primary, pieColors.success, pieColors.info, pieColors.warning];
-                  const chart = context.chart;
-                  const { ctx, chartArea } = chart;
-                  if (!chartArea) return null;
-                  const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-                  gradient.addColorStop(0, 'rgba(115,103,240,0)');
-                  gradient.addColorStop(1, 'rgba(115,103,240,0.18)');
-                  return gradient;
-                },
-                cutout: item.chart === 'pie' ? '75%' : 0,
-              },
-            ],
-          };
-
-          const chartOptions = {
-            maintainAspectRatio: false,
-            responsive: true,
-            plugins: {
-              legend: {
-                display: item.chart === 'pie',
-                position: 'bottom',
-                labels: {
-                  usePointStyle: true,
-                  pointStyle: 'circle',
-                  boxWidth: 8,
-                  padding: 20,
-                  font: { size: 12, weight: '500', family: "'Public Sans', sans-serif" },
-                  color: '#b6bee3'
-                }
-              },
-              tooltip: {
-                backgroundColor: '#2f3349',
-                titleColor: '#d0d4f1',
-                bodyColor: '#d0d4f1',
-                borderColor: '#434968',
-                borderWidth: 1,
-                padding: 10,
-                cornerRadius: 8,
-                displayColors: false
-              }
-            },
-            scales: item.chart === 'line' ? {
-              x: { display: false },
-              y: { display: false, beginAtZero: true }
-            } : {
-              x: { display: false },
-              y: { display: false }
-            }
-          };
-
-          return (
-            <div key={key} className={`bg-accent rounded-xl p-5 border border-permanent/40 shadow-[0_4px_18px_0_rgba(15,20,34,0.36)] flex flex-col gap-4 group`} style={{ gridColumn: `${item.col} span / ${item.col} span` }}>
-              <div className='flex items-center justify-between'>
-                <div className='flex flex-col'>
-                  <h3 className='text-heading text-base font-bold group-hover:text-primary transition-colors'>{item.title}</h3>
-                  <p className='text-xs text-secondary font-medium'>{item.description}</p>
-                </div>
-                {item.chart === 'line' && (
-                  <span className='px-2 py-0.5 rounded-full bg-green-500/15 text-green-400 text-[10px] font-bold'>+12.5%</span>
-                )}
-              </div>
-              <div className="w-full h-48 relative">
-                {item.chart === 'line' ? (
-                  <Line data={chartData} options={chartOptions} />
-                ) : (
-                  <Doughnut data={chartData} options={chartOptions} />
-                )}
-              </div>
-              {item.chart !== 'pie' && (
-                <div className='flex items-center justify-between mt-2 pt-3 border-t border-permanent/30'>
-                  <div className='flex flex-col'>
-                    <span className='text-[10px] text-secondary font-bold uppercase tracking-wider'>Last Period</span>
-                    <span className='text-xs font-bold text-heading'>-2.43%</span>
-                  </div>
-                  <div className='flex flex-col items-end'>
-                    <span className='text-[10px] text-secondary font-bold uppercase tracking-wider'>Engagement</span>
-                    <span className='text-xs font-bold text-heading'>85.4%</span>
-                  </div>
-                </div>
-              )}
-            </div>
-          )
-        })}
-      </div>
-
-      {/* Recent Products & Quick Actions */}
-      <div className='grid grid-cols-1 md:grid-cols-12 gap-6'>
-        
-        {/* Recent Products Table */}
-        <div className='md:col-span-8 bg-accent rounded-xl p-5 border border-permanent/40 shadow-[0_4px_18px_0_rgba(15,20,34,0.36)] flex flex-col'>
-          <div className='flex items-center justify-between mb-4'>
+          <div className='relative z-10 mt-6 pt-4 border-t border-permanent/20 flex items-center justify-between'>
             <div>
-              <h3 className='text-base font-bold text-heading'>Recently Added Products</h3>
-              <p className='text-xs font-medium text-secondary'>Latest products added to your store.</p>
+              <span className='text-2xl font-black text-heading tracking-tight'>{stats.revenue.value}</span>
+              <p className='text-[11px] text-green-400 font-semibold flex items-center gap-0.5 mt-0.5'>
+                <RiArrowRightUpLine size={12} /> {stats.revenue.change} of target
+              </p>
             </div>
-            <Link href={route('post.index', { type: 'product' })} className='text-xs font-bold text-primary hover:underline'>
-              View All
+            <Link
+              href={route('post.index', { type: 'product' })}
+              className='bg-primary hover:bg-[#685dd8] text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-[0_4px_12px_0_rgba(115,103,240,0.4)] hover:shadow-[0_6px_16px_0_rgba(115,103,240,0.5)] cursor-pointer'
+            >
+              View Sales
             </Link>
           </div>
 
-          <div className="overflow-x-auto rounded-lg border border-permanent/30">
-            <table className="w-full text-left text-sm text-res">
-              <thead className="text-[11px] uppercase bg-bg/60 text-secondary font-semibold border-b border-permanent/30">
+          {/* 3D Trophy / Medal Graphic Illustration */}
+          <div className='absolute right-2 top-4 size-13 pointer-events-none select-none opacity-90 group-hover:scale-105 transition-transform duration-500'>
+            <div className='relative w-full h-full flex items-center justify-center'>
+              <div className='absolute inset-0 bg-primary/20 blur-2xl rounded-full' />
+              <div className='size-13 rounded bg-gradient-to-tr from-[#7367f0] to-[#9e95f5] flex items-center justify-center shadow-xl rotate-12 group-hover:rotate-6 transition-transform'>
+                <RiTrophyLine className='size-8 text-white -rotate-12 group-hover:-rotate-6 transition-transform' />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Statistics Card (4 horizontal metrics in Vuexy style) */}
+        <div className='lg:col-span-8 bg-accent p-6 rounded shadow-[0_4px_18px_0_rgba(15,20,34,0.36)] border border-permanent/30 flex flex-col justify-between'>
+          <div className='flex items-center justify-between mb-4'>
+            <div>
+              <h4 className='text-base font-bold text-heading'>Statistics</h4>
+              <p className='text-xs text-secondary'>Updated in real-time • Store performance overview</p>
+            </div>
+            <span className='text-[11px] font-semibold text-secondary bg-bg/60 px-3 py-1 rounded-full border border-permanent/20'>
+              Live Tracking
+            </span>
+          </div>
+
+          <div className='grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2'>
+            {/* 1. Sales */}
+            <div className='flex items-center gap-2.5 p-2 rounded-xl bg-bg/30 border border-permanent/10 hover:border-primary/30 transition-all'>
+              <div className='size-10 rounded-xl bg-[#7367f0]/15 text-[#7367f0] flex items-center justify-center shrink-0 shadow-sm'>
+                <RiShoppingBag3Line size={18} />
+              </div>
+              <div className='flex flex-col'>
+                <h4 className='text-base font-extrabold text-heading leading-tight'>{stats.sales.value}</h4>
+                <span className='text-xs text-secondary font-medium'>{stats.sales.label}</span>
+                <span className='text-[10px] text-green-400 font-bold mt-0.25'>{stats.sales.change}</span>
+              </div>
+            </div>
+
+            {/* 2. Customers */}
+            <div className='flex items-center gap-2.5 p-2 rounded-xl bg-bg/30 border border-permanent/10 hover:border-[#00bad1]/30 transition-all'>
+              <div className='size-10 rounded-xl bg-[#00bad1]/15 text-[#00bad1] flex items-center justify-center shrink-0 shadow-sm'>
+                <RiUser3Line size={18} />
+              </div>
+              <div className='flex flex-col'>
+                <h4 className='text-base font-extrabold text-heading leading-tight'>{stats.customers.value}</h4>
+                <span className='text-xs text-secondary font-medium'>{stats.customers.label}</span>
+                <span className='text-[10px] text-green-400 font-bold mt-0.25'>{stats.customers.change}</span>
+              </div>
+            </div>
+
+            {/* 3. Products */}
+            <div className='flex items-center gap-2.5 p-2 rounded-xl bg-bg/30 border border-permanent/10 hover:border-[#ff4c51]/30 transition-all'>
+              <div className='size-10 rounded-xl bg-[#ff4c51]/15 text-[#ff4c51] flex items-center justify-center shrink-0 shadow-sm'>
+                <RiStore2Line size={18} />
+              </div>
+              <div className='flex flex-col'>
+                <h4 className='text-base font-extrabold text-heading leading-tight'>{stats.products.value}</h4>
+                <span className='text-xs text-secondary font-medium'>{stats.products.label}</span>
+                <span className='text-[10px] text-green-400 font-bold mt-0.25'>{stats.products.change}</span>
+              </div>
+            </div>
+
+            {/* 4. Revenue */}
+            <div className='flex items-center gap-2.5 p-2 rounded-xl bg-bg/30 border border-permanent/10 hover:border-[#28c76f]/30 transition-all'>
+              <div className='size-10 rounded-xl bg-[#28c76f]/15 text-[#28c76f] flex items-center justify-center shrink-0 shadow-sm'>
+                <RiMoneyDollarCircleLine size={18} />
+              </div>
+              <div className='flex flex-col'>
+                <h4 className='text-base font-extrabold text-heading leading-tight'>{stats.revenue.value}</h4>
+                <span className='text-xs text-secondary font-medium'>{stats.revenue.label}</span>
+                <span className='text-[10px] text-green-400 font-bold mt-0.25'>{stats.revenue.change}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── ROW 2: Revenue Report & Profit / Expenses Mini Cards ─ */}
+      <div className='grid grid-cols-1 lg:grid-cols-12 gap-6'>
+
+        {/* Revenue Report (Dual Bar Chart + Right Budget Sidebar) */}
+        <div className='lg:col-span-8 bg-accent p-6 rounded shadow-[0_4px_18px_0_rgba(15,20,34,0.36)] border border-permanent/30 flex flex-col justify-between'>
+          <div className='flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-permanent/20'>
+            <div>
+              <h4 className='text-base font-bold text-heading'>Revenue Report</h4>
+              <p className='text-xs text-secondary'>Monthly earnings versus operational expenses</p>
+            </div>
+
+            <div className='flex items-center gap-3'>
+              <div className='flex items-center gap-1 bg-bg/50 p-1 rounded-xl border border-permanent/20 text-xs font-semibold text-secondary'>
+                <button
+                  onClick={() => setReportTab('all')}
+                  className={`px-3 py-1 rounded-lg transition-all ${reportTab === 'all' ? 'bg-primary text-white shadow-xs' : 'hover:text-heading'}`}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => setReportTab('earnings')}
+                  className={`px-3 py-1 rounded-lg transition-all ${reportTab === 'earnings' ? 'bg-[#7367f0] text-white shadow-xs' : 'hover:text-heading'}`}
+                >
+                  Earning
+                </button>
+                <button
+                  onClick={() => setReportTab('expenses')}
+                  className={`px-3 py-1 rounded-lg transition-all ${reportTab === 'expenses' ? 'bg-[#00bad1] text-white shadow-xs' : 'hover:text-heading'}`}
+                >
+                  Expense
+                </button>
+              </div>
+
+              <select
+                value={reportYear}
+                onChange={(e) => setReportYear(e.target.value)}
+                className='bg-bg/50 border border-permanent/20 text-heading text-xs font-semibold rounded-xl px-3 py-1.5 focus:outline-hidden focus:ring-1 focus:ring-primary'
+              >
+                <option value="2026">2026</option>
+                <option value="2025">2025</option>
+              </select>
+            </div>
+          </div>
+
+          <div className='grid grid-cols-1 md:grid-cols-12 gap-6 pt-5'>
+            {/* Bar Chart */}
+            <div className='md:col-span-8 h-64 relative'>
+              <Bar data={revenueChartData} options={revenueChartOptions} />
+            </div>
+
+            {/* Right Budget Column inside Revenue Report */}
+            <div className='md:col-span-4 flex flex-col justify-between pl-0 md:pl-5 border-t md:border-t-0 md:border-l border-permanent/20 pt-4 md:pt-0'>
+              <div className='flex flex-col gap-4'>
+                <div className='text-center md:text-left'>
+                  <span className='text-xs font-bold uppercase tracking-wider text-secondary'>Budget Status</span>
+                  <div className='flex items-baseline gap-2 mt-1'>
+                    <h3 className='text-2xl font-black text-heading'>{revenueReport.budget}</h3>
+                    <span className='text-xs font-bold text-green-400 bg-green-500/15 px-2 py-0.5 rounded-full'>
+                      {revenueReport.budget_growth}
+                    </span>
+                  </div>
+                  <p className='text-xs text-secondary mt-1'>Budget allocated for marketing & logistics</p>
+                </div>
+
+                {/* Budget Progress Bar */}
+                <div className='flex flex-col gap-1.5'>
+                  <div className='flex justify-between text-xs font-semibold'>
+                    <span className='text-secondary'>Spent Ratio</span>
+                    <span className='text-primary font-bold'>74%</span>
+                  </div>
+                  <div className='w-full bg-bg/60 h-2 rounded-full overflow-hidden border border-permanent/20'>
+                    <div className='bg-primary h-full rounded-full transition-all duration-500' style={{ width: '74%' }} />
+                  </div>
+                </div>
+
+                <div className='p-3.5 rounded-xl bg-bg/40 border border-permanent/10 flex flex-col gap-1'>
+                  <span className='text-[11px] text-secondary font-medium'>Deposit Received</span>
+                  <span className='text-lg font-bold text-heading'>{revenueReport.deposit}</span>
+                </div>
+              </div>
+
+              <Link
+                href={route('post.index', { type: 'product' })}
+                className='w-full text-center mt-4 bg-primary hover:bg-[#685dd8] text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-[0_3px_10px_0_rgba(115,103,240,0.35)]'
+              >
+                Increase Budget
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* 2 Metric Mini Cards Stacked (Total Profit & Expenses) */}
+        <div className='lg:col-span-4 flex flex-col gap-6'>
+
+          {/* Card: Total Profit */}
+          <div className='bg-accent p-5 rounded shadow-[0_4px_18px_0_rgba(15,20,34,0.36)] border border-permanent/30 flex flex-col justify-between h-full'>
+            <div className='flex items-center justify-between mb-2'>
+              <div className='flex flex-col'>
+                <span className='text-xs font-bold uppercase tracking-wider text-secondary'>Profit Margin</span>
+                <div className='flex items-baseline gap-2 mt-1'>
+                  <h3 className='text-2xl font-black text-heading'>$28,450</h3>
+                  <span className='text-xs font-bold text-green-400 bg-green-500/15 px-2 py-0.5 rounded-full flex items-center gap-0.5'>
+                    <RiArrowRightUpLine size={12} /> +42.5%
+                  </span>
+                </div>
+              </div>
+              <div className='size-10 rounded-xl bg-green-500/15 text-green-400 flex items-center justify-center shadow-xs'>
+                <RiMoneyDollarCircleLine size={20} />
+              </div>
+            </div>
+            <div className='h-20 w-full mt-2'>
+              <Line data={profitSparkline} options={miniChartOptions} />
+            </div>
+          </div>
+
+          {/* Card: Total Expenses */}
+          <div className='bg-accent p-5 rounded shadow-[0_4px_18px_0_rgba(15,20,34,0.36)] border border-permanent/30 flex flex-col justify-between h-full'>
+            <div className='flex items-center justify-between mb-2'>
+              <div className='flex flex-col'>
+                <span className='text-xs font-bold uppercase tracking-wider text-secondary'>Total Expenses</span>
+                <div className='flex items-baseline gap-2 mt-1'>
+                  <h3 className='text-2xl font-black text-heading'>$14,240</h3>
+                  <span className='text-xs font-bold text-orange-400 bg-orange-500/15 px-2 py-0.5 rounded-full flex items-center gap-0.5'>
+                    <RiArrowRightDownLine size={12} /> -12.4%
+                  </span>
+                </div>
+              </div>
+              <div className='size-10 rounded-xl bg-orange-500/15 text-orange-400 flex items-center justify-center shadow-xs'>
+                <RiShoppingBag3Line size={20} />
+              </div>
+            </div>
+            <div className='h-20 w-full mt-2'>
+              <Line data={expensesSparkline} options={miniChartOptions} />
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* ── ROW 3: Popular Products & Order Statistics ─────── */}
+      <div className='grid grid-cols-1 lg:grid-cols-12 gap-6'>
+
+        {/* Popular Products Table */}
+        <div className='lg:col-span-8 bg-accent p-6 rounded shadow-[0_4px_18px_0_rgba(15,20,34,0.36)] border border-permanent/30 flex flex-col justify-between'>
+          <div className='flex items-center justify-between mb-4'>
+            <div>
+              <h4 className='text-base font-bold text-heading'>Top Selling Products</h4>
+              <p className='text-xs text-secondary'>Products with the highest customer velocity & inventory status</p>
+            </div>
+            <Link
+              href={route('post.index', { type: 'product' })}
+              className='text-xs font-bold text-primary hover:underline flex items-center gap-1'
+            >
+              View All <RiArrowRightUpLine size={14} />
+            </Link>
+          </div>
+
+          <div className='overflow-x-auto rounded-xl border border-permanent/20'>
+            <table className='w-full text-left text-xs text-res'>
+              <thead className='bg-bg/60 text-secondary uppercase font-semibold text-[10px] tracking-wider border-b border-permanent/20'>
                 <tr>
-                  <th className="px-4 py-3">Product</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3 text-right">Added On</th>
+                  <th className='px-3 py-3.5'>Product</th>
+                  <th className='px-2 py-3.5'>Category</th>
+                  <th className='px-3 py-3.5'>Stock</th>
+                  <th className='px-3 py-3.5'>Price</th>
+                  <th className='px-3 py-3.5 text-right'>Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-permanent/20">
-                {recentProducts.length === 0 ? (
+              <tbody className='divide-y divide-permanent/10 w-full overflow-x-auto'>
+                {popularProducts.length === 0 ? (
                   <tr>
-                    <td colSpan="3" className="px-4 py-8 text-center text-secondary italic text-xs">
-                      No products found. Add some products to see them here!
+                    <td colSpan='5' className='px-4 py-8 text-center text-secondary italic'>
+                      No products found. Start adding products to populate analytics!
                     </td>
                   </tr>
                 ) : (
-                  recentProducts.map((product, idx) => (
-                    <tr key={idx} className="hover:bg-dynamic/40 transition-colors">
-                      <td className="px-4 py-3 font-medium text-heading text-xs">
-                        <div className="flex items-center gap-3">
-                          <div className="size-8 rounded-lg bg-primary/15 flex items-center justify-center shrink-0 text-primary">
-                            <RiStore2Line className="size-4" />
+                  popularProducts.map((prod, idx) => (
+                    <tr key={idx} className='hover:bg-dynamic/40 transition-colors'>
+                      <td className='px-3 py-3 font-semibold text-heading'>
+                        <div className='flex items-center gap-3'>
+                          <div className='size-8 rounded-lg bg-primary/15 text-primary flex items-center justify-center shrink-0 font-bold'>
+                            {prod.title ? prod.title.charAt(0).toUpperCase() : 'P'}
                           </div>
-                          <span className="truncate max-w-[220px] font-semibold">{product.title}</span>
+                          <div className='flex flex-col max-w-[150px] truncate'>
+                            <span className='truncate font-bold text-heading hover:text-primary transition-colors'>
+                              {prod.title}
+                            </span>
+                            <span className='text-[10px] text-secondary font-mono'>{prod.sku || 'NST-ITEM'}</span>
+                          </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3">
-                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase
-                          ${product.status === 'publish' ? 'bg-green-500/15 text-green-400' : 'bg-orange-500/15 text-orange-400'}`}>
-                          {product.status || 'Draft'}
+                      <td className='px-2 py-3 items-center'>
+                        <span className='px-2.5 py-1 flex rounded-full text-[8px] font-semibold bg-bg/80 w-fit text-secondary border text-center items-center justify-center border-permanent/20'>
+                          {prod.category}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right text-xs text-secondary font-medium">
-                        {new Date(product.created_at).toLocaleDateString()}
+                      <td className='px-3 py-3'>
+                        <span className={`px-2 py-1 items-center justify-center rounded-full flex text-[9px] font-semibold ${prod.stock > 0 ? 'bg-green-500/15 text-green-400' : 'bg-red-500/15 text-red-400'}`}>
+                          {prod.stock > 0 ? `${prod.stock} in stock` : 'Out of stock'}
+                        </span>
+                      </td>
+                      <td className='px-3 py-3 font-semibold text-heading'>
+                        ${prod.price ? prod.price.toLocaleString() : '199.00'}
+                      </td>
+                      <td className='px-3 py-3 text-right'>
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${prod.status === 'publish' ? 'bg-green-500/15 text-green-400' : 'bg-orange-500/15 text-orange-400'}`}>
+                          {prod.status}
+                        </span>
                       </td>
                     </tr>
                   ))
@@ -279,53 +536,160 @@ function Dashboard({ data }) {
           </div>
         </div>
 
-        {/* Vuexy Quick Actions Panel */}
-        <div className='md:col-span-4 flex flex-col gap-4'>
-          <div className='bg-accent rounded-xl p-5 border border-permanent/40 shadow-[0_4px_18px_0_rgba(15,20,34,0.36)] h-full'>
-            <h3 className='text-base font-bold text-heading mb-0.5'>Quick Actions</h3>
-            <p className='text-xs font-medium text-secondary mb-4'>Fast access to common admin tasks</p>
-            
+        {/* Order Statistics (Doughnut Chart + Legend Breakdown) */}
+        <div className='lg:col-span-4 bg-accent p-6 rounded shadow-[0_4px_18px_0_rgba(15,20,34,0.36)] border border-permanent/30 flex flex-col justify-between'>
+          <div className='flex items-center justify-between mb-2'>
+            <div>
+              <h4 className='text-base font-bold text-heading'>Order Statistics</h4>
+              <p className='text-xs text-secondary'>Catalog distribution by category</p>
+            </div>
+            <button className='text-secondary hover:text-heading transition-colors'>
+              <RiMore2Fill size={18} />
+            </button>
+          </div>
+
+          {/* Central Cutout Doughnut Chart */}
+          <div className='relative h-56 w-full flex items-center justify-center my-3'>
+            <Doughnut data={doughnutData} options={doughnutOptions} />
+            <div className='absolute flex flex-col items-center pointer-events-none'>
+              <span className='text-2xl font-black text-heading tracking-tight'>{stats.sales.value}</span>
+              <span className='text-[10px] font-bold uppercase tracking-wider text-secondary'>Total Items</span>
+            </div>
+          </div>
+
+          {/* Categories Legend List */}
+          <div className='flex flex-col gap-2.5 pt-3 border-t border-permanent/20'>
+            {categoriesChart.labels.slice(0, 4).map((label, idx) => (
+              <div key={idx} className='flex items-center justify-between text-xs'>
+                <div className='flex items-center gap-2'>
+                  <span className='size-2.5 rounded-full' style={{ backgroundColor: doughnutColors[idx % doughnutColors.length] }} />
+                  <span className='font-semibold text-heading'>{label}</span>
+                </div>
+                <span className='text-secondary font-semibold font-mono'>
+                  {categoriesChart.series[idx]} units
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+      </div>
+
+      {/* ── ROW 4: Recent Transactions & Quick Admin Actions ── */}
+      <div className='grid grid-cols-1 lg:grid-cols-12 gap-6'>
+
+        {/* Recent Transactions List */}
+        <div className='lg:col-span-8 bg-accent p-6 rounded shadow-[0_4px_18px_0_rgba(15,20,34,0.36)] border border-permanent/30 flex flex-col justify-between'>
+          <div className='flex items-center justify-between mb-4'>
+            <div>
+              <h4 className='text-base font-bold text-heading'>Transactions</h4>
+              <p className='text-xs text-secondary'>Latest customer payments and settlement orders</p>
+            </div>
+            <span className='text-xs font-bold text-primary'>Realtime Stream</span>
+          </div>
+
+          <div className='flex flex-col divide-y divide-permanent/10'>
+            {recentOrders.length === 0 ? (
+              <div className='py-8 text-center text-xs text-secondary italic'>
+                No transactions recorded yet.
+              </div>
+            ) : (
+              recentOrders.map((ord, idx) => (
+                <div key={idx} className='py-3.5 flex items-center justify-between first:pt-0 last:pb-0 hover:bg-dynamic/20 px-2 rounded-xl transition-colors'>
+                  <div className='flex items-center gap-3.5'>
+                    <div className={`size-10 rounded-xl flex items-center justify-center shrink-0 ${ord.method?.toLowerCase().includes('paypal') ? 'bg-[#00bad1]/15 text-[#00bad1]' : 'bg-[#7367f0]/15 text-[#7367f0]'}`}>
+                      {ord.method?.toLowerCase().includes('paypal') ? (
+                        <RiPaypalLine size={20} />
+                      ) : (
+                        <RiBankCardLine size={20} />
+                      )}
+                    </div>
+                    <div className='flex flex-col'>
+                      <span className='font-bold text-heading text-xs'>{ord.customer}</span>
+                      <span className='text-[10px] text-secondary'>{ord.method} • {ord.date}</span>
+                    </div>
+                  </div>
+
+                  <div className='flex items-center gap-4'>
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${ord.status === 'completed' || ord.status === 'paid' ? 'bg-green-500/15 text-green-400' : 'bg-orange-500/15 text-orange-400'}`}>
+                      {ord.status}
+                    </span>
+                    <span className='text-sm font-extrabold text-heading font-mono'>
+                      +${ord.amount.toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Quick Admin Actions (Vuexy Shortcuts) */}
+        <div className='lg:col-span-4 bg-accent p-6 rounded shadow-[0_4px_18px_0_rgba(15,20,34,0.36)] border border-permanent/30 flex flex-col justify-between'>
+          <div>
+            <h4 className='text-base font-bold text-heading mb-1'>Quick Actions</h4>
+            <p className='text-xs text-secondary mb-4'>Immediate access to store workflows</p>
+
             <div className='flex flex-col gap-2.5'>
-              <Link href={route('post.create', { type: 'product' })} className='flex items-center gap-3 p-3 rounded-xl bg-bg/40 hover:bg-primary/10 hover:text-primary transition-all border border-permanent/20 hover:border-primary/40 group cursor-pointer'>
-                <div className='p-2 rounded-lg bg-primary/15 text-primary group-hover:scale-110 transition-transform'>
-                  <RiAddLine size={16} />
+              <Link
+                href={route('post.create', { type: 'product' })}
+                className='flex items-center gap-3.5 p-3 rounded-xl bg-bg/40 hover:bg-primary/10 hover:border-primary/40 border border-permanent/20 transition-all group'
+              >
+                <div className='size-9 rounded-lg bg-primary/15 text-primary flex items-center justify-center group-hover:scale-105 transition-transform'>
+                  <RiAddLine size={18} />
                 </div>
                 <div className='flex flex-col'>
                   <span className='text-xs font-bold text-heading group-hover:text-primary transition-colors'>Add New Product</span>
-                  <span className='text-[11px] text-secondary'>Create a new product listing</span>
-                </div>
-              </Link>
-              
-              <Link href={route('users')} className='flex items-center gap-3 p-3 rounded-xl bg-bg/40 hover:bg-blue-500/10 hover:text-blue-400 transition-all border border-permanent/20 hover:border-blue-500/40 group cursor-pointer'>
-                <div className='p-2 rounded-lg bg-blue-500/15 text-blue-400 group-hover:scale-110 transition-transform'>
-                  <RiUser3Line size={16} />
-                </div>
-                <div className='flex flex-col'>
-                  <span className='text-xs font-bold text-heading group-hover:text-blue-400 transition-colors'>Manage Users</span>
-                  <span className='text-[11px] text-secondary'>View and edit customer accounts</span>
+                  <span className='text-[10px] text-secondary'>Create listings with variants and stock</span>
                 </div>
               </Link>
 
-              <Link href={route('admin.setting', { type: 'site' })} className='flex items-center gap-3 p-3 rounded-xl bg-bg/40 hover:bg-orange-500/10 hover:text-orange-400 transition-all border border-permanent/20 hover:border-orange-500/40 group cursor-pointer'>
-                <div className='p-2 rounded-lg bg-orange-500/15 text-orange-400 group-hover:scale-110 transition-transform'>
-                  <RiSettings3Line size={16} />
+              <Link
+                href={route('users')}
+                className='flex items-center gap-3.5 p-3 rounded-xl bg-bg/40 hover:bg-[#00bad1]/10 hover:border-[#00bad1]/40 border border-permanent/20 transition-all group'
+              >
+                <div className='size-9 rounded-lg bg-[#00bad1]/15 text-[#00bad1] flex items-center justify-center group-hover:scale-105 transition-transform'>
+                  <RiUser3Line size={18} />
                 </div>
                 <div className='flex flex-col'>
-                  <span className='text-xs font-bold text-heading group-hover:text-orange-400 transition-colors'>Site Settings</span>
-                  <span className='text-[11px] text-secondary'>Update core configuration</span>
+                  <span className='text-xs font-bold text-heading group-hover:text-[#00bad1] transition-colors'>Manage Customers</span>
+                  <span className='text-[10px] text-secondary'>Inspect users, roles and privileges</span>
+                </div>
+              </Link>
+
+              <Link
+                href={route('admin.setting', { type: 'site' })}
+                className='flex items-center gap-3.5 p-3 rounded-xl bg-bg/40 hover:bg-[#ff9f43]/10 hover:border-[#ff9f43]/40 border border-permanent/20 transition-all group'
+              >
+                <div className='size-9 rounded-lg bg-[#ff9f43]/15 text-[#ff9f43] flex items-center justify-center group-hover:scale-105 transition-transform'>
+                  <RiSettings3Line size={18} />
+                </div>
+                <div className='flex flex-col'>
+                  <span className='text-xs font-bold text-heading group-hover:text-[#ff9f43] transition-colors'>Store Settings</span>
+                  <span className='text-[10px] text-secondary'>Configure payment, taxes and branding</span>
                 </div>
               </Link>
             </div>
           </div>
+
+          <div className='mt-5 pt-4 border-t border-permanent/20 flex items-center justify-between text-xs text-secondary font-medium'>
+            <span className='flex items-center gap-1.5'>
+              <RiCheckboxCircleFill className='text-green-400 size-4' /> All systems operational
+            </span>
+            <span className='text-[11px] font-mono'>v3.1.0</span>
+          </div>
         </div>
+
       </div>
+
     </div>
   )
 }
 
 export default Dashboard
+
 Dashboard.layout = (page) => {
   return (
-    <AdminLayout title="Dashboard">{page}</AdminLayout>
+    <AdminLayout title="eCommerce Dashboard">{page}</AdminLayout>
   )
 }

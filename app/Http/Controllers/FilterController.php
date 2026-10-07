@@ -26,9 +26,11 @@ class FilterController extends Controller
                     $data->get();
 
                 } else {
-                    $data->update([
-                        $column => $action
-                    ]);
+                    $updatePayload = [$column => $action];
+                    if (\Illuminate\Support\Facades\Schema::hasColumn($table, 'updated_at')) {
+                        $updatePayload['updated_at'] = now();
+                    }
+                    $data->update($updatePayload);
                 }
             }
         }

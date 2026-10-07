@@ -7,10 +7,35 @@
             "type": "required|string"
         },
         "schema": [
-            {"name": "name", "type": "string"},
-            {"name": "group", "type": "string", "nullable": true},
-            {"name": "type", "type": "string", "default": "text"},
-            {"name": "options", "type": "json", "nullable": true}
+            {
+                "name": "name",
+                "type": "string"
+            },
+            {
+                "name": "group",
+                "type": "string",
+                "nullable": true
+            },
+            {
+                "name": "type",
+                "type": "string",
+                "default": "text"
+            },
+            {
+                "name": "options",
+                "type": "json",
+                "nullable": true
+            },
+            {
+                "name": "created_at",
+                "type": "timestamp",
+                "nullable": true
+            },
+            {
+                "name": "updated_at",
+                "type": "timestamp",
+                "nullable": true
+            }
         ],
         "main_fields": [
             "name",

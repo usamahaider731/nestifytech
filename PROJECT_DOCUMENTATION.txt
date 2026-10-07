@@ -1,0 +1,297 @@
+NESTIFYTECH PROJECT DOCUMENTATION
+================================
+
+1. PROJECT OVERVIEW
+-------------------
+NestifyTech is a Laravel 12 ecommerce and content-management application built for managing a configurable storefront, catalog, taxonomies, media, reviews, orders, and admin workflows. The application combines a Laravel backend with an Inertia + React frontend, Vite asset pipeline, and a dynamic module-driven admin system.
+
+The project is designed around a modular architecture in which admin sections such as users, roles, posts, categories, attributes, reviews, settings, and layouts are managed through reusable controller, schema, and form-driven patterns.
+
+2. TECHNOLOGY STACK
+-------------------
+Backend:
+- PHP 8.2+
+- Laravel 12
+- Laravel Sanctum
+- Intervention Image
+- Stripe PHP SDK
+- PHPUnit
+- Laravel Pint
+
+Frontend:
+- Inertia.js 2
+- React 18
+- Vite 6
+- Tailwind CSS 4
+- Redux Toolkit
+- FullCalendar
+- Chart.js
+- Embla Carousel
+- React Quill
+- React Icons
+- React Toastify
+- Motion
+
+Database:
+- MySQL (primary target)
+
+3. APPLICATION PURPOSE
+----------------------
+NestifyTech supports:
+- Storefront browsing and search
+- Product and content catalog management
+- Category, brand, and tag taxonomies
+- Product variation handling
+- Reviews and rating data
+- Cart and checkout flows
+- Order processing
+- Access-controlled admin panel
+- Theme and layout configuration
+- Dynamic JSON-backed configuration
+- Media management and image resizing
+
+4. MAIN ARCHITECTURE
+--------------------
+The project follows a standard Laravel application layout with custom module logic layered on top.
+
+Core directories:
+- app/                - Application code and domain logic
+- app/Console/        - Artisan commands
+- app/Http/Controllers/ - Web, API, admin, and storefront controllers
+- app/Http/Middleware/  - Auth and permission middleware
+- app/Models/         - Eloquent models
+- app/Services/       - Business logic and import services
+- app/Support/        - Shared helper utilities
+- app/Traits/         - Reusable module handling traits
+- config/             - Laravel configuration files
+- database/migrations/ - Database schema definitions
+- database/seeders/    - Seeders for application data
+- public/             - Public assets, uploaded media, storage links
+- resources/js/       - React/Inertia frontend pages and components
+- resources/views/    - Blade views for shell rendering
+- routes/             - route registration for web and API entry points
+- storage/app/data/  - Runtime JSON configuration and app-managed data
+- tests/              - PHPUnit tests
+
+5. DYNAMIC MODULE SYSTEM
+------------------------
+One of the core ideas in this project is a generic module system driven by module configuration and schema metadata.
+
+Main behavior:
+- Admin routes route through ModuleController
+- Each module type is resolved from a config file/schema
+- CRUD actions are handled generically for many entities
+- Frontend forms and fields are generated from data-driven definitions
+- Content types are often defined by names such as user, role, category, post, attribute, reviews, and others
+
+This makes the system highly extensible without requiring a separate controller for each content type.
+
+6. ROUTING OVERVIEW
+-------------------
+Routes are declared in:
+- routes/web.php
+- routes/auth.php
+- routes/api.php
+
+Public routes:
+- /                           - storefront home
+- /checkout                  - checkout page
+- /compare                   - compare page
+- /view/specific/classification/{type}/{id}/{slug}
+- /view/post/{type}/{sku}/{id}
+- /search/keywords           - keyword search
+- /api/color-themes         - public color themes
+- /search-pages.json        - searchable page metadata
+
+Admin routes:
+- /admin                     - dashboard
+- /admin/setting/{type}      - settings editor
+- /admin/module/{type}       - generic module management
+- /admin/post/{type}         - post management
+- /admin/taxonomy/{type}     - taxonomy management
+- /admin/layout              - layout/menu configuration
+- /admin/language            - language management
+- /admin/builder             - admin builder / schema management
+- /admin/import-export       - import/export tools
+
+API routes (prefixed with /api):
+- /taxonomy-options/{type}
+- /menu-options
+- /menu-locations
+- /roles-options
+- /attribute-options
+- /header-setting
+- /footer-setting
+- /get_menu
+- /language
+- /language/{lang}
+- /get_taxonomies
+- /get_posts
+- /setting
+- /reviews/product/{postId}
+- /reviews
+- /cart/stock
+- /cart/order
+
+7. KEY BUSINESS FEATURES
+------------------------
+Storefront features:
+- Product and content presentation
+- Category and taxonomy-based filtering
+- Search and keyword lookup
+- Brand and collection-based views
+- Theme color support
+- Language switching
+- Cart and checkout experience
+
+Admin features:
+- Dashboard and charts
+- User and role management
+- Post and product creation/editing
+- Category/brand/tag management
+- Attribute and variation management
+- Reviews moderation
+- Media uploads and thumbs
+- Internal layout and menu configuration
+- Translation management
+- Site setting management
+- AI-assisted field generation support where enabled
+
+Commerce features:
+- Product review retrieval and creation
+- Cart stock checks
+- Order placement
+- Stripe payment intent creation and attachment
+- Order cancellation support
+
+8. CONFIGURATION AND DATA MODEL
+--------------------------------
+The application uses both the database and JSON configuration files.
+
+Environment configuration:
+- .env and .env.example define core Laravel environment variables
+- Database credentials, app URL, queue, and mail settings belong here
+- Secret values and local environment settings must not be committed
+
+Runtime JSON configuration:
+Stored under storage/app/data/ and used by the schema-driven app.
+Common files include:
+- setting.json
+- layout.json
+- sidebar-menu.json
+- dashboard.json
+- form.json
+- search_pages.json
+- lang/
+- schema/
+
+These files are important application data and should be backed up alongside the database.
+
+9. DATABASE AND MIGRATIONS
+--------------------------
+Database schema is managed through Laravel migrations in database/migrations/.
+
+Typical workflow:
+- Create or edit a migration
+- Run php artisan migrate
+- Check status with php artisan migrate:status
+
+Local reset workflow:
+- php artisan migrate:fresh --seed
+
+This is destructive and should only be used on local disposable databases.
+
+10. INSTALLATION AND LOCAL SETUP
+---------------------------------
+Requirements:
+- PHP 8.2+
+- Composer
+- Node.js and npm
+- MySQL or compatible database
+- XAMPP or similar local stack is acceptable for Windows environments
+
+Installation steps:
+1. Open a terminal in the project root.
+2. Run:
+   composer install
+   npm install
+3. Copy .env.example to .env if it is not already present.
+4. Generate the app key:
+   php artisan key:generate
+5. Create the database referenced in .env.
+6. Run migrations:
+   php artisan migrate
+7. Link storage:
+   php artisan storage:link
+
+Local development server:
+- composer run dev
+
+This starts the Laravel app, queue listener, and Vite dev server together.
+
+Alternatively:
+- php artisan serve
+- php artisan queue:listen --tries=1
+- npm run dev
+
+11. BUILD AND TESTING
+---------------------
+Run tests:
+- composer test
+- php artisan test
+
+Run a single test file:
+- php artisan test tests/Feature/ExampleTest.php
+
+PHP formatting:
+- vendor/bin/pint
+
+Build frontend assets:
+- npm run build
+
+12. DEPLOYMENT CHECKLIST
+------------------------
+Production deployment should include:
+1. PHP 8.2+, Composer, Node.js, MySQL, and queue worker setup
+2. Correct .env values for APP_ENV, APP_DEBUG, APP_URL, database, and mail settings
+3. composer install --no-dev --optimize-autoloader
+4. npm ci
+5. npm run build
+6. php artisan migrate --force
+7. php artisan storage:link
+8. php artisan config:cache
+9. php artisan route:cache
+10. php artisan view:cache
+11. php artisan queue:work --tries=3
+12. Regular backups of database, storage/app/data, and uploads
+
+13. SECURITY AND MAINTENANCE
+---------------------------
+- Do not commit secrets from .env
+- Protect admin routes with permission-based middleware
+- Keep frontend visibility and server-side authorization aligned
+- Validate all input and handle permission checks on the server side
+- Back up JSON configuration and media before moving data between environments
+
+14. TROUBLESHOOTING
+-------------------
+Common issues:
+- Missing .env values or app key
+- Incorrect database credentials or missing created database
+- Vite or frontend build issues from stale Node dependencies
+- Missing storage link for uploaded media
+- Permission errors in admin routes
+- Queue worker not running for background operations
+
+Useful commands:
+- php artisan route:list
+- php artisan config:clear
+- php artisan cache:clear
+- php artisan migrate:status
+- php artisan storage:link
+
+15. SUMMARY
+-----------
+NestifyTech is a flexible Laravel-based ecommerce and catalog platform with a dynamic module system, Inertia React frontend, and a powerful admin experience. It is built to support configurable storefronts, content-driven product management, multilingual operations, and catalog commerce with media and layout customization.
+
+This project is best understood as a modular content and commerce system rather than a static one-page application. Its structure allows administrators to define and manage a broad variety of content models without creating separate app code for every module.

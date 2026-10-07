@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\HandleInertiaRequests::class,
             \App\Http\Middleware\UpdateUserLastSeen::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
+            \App\Http\Middleware\LogUserActivity::class,
         ]);
         $middleware->statefulApi();
         $middleware->validateCsrfTokens(except: [

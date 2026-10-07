@@ -138,9 +138,12 @@ function catalog_price_bounds(): array
 
 function hydrate_posts($result, array $args, bool $attachCategory, bool $attachBrand, bool $attachTags, bool $attachAddress)
 {
-    $result->each(function ($item) {
+    $result->each(function ($item) use ($args) {
         if ($item->relationLoaded('meta')) {
             $item->setRelation('meta', $item->meta->keyBy('key'));
+        }
+        if (!empty($args['price'])) {
+            $item->append('price');
         }
     });
 
@@ -332,14 +335,16 @@ function get_posts(array $args = [])
         $monthEnd   = now()->endOfMonth()->toDateTimeString();
 
         $subSql = "SELECT product_id, COALESCE(SUM(quantity), 0) as total_sold"
-                . " FROM order_items"
-                . " WHERE created_at BETWEEN '{$monthStart}' AND '{$monthEnd}'"
-                . " GROUP BY product_id";
+            . " FROM order_items"
+            . " WHERE created_at BETWEEN '{$monthStart}' AND '{$monthEnd}'"
+            . " GROUP BY product_id";
 
         $posts->leftJoin(
-                \Illuminate\Support\Facades\DB::raw("({$subSql}) as oi_agg"),
-                'posts.id', '=', 'oi_agg.product_id'
-            )
+            \Illuminate\Support\Facades\DB::raw("({$subSql}) as oi_agg"),
+            'posts.id',
+            '=',
+            'oi_agg.product_id'
+        )
             ->select('posts.*', \Illuminate\Support\Facades\DB::raw('COALESCE(oi_agg.total_sold, 0) as total_sold'))
             ->orderByDesc('total_sold');
     } elseif (!empty($args['popular']) || array_key_exists('views', $args)) {
@@ -405,7 +410,9 @@ function get_posts(array $args = [])
             });
         });
     }
-
+    if (! empty($args['price'])) {
+        // Price is a method on the model, not a relation. We don't need to eager load it.
+    }
     $sort = $args['sort'] ?? null;
     if ($sort === 'price_asc') {
         $posts->select('posts.*')->orderByRaw("{$priceSql} asc");
@@ -443,7 +450,6 @@ function get_posts(array $args = [])
     if (! empty($args['meta']) || $attachCategory || $attachBrand || $attachTags || $attachAddress) {
         $posts->with('meta');
     }
-
     if (! empty($args['paginate'])) {
         $perPage = (int) ($args['per_page'] ?? $args['limit'] ?? 20);
         $paginator = $posts->paginate($perPage)->withQueryString();

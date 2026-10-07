@@ -1,0 +1,173 @@
+# NestifyTech Project Documentation
+
+## Overview
+NestifyTech is a Laravel 12 ecommerce and content-management application for managing a configurable storefront, catalog, taxonomies, media, reviews, orders, and admin workflows. It combines a Laravel backend, an Inertia + React frontend, Vite asset pipeline, and a flexible module-driven admin system.
+
+## Stack
+### Backend
+- PHP 8.2+
+- Laravel 12
+- Sanctum
+- Intervention Image
+- Stripe PHP SDK
+- PHPUnit
+- Laravel Pint
+
+### Frontend
+- Inertia.js 2
+- React 18
+- Vite 6
+- Tailwind CSS 4
+- Redux Toolkit
+- FullCalendar
+- Chart.js
+- Embla Carousel
+- React Quill
+- React Icons
+- React Toastify
+- Motion
+
+### Database
+- MySQL
+
+## Architecture
+The project follows a standard Laravel application layout with custom module logic layered on top.
+
+- app/ - application code and business logic
+- app/Console/ - artisan commands
+- app/Http/Controllers/ - storefront, admin, and API controllers
+- app/Http/Middleware/ - auth and permission middleware
+- app/Models/ - Eloquent models
+- app/Services/ - services and importers
+- app/Support/ - helper utilities
+- app/Traits/ - reusable module behavior
+- config/ - Laravel config files
+- database/migrations/ - schema changes
+- database/seeders/ - seed data
+- public/ - public media and assets
+- resources/js/ - frontend pages and components
+- resources/views/ - Blade shell rendering
+- routes/ - web and API routes
+- storage/app/data/ - JSON-based app configuration
+- tests/ - PHPUnit tests
+
+## Dynamic Module System
+The admin experience is built around a modular controller and schema-driven pattern:
+
+- ModuleController handles generic module CRUD flows
+- Module types are resolved by configuration schema
+- Form definitions and tables are generated from module metadata
+- Admin features are highly reusable across many content types
+
+This allows the project to support dynamic management of users, roles, products, taxonomies, attributes, reviews, and settings without a separate controller for every entity.
+
+## Routes
+### Public
+- / - storefront home
+- /checkout - checkout
+- /compare - comparison page
+- /view/post/{type}/{sku}/{id} - product detail
+- /search/keywords - search
+
+### Admin
+- /admin - dashboard
+- /admin/setting/{type} - settings
+- /admin/module/{type} - generic module management
+- /admin/post/{type} - post management
+- /admin/taxonomy/{type} - taxonomy management
+- /admin/layout - layout and menu configuration
+- /admin/language - translation management
+- /admin/builder - admin builder
+- /admin/import-export - import/export tools
+
+### API
+All API routes are under /api and include:
+- /taxonomy-options/{type}
+- /menu-options
+- /menu-locations
+- /roles-options
+- /attribute-options
+- /header-setting
+- /footer-setting
+- /get_menu
+- /language
+- /language/{lang}
+- /get_taxonomies
+- /get_posts
+- /setting
+- /reviews/product/{postId}
+- /reviews
+- /cart/stock
+- /cart/order
+
+## Configuration Data
+The application stores app-specific configuration in JSON under storage/app/data/.
+
+Common files include:
+- setting.json
+- layout.json
+- sidebar-menu.json
+- dashboard.json
+- form.json
+- search_pages.json
+- lang/
+- schema/
+
+These files should be backed up along with the database.
+
+## Setup
+### Requirements
+- PHP 8.2+
+- Composer
+- Node.js and npm
+- MySQL or compatible database
+
+### Installation
+```bash
+composer install
+npm install
+copy .env.example .env
+php artisan key:generate
+php artisan migrate
+php artisan storage:link
+```
+
+### Local run
+```bash
+composer run dev
+```
+
+Or run separately:
+```bash
+php artisan serve
+php artisan queue:listen --tries=1
+npm run dev
+```
+
+## Testing and Quality
+```bash
+composer test
+php artisan test
+vendor/bin/pint
+npm run build
+```
+
+## Deployment Checklist
+1. Prepare PHP 8.2+, Composer, Node.js, MySQL, and a queue worker.
+2. Set correct values in .env for APP_ENV, APP_DEBUG, APP_URL, DB credentials, and mail configuration.
+3. Install production dependencies.
+4. Build frontend assets.
+5. Run migrations.
+6. Create a storage link.
+7. Cache config and routes.
+8. Run queue worker.
+9. Back up database and uploaded media.
+
+## Maintenance Tips
+- Never commit secrets from .env.
+- Use server-side permission checks for admin routes.
+- Backup JSON configuration and uploads before environment changes.
+- Use php artisan route:list to inspect current routes.
+
+## Summary
+NestifyTech is a modular Laravel ecommerce and content platform designed to support storefront browsing, catalog management, multilingual operations, media handling, dashboard administration, and commerce workflows. It is one of the more configurable Laravel applications in the workspace, centered on form-driven admin functionality and dynamic data management.

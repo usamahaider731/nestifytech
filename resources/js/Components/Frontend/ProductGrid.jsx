@@ -55,69 +55,62 @@ export default function ProductGrid({
     useEffect(() => {
         if (!displayProducts.length) return;
         let ctx = gsap.context(() => {
-            if (!titleRef.current) {
-                return;
-            }
-            const chars = titleRef.current.querySelectorAll('.char');
-            gsap.from(chars, {
-                yPercent: "random(-200, 200)",
-                rotation: "random(-20, 20)",
-                opacity: 0,
-                stagger: 0.02,
-                ease: "back.out(1.2)",
-                scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: "top 75%",
-                    end: "top 20%",
-                    scrub: 1
-                }
-            });
-
-            // Text effect for description
-            if (!textRef.current) {
-                return;
-            }
-            gsap.fromTo(textRef.current,
-                { opacity: 0.4, filter: "blur(3px)", x: -20 },
-                {
+            if (titleRef.current) {
+                const chars = titleRef.current.querySelectorAll('.char');
+                gsap.from(chars, {
+                    yPercent: "random(-200, 200)",
+                    rotation: "random(-20, 20)",
+                    opacity: 0,
+                    stagger: 0.02,
+                    ease: "back.out(1.2)",
                     scrollTrigger: {
                         trigger: sectionRef.current,
-                        start: "top 90%",
-                        scrub: 1,
-                        toggleActions: "play reverse play reverse",
+                        start: "top 75%",
+                        end: "top 20%",
+                        scrub: 1
+                    }
+                });
+            }
+
+            // Text effect for description
+            if (textRef.current) {
+                gsap.fromTo(textRef.current,
+                    { opacity: 0.4, filter: "blur(3px)", x: -20 },
+                    {
+                        scrollTrigger: {
+                            trigger: sectionRef.current,
+                            start: "top 110%",
+                            scrub: 1,
+                            toggleActions: "play reverse play reverse",
+                        },
+                        opacity: 1,
+                        filter: "blur(0px)",
+                        x: 0,
+                        duration: .2,
+                        ease: "power2.out"
+                    }
+                );
+            }
+
+            // Animate cards staggering
+            gsap.fromTo('.product-card-gsap-wrapper', 
+                { y: 40, opacity: 0 },
+                {
+                    scrollTrigger: {
+                        trigger: gridRef.current,
+                        start: "top 85%",
+                        toggleActions: "play none none none"
                     },
+                    y: 0,
                     opacity: 1,
-                    filter: "blur(0px)",
-                    x: 0,
-                    duration: .3,
+                    duration: 0.7,
+                    stagger: 0.1,
                     ease: "power2.out"
                 }
             );
-
-            // Animate cards staggering
-
-
-
-
         }, sectionRef);
 
-        let ctx2 = gsap.context(() => {
-            gsap.from('.product-card-gsap-wrapper', {
-                scrollTrigger: {
-                    trigger: gridRef.current,
-                    start: "top 85%",
-                    toggleActions: "play reverse play reverse",
-                },
-                y: 50,
-                opacity: 0,
-                duration: 0.6,
-                stagger: 0.1,
-                ease: "power3.out",
-                clearProps: "all"
-            });
-        }, gridRef);
-
-        return () => ctx.revert() && ctx2.revert();
+        return () => ctx.revert();
     }, [displayProducts]);
     const renderSplitText = (text) => {
         return text.split(' ').map((word, wordIndex) => (
@@ -131,11 +124,11 @@ export default function ProductGrid({
         ));
     };
     return (
-        <section id={id} ref={sectionRef} className={`${compact ? 'py-2' : 'py-16 md:py-24'} ${className}`}>
+        <section id={id} ref={sectionRef} className={`${compact ? 'py-2' : 'py-16'} ${className}`}>
             {showHeader && (
-            <div className="mb-10 flex flex-col gap-5 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between md:mb-12">
+            <div className="mb-10 flex flex-col gap-5 border-b border-border pb-4 sm:flex-row sm:items-end sm:justify-between md:mb-12">
                 <div className="max-w-2xl">
-                    <h2 className={titleClass} ref={titleRef}>{(__(translatedTitle))}</h2>
+                    <h2 className={titleClass} ref={titleRef}>{renderSplitText(__(translatedTitle))}</h2>
                     {translatedSubtitle && (
                         <p ref={textRef} className="mt-4 text-sm leading-relaxed text-res md:text-base">
                             {__(translatedSubtitle)}

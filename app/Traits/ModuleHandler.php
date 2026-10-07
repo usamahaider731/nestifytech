@@ -261,6 +261,13 @@ trait ModuleHandler
                     $val = json_encode($val);
                 }
             }
+            if (Schema::hasColumn($tableName, 'updated_at')) {
+                $data['updated_at'] = now();
+            }
+            if (!$isEdit && Schema::hasColumn($tableName, 'created_at') && !isset($data['created_at'])) {
+                $data['created_at'] = now();
+            }
+
             if ($isEdit) {
                 DB::table($tableName)->where('id', $id)->update($data);
 

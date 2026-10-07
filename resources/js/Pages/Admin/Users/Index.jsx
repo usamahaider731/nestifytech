@@ -64,9 +64,9 @@ function Index({ users, userStats, table }) {
               <span className='text-2xl mt-2 font-medium font-primary'>{card.count}</span>
 
               {/* </div> */}
-              <div className='flex w-full justify-between'>
+              <div className='flex w-full flex-col'>
                 <span className='text-secondary mt-1 font-primary text-sm font-medium'>{card.title}</span>
-
+                {card.note && <span className='text-xs text-res mt-0.5'>{card.note}</span>}
               </div>
             </div>
 
