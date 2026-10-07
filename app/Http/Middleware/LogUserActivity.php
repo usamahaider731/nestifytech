@@ -17,8 +17,8 @@ class LogUserActivity
     {
         $path = $request->path();
 
-        // 1. Ignore assets, debugbar, and system files
-        if ($request->is('build/*', 'assets/*', '_debugbar/*', 'storage/*') || preg_match('/\.(css|js|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/i', $path)) {
+        // 1. Ignore assets, debugbar, images, colors, and static files
+        if ($request->is('build/*', 'assets/*', '_debugbar/*', 'storage/*', 'image/*', '*.min.css', 'colors.min.css', 'backend-colors.min.css', 'search-pages.json') || preg_match('/\.(css|js|png|jpg|jpeg|gif|svg|ico|webp|woff|woff2|ttf|eot)$/i', $path)) {
             return $next($request);
         }
 

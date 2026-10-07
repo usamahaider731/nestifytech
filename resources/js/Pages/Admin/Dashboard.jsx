@@ -1,6 +1,6 @@
 import AdminLayout from '@/Layouts/AdminLayout'
 import React, { useState } from 'react'
-import { Link, usePage } from '@inertiajs/react'
+import { Link, usePage, router } from '@inertiajs/react'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -47,34 +47,38 @@ ChartJS.register(
 
 function Dashboard({ data, ecommerce }) {
   const { auth } = usePage().props
-  const [reportYear, setReportYear] = useState('2026')
+  const availableYears = ecommerce?.available_years
+  const [reportYear, setReportYear] = useState(ecommerce?.selected_year?.toString() || '2026')
   const [reportTab, setReportTab] = useState('all') // 'all' | 'earnings' | 'expenses'
-
-  // Safe fallbacks from backend
-  const stats = ecommerce?.stats || {
-    sales: { value: '230k', label: 'Sales', change: '+18.2%', color: '#7367f0' },
-    customers: { value: '8.5k', label: 'Customers', change: '+24.5%', color: '#00bad1' },
-    products: { value: '1.4k', label: 'Products', change: '+12.8%', color: '#ff4c51' },
-    revenue: { value: '$97,450', label: 'Revenue', change: '+28.4%', color: '#28c76f' },
+  const handleYearChange = (year) => {
+    setReportYear(year)
+    router.get(route('admin.dashboard'), { year }, { preserveState: true, preserveScroll: true, replace: true })
   }
-
+  const stats = ecommerce?.stats || {
+    sales: { value: '0', label: 'Sales', change: '+0.0%', is_positive: true, color: '#7367f0' },
+    customers: { value: '0', label: 'Customers', change: '+0.0%', is_positive: true, color: '#00bad1' },
+    products: { value: '0', label: 'Products', change: '+0.0%', is_positive: true, color: '#ff4c51' },
+    revenue: { value: '$0', label: 'Revenue', change: '+0.0%', is_positive: true, color: '#28c76f' },
+  }
+  const congratulations = ecommerce?.congratulations || {}
+  const profitSummary = ecommerce?.profit_summary || {}
   const revenueReport = ecommerce?.revenue_report || {
-    months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
-    earnings: [18000, 24000, 29000, 22000, 31000, 38000, 34000, 42000, 48000, 52000],
-    expenses: [12000, 15000, 18000, 14000, 21000, 22000, 20000, 24000, 26000, 28000],
-    budget: '$56,800',
-    budget_growth: '+24.8%',
-    deposit: '$25,852'
+    months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    earnings: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    expenses: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    budget: '$50,000',
+    budget_growth: '+0.0%',
+    spent_ratio: '0%',
+    deposit: '$0'
   }
 
   const popularProducts = ecommerce?.popular_products || []
   const recentOrders = ecommerce?.recent_orders || []
   const categoriesChart = ecommerce?.categories_chart || {
     labels: ['Smartphones', 'Laptops', 'Audio', 'Accessories'],
-    series: [45, 28, 18, 9]
+    series: [45, 28, 18, 9],
+    total_units: 100
   }
-
-  // ─── Revenue Bar Chart Config ──────────────────────────────
   const revenueChartData = {
     labels: revenueReport.months,
     datasets: [
@@ -94,7 +98,6 @@ function Dashboard({ data, ecommerce }) {
       }] : []),
     ]
   }
-
   const revenueChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -130,12 +133,10 @@ function Dashboard({ data, ecommerce }) {
       }
     }
   }
-
-  // ─── Mini Sparkline Chart (Profit) ─────────────────────────
   const profitSparkline = {
-    labels: ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7'],
+    labels: profitSummary.profit_sparkline?.labels || ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
     datasets: [{
-      data: [12, 18, 14, 25, 22, 32, 28],
+      data: profitSummary.profit_sparkline?.data || [0, 0, 0, 0, 0, 0, 0],
       borderColor: '#28c76f',
       borderWidth: 2.5,
       tension: 0.45,
@@ -152,19 +153,16 @@ function Dashboard({ data, ecommerce }) {
       }
     }]
   }
-
   const miniChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: { legend: { display: false }, tooltip: { enabled: false } },
     scales: { x: { display: false }, y: { display: false } }
   }
-
-  // ─── Expenses Mini Sparkline ───────────────────────────────
   const expensesSparkline = {
-    labels: ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7'],
+    labels: profitSummary.expenses_sparkline?.labels || ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
     datasets: [{
-      data: [24, 21, 28, 19, 23, 17, 15],
+      data: profitSummary.expenses_sparkline?.data || [0, 0, 0, 0, 0, 0, 0],
       borderColor: '#ff9f43',
       borderWidth: 2.5,
       tension: 0.45,
@@ -181,8 +179,6 @@ function Dashboard({ data, ecommerce }) {
       }
     }]
   }
-
-  // ─── Category Breakdown Doughnut ───────────────────────────
   const doughnutColors = ['#7367f0', '#28c76f', '#00bad1', '#ff9f43', '#ff4c51']
   const doughnutData = {
     labels: categoriesChart.labels,
@@ -193,7 +189,6 @@ function Dashboard({ data, ecommerce }) {
       cutout: '76%'
     }]
   }
-
   const doughnutOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -210,14 +205,9 @@ function Dashboard({ data, ecommerce }) {
       }
     }
   }
-
   return (
     <div className='flex flex-col gap-6 pt-3 pb-12 font-sans'>
-
-      {/* ── ROW 1: Congratulations Card & Statistics ───────── */}
       <div className='grid grid-cols-1 lg:grid-cols-12 gap-6'>
-
-        {/* Congratulations Card (Vuexy Style) */}
         <div className='lg:col-span-4 bg-accent p-6 rounded relative overflow-hidden shadow-[0_4px_18px_0_rgba(15,20,34,0.36)] border border-permanent/30 flex flex-col justify-between group'>
           <div className='relative z-10 flex flex-col gap-2 max-w-[240px]'>
             <span className='text-[11px] font-bold uppercase tracking-wider text-primary'>eCommerce Champion</span>
@@ -225,15 +215,15 @@ function Dashboard({ data, ecommerce }) {
               Congratulations {auth?.user?.name ? auth.user.name.split(' ')[0] : 'Admin'}! 🎉
             </h3>
             <p className='text-xs text-secondary leading-relaxed'>
-              Best seller of the month. You have achieved <strong className='text-heading font-semibold'>78%</strong> more sales today!
+              {congratulations.message || `Store performance is trending up! You achieved ${stats.revenue.change} revenue growth this month.`}
             </p>
           </div>
-
           <div className='relative z-10 mt-6 pt-4 border-t border-permanent/20 flex items-center justify-between'>
             <div>
               <span className='text-2xl font-black text-heading tracking-tight'>{stats.revenue.value}</span>
-              <p className='text-[11px] text-green-400 font-semibold flex items-center gap-0.5 mt-0.5'>
-                <RiArrowRightUpLine size={12} /> {stats.revenue.change} of target
+              <p className={`text-[11px] font-semibold flex items-center gap-0.5 mt-0.5 ${stats.revenue.is_positive !== false ? 'text-green-400' : 'text-red-400'}`}>
+                {stats.revenue.is_positive !== false ? <RiArrowRightUpLine size={12} /> : <RiArrowRightDownLine size={12} />}
+                {congratulations.achievement_percentage || stats.revenue.change} of target
               </p>
             </div>
             <Link
@@ -243,8 +233,6 @@ function Dashboard({ data, ecommerce }) {
               View Sales
             </Link>
           </div>
-
-          {/* 3D Trophy / Medal Graphic Illustration */}
           <div className='absolute right-2 top-4 size-13 pointer-events-none select-none opacity-90 group-hover:scale-105 transition-transform duration-500'>
             <div className='relative w-full h-full flex items-center justify-center'>
               <div className='absolute inset-0 bg-primary/20 blur-2xl rounded-full' />
@@ -254,8 +242,6 @@ function Dashboard({ data, ecommerce }) {
             </div>
           </div>
         </div>
-
-        {/* Statistics Card (4 horizontal metrics in Vuexy style) */}
         <div className='lg:col-span-8 bg-accent p-6 rounded shadow-[0_4px_18px_0_rgba(15,20,34,0.36)] border border-permanent/30 flex flex-col justify-between'>
           <div className='flex items-center justify-between mb-4'>
             <div>
@@ -266,9 +252,7 @@ function Dashboard({ data, ecommerce }) {
               Live Tracking
             </span>
           </div>
-
           <div className='grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2'>
-            {/* 1. Sales */}
             <div className='flex items-center gap-2.5 p-2 rounded-xl bg-bg/30 border border-permanent/10 hover:border-primary/30 transition-all'>
               <div className='size-10 rounded-xl bg-[#7367f0]/15 text-[#7367f0] flex items-center justify-center shrink-0 shadow-sm'>
                 <RiShoppingBag3Line size={18} />
@@ -276,11 +260,12 @@ function Dashboard({ data, ecommerce }) {
               <div className='flex flex-col'>
                 <h4 className='text-base font-extrabold text-heading leading-tight'>{stats.sales.value}</h4>
                 <span className='text-xs text-secondary font-medium'>{stats.sales.label}</span>
-                <span className='text-[10px] text-green-400 font-bold mt-0.25'>{stats.sales.change}</span>
+                <span className={`text-[10px] font-bold mt-0.25 flex items-center gap-0.5 ${stats.sales.is_positive !== false ? 'text-green-400' : 'text-red-400'}`}>
+                  {stats.sales.is_positive !== false ? <RiArrowRightUpLine size={10} /> : <RiArrowRightDownLine size={10} />}
+                  {stats.sales.change}
+                </span>
               </div>
             </div>
-
-            {/* 2. Customers */}
             <div className='flex items-center gap-2.5 p-2 rounded-xl bg-bg/30 border border-permanent/10 hover:border-[#00bad1]/30 transition-all'>
               <div className='size-10 rounded-xl bg-[#00bad1]/15 text-[#00bad1] flex items-center justify-center shrink-0 shadow-sm'>
                 <RiUser3Line size={18} />
@@ -288,11 +273,12 @@ function Dashboard({ data, ecommerce }) {
               <div className='flex flex-col'>
                 <h4 className='text-base font-extrabold text-heading leading-tight'>{stats.customers.value}</h4>
                 <span className='text-xs text-secondary font-medium'>{stats.customers.label}</span>
-                <span className='text-[10px] text-green-400 font-bold mt-0.25'>{stats.customers.change}</span>
+                <span className={`text-[10px] font-bold mt-0.25 flex items-center gap-0.5 ${stats.customers.is_positive !== false ? 'text-green-400' : 'text-red-400'}`}>
+                  {stats.customers.is_positive !== false ? <RiArrowRightUpLine size={10} /> : <RiArrowRightDownLine size={10} />}
+                  {stats.customers.change}
+                </span>
               </div>
             </div>
-
-            {/* 3. Products */}
             <div className='flex items-center gap-2.5 p-2 rounded-xl bg-bg/30 border border-permanent/10 hover:border-[#ff4c51]/30 transition-all'>
               <div className='size-10 rounded-xl bg-[#ff4c51]/15 text-[#ff4c51] flex items-center justify-center shrink-0 shadow-sm'>
                 <RiStore2Line size={18} />
@@ -300,11 +286,12 @@ function Dashboard({ data, ecommerce }) {
               <div className='flex flex-col'>
                 <h4 className='text-base font-extrabold text-heading leading-tight'>{stats.products.value}</h4>
                 <span className='text-xs text-secondary font-medium'>{stats.products.label}</span>
-                <span className='text-[10px] text-green-400 font-bold mt-0.25'>{stats.products.change}</span>
+                <span className={`text-[10px] font-bold mt-0.25 flex items-center gap-0.5 ${stats.products.is_positive !== false ? 'text-green-400' : 'text-red-400'}`}>
+                  {stats.products.is_positive !== false ? <RiArrowRightUpLine size={10} /> : <RiArrowRightDownLine size={10} />}
+                  {stats.products.change}
+                </span>
               </div>
             </div>
-
-            {/* 4. Revenue */}
             <div className='flex items-center gap-2.5 p-2 rounded-xl bg-bg/30 border border-permanent/10 hover:border-[#28c76f]/30 transition-all'>
               <div className='size-10 rounded-xl bg-[#28c76f]/15 text-[#28c76f] flex items-center justify-center shrink-0 shadow-sm'>
                 <RiMoneyDollarCircleLine size={18} />
@@ -312,17 +299,16 @@ function Dashboard({ data, ecommerce }) {
               <div className='flex flex-col'>
                 <h4 className='text-base font-extrabold text-heading leading-tight'>{stats.revenue.value}</h4>
                 <span className='text-xs text-secondary font-medium'>{stats.revenue.label}</span>
-                <span className='text-[10px] text-green-400 font-bold mt-0.25'>{stats.revenue.change}</span>
+                <span className={`text-[10px] font-bold mt-0.25 flex items-center gap-0.5 ${stats.revenue.is_positive !== false ? 'text-green-400' : 'text-red-400'}`}>
+                  {stats.revenue.is_positive !== false ? <RiArrowRightUpLine size={10} /> : <RiArrowRightDownLine size={10} />}
+                  {stats.revenue.change}
+                </span>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* ── ROW 2: Revenue Report & Profit / Expenses Mini Cards ─ */}
       <div className='grid grid-cols-1 lg:grid-cols-12 gap-6'>
-
-        {/* Revenue Report (Dual Bar Chart + Right Budget Sidebar) */}
         <div className='lg:col-span-8 bg-accent p-6 rounded shadow-[0_4px_18px_0_rgba(15,20,34,0.36)] border border-permanent/30 flex flex-col justify-between'>
           <div className='flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-permanent/20'>
             <div>
@@ -354,22 +340,19 @@ function Dashboard({ data, ecommerce }) {
 
               <select
                 value={reportYear}
-                onChange={(e) => setReportYear(e.target.value)}
-                className='bg-bg/50 border border-permanent/20 text-heading text-xs font-semibold rounded-xl px-3 py-1.5 focus:outline-hidden focus:ring-1 focus:ring-primary'
+                onChange={(e) => handleYearChange(e.target.value)}
+                className='bg-bg/50 border border-permanent/20 text-heading text-xs font-semibold rounded-xl px-3 py-1.5 focus:outline-hidden focus:ring-1 focus:ring-primary cursor-pointer'
               >
-                <option value="2026">2026</option>
-                <option value="2025">2025</option>
+                {availableYears.map((yr) => (
+                  <option key={yr} value={yr}>{yr}</option>
+                ))}
               </select>
             </div>
           </div>
-
           <div className='grid grid-cols-1 md:grid-cols-12 gap-6 pt-5'>
-            {/* Bar Chart */}
             <div className='md:col-span-8 h-64 relative'>
               <Bar data={revenueChartData} options={revenueChartOptions} />
             </div>
-
-            {/* Right Budget Column inside Revenue Report */}
             <div className='md:col-span-4 flex flex-col justify-between pl-0 md:pl-5 border-t md:border-t-0 md:border-l border-permanent/20 pt-4 md:pt-0'>
               <div className='flex flex-col gap-4'>
                 <div className='text-center md:text-left'>
@@ -382,24 +365,23 @@ function Dashboard({ data, ecommerce }) {
                   </div>
                   <p className='text-xs text-secondary mt-1'>Budget allocated for marketing & logistics</p>
                 </div>
-
-                {/* Budget Progress Bar */}
                 <div className='flex flex-col gap-1.5'>
                   <div className='flex justify-between text-xs font-semibold'>
                     <span className='text-secondary'>Spent Ratio</span>
-                    <span className='text-primary font-bold'>74%</span>
+                    <span className='text-primary font-bold'>{revenueReport.spent_ratio || '0%'}</span>
                   </div>
                   <div className='w-full bg-bg/60 h-2 rounded-full overflow-hidden border border-permanent/20'>
-                    <div className='bg-primary h-full rounded-full transition-all duration-500' style={{ width: '74%' }} />
+                    <div
+                      className='bg-primary h-full rounded-full transition-all duration-500'
+                      style={{ width: revenueReport.spent_ratio || '0%' }}
+                    />
                   </div>
                 </div>
-
                 <div className='p-3.5 rounded-xl bg-bg/40 border border-permanent/10 flex flex-col gap-1'>
                   <span className='text-[11px] text-secondary font-medium'>Deposit Received</span>
                   <span className='text-lg font-bold text-heading'>{revenueReport.deposit}</span>
                 </div>
               </div>
-
               <Link
                 href={route('post.index', { type: 'product' })}
                 className='w-full text-center mt-4 bg-primary hover:bg-[#685dd8] text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-[0_3px_10px_0_rgba(115,103,240,0.35)]'
@@ -409,19 +391,16 @@ function Dashboard({ data, ecommerce }) {
             </div>
           </div>
         </div>
-
-        {/* 2 Metric Mini Cards Stacked (Total Profit & Expenses) */}
         <div className='lg:col-span-4 flex flex-col gap-6'>
-
-          {/* Card: Total Profit */}
           <div className='bg-accent p-5 rounded shadow-[0_4px_18px_0_rgba(15,20,34,0.36)] border border-permanent/30 flex flex-col justify-between h-full'>
             <div className='flex items-center justify-between mb-2'>
               <div className='flex flex-col'>
                 <span className='text-xs font-bold uppercase tracking-wider text-secondary'>Profit Margin</span>
                 <div className='flex items-baseline gap-2 mt-1'>
-                  <h3 className='text-2xl font-black text-heading'>$28,450</h3>
-                  <span className='text-xs font-bold text-green-400 bg-green-500/15 px-2 py-0.5 rounded-full flex items-center gap-0.5'>
-                    <RiArrowRightUpLine size={12} /> +42.5%
+                  <h3 className='text-2xl font-black text-heading'>{profitSummary.total_profit || '$0'}</h3>
+                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5 ${profitSummary.profit_is_positive !== false ? 'text-green-400 bg-green-500/15' : 'text-red-400 bg-red-500/15'}`}>
+                    {profitSummary.profit_is_positive !== false ? <RiArrowRightUpLine size={12} /> : <RiArrowRightDownLine size={12} />}
+                    {profitSummary.profit_change || '+0.0%'}
                   </span>
                 </div>
               </div>
@@ -433,16 +412,15 @@ function Dashboard({ data, ecommerce }) {
               <Line data={profitSparkline} options={miniChartOptions} />
             </div>
           </div>
-
-          {/* Card: Total Expenses */}
           <div className='bg-accent p-5 rounded shadow-[0_4px_18px_0_rgba(15,20,34,0.36)] border border-permanent/30 flex flex-col justify-between h-full'>
             <div className='flex items-center justify-between mb-2'>
               <div className='flex flex-col'>
                 <span className='text-xs font-bold uppercase tracking-wider text-secondary'>Total Expenses</span>
                 <div className='flex items-baseline gap-2 mt-1'>
-                  <h3 className='text-2xl font-black text-heading'>$14,240</h3>
-                  <span className='text-xs font-bold text-orange-400 bg-orange-500/15 px-2 py-0.5 rounded-full flex items-center gap-0.5'>
-                    <RiArrowRightDownLine size={12} /> -12.4%
+                  <h3 className='text-2xl font-black text-heading'>{profitSummary.total_expenses || '$0'}</h3>
+                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5 ${profitSummary.expenses_is_positive ? 'text-orange-400 bg-orange-500/15' : 'text-green-400 bg-green-500/15'}`}>
+                    {profitSummary.expenses_is_positive ? <RiArrowRightUpLine size={12} /> : <RiArrowRightDownLine size={12} />}
+                    {profitSummary.expenses_change || '+0.0%'}
                   </span>
                 </div>
               </div>
@@ -454,14 +432,9 @@ function Dashboard({ data, ecommerce }) {
               <Line data={expensesSparkline} options={miniChartOptions} />
             </div>
           </div>
-
         </div>
       </div>
-
-      {/* ── ROW 3: Popular Products & Order Statistics ─────── */}
       <div className='grid grid-cols-1 lg:grid-cols-12 gap-6'>
-
-        {/* Popular Products Table */}
         <div className='lg:col-span-8 bg-accent p-6 rounded shadow-[0_4px_18px_0_rgba(15,20,34,0.36)] border border-permanent/30 flex flex-col justify-between'>
           <div className='flex items-center justify-between mb-4'>
             <div>
@@ -475,7 +448,6 @@ function Dashboard({ data, ecommerce }) {
               View All <RiArrowRightUpLine size={14} />
             </Link>
           </div>
-
           <div className='overflow-x-auto rounded-xl border border-permanent/20'>
             <table className='w-full text-left text-xs text-res'>
               <thead className='bg-bg/60 text-secondary uppercase font-semibold text-[10px] tracking-wider border-b border-permanent/20'>
@@ -499,14 +471,25 @@ function Dashboard({ data, ecommerce }) {
                     <tr key={idx} className='hover:bg-dynamic/40 transition-colors'>
                       <td className='px-3 py-3 font-semibold text-heading'>
                         <div className='flex items-center gap-3'>
-                          <div className='size-8 rounded-lg bg-primary/15 text-primary flex items-center justify-center shrink-0 font-bold'>
-                            {prod.title ? prod.title.charAt(0).toUpperCase() : 'P'}
-                          </div>
+                          {prod.image ? (
+                            <img src={prod.image} alt={prod.title} className='size-8 rounded-lg object-cover shrink-0' />
+                          ) : (
+                            <div className='size-8 rounded-lg bg-primary/15 text-primary flex items-center justify-center shrink-0 font-bold'>
+                              {prod.title ? prod.title.charAt(0).toUpperCase() : 'P'}
+                            </div>
+                          )}
                           <div className='flex flex-col max-w-[150px] truncate'>
                             <span className='truncate font-bold text-heading hover:text-primary transition-colors'>
                               {prod.title}
                             </span>
-                            <span className='text-[10px] text-secondary font-mono'>{prod.sku || 'NST-ITEM'}</span>
+                            <div className='flex items-center gap-1.5'>
+                              <span className='text-[10px] text-secondary font-mono'>{prod.sku || 'NST-ITEM'}</span>
+                              {prod.sales_count > 0 && (
+                                <span className='text-[9px] font-bold text-primary bg-primary/10 px-1 rounded'>
+                                  {prod.sales_count} sold
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </td>
@@ -521,7 +504,7 @@ function Dashboard({ data, ecommerce }) {
                         </span>
                       </td>
                       <td className='px-3 py-3 font-semibold text-heading'>
-                        ${prod.price ? prod.price.toLocaleString() : '199.00'}
+                        ${prod.price ? prod.price.toLocaleString() : '0.00'}
                       </td>
                       <td className='px-3 py-3 text-right'>
                         <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${prod.status === 'publish' ? 'bg-green-500/15 text-green-400' : 'bg-orange-500/15 text-orange-400'}`}>
@@ -552,14 +535,14 @@ function Dashboard({ data, ecommerce }) {
           <div className='relative h-56 w-full flex items-center justify-center my-3'>
             <Doughnut data={doughnutData} options={doughnutOptions} />
             <div className='absolute flex flex-col items-center pointer-events-none'>
-              <span className='text-2xl font-black text-heading tracking-tight'>{stats.sales.value}</span>
-              <span className='text-[10px] font-bold uppercase tracking-wider text-secondary'>Total Items</span>
+              <span className='text-2xl font-black text-heading tracking-tight'>{categoriesChart.total_units || stats.sales.value}</span>
+              <span className='text-[10px] font-bold uppercase tracking-wider text-secondary'>Total Units</span>
             </div>
           </div>
 
           {/* Categories Legend List */}
           <div className='flex flex-col gap-2.5 pt-3 border-t border-permanent/20'>
-            {categoriesChart.labels.slice(0, 4).map((label, idx) => (
+            {categoriesChart.labels.slice(0, 5).map((label, idx) => (
               <div key={idx} className='flex items-center justify-between text-xs'>
                 <div className='flex items-center gap-2'>
                   <span className='size-2.5 rounded-full' style={{ backgroundColor: doughnutColors[idx % doughnutColors.length] }} />
