@@ -47,6 +47,7 @@ ChartJS.register(
 
 function Dashboard({ data, ecommerce }) {
   const { auth } = usePage().props
+  const currency = ecommerce?.currency || 'PKR'
   const availableYears = ecommerce?.available_years
   const [reportYear, setReportYear] = useState(ecommerce?.selected_year?.toString() || '2026')
   const [reportTab, setReportTab] = useState('all') // 'all' | 'earnings' | 'expenses'
@@ -58,7 +59,7 @@ function Dashboard({ data, ecommerce }) {
     sales: { value: '0', label: 'Sales', change: '+0.0%', is_positive: true, color: '#7367f0' },
     customers: { value: '0', label: 'Customers', change: '+0.0%', is_positive: true, color: '#00bad1' },
     products: { value: '0', label: 'Products', change: '+0.0%', is_positive: true, color: '#ff4c51' },
-    revenue: { value: '$0', label: 'Revenue', change: '+0.0%', is_positive: true, color: '#28c76f' },
+    revenue: { value: 'PKR 0', label: 'Revenue', change: '+0.0%', is_positive: true, color: '#28c76f' },
   }
   const congratulations = ecommerce?.congratulations || {}
   const profitSummary = ecommerce?.profit_summary || {}
@@ -66,10 +67,10 @@ function Dashboard({ data, ecommerce }) {
     months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
     earnings: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     expenses: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    budget: '$50,000',
+    budget: 'PKR 50,000',
     budget_growth: '+0.0%',
     spent_ratio: '0%',
-    deposit: '$0'
+    deposit: 'PKR 0'
   }
 
   const popularProducts = ecommerce?.popular_products || []
@@ -114,7 +115,7 @@ function Dashboard({ data, ecommerce }) {
         padding: 10,
         cornerRadius: 8,
         callbacks: {
-          label: (context) => ` ${context.dataset.label}: $${context.raw?.toLocaleString()}`
+          label: (context) => ` ${context.dataset.label}: ${currency} ${context.raw?.toLocaleString()}`
         }
       }
     },
@@ -128,7 +129,7 @@ function Dashboard({ data, ecommerce }) {
         ticks: {
           color: '#828699',
           font: { size: 11 },
-          callback: (value) => `$${value / 1000}k`
+          callback: (value) => `${currency} ${value >= 1000 ? `${value / 1000}k` : value}`
         }
       }
     }
@@ -397,7 +398,7 @@ function Dashboard({ data, ecommerce }) {
               <div className='flex flex-col'>
                 <span className='text-xs font-bold uppercase tracking-wider text-secondary'>Profit Margin</span>
                 <div className='flex items-baseline gap-2 mt-1'>
-                  <h3 className='text-2xl font-black text-heading'>{profitSummary.total_profit || '$0'}</h3>
+                  <h3 className='text-2xl font-black text-heading'>{profitSummary.total_profit || `${currency} 0`}</h3>
                   <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5 ${profitSummary.profit_is_positive !== false ? 'text-green-400 bg-green-500/15' : 'text-red-400 bg-red-500/15'}`}>
                     {profitSummary.profit_is_positive !== false ? <RiArrowRightUpLine size={12} /> : <RiArrowRightDownLine size={12} />}
                     {profitSummary.profit_change || '+0.0%'}
@@ -417,7 +418,7 @@ function Dashboard({ data, ecommerce }) {
               <div className='flex flex-col'>
                 <span className='text-xs font-bold uppercase tracking-wider text-secondary'>Total Expenses</span>
                 <div className='flex items-baseline gap-2 mt-1'>
-                  <h3 className='text-2xl font-black text-heading'>{profitSummary.total_expenses || '$0'}</h3>
+                  <h3 className='text-2xl font-black text-heading'>{profitSummary.total_expenses || `${currency} 0`}</h3>
                   <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5 ${profitSummary.expenses_is_positive ? 'text-orange-400 bg-orange-500/15' : 'text-green-400 bg-green-500/15'}`}>
                     {profitSummary.expenses_is_positive ? <RiArrowRightUpLine size={12} /> : <RiArrowRightDownLine size={12} />}
                     {profitSummary.expenses_change || '+0.0%'}
@@ -452,11 +453,11 @@ function Dashboard({ data, ecommerce }) {
             <table className='w-full text-left text-xs text-res'>
               <thead className='bg-bg/60 text-secondary uppercase font-semibold text-[10px] tracking-wider border-b border-permanent/20'>
                 <tr>
-                  <th className='px-3 py-3.5'>Product</th>
-                  <th className='px-2 py-3.5'>Category</th>
-                  <th className='px-3 py-3.5'>Stock</th>
-                  <th className='px-3 py-3.5'>Price</th>
-                  <th className='px-3 py-3.5 text-right'>Status</th>
+                  <th className='px-2.5 py-3.5'>Product</th>
+                  <th className='px-2.5 py-3.5'>Category</th>
+                  <th className='px-2.5 py-3.5'>Stock</th>
+                  <th className='px-2.5 py-3.5'>Price</th>
+                  <th className='px-2.5 py-3.5 text-right'>Status</th>
                 </tr>
               </thead>
               <tbody className='divide-y divide-permanent/10 w-full overflow-x-auto'>
@@ -469,7 +470,7 @@ function Dashboard({ data, ecommerce }) {
                 ) : (
                   popularProducts.map((prod, idx) => (
                     <tr key={idx} className='hover:bg-dynamic/40 transition-colors'>
-                      <td className='px-3 py-3 font-semibold text-heading'>
+                      <td className='px-2.5 py-3 font-semibold text-heading'>
                         <div className='flex items-center gap-3'>
                           {prod.image ? (
                             <img src={prod.image} alt={prod.title} className='size-8 rounded-lg object-cover shrink-0' />
@@ -493,20 +494,20 @@ function Dashboard({ data, ecommerce }) {
                           </div>
                         </div>
                       </td>
-                      <td className='px-2 py-3 items-center'>
+                      <td className='px-2.5 py-3 items-center'>
                         <span className='px-2.5 py-1 flex rounded-full text-[8px] font-semibold bg-bg/80 w-fit text-secondary border text-center items-center justify-center border-permanent/20'>
                           {prod.category}
                         </span>
                       </td>
-                      <td className='px-3 py-3'>
+                      <td className='px-2.5 py-3'>
                         <span className={`px-2 py-1 items-center justify-center rounded-full flex text-[9px] font-semibold ${prod.stock > 0 ? 'bg-green-500/15 text-green-400' : 'bg-red-500/15 text-red-400'}`}>
                           {prod.stock > 0 ? `${prod.stock} in stock` : 'Out of stock'}
                         </span>
                       </td>
-                      <td className='px-3 py-3 font-semibold text-heading'>
-                        ${prod.price ? prod.price.toLocaleString() : '0.00'}
+                      <td className='px-2.5 py-3 font-semibold text-heading'>
+                        {currency} {prod.price ? prod.price.toLocaleString() : '0.00'}
                       </td>
-                      <td className='px-3 py-3 text-right'>
+                      <td className='px-2.5 py-3 text-right'>
                         <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${prod.status === 'publish' ? 'bg-green-500/15 text-green-400' : 'bg-orange-500/15 text-orange-400'}`}>
                           {prod.status}
                         </span>
@@ -598,7 +599,7 @@ function Dashboard({ data, ecommerce }) {
                       {ord.status}
                     </span>
                     <span className='text-sm font-extrabold text-heading font-mono'>
-                      +${ord.amount.toLocaleString()}
+                      +{currency} {ord.amount.toLocaleString()}
                     </span>
                   </div>
                 </div>

@@ -180,6 +180,7 @@ class LayoutController extends Controller
                     } else {
                         $oldValue = $field['value'] ?? null;
                         if ($oldValue) {
+                            dd($field);
                             $oldFiles = is_array($oldValue) ? $oldValue : [$oldValue];
                             foreach ($oldFiles as $oldFile) {
                                 if (is_string($oldFile) && File::exists(public_path('storage/uploads/image/' . $oldFile))) {

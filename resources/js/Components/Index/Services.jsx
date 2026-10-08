@@ -94,12 +94,6 @@ const Services = () => {
                                     <div className="mt-auto w-full flex flex-col items-center">
                                         <h3 className="text-xl font-bold font-poppins text-white mb-2">{service.title}</h3>
                                         <p className="text-sm text-gray-300 mb-6 leading-relaxed opacity-90">{service.description}</p>
-                                        <div className="overflow-hidden">
-                                            <Link className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/10 hover:bg-primary border border-white/20 hover:border-primary text-white text-sm font-medium transition-all duration-300 backdrop-blur-sm opacity-0 group-hover:opacity-100 translate-y-8 group-hover:translate-y-0">
-                                                {__('Learn More')}
-                                                <RiArrowRightSLine className="text-lg" />
-                                            </Link>
-                                        </div>
                                     </div>
                                 </div>
                                 <div className='relative z-11 flex flex-col items-center justify-center p-6 h-full translate-x-full transition-transform duration-500 group-hover:-translate-x-0'>

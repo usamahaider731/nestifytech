@@ -216,7 +216,7 @@ class PostTaxonomy extends Model
         return $rftl;
     }
 
-    public function getPriceAttribute()
+    public function getTotalPriceAttribute()
     {
         $variations = $this->variations;
         $meta = $this->meta;
@@ -224,7 +224,7 @@ class PostTaxonomy extends Model
             if (empty($meta)) return 0.0;
             else {
                 foreach ($meta as  $value) {
-                    if($value->key === 'first_price'){
+                    if ($value->key === 'first_price') {
                         return $value->value;
                     }
                 }
@@ -246,5 +246,61 @@ class PostTaxonomy extends Model
         }
 
         return $grandTotal;
+    }
+    public function getPriceAttribute()
+    {
+        $variations = $this->variations;
+        $meta = $this->meta;
+        if (!empty($meta)) {
+            foreach ($meta as  $value) {
+                if ($value->key === 'first_price') {
+                    $first_price = $value->value;
+                }
+                if ($value->key == "second_price") {
+                    $second_price = $value->value;
+                }
+            }
+            if (isset($first_price) && $first_price > $second_price) {
+                return $second_price;
+            }
+            return $first_price;
+        } else {
+
+            foreach ($variations as $parent) {
+                if (isset($parent->combinations) && is_array($parent->combinations)) {
+                    $price = isset($parent->combinations[0]['price']) ? (float) $parent->combinations[0]['price'] : 0.0;
+                    return $price;
+                }
+            }
+        }
+    }
+    public function getStockAttribute()
+    {
+        $variations = $this->variations;
+        $meta = $this->meta;
+        if (empty($variations)) {
+            if (empty($meta)) return 0;
+            else {
+                foreach ($meta as  $value) {
+                    if ($value->key === 'stock') {
+                        return $value->value;
+                    }
+                }
+                return 0;
+            }
+        }
+
+        $grandStock = 0;
+
+        foreach ($variations as $parent) {
+            if (isset($parent->combinations) && is_array($parent->combinations)) {
+                foreach ($parent->combinations as $child) {
+                    $stock = isset($child['stock']) ? (int) $child['stock'] : 0;
+                    $grandStock += ( $stock);
+                }
+            }
+        }
+
+        return $grandStock;
     }
 }

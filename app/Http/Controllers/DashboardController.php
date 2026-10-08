@@ -3,17 +3,24 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use File;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
   protected $file;
+  protected $currency;
   protected $data;
   public function __construct()
   {
     parent::__construct();
+    $setting_file = $this->json_file_location . '/setting.json';
+    $this->currency = 'USD';
+    if (File::exists($setting_file)) {
+      $setting = json_decode(File::get($setting_file), true);
+      $this->currency = $setting['site']['currency']['value'];
+    }
     $this->file = $this->json_file_location . '/dashboard.json';
     if (File::exists($this->file)) {
       $this->data = json_decode(File::get($this->file), true);
@@ -274,7 +281,7 @@ class DashboardController extends Controller
         'color' => '#ff4c51'
       ],
       'revenue' => [
-        'value' => '$' . number_format($totalRevenue, 0),
+        'value' => 'PKR ' . number_format($totalRevenue, 0),
         'label' => 'Revenue',
         'change' => $revenueGrowth['text'],
         'is_positive' => $revenueGrowth['is_positive'],
@@ -358,13 +365,12 @@ class DashboardController extends Controller
 
     $popularProducts = $sortedProducts->map(function ($p) use ($metas, $salesAgg) {
       $pMeta = $metas->get($p->id, collect());
-      $price = $pMeta->where('key', 'first_price')->first()?->value ??
-        $pMeta->where('key', 'price')->first()?->value ?? '0';
-      $stock = $pMeta->where('key', 'stock')->first()?->value ?? '10';
+      
+      $price =  $p->price;
+      $stock = $p->stock;
       $catId = $pMeta->where('key', 'category')->first()?->value;
       $image = $pMeta->where('key', 'thumbnail')->first()?->value ??
         $pMeta->where('key', 'image')->first()?->value ?? null;
-
       $catName = 'General';
       if ($catId) {
         $decoded = json_decode($catId, true);
@@ -379,7 +385,7 @@ class DashboardController extends Controller
         'title' => $p->title,
         'sku' => $p->sku,
         'category' => $catName,
-        'price' => (float) $price,
+        'price' => $price,
         'stock' => is_numeric($stock) ? (int) $stock : 10,
         'sales_count' => (int) ($salesAgg[$p->id] ?? 0),
         'status' => $p->status ?? 'publish',
@@ -468,6 +474,7 @@ class DashboardController extends Controller
 
     // ─── Final Ecommerce Dashboard Payload ─────────────────────────
     $ecommerce = [
+      'currency' => $this->currency ?? 'PKR',
       'selected_year' => $selectedYear,
       'available_years' => $availableYears,
       'stats' => $stats,
@@ -476,16 +483,16 @@ class DashboardController extends Controller
         'months' => $reportMonths,
         'earnings' => $reportEarnings,
         'expenses' => $reportExpenses,
-        'budget' => '$' . number_format($yearlyBudget, 0),
+        'budget' => 'PKR ' . number_format($yearlyBudget, 0),
         'budget_growth' => $revenueGrowth['text'],
         'spent_ratio' => $spentRatio . '%',
-        'deposit' => '$' . number_format($depositReceived, 0)
+        'deposit' => 'PKR ' . number_format($depositReceived, 0)
       ],
       'profit_summary' => [
-        'total_profit' => '$' . number_format($totalProfit, 0),
+        'total_profit' => 'PKR ' . number_format($totalProfit, 0),
         'profit_change' => $profitGrowth['text'],
         'profit_is_positive' => $profitGrowth['is_positive'],
-        'total_expenses' => '$' . number_format($totalYearlyExpenses, 0),
+        'total_expenses' => 'PKR ' . number_format($totalYearlyExpenses, 0),
         'expenses_change' => $expensesGrowth['text'],
         'expenses_is_positive' => $expensesGrowth['is_positive'],
         'profit_sparkline' => [

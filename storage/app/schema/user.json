@@ -38,7 +38,10 @@
         ],
         "main_fields": [
             "name",
-            "email"
+            "email",
+            "roles",
+            "password",
+            "active"
         ],
         "meta_fields": "auto",
         "fixed_fields": {},

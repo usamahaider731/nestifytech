@@ -90,7 +90,15 @@ function Header() {
                                 <Dropdown.Content align='right' width='60' className='mt-2' contentClasses='!border !border-permanent/40 shadow-2xl overflow-hidden rounded-xl bg-accent p-0 w-60'>
                                     <div className='px-4 py-3.5 border-b border-permanent/30 bg-dynamic/30'>
                                         <div className='flex items-center gap-3'>
-                                            <ImageViwer image={auth.user.user_avater} className='size-10 rounded-full bg-primary/10 border border-primary/20 object-cover' />
+                                            {
+                                                auth?.user?.user_avater && auth?.user?.user_avater?.filename && auth?.user?.user_avater?.filename.trim() !== '' ? (
+                                                    <ImageViwer image={auth?.user?.user_avater} className='size-10 rounded-full bg-primary/10 border border-primary/20 object-cover' />
+                                                ) : (
+                                                    <div className='size-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center'>
+                                                        <span className='text-primary text-lg font-bold'>{auth?.user?.name.charAt(0).toUpperCase()}</span>
+                                                    </div>
+                                                )
+                                            }
                                             <div className='flex flex-col min-w-0'>
                                                 <span className='text-heading text-sm font-bold truncate leading-snug'>{auth.user.name}</span>
                                                 <span className='inline-block text-[10px] font-semibold text-primary bg-primary/15 px-2 py-0.5 rounded-full uppercase tracking-wider mt-0.5 w-max'>

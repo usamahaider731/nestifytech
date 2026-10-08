@@ -245,7 +245,7 @@ class ModuleController extends Controller
 
     private function getAdditionalTableData($type, $result)
     {
-        if ($type === 'user') {
+        if ($type === 'users') {
             $totalUsers        = DB::table('users')->count();
             $activeUsers       = DB::table('users')->where('active', 1)->count();
             $inactiveUsers     = $totalUsers - $activeUsers;

@@ -258,7 +258,7 @@ trait ModuleHandler
             // Automatically JSON encode arrays for longText/json storage
             foreach ($data as $key => $val) {
                 if (is_array($val)) {
-                    $val = json_encode($val);
+                    $data[$key] = json_encode($val);
                 }
             }
             if (Schema::hasColumn($tableName, 'updated_at')) {

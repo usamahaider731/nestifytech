@@ -96,8 +96,10 @@ Route::get('/setting', [ApiController::class, 'setting'])->name('api.setting');
 //     Route::post('/get_taxonomies', 'get_taxonomies')->name('api.get_taxonomies');
 // });
 
-Route::get('/reviews/product/{postId}', [\App\Http\Controllers\ReviewController::class, 'productReviews'])->name('api.reviews.product');
+Route::middleware('web')->get('/reviews/product/{postId}', [\App\Http\Controllers\ReviewController::class, 'productReviews'])->name('api.reviews.product');
 Route::middleware('web')->post('/reviews', [\App\Http\Controllers\ReviewController::class, 'store'])->name('api.reviews.store');
+Route::middleware('web')->post('/reviews/{id}/like', [\App\Http\Controllers\ReviewController::class, 'like'])->name('api.reviews.like');
+Route::middleware('web')->post('/reviews/{id}/report', [\App\Http\Controllers\ReviewController::class, 'report'])->name('api.reviews.report');
 
 // Cart & Orders
 Route::middleware('web')->group(function () {

@@ -348,4 +348,22 @@ class ApiController extends Controller
 
         return response()->json(['success' => true]);
     }
+    public function review(Request $request)
+    {
+        $validated = $request->validate([
+            'type' => ['required', 'string'],
+            'id' => ['required', 'integer'],
+        ]);
+        $reviews = DB::table('reviews')->where('post_id', $request->id)->where('status','approved')->orderBy('created_at', 'desc')->get();
+        $reviews->each(function ($review) {
+            $user = DB::table('users')->where('id', $review->user_id)->first();
+            $review->user = $user;
+            $review->replies = DB::table('reviews')->where('parent_id', $review->id)->where('status','approved')->orderBy('created_at', 'desc')->get();
+            $review->replies->each(function ($reply) {
+                $user = DB::table('users')->where('id', $reply->user_id)->first();
+                $reply->user = $user;
+            });
+        });
+        return response()->json($reviews);
+    }
 }

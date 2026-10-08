@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
-import { RiExpandUpDownFill, RiExpandUpDownLine, RiStarFill, RiStarLine } from 'react-icons/ri';
+import { RiExpandUpDownFill, RiExpandUpDownLine, RiFlagFill, RiFlagLine, RiMessage2Fill, RiMessage2Line, RiMessage3Line, RiStarFill, RiStarLine, RiThumbUpFill, RiThumbUpLine } from 'react-icons/ri';
 import Dropdown from '../Dropdown';
 import Textarea from '../Textarea';
 import { useLang } from '@/contexts/LanguageContext';
@@ -33,6 +33,9 @@ const SingleProductTabs = ({ product }) => {
     const [submitting, setSubmitting] = useState(false);
     const [submitMessage, setSubmitMessage] = useState(null);
 
+    const [replyTo, setReplyTo] = useState(null);
+    const [replyForm, setReplyForm] = useState({ comment: '' });
+
     const attributes = product?.attributes ?? [];
 
     const groupedProperties = useMemo(() => {
@@ -47,17 +50,58 @@ const SingleProductTabs = ({ product }) => {
         return groups;
     }, [attributes, __]);
 
+    const fetchReviews = () => {
+        setReviewsLoading(true);
+        axios
+            .get(route('api.reviews.product', { postId: product.id }))
+            .then((res) =>  setReviews(res.data?.data ?? res.data ?? []) )
+            .finally(() => setReviewsLoading(false));
+    };
+
     useEffect(() => {
         if (activeTab !== 'reviews' || !product?.id) {
             return;
         }
-        setReviewsLoading(true);
-        axios
-            .get(`/api/reviews/product/${product.id}`)
-            .then((res) => setReviews(res.data?.data ?? res.data ?? []))
-            .catch(() => setReviews([]))
-            .finally(() => setReviewsLoading(false));
+        fetchReviews();
     }, [activeTab, product?.id]);
+
+    const handleReviewAction = async (reviewId, action) => {
+        try {
+            const response = await axios.post(route(`api.reviews.${action}`, { id: reviewId }));
+            if (response.data && response.data.success === false) {
+                alert(response.data.message);
+            } else {
+                fetchReviews();
+            }
+        } catch (error) {
+            if (error.response && error.response.data && error.response.data.message) {
+                alert(error.response.data.message);
+            } else {
+                console.error(error);
+            }
+        }
+    };
+
+    const handleReplySubmit = async (e, parentId) => {
+        e.preventDefault();
+        if (!product?.id) return;
+        setSubmitting(true);
+        try {
+            await axios.post(route('api.reviews.store'), {
+                post_id: product.id,
+                comment: replyForm.comment,
+                type: "general",
+                parent_id: parentId
+            });
+            setReplyForm({ comment: '' });
+            setReplyTo(null);
+            fetchReviews();
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setSubmitting(false);
+        }
+    };
 
     const handleReviewSubmit = async (e) => {
         e.preventDefault();
@@ -94,8 +138,8 @@ const SingleProductTabs = ({ product }) => {
                         type="button"
                         onClick={() => setActiveTab(tab.id)}
                         className={`px-5 py-3 text-sm font-semibold transition-colors border-b-2 -mb-px ${activeTab === tab.id
-                                ? 'border-primary text-primary'
-                                : 'border-transparent text-res hover:text-heading'
+                            ? 'border-primary text-primary'
+                            : 'border-transparent text-res hover:text-heading'
                             }`}
                     >
                         {__(tab.label)}
@@ -147,16 +191,69 @@ const SingleProductTabs = ({ product }) => {
                                 {reviews.map((review) => (
                                     <li
                                         key={review.id}
-                                        className="flex flex-col gap-2 pb-5 border-b border-border/60 last:border-0"
+                                        className="flex flex-col gap-2 p-5 items-start border-b bg-white border-border/60 last:border-0"
                                     >
                                         <div className="flex flex-wrap items-center gap-3">
-                                            <StarRating value={review.rating} />
-                                            <span className="text-sm font-semibold text-heading">
-                                                {review.user?.name ?? __('Customer')}
+                                            <span className="text-sm font-semibold bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center">
+                                                {review.user?.name.charAt(0).toUpperCase()}
                                             </span>
+                                            <span className="text-sm font-semibold text-heading">
+                                                {review.user?.name}
+                                            </span>
+                                            <StarRating value={review.rating} />
                                         </div>
                                         {review.comment && (
-                                            <p className="text-sm text-text leading-relaxed">{review.comment}</p>
+                                            <div className='text-sm bg-bg p-3 rounded-lg w-full'>
+                                                <p className="text-sm text-text leading-relaxed">{review.comment}</p>
+                                            </div>
+                                        )}
+                                        <div className=' flex w-full justify-end gap-3 mt-4'>
+                                            <span onClick={() => setReplyTo(replyTo === review.id ? null : review.id)} className='text-res bg-common px-2 py-1 rounded-md flex items-center gap-1 text-xs font-medium cursor-pointer hover:bg-common/80'>
+                                                <RiMessage2Line />
+                                                {__('Reply')}
+                                            </span>
+                                            <span onClick={() => handleReviewAction(review.id, 'like')} className={`text-res bg-common px-2 py-1 rounded-md flex items-center gap-1 text-xs font-medium cursor-pointer hover:bg-common/80 ${review.is_liked ? 'text-primary' : ''}`}>
+                                                {review.is_liked ? <RiThumbUpFill /> : <RiThumbUpLine />}
+                                                {review.likes || 0} {__(review.is_liked ? 'Liked' : (review.likes > 1 ? 'Likes' : 'Like'))}
+                                            </span>
+                                            <span onClick={() => handleReviewAction(review.id, 'report')} className={`text-res bg-common px-2 py-1 rounded-md flex items-center gap-1 text-xs font-medium cursor-pointer hover:bg-common/80 ${review.is_reported ? 'text-red-500' : ''}`}>
+                                                {review.is_reported ? <RiFlagFill /> : <RiFlagLine />}
+                                                {review.reports || 0} {__(review.is_reported ? 'Reported' : 'Report')}
+                                            </span>
+                                        </div>
+                                        
+                                        {replyTo === review.id && (
+                                            <form onSubmit={(e) => handleReplySubmit(e, review.id)} className="flex flex-col gap-3 w-full mt-3 pl-8">
+                                                <Textarea
+                                                    rows={2}
+                                                    value={replyForm.comment}
+                                                    onChange={(e) => setReplyForm({ comment: e.target.value })}
+                                                    placeholder={__('Write a reply...')}
+                                                    className="rounded-md border-border bg-white text-text text-sm resize-y"
+                                                />
+                                                <div className="flex justify-end gap-2">
+                                                    <button type="button" onClick={() => setReplyTo(null)} className="px-4 py-1.5 rounded-md bg-common text-text text-sm font-semibold">{__('Cancel')}</button>
+                                                    <button type="submit" disabled={submitting} className="px-4 py-1.5 rounded-md bg-primary text-white text-sm font-semibold disabled:opacity-60">{__('Submit Reply')}</button>
+                                                </div>
+                                            </form>
+                                        )}
+                                        
+                                        {review.replies && review.replies.length > 0 && (
+                                            <ul className="flex flex-col gap-3 w-full mt-3 pl-8 border-l-2 border-border/50">
+                                                {review.replies.map(reply => (
+                                                    <li key={reply.id} className="flex flex-col gap-2 p-3 bg-bg rounded-lg">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-xs font-semibold bg-primary text-white rounded-full w-6 h-6 flex items-center justify-center">
+                                                                {reply.user?.name.charAt(0).toUpperCase()}
+                                                            </span>
+                                                            <span className="text-xs font-semibold text-heading">
+                                                                {reply.user?.name}
+                                                            </span>
+                                                        </div>
+                                                        <p className="text-sm text-text leading-relaxed">{reply.comment}</p>
+                                                    </li>
+                                                ))}
+                                            </ul>
                                         )}
                                     </li>
                                 ))}

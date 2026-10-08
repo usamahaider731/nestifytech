@@ -143,6 +143,7 @@ class SettingController extends Controller
 
     public function settingUpdate(Request $request)
     {
+
         $typePermissionMap = [
             'site' => 'setting-write',
             'font' => 'setting-write',
@@ -151,7 +152,6 @@ class SettingController extends Controller
             'ai' => 'setting-write',
             'ads' => 'ads-write',
         ];
-
         $permissionKey = strtolower($request->type);
         if (isset($typePermissionMap[$permissionKey])) {
             $requiredPermission = $typePermissionMap[$permissionKey];
