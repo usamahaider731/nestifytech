@@ -180,6 +180,7 @@ const FieldControls = ({
 
     // === DROPDOWN ===
     if (field.type === 'dropdown') {
+        
         if (field.multiple) {
             return (
                 <div className={`flex flex-col gap-2 ${colSpan} ${fieldClass}`} key={field.name}>
@@ -205,6 +206,7 @@ const FieldControls = ({
                         name={field.name}
                         value={data[field.name] || ''}
                         none={field.none ? true : false}
+
                         valueInTitle={field.valueInTitle == 'true' ? true : false}
                         options={processOptions(field.options, field.name)}
                         onChange={(val) => updateField(field.name, val)}
@@ -336,6 +338,8 @@ const FieldControls = ({
                     onChange={(val) => updateField(field.name, val)}
                     label={field.label}
                     fields={field.fields || []}
+                    show_add_button={field.show_add_button}
+                    
                     dropdownOptions={dropdownOptions}
                     loadingStates={loadingStates}
                 />

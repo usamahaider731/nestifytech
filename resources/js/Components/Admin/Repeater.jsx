@@ -188,6 +188,7 @@ function Repeater({ value = [], onChange, label = "Item", fields = [], dropdownO
                     <DropdownSelect
                         {...commonProps}
                         options={options}
+                        searchable={field.searchable}
                         isLoading={loadingStates[field.name]}
                         onChange={(val) => handleFieldChange(index, field.name, val)}
                     />
@@ -268,7 +269,7 @@ function Repeater({ value = [], onChange, label = "Item", fields = [], dropdownO
                         return (
                             <div
                                 key={index}
-                                className="relative group bg-accent/40 rounded-xl border border-secondary/20 hover:border-primary/30 transition-all overflow-hidden"
+                                className="relative group bg-accent/40 rounded-xl border border-secondary/20 hover:border-primary/30 transition-all"
                             >
                                 <div className="flex items-center gap-3 p-4">
                                     <button

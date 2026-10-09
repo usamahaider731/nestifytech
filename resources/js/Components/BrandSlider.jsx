@@ -23,7 +23,7 @@ const BrandSlider = () => {
                     {brands.map((brand, index) => {
                         return (
                             <Slider.Slide key={index}   width='250'>
-                                <Link className='w-full grayscale-100 hover:grayscale-0'>
+                                <Link href={route('taxonomy.view',{type:'brand', slug:brand.slug, id:brand.id})} className='w-full grayscale-100 hover:grayscale-0'>
                                     <div className='w-full flex items-center justify-center text-center'>
                                         <ImageViwer 
                                             image={brand.image} 

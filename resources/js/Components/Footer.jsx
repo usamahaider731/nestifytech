@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { LiaHeadsetSolid } from "react-icons/lia";
 import { IoMdPaperPlane } from "react-icons/io";
-import { 
-    FiFacebook, FiTwitter, FiInstagram, FiYoutube, FiMail, FiPhone, 
+import {
+    FiFacebook, FiTwitter, FiInstagram, FiYoutube, FiMail, FiPhone,
     FiMapPin, FiArrowUp, FiShieldOff, FiSend, FiCheckCircle,
     FiTruck, FiRefreshCw, FiHeadphones, FiLock
 } from 'react-icons/fi';
@@ -11,6 +11,7 @@ import { FaCcVisa, FaCcMastercard, FaCcPaypal, FaCcApplePay, FaFacebookF, FaFace
 import ImageViwer from './Admin/ImageViwer';
 import { RiArrowUpLine, RiArrowUpSLine, RiArrowUpWideLine, RiInstagramFill, RiLinkedinBoxFill, RiPinterestFill, RiTwitterXFill, RiWhatsappFill, RiWhatsappLine, RiYoutubeFill } from 'react-icons/ri';
 import { useLang } from '@/contexts/LanguageContext';
+import axios from 'axios';
 
 const Footer = () => {
     const { setting, auth } = usePage().props;
@@ -20,8 +21,33 @@ const Footer = () => {
     const scrollToTop = () => {
         window.scrollTo({ top: 0 });
     };
-    const FooterSetting= setting.layout.Footer;
-    const logo_path = setting.site[FooterSetting.footer_logo].value 
+    const [FooterMenuList, SetFooterMenuList] = useState({ name: '', menus: [] });
+    const FooterSetting = setting.layout.Footer;
+    const FooterMenu = FooterSetting.footer_menu_lists;
+useEffect(() => {
+    if (!FooterMenu || FooterMenu.length === 0) return;
+
+    const fetchPromises = FooterMenu.map((menu) =>
+        axios.get(route('menu', { 'location': menu.menu_location }))
+            .then((response) => ({
+                name: menu.title,
+                menus: response.data.map((item) => ({
+                    title: item.name,
+                    url: item.link
+                }))
+            }))
+    );
+
+    Promise.all(fetchPromises)
+        .then((completedMenus) => {
+            SetFooterMenuList(completedMenus);
+        })
+        .catch((error) => {
+            console.error('Failed to load footer menus:', error);
+        });
+}, [FooterMenu]);
+    console.log(FooterMenuList); 
+    const logo_path = setting.site[FooterSetting.footer_logo].value
     const socialLinks = [
         { icon: <FaFacebook />, href: '#', name: 'Facebook', color: "" },
         { icon: <RiTwitterXFill />, href: '#', name: 'Twitter' },
@@ -80,7 +106,7 @@ const Footer = () => {
                                 <IoMdPaperPlane className='' size={32} />
                             </div>
                             <span className="text-xl font-medium text-text">
-                                   {__('Sign up to Newsletter')}
+                                {__('Sign up to Newsletter')}
                             </span>
                         </div>
 
@@ -88,14 +114,14 @@ const Footer = () => {
                             <input
                                 type="email"
                                 placeholder={__('Enter your email address')}
-                                    className="w-80 bg-transparent border-none outline-none ring-0 px-5 h-10.5 text-base text-text placeholder:text-text/70 focus:outline-none"
+                                className="w-80 bg-transparent border-none outline-none ring-0 px-5 h-10.5 text-base text-text placeholder:text-text/70 focus:outline-none"
                                 required
                             />
                             <button
                                 type="submit"
                                 className="flex text-white items-center bg-dynamic gap-2 whitespace-nowrap px-6 h-10.5 text-xs font-extrabold uppercase tracking-[0.15em] text-slate-900 transition-colors cursor-pointer"
                             >
-                               {auth.user ? __('Subscribe') : __('Sign up')} <FiSend />
+                                {auth.user ? __('Subscribe') : __('Sign up')} <FiSend />
                             </button>
                         </form>
                     </div>
@@ -104,10 +130,10 @@ const Footer = () => {
 
             <div className="relative container mx-auto px-6 py-14">
 
-                <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-12">
+                <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-13">
                     <div className="space-y-6 lg:col-span-4">
                         <Link href="/" className="inline-flex items-center gap-3 text-2xl font-black uppercase tracking-tight text-white">
-                          <ImageViwer image={logo_path} className='max-w-40' />
+                            <ImageViwer image={logo_path} className='max-w-40' />
                         </Link>
 
                         <div className="space-y-4">
@@ -116,16 +142,16 @@ const Footer = () => {
                             </p>
 
                             <div className="flex gap-4">
-                            <LiaHeadsetSolid className='size-13 text-primary' />
+                                <LiaHeadsetSolid className='size-13 text-primary' />
 
                                 <div className='flex flex-col'>
-                                <p className="text-sm text-text">{__('Got Questions ? Call us 24/7!')}</p>
-                                <div className="mt-2 text-2xl font-medium text-heading">{setting.site.phone.value}</div>
-                            </div></div>
+                                    <p className="text-sm text-text">{__('Got Questions ? Call us 24/7!')}</p>
+                                    <div className="mt-2 text-2xl font-medium text-heading">{setting.site.phone.value}</div>
+                                </div></div>
 
                             <div className="flex flex-col items-start gap-3 text-sm text-text">
                                 <div className="mt-1 flex items-center justify-center text-heading  font-medium">
-                                   {__('Contact Info')}
+                                    {__('Contact Info')}
                                 </div>
                                 <span>{setting.site.address.value}</span>
                             </div>
@@ -145,50 +171,23 @@ const Footer = () => {
                         </div>
                     </div>
 
+                    {FooterMenuList.length > 0 && FooterMenuList.map((menu, index) => (
                     <div className="lg:col-span-3">
+                        
                         <h4 className="mb-5 inline-block pb-2 text-sm font-bold uppercase text-heading">
-                            {__('Find it fast')}
+                            {menu.name}
                         </h4>
                         <ul className="space-y-2.5 text-sm text-text">
-                            {quickLinks.map((link, idx) => (
+                            {menu?.menus?.map((link, idx) => (
                                 <li key={idx}>
-                                    <Link href="#" className="transition-colors duration-200 hover:text-primary">
-                                        {link}
+                                    <Link href={link.link} className="transition-colors duration-200 hover:text-primary">
+                                        {link.title}
                                     </Link>
                                 </li>
                             ))}
                         </ul>
                     </div>
-
-                    <div className="lg:col-span-3">
-                        <h4 className="mb-5 inline-block pb-2 text-sm font-extrabold uppercase text-heading">
-                            {__('Customer care')}
-                        </h4>
-                        <ul className="space-y-2.5 text-sm">
-                            {careLinks.map((link, idx) => (
-                                <li key={idx}>
-                                    <Link href="#" className="text-text font-normal transition-colors duration-200 hover:text-primary">
-                                        {link}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    <div className="lg:col-span-2">
-                        <h4 className="mb-5 inline-block pb-2 text-sm font-bold uppercase text-heading">
-                            {__('Information')}
-                        </h4>
-                        <ul className="space-y-2.5 text-sm">
-                            {infoLinks.map((link, idx) => (
-                                <li key={idx}>
-                                    <Link href="#" className="text-text transition-colors duration-200 hover:text-primary">
-                                        {link}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+                    ))}
                 </div>
             </div>
             <div className="relative border-t bg-common">

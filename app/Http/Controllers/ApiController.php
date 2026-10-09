@@ -50,7 +50,7 @@ class ApiController extends Controller
     public function menu(Request $request)
     {
         $query = DB::table('menu')->orderBy('sort_order', 'asc');
-        if ($request->location) {
+        if (!is_array($request->location)) {
             $query->where('location', $request->location);
         }
         return response()->json($query->get()->values());
