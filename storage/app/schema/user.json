@@ -48,6 +48,14 @@
         "table": "users"
     },
     "table": {
+        "card": {
+            "image": "image",
+            "title": "name",
+            "subtitle": "email",
+            "top_right": "active",
+            "badges": ["role"],
+            "actions": "action"
+        },
         "keywords": true,
         "paginationPerPage": 10,
         "paginationList": [

@@ -67,6 +67,14 @@
         "table": "taxonomies"
     },
     "table": {
+        "card": {
+            "image": "image",
+            "title": "title",
+            "subtitle": "parent",
+            "top_right": "status",
+            "badges": ["discount"],
+            "actions": "action"
+        },
         "keywords": true,
         "paginationPerPage": 10,
         "paginationList": [

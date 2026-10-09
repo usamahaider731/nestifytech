@@ -87,5 +87,8 @@
     "Cancel": "Cancel",
     "Submit Reply": "Submit Reply",
     "Liked": "Liked",
-    "Reported": "Reported"
+    "Reported": "Reported",
+    "No Products Found": "No Products Found",
+    "We could not find products matching these filters. Try clearing them or browse another category.": "We could not find products matching these filters. Try clearing them or browse another category.",
+    "Continue Shopping": "Continue Shopping"
 }

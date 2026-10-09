@@ -118,6 +118,50 @@ class ModuleController extends Controller
         }
         $result = $this->handleTableRequest($request, $type, $query);
 
+        if ($type === 'roles' || $type === 'role') {
+            $allUsers = DB::table('users')->select('id', 'name', 'roles')->get();
+            $mediaMap = DB::table('media')
+                ->where('type', 'user')
+                ->whereIn('parent_id', $allUsers->pluck('id'))
+                ->pluck('filename', 'parent_id')
+                ->toArray();
+
+            $usersByRole = [];
+            foreach ($allUsers as $u) {
+                $userRoles = $u->roles;
+                if (is_string($userRoles)) {
+                    $userRoles = json_decode($userRoles, true);
+                }
+                if (is_array($userRoles)) {
+                    foreach ($userRoles as $rId) {
+                        $usersByRole[(int)$rId][] = [
+                            'id' => $u->id,
+                            'name' => $u->name,
+                            'image' => $mediaMap[$u->id] ?? null,
+                        ];
+                    }
+                }
+            }
+
+            if (isset($result['data'])) {
+                $items = $result['data'] instanceof \Illuminate\Pagination\LengthAwarePaginator
+                    ? $result['data']->getCollection()
+                    : (is_array($result['data']) ? $result['data'] : collect($result['data']));
+
+                foreach ($items as &$roleItem) {
+                    $rId = is_object($roleItem) ? $roleItem->id : ($roleItem['id'] ?? null);
+                    $assigned = $usersByRole[(int)$rId] ?? [];
+                    if (is_object($roleItem)) {
+                        $roleItem->users = $assigned;
+                        $roleItem->users_count = count($assigned);
+                    } else if (is_array($roleItem)) {
+                        $roleItem['users'] = $assigned;
+                        $roleItem['users_count'] = count($assigned);
+                    }
+                }
+            }
+        }
+
         if (($request->ajax() || $request->wantsJson()) && !$request->hasHeader('X-Inertia')) {
             return response()->json($result['data']);
         }
@@ -129,13 +173,20 @@ class ModuleController extends Controller
         // Map 'data' to plural type name for backward compatibility with frontend Index files
         $pluralType = Str::plural($type);
 
-        return Inertia::render($view, array_merge([
+        $payload = array_merge([
             $pluralType => $result['data'],
-            'data' => $result['data'],
-            'table' => $result['table'],
-            'type' => $type,
-            'formData' => $result['formData']
-        ], $additionalData));
+            'data'      => $result['data'],
+            'table'     => $result['table'],
+            'type'      => $type,
+            'formData'  => $result['formData']
+        ], $additionalData);
+
+        // Pass selectedParentId for the Reviews page
+        if ($type === 'reviews') {
+            $payload['selectedParentId'] = $request->has('id') ? (int) $request->id : null;
+        }
+
+        return Inertia::render($view, $payload);
     }
 
     /**
@@ -270,11 +321,20 @@ class ModuleController extends Controller
     {
         // Unify all module forms into a single view
         if (in_array($page, ['Create', 'Edit'])) {
-            return "Admin/Module/Form";
+            return 'Admin/Module/Form';
         }
 
-        // Unify all module index pages into a single view
-        return "Admin/Module/Index";
+        // Module-specific index views
+        $customViews = [
+            
+        ];
+
+        if ($page === 'Index' && isset($customViews[$type])) {
+            return $customViews[$type];
+        }
+
+        // Unify all other module index pages into a single view
+        return 'Admin/Module/Index';
     }
 
     private function getAdditionalTableData($type, $result)

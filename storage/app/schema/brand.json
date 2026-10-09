@@ -54,6 +54,13 @@
         "table": "taxonomies"
     },
     "table": {
+        "card": {
+            "image": "image",
+            "title": "title",
+            "content": "description",
+            "top_right": "status",
+            "actions": "action"
+        },
         "keywords": true,
         "paginationPerPage": 5,
         "paginationList": [

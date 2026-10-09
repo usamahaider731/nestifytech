@@ -83,6 +83,14 @@
         "table": "posts"
     },
     "table": {
+        "card": {
+            "image": "image",
+            "title": "title",
+            "subtitle": "sku",
+            "top_right": "status",
+            "badges": ["category", "brand"],
+            "actions": "action"
+        },
         "keywords": true,
         "paginationPerPage": 10,
         "paginationList": [

@@ -23,7 +23,8 @@ function Table({
   links = EMPTY_ARRAY,
   paginationPerPage = 10,
   paginationList = [10, 20, 50, 100],
-  onCheckChange
+  onCheckChange,
+  viewMode = 'table'
 }) {
   const [Values, SetValues] = useState([]);
   const [Links, SetLinks] = useState(links);
@@ -284,9 +285,15 @@ function Table({
           )}
         </div>
       </div>
-      <table className='w-full table'>
-        {children}
-      </table>
+      {viewMode === 'card' ? (
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-5 w-full pt-4'>
+          {children}
+        </div>
+      ) : (
+        <table className='w-full table'>
+          {children}
+        </table>
+      )}
       {Links && Links.length > 3 && (
         <Pagination />
       )}
@@ -349,7 +356,7 @@ function CheckboxHead({ children, className = '', ...props }) {
 function CheckboxBody({ children, valueId = '', className = '', ...props }) {
   const { Values, Check, SetCheck } = useContext(TableProvider)
   return (
-    <div className='relative h-fit mx-auto w-fit flex'>
+    <div className={`relative h-fit mx-auto w-fit flex ${className}`}>
       <Checkbox
         checked={Check.includes(valueId)}
         onChange={() => {

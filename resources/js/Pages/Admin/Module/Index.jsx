@@ -9,7 +9,7 @@ import { hasPermission, stripTags } from '@/Utils/helper'
 import { TbDotsVertical, TbCloudDownload, TbCloudUpload, TbFileZip, TbDatabaseImport, TbDatabaseExport } from 'react-icons/tb'
 import { Dialog, Transition } from '@headlessui/react'
 import { Fragment } from 'react'
-import { RiBarChartBoxLine, RiCheckboxCircleLine, RiDraftLine, RiStackLine, RiArrowLeftLine, RiCheckLine, RiCloseLine, RiErrorWarningLine, RiArrowLeftSLine } from 'react-icons/ri'
+import { RiBarChartBoxLine, RiCheckboxCircleLine, RiDraftLine, RiStackLine, RiArrowLeftLine, RiCheckLine, RiCloseLine, RiErrorWarningLine, RiArrowLeftSLine, RiLayoutGridFill, RiListUnordered, RiStarFill } from 'react-icons/ri'
 import axios from 'axios'
 
 function Index({ data, table, type, stats }) {
@@ -22,6 +22,7 @@ function Index({ data, table, type, stats }) {
   const [activeTab, setActiveTab] = useState('export') // export or import
   const [importFile, setImportFile] = useState(null)
   const [toasts, setToasts] = useState([])
+  const [viewMode, setViewMode] = useState('table')
 
   const addToast = (message, type = 'success') => {
     const id = Date.now()
@@ -170,34 +171,34 @@ function Index({ data, table, type, stats }) {
             <ActionDropdown.Context className='flex flex-col gap-0.75 shadow-[2px_2px_3px_2px] shadow-secondary'>
               {column.actions.map((actionItem, idx) => {
                 let href = '#';
-                
+
                 // If there's a condition to show this action based on row data
                 if (actionItem.condition) {
-                   const { key, operator, value } = actionItem.condition;
-                   if (operator === '==' && row[key] != value) return null;
-                   if (operator === '!=' && row[key] == value) return null;
+                  const { key, operator, value } = actionItem.condition;
+                  if (operator === '==' && row[key] != value) return null;
+                  if (operator === '!=' && row[key] == value) return null;
                 }
 
                 if (actionItem.route) {
-                   let params = { type, id: row.id };
-                   if (actionItem.params) {
-                      params = { ...params, ...actionItem.params };
-                   }
-                   // Replace dynamic params from row
-                   Object.keys(params).forEach(k => {
-                      if (typeof params[k] === 'string' && params[k].startsWith('{') && params[k].endsWith('}')) {
-                         const rowKey = params[k].replace(/[{}]/g, '');
-                         params[k] = row[rowKey];
-                      }
-                   });
-                   href = route(actionItem.route, params);
+                  let params = { type, id: row.id };
+                  if (actionItem.params) {
+                    params = { ...params, ...actionItem.params };
+                  }
+                  // Replace dynamic params from row
+                  Object.keys(params).forEach(k => {
+                    if (typeof params[k] === 'string' && params[k].startsWith('{') && params[k].endsWith('}')) {
+                      const rowKey = params[k].replace(/[{}]/g, '');
+                      params[k] = row[rowKey];
+                    }
+                  });
+                  href = route(actionItem.route, params);
                 } else if (actionItem.url_template) {
-                   href = actionItem.url_template;
-                   Object.keys(row).forEach(k => {
-                      href = href.replace(`{${k}}`, row[k] || '');
-                   });
+                  href = actionItem.url_template;
+                  Object.keys(row).forEach(k => {
+                    href = href.replace(`{${k}}`, row[k] || '');
+                  });
                 }
-                
+
                 if (actionItem.type === 'external') {
                   return (
                     <a key={idx} href={href} target={actionItem.target || '_self'} className="block w-full text-left px-4 py-2 text-sm text-text hover:bg-common hover:text-primary transition-colors">
@@ -211,12 +212,11 @@ function Index({ data, table, type, stats }) {
                     <button
                       key={idx}
                       onClick={() => handlePostAction(href, actionItem.data || {}, actionItem.label)}
-                      className={`h-10 w-full px-3 cursor-pointer flex items-center justify-start rounded-md transition-colors text-sm font-medium ${
-                        actionItem.label === 'Approve' ? 'text-green-600 hover:bg-green-100' :
-                        actionItem.label === 'Reject'  ? 'text-red-500 hover:bg-red-100' :
-                        actionItem.label === 'Delete'  ? 'text-red-700 hover:bg-red-100' :
-                        'text-heading hover:bg-primary hover:text-white'
-                      }`}
+                      className={`h-10 w-full px-3 cursor-pointer flex items-center justify-start rounded-md transition-colors text-sm font-medium ${actionItem.label === 'Approve' ? 'text-green-600 hover:bg-green-100' :
+                          actionItem.label === 'Reject' ? 'text-red-500 hover:bg-red-100' :
+                            actionItem.label === 'Delete' ? 'text-red-700 hover:bg-red-100' :
+                              'text-heading hover:bg-primary hover:text-white'
+                        }`}
                     >
                       {actionItem.label}
                     </button>
@@ -225,12 +225,11 @@ function Index({ data, table, type, stats }) {
                       key={idx}
                       method={actionItem.method || 'GET'}
                       href={href}
-                      className={`h-10 w-full px-3 cursor-pointer flex items-center justify-start rounded-md transition-colors text-sm font-medium ${
-                        actionItem.label === 'Approve' ? 'text-green-600 hover:bg-green-100' :
-                        actionItem.label === 'Reject'  ? 'text-red-500 hover:bg-red-100' :
-                        actionItem.label === 'Delete'  ? 'text-red-700 hover:bg-red-100' :
-                        'text-heading hover:bg-primary hover:text-white'
-                      }`}
+                      className={`h-10 w-full px-3 cursor-pointer flex items-center justify-start rounded-md transition-colors text-sm font-medium ${actionItem.label === 'Approve' ? 'text-green-600 hover:bg-green-100' :
+                          actionItem.label === 'Reject' ? 'text-red-500 hover:bg-red-100' :
+                            actionItem.label === 'Delete' ? 'text-red-700 hover:bg-red-100' :
+                              'text-heading hover:bg-primary hover:text-white'
+                        }`}
                     >
                       {actionItem.label}
                     </ActionDropdown.Link>
@@ -261,7 +260,7 @@ function Index({ data, table, type, stats }) {
                 Delete
               </ActionDropdown.Link>
             )}
-            
+
           </ActionDropdown.Context>
         </ActionDropdown>
       </div>
@@ -290,10 +289,10 @@ function Index({ data, table, type, stats }) {
         const map = {
           approved: 'bg-green-100 text-green-700',
           rejected: 'bg-red-100 text-red-600',
-          pending:  'bg-amber-100 text-amber-700',
+          pending: 'bg-amber-100 text-amber-700',
         }
         return (
-          <span className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold capitalize ${ map[s] ?? 'bg-gray-100 text-gray-600'}`}>
+          <span className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold capitalize ${map[s] ?? 'bg-gray-100 text-gray-600'}`}>
             {s ?? '—'}
           </span>
         )
@@ -305,6 +304,168 @@ function Index({ data, table, type, stats }) {
       default:
         return row?.[column.column]
     }
+  }
+
+  const renderCardStatus = (row, col) => {
+    if (!col) return null
+    const val = row?.[col.column] ?? row?.[col.id]
+    if (val === undefined || val === null || val === '') return null
+
+    const valStr = String(val).toLowerCase()
+    const isApprovedOrPublished = ['publish', 'published', 'approved', 'active', '1', 'true'].includes(valStr)
+    const isPending = ['pending', 'draft', 'in_review'].includes(valStr)
+    const isRejectedOrDeleted = ['rejected', 'delete', 'deleted', 'inactive', '0', 'false'].includes(valStr)
+
+    const badgeStyle = isApprovedOrPublished
+      ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/25'
+      : isPending
+        ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/25'
+        : isRejectedOrDeleted
+          ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/25'
+          : 'bg-dynamic text-secondary border-secondary/20'
+
+    const dotStyle = isApprovedOrPublished
+      ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'
+      : isPending
+        ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]'
+        : isRejectedOrDeleted
+          ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]'
+          : 'bg-secondary'
+
+    const labelMap = {
+      publish: 'Published',
+      '1': 'Active',
+      '0': 'Inactive',
+      draft: 'Draft',
+      approved: 'Approved',
+      pending: 'Pending',
+      rejected: 'Rejected',
+    }
+    const label = labelMap[valStr] || (typeof val === 'string' ? val : valStr)
+
+    return (
+      <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${badgeStyle} capitalize tracking-wide transition-colors select-none`}>
+        <span className={`size-1.5 rounded-full ${dotStyle}`} />
+        <span>{label}</span>
+      </span>
+    )
+  }
+
+  const renderCardImage = (row, col, titleText) => {
+    if (!col) return null
+    const val = row?.[col.column] ?? row?.[col.id]
+    if (val) {
+      return (
+        <ImageViwer
+          image={val}
+          className='w-full h-full object-cover rounded-xl group-hover:scale-105 transition-transform duration-300'
+        />
+      )
+    }
+    // Sleek branded monogram avatar if no image
+    const initial = String(titleText || row?.id || '?').charAt(0).toUpperCase()
+    return (
+      <div className='w-full h-full rounded-xl bg-gradient-to-br from-primary/20 via-primary/10 to-dynamic/80 flex items-center justify-center font-bold text-lg text-primary select-none group-hover:scale-105 transition-transform duration-300 shadow-inner'>
+        {initial}
+      </div>
+    )
+  }
+
+  const renderCardBadge = (row, col) => {
+    if (!col) return null
+    const colId = col.id || col.column
+    const val = row?.[col.column] ?? row?.[col.id]
+
+    // Special styling for ratings
+    if (colId === 'rating' || col.column === 'rating') {
+      const ratingVal = val ?? row?.rating ?? 5
+      return (
+        <span className='inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/25 shadow-2xs'>
+          <RiStarFill className='size-3 text-amber-500 fill-amber-500' />
+          <span>{ratingVal}</span>
+          <span className='text-[10px] text-amber-500/70 font-normal'>/ 5</span>
+        </span>
+      )
+    }
+
+    // Special styling for brand images
+    if (col.type === 'brand_image') {
+      const brand = row?.brand
+      if (!brand) return null
+      if (brand?.image) {
+        return (
+          <div className='h-7 px-2.5 rounded-lg bg-dynamic/50 border border-secondary/15 flex items-center justify-center hover:border-primary/30 transition-colors' title={brand?.title}>
+            <ImageViwer image={brand.image} width={70} height={24} className='h-4.5 w-auto max-w-[65px] object-contain' />
+          </div>
+        )
+      }
+      return (
+        <span className='inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-dynamic/60 text-heading border border-secondary/15'>
+          {brand?.title || brand}
+        </span>
+      )
+    }
+
+    // Special styling for user avatars list (e.g. on roles card)
+    if (colId === 'users' || col.type === 'user_avatars') {
+      const usersList = Array.isArray(val) ? val : (Array.isArray(row?.users) ? row.users : []);
+      const totalCount = row?.users_count !== undefined ? row.users_count : usersList.length;
+      const visible = usersList.slice(0, 3);
+      const remaining = totalCount - visible.length;
+
+      if (totalCount === 0) {
+        return <span className='text-xs text-secondary/70 italic'>No users</span>;
+      }
+
+      return (
+        <div className='flex items-center -space-x-2.5 overflow-hidden py-1'>
+          {visible.map((u, idx) => {
+            const avatar = u?.image || u?.user_avater;
+            const uName = u?.name || `User ${idx + 1}`;
+            return (
+              <div
+                key={u?.id || idx}
+                title={uName}
+                className='relative size-10 rounded-full ring-2 ring-accent bg-dynamic overflow-hidden flex items-center justify-center shadow-xs shrink-0'
+              >
+                {avatar ? (
+                  <ImageViwer image={avatar} className='size-10 rounded-full object-cover' />
+                ) : (
+                  <div className='size-10 rounded-full bg-primary/15 text-primary font-bold text-xs flex items-center justify-center uppercase'>
+                    {uName.charAt(0)}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+          {remaining > 0 && (
+            <div
+              title={`${remaining} more user${remaining > 1 ? 's' : ''}`}
+              className='relative size-10 rounded-full ring-2 ring-accent bg-dynamic/90 text-heading font-bold text-xs flex items-center justify-center shadow-xs shrink-0'
+            >
+              +{remaining}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Badges / category / role
+    if (['badage', 'badge', 'category_badges', 'role_badges'].includes(col.type)) {
+      return (
+        <div className='flex items-center gap-1.5 flex-wrap [&>div]:!h-auto [&>div]:!w-auto [&>div]:!justify-start'>
+          {fieldRender(row, col)}
+        </div>
+      )
+    }
+
+    // Fallback chip
+    return (
+      <span className='inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-dynamic/50 text-secondary border border-secondary/15'>
+        {col.label && <span className='text-[10px] opacity-70 uppercase tracking-wider font-semibold'>{col.label}:</span>}
+        <span className='font-semibold text-heading truncate max-w-32'>{fieldRender(row, col)}</span>
+      </span>
+    )
   }
 
   const handleExport = () => {
@@ -337,8 +498,8 @@ function Index({ data, table, type, stats }) {
   }
 
   // Determine if this is a posts-type or taxonomy-type module for stat labels
-  const isPostModule  = stats && 'published' in stats
-  const statCards     = stats ? [
+  const isPostModule = stats && 'published' in stats
+  const statCards = stats ? [
     {
       label: 'Total',
       value: stats.total ?? 0,
@@ -455,6 +616,24 @@ function Index({ data, table, type, stats }) {
           <h1 className='text-xl font-medium capitalize text-primary'>{type}</h1>
         </div>
         <div className='flex gap-3 items-center'>
+          {/* View Toggle */}
+          <div className="flex bg-accent border border-secondary/20 rounded-lg p-0.5 shadow-sm">
+            <button
+              onClick={() => setViewMode('table')}
+              className={`p-1.5 rounded-md transition-all ${viewMode === 'table' ? 'bg-primary text-white shadow-sm' : 'text-res hover:text-heading hover:bg-white/5'}`}
+              title="Table View"
+            >
+              <RiListUnordered className="size-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('card')}
+              className={`p-1.5 rounded-md transition-all ${viewMode === 'card' ? 'bg-primary text-white shadow-sm' : 'text-res hover:text-heading hover:bg-white/5'}`}
+              title="Card View"
+            >
+              <RiLayoutGridFill className="size-4" />
+            </button>
+          </div>
+
           <select
             value={exportFormat}
             onChange={(e) => setExportFormat(e.target.value)}
@@ -496,31 +675,163 @@ function Index({ data, table, type, stats }) {
         onCheckChange={setSelectedIds}
         paginationPerPage={table?.paginationPerPage}
         paginationList={table?.paginationList}
+        viewMode={viewMode}
       >
-        <Table.THead className='w-full'>
-          <Table.TR className='w-full text-heading uppercase text-sm h-14 bg-accent'>
-            <Table.TH className='w-1/20 font-medium'>
-              <Table.TH.Checkbox />
-            </Table.TH>
-            {columns.map((col) => (
-              <Table.TH width={col.width} className='font-medium' key={col.id} sort={col.sort} column={col.column}>{col.label}</Table.TH>
-            ))}
-          </Table.TR>
-        </Table.THead>
-        <Table.TBody className='w-full'>
-          {Rows && Rows.map((row) => (
-            <Table.TR className='w-full text-sm bg-permanent h-12 text-res' key={row.id}>
-              <Table.TD>
-                <Table.TD.Checkbox valueId={row.id} />
-              </Table.TD>
-              {columns.map((col) => (
-                <Table.TD style={{ width: col.width }} className='font-medium text-center' key={col.id}>
-                  {fieldRender(row, col)}
-                </Table.TD>
+        {viewMode === 'table' ? (
+          <>
+            <Table.THead className='w-full'>
+              <Table.TR className='w-full text-heading uppercase text-sm h-14 bg-accent'>
+                <Table.TH className='w-1/20 font-medium'>
+                  <Table.TH.Checkbox />
+                </Table.TH>
+                {columns.map((col) => (
+                  <Table.TH width={col.width} className='font-medium' key={col.id} sort={col.sort} column={col.column}>{col.label}</Table.TH>
+                ))}
+              </Table.TR>
+            </Table.THead>
+            <Table.TBody className='w-full'>
+              {Rows && Rows.map((row) => (
+                <Table.TR className='w-full text-sm bg-permanent h-12 text-res' key={row.id}>
+                  <Table.TD>
+                    <Table.TD.Checkbox valueId={row.id} />
+                  </Table.TD>
+                  {columns.map((col) => (
+                    <Table.TD style={{ width: col.width }} className='font-medium text-center' key={col.id}>
+                      {fieldRender(row, col)}
+                    </Table.TD>
+                  ))}
+                </Table.TR>
               ))}
-            </Table.TR>
-          ))}
-        </Table.TBody>
+            </Table.TBody>
+          </>
+        ) : (
+          Rows && Rows.map((row) => {
+              const card = table?.card;
+
+              if (card) {
+                const getCol = (id) => columns.find(c => c.column === id || c.id === id) || { column: id, id };
+                const titleCol = card.title ? getCol(card.title) : null;
+                const titleText = titleCol ? (row[titleCol.column] ?? row[titleCol.id]) : '';
+
+                return (
+                  <div
+                    key={row.id}
+                    className="group relative flex flex-col justify-between rounded-2xl bg-accent border border-secondary/15 hover:border-primary/40 p-5 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_32px_-6px_rgba(115,103,240,0.12)] dark:hover:shadow-[0_12px_32px_-6px_rgba(0,0,0,0.5)] transition-all duration-300 ease-out hover:-translate-y-1 overflow-hidden"
+                  >
+                    {/* Top ambient highlight on hover */}
+                    <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-primary/30 via-primary to-primary/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    
+                    {/* Subtle soft glow in corner */}
+                    <div className="absolute -top-16 -right-16 size-36 rounded-full bg-primary/10 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+                    <div className="flex flex-col gap-3.5 relative z-10">
+                      {/* ── Top Bar: Checkbox + ID and Status + Action ── */}
+                      <div className="flex items-center justify-between pb-3 border-b border-secondary/10">
+                        <div className="flex items-center gap-2">
+                          <Table.TD.Checkbox
+                            valueId={row.id}
+                            className="size-4 !mx-0 rounded border-secondary/30 text-primary cursor-pointer transition-colors"
+                          />
+                          <span className="text-[11px] font-bold tracking-wider text-secondary/70 bg-dynamic/60 px-2 py-0.5 rounded-md">
+                            #{row.id}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          {card.top_right && (
+                            <div className="flex items-center">
+                              {renderCardStatus(row, getCol(card.top_right))}
+                            </div>
+                          )}
+                          {card.actions && (
+                            <div className="[&>div]:!h-auto [&>div]:!w-auto [&>div]:!my-0 [&_button]:!h-7 [&_button]:!w-7 text-secondary hover:text-heading transition-colors">
+                              {fieldRender(row, getCol(card.actions))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* ── Hero / Identity: Image + Title + Subtitle ── */}
+                      <div className="flex gap-3.5 items-start">
+                        {card.image && (
+                          <div className="relative size-16 shrink-0 rounded-2xl overflow-hidden bg-gradient-to-br from-dynamic/80 to-dynamic/30 border border-secondary/15 flex items-center justify-center p-1 shadow-inner group-hover:border-primary/40 group-hover:shadow-md transition-all duration-300">
+                            {renderCardImage(row, getCol(card.image), titleText)}
+                          </div>
+                        )}
+
+                        <div className="flex flex-col min-w-0 flex-1 pt-0.5">
+                          {card.title && (
+                            <h3 className="text-[15px] font-bold text-heading group-hover:text-primary transition-colors line-clamp-2 leading-snug tracking-tight">
+                              {fieldRender(row, getCol(card.title))}
+                            </h3>
+                          )}
+                          {card.subtitle && (
+                            <div className="text-xs text-res mt-1 flex items-center gap-1.5 truncate [&>div]:!mx-0 [&>div]:!px-0 [&>div]:!py-0">
+                              <span className="text-secondary/70 font-semibold text-[10px] uppercase tracking-wider">
+                                {getCol(card.subtitle).label || card.subtitle}:
+                              </span>
+                              <span className="font-medium text-heading/80 truncate">
+                                {fieldRender(row, getCol(card.subtitle))}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* ── Content / Comment / Excerpt ── */}
+                      {card.content && (
+                        <div className="relative rounded-xl bg-dynamic/35 dark:bg-dynamic/15 p-3 text-xs leading-relaxed text-res border border-secondary/10 group-hover:border-secondary/20 transition-colors line-clamp-3 italic">
+                          <span className="text-secondary/60 font-serif mr-1 text-sm">“</span>
+                          {fieldRender(row, getCol(card.content))}
+                          <span className="text-secondary/60 font-serif ml-1 text-sm">”</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* ── Badges / Meta Footer ── */}
+                    {card.badges && Array.isArray(card.badges) && card.badges.length > 0 && (
+                      <div className="mt-4 pt-3 border-t border-secondary/10 flex flex-wrap gap-2 items-center relative z-10">
+                        {card.badges.map(badgeId => (
+                          <div key={badgeId} className="flex items-center">
+                            {renderCardBadge(row, getCol(badgeId))}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              // Fallback for schemas without "card" config
+              return (
+                <div
+                  key={row.id}
+                  className="group relative flex flex-col justify-between rounded-2xl bg-accent border border-secondary/15 hover:border-primary/40 p-5 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_32px_-6px_rgba(115,103,240,0.12)] dark:hover:shadow-[0_12px_32px_-6px_rgba(0,0,0,0.5)] transition-all duration-300 ease-out hover:-translate-y-1 overflow-hidden"
+                >
+                  <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-primary/30 via-primary to-primary/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="flex items-center justify-between pb-3 border-b border-secondary/10">
+                    <div className="flex items-center gap-2">
+                      <Table.TD.Checkbox valueId={row.id} className="size-4 !mx-0 rounded border-secondary/30 text-primary cursor-pointer" />
+                      <span className="text-[11px] font-bold tracking-wider text-secondary/70 bg-dynamic/60 px-2 py-0.5 rounded-md">#{row.id}</span>
+                    </div>
+                    <div className="[&>div]:!h-auto [&>div]:!w-auto [&>div]:!my-0 [&_button]:!h-7 [&_button]:!w-7 text-secondary hover:text-heading transition-colors">
+                      {columns.map(col => col.type === 'action' ? fieldRender(row, col) : null)}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2.5 pt-3">
+                    {columns.filter(col => col.type !== 'action' && col.column !== 'id').map((col) => (
+                      <div key={col.id} className="flex flex-col bg-dynamic/30 rounded-xl p-2.5 border border-secondary/10">
+                        <span className="text-[10px] uppercase font-bold text-secondary/70 tracking-wider mb-0.5">{col.label}</span>
+                        <div className="text-xs font-semibold text-heading truncate">
+                          {fieldRender(row, col)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })
+        )}
       </Table>
 
       {/* ── Toast Notifications ── */}

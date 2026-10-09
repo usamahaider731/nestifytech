@@ -3,6 +3,7 @@ import AdminLayout from '@/Layouts/AdminLayout'
 import { Link } from '@inertiajs/react'
 import React from 'react'
 import { RiDeleteBin6Line, RiFileEditLine, RiFile3Fill, RiLayoutGridFill, RiListUnordered } from 'react-icons/ri';
+import ImageViwer from '@/Components/Admin/ImageViwer';
 import Table from '@/Components/Admin/Table'
 import { usePage } from '@inertiajs/react';
 import { hasPermission } from '@/Utils/helper';
@@ -85,35 +86,80 @@ function Index({ roles, table }) {
             </div>
 
             {Layout === 'grid' ? (
-                <div className='grid grid-cols-4 gap-5'>
-                    {Roles && Roles.map((role) => (
-                        <div key={role.id} className='p-6 flex flex-col col-span-1 justify-between gap-5 items-start shadow bg-accent rounded-2xl'>
-                            <div className='flex text-heading items-start justify-between w-full'>
-                                <h4 className='text-heading font-primary capitalize text-base font-medium'>{role.title}</h4>
-                                {hasPermission(auth.user, 'role-write') && (
-                                    <Link href={route('edit.role', { id: role.id })} className='size-9 bg-primary/10 text-primary rounded-lg flex items-center justify-center'>
-                                        <RiFileEditLine className='size-5' />
-                                    </Link>
-                                )}
-                            </div>
-                            <div className='flex w-full justify-between items-center'>
-                                <div className='flex items-center gap-2'>
-                                    {role.status === 'publish' ?
-                                        <div className='bg-green-500 size-2.5 rounded-full'></div>
-                                        :
-                                        <div className='bg-red-500 size-2.5 rounded-full'></div>
-                                    }
-                                    <span className='text-secondary font-primary text-sm font-medium capitalize'>{role.status}</span>
+                <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5'>
+                    {Roles && Roles.map((role) => {
+                        const roleUsers = Array.isArray(role.users) ? role.users : [];
+                        const totalUsers = role.users_count !== undefined ? role.users_count : roleUsers.length;
+                        const visibleUsers = roleUsers.slice(0, 3);
+                        const remainingCount = totalUsers - visibleUsers.length;
+
+                        return (
+                            <div key={role.id} className='p-6 flex flex-col col-span-1 justify-between gap-5 items-start shadow-sm hover:shadow-md transition-all bg-accent border border-secondary/10 rounded-2xl'>
+                                <div className='flex text-heading items-start justify-between w-full'>
+                                    <h4 className='text-heading font-primary capitalize text-base font-semibold'>{role.title}</h4>
+                                    {hasPermission(auth.user, 'role-write') && (
+                                        <Link href={route('edit.role', { id: role.id })} className='size-9 bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors rounded-lg flex items-center justify-center'>
+                                            <RiFileEditLine className='size-5' />
+                                        </Link>
+                                    )}
                                 </div>
-                                <div className='flex items-center'>
-                                    <Link href={route('role.detail', { id: role.id })} className='h-fit w-fit flex items-center px-3 py-1.5
-                                         bg-secondary text-[10px] rounded font-medium font-primary uppercase text-white hover:bg-secondary/90 transition-colors'>
-                                        Details
-                                    </Link>
+
+                                {/* User avatars stack */}
+                                <div className='flex items-center w-full py-1'>
+                                    {totalUsers > 0 ? (
+                                        <div className='flex items-center -space-x-2.5 overflow-hidden'>
+                                            {visibleUsers.map((u, idx) => {
+                                                const avatar = u.image || u.user_avater;
+                                                const uName = u.name || `User ${idx + 1}`;
+                                                return (
+                                                    <div
+                                                        key={u.id || idx}
+                                                        title={uName}
+                                                        className='relative size-10 rounded-full ring-2 ring-accent bg-dynamic overflow-hidden flex items-center justify-center shadow-xs'
+                                                    >
+                                                        {avatar ? (
+                                                            <ImageViwer image={avatar} className='size-10 rounded-full object-cover' />
+                                                        ) : (
+                                                            <div className='size-10 rounded-full bg-primary/15 text-primary font-bold text-xs flex items-center justify-center uppercase'>
+                                                                {uName.charAt(0)}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+
+                                            {remainingCount > 0 && (
+                                                <div
+                                                    title={`${remainingCount} more user${remainingCount > 1 ? 's' : ''}`}
+                                                    className='relative size-10 rounded-full ring-2 ring-accent bg-dynamic/90 text-heading font-bold text-xs flex items-center justify-center shadow-xs'
+                                                >
+                                                    +{remainingCount}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <span className='text-xs text-secondary/70 italic'>No users assigned</span>
+                                    )}
+                                </div>
+
+                                <div className='flex w-full justify-between items-center pt-2 border-t border-secondary/10'>
+                                    <div className='flex items-center gap-2'>
+                                        {role.status === 'publish' || role.status === 'active' ? (
+                                            <div className='bg-green-500 size-2.5 rounded-full'></div>
+                                        ) : (
+                                            <div className='bg-red-500 size-2.5 rounded-full'></div>
+                                        )}
+                                        <span className='text-secondary font-primary text-xs font-medium capitalize'>{role.status || 'Active'}</span>
+                                    </div>
+                                    <div className='flex items-center'>
+                                        <Link href={route('role.detail', { id: role.id })} className='h-fit w-fit flex items-center px-3 py-1.5 bg-secondary text-[10px] rounded font-medium font-primary uppercase text-white hover:bg-secondary/90 transition-colors'>
+                                            Details
+                                        </Link>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             ) : (
                 <Table

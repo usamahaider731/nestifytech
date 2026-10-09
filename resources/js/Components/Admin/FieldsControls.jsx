@@ -261,25 +261,22 @@ const FieldControls = ({
             <div key={role.id} className={`flex flex-col gap-2 ${colSpan}`}>
                 <InputLabel className='text-heading'>{role.title}</InputLabel>
                 <Togglebox
-                    checked={data.roles?.includes(role.id)}
+                    checked={!!(data.roles?.some(r => String(r) === String(role.id)))}
                     onChange={(e) => {
                         const isChecked = e.target.checked;
                         const updated = isChecked
                             ? [...(data.roles || []), role.id]
-                            : data.roles.filter((id) => id !== role.id);
+                            : (data.roles || []).filter((id) => String(id) !== String(role.id));
                         updateField('roles', updated);
                     }}
                 />
                 {
                     field.desc &&
-
                     <p className="text-xs font-medium text-res italic">{field.desc}</p>
                 }
             </div>
         ));
     }
-
-    // === CHECKBOX ===
     if (field.type === 'checkbox') {
         return (
             <div className={`flex flex-col gap-2 ${colSpan}`} key={field.name}>
