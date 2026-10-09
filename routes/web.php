@@ -147,7 +147,8 @@ Route::prefix('/admin')->middleware(['auth', 'verified'])->group(function () {
         Route::delete('/menu/{id}', 'menuDestroy')->name('menu.destroy')->middleware('permission:layout-write');
     });
     Route::prefix('/reviews')->controller(ModuleController::class)->middleware('permission:review-read')->group(function () {
-        Route::get('/', 'index')->defaults('type', 'reviews')->name('admin.reviews.index');
+        Route::get('/{id?}', 'index')->defaults('type', 'reviews')->name('admin.reviews.index');
+        Route::post('/{id}/status', [ReviewController::class, 'updateStatus'])->name('admin.reviews.status')->middleware('permission:review-write');
         Route::delete('/{id}', 'destroy')->defaults('type', 'reviews')->name('admin.reviews.destroy')->middleware('permission:review-write');
     });
     Route::prefix('/ai')->controller(AiController::class)->group(function () {

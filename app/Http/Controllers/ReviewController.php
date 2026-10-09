@@ -9,10 +9,26 @@ class ReviewController extends Controller
 {
     public $review_table = "reviews";
     // ====== ADMIN METHODS ======
-    public function index()
+    public function index($id = null)
     {
-        $reviews = \App\Models\Review::with(['user:id,name,email', 'post:id,title'])->latest()->get();
-        return \Inertia\Inertia::render('Admin/Reviews/Index', ['reviews' => $reviews]);
+        $query = \App\Models\Review::query()->with(['user:id,name,email', 'post:id,title']);
+
+        if ($id !== null && $id !== '' && $id !== '0') {
+            $query->where('parent_id', (int) $id);
+        } else {
+            $query->where(function ($q) {
+                $q->whereNull('parent_id')
+                    ->orWhere('parent_id', 0)
+                    ->orWhere('parent_id', '');
+            });
+        }
+
+        $reviews = $query->latest()->get();
+
+        return \Inertia\Inertia::render('Admin/Reviews/Index', [
+            'reviews' => $reviews,
+            'selectedParentId' => $id !== null && $id !== '' ? (int) $id : null,
+        ]);
     }
 
     public function updateStatus(Request $request, $id)

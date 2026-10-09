@@ -31,6 +31,27 @@ class ModuleController extends Controller
     }
 
     /**
+     * Restrict review lists to top-level entries by default and to a parent review when provided.
+     */
+    protected function applyReviewParentFilter($query, Request $request, string $type, $id = null)
+    {
+        if ($type !== 'reviews') {
+            return $query;
+        }
+        $parentId = $id ?? $request->id;
+
+        if ($parentId !== null && $parentId !== '' && $parentId !== '0' && (int) $parentId !== 0) {
+            return $query->where('parent_id', (int) $parentId);
+        }
+        return $query->where(function ($q) {
+            $q->whereNull('parent_id')
+                ->orWhere('parent_id', 0)
+                ->orWhere('parent_id', '')
+                ->orWhere('parent_id', '0');
+        });
+    }
+
+    /**
      * Unified Index handler for all modules.
      */
     public function index(Request $request, $type, $id = null)
@@ -82,6 +103,19 @@ class ModuleController extends Controller
             }
         }
 
+        if ($type === 'reviews') {
+            if ($request->has('id')) {
+                $query = $query->where('parent_id', $request->id);
+            }
+            else {
+                $query = $query->where(function ($q) {
+                    $q->whereNull('parent_id')
+                        ->orWhere('parent_id', 0)
+                        ->orWhere('parent_id', '')
+                        ->orWhere('parent_id', '0');
+                });
+            }
+        }
         $result = $this->handleTableRequest($request, $type, $query);
 
         if (($request->ajax() || $request->wantsJson()) && !$request->hasHeader('X-Inertia')) {

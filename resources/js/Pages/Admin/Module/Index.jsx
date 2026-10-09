@@ -9,10 +9,10 @@ import { hasPermission, stripTags } from '@/Utils/helper'
 import { TbDotsVertical, TbCloudDownload, TbCloudUpload, TbFileZip, TbDatabaseImport, TbDatabaseExport } from 'react-icons/tb'
 import { Dialog, Transition } from '@headlessui/react'
 import { Fragment } from 'react'
-import { RiBarChartBoxLine, RiCheckboxCircleLine, RiDraftLine, RiStackLine } from 'react-icons/ri'
+import { RiBarChartBoxLine, RiCheckboxCircleLine, RiDraftLine, RiStackLine, RiArrowLeftLine, RiCheckLine, RiCloseLine, RiErrorWarningLine, RiArrowLeftSLine } from 'react-icons/ri'
+import axios from 'axios'
 
 function Index({ data, table, type, stats }) {
-
   const { auth } = usePage().props
   const [Rows, setRows] = useState(data?.data || data || [])
   const [exportFormat, setExportFormat] = useState('csv')
@@ -21,6 +21,27 @@ function Index({ data, table, type, stats }) {
   const [showAdvancedModal, setShowAdvancedModal] = useState(false)
   const [activeTab, setActiveTab] = useState('export') // export or import
   const [importFile, setImportFile] = useState(null)
+  const [toasts, setToasts] = useState([])
+
+  const addToast = (message, type = 'success') => {
+    const id = Date.now()
+    setToasts(prev => [...prev, { id, message, type }])
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3500)
+  }
+
+  const handlePostAction = async (href, data = {}, label = '') => {
+    try {
+      await axios.post(href, data, {
+        headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content }
+      })
+      addToast(`${label || 'Action'} completed successfully.`, 'success')
+      // Refresh page data via Inertia without full reload
+      router.reload({ only: ['data'] })
+    } catch (err) {
+      const msg = err?.response?.data?.message || `${label || 'Action'} failed. Please try again.`
+      addToast(msg, 'error')
+    }
+  }
   useEffect(() => {
     setRows(data?.data || data || [])
   }, [data, type])
@@ -137,7 +158,92 @@ function Index({ data, table, type, stats }) {
     )
   }
 
-  const renderAction = (row) => {
+  const renderAction = (row, column) => {
+    // If the schema defines specific actions
+    if (column && column.actions && Array.isArray(column.actions)) {
+      return (
+        <div className='w-full flex h-12 my-auto items-center gap-3 justify-center'>
+          <ActionDropdown>
+            <ActionDropdown.Trigger>
+              <TbDotsVertical className='cursor-pointer size-4.25' />
+            </ActionDropdown.Trigger>
+            <ActionDropdown.Context className='flex flex-col gap-0.75 shadow-[2px_2px_3px_2px] shadow-secondary'>
+              {column.actions.map((actionItem, idx) => {
+                let href = '#';
+                
+                // If there's a condition to show this action based on row data
+                if (actionItem.condition) {
+                   const { key, operator, value } = actionItem.condition;
+                   if (operator === '==' && row[key] != value) return null;
+                   if (operator === '!=' && row[key] == value) return null;
+                }
+
+                if (actionItem.route) {
+                   let params = { type, id: row.id };
+                   if (actionItem.params) {
+                      params = { ...params, ...actionItem.params };
+                   }
+                   // Replace dynamic params from row
+                   Object.keys(params).forEach(k => {
+                      if (typeof params[k] === 'string' && params[k].startsWith('{') && params[k].endsWith('}')) {
+                         const rowKey = params[k].replace(/[{}]/g, '');
+                         params[k] = row[rowKey];
+                      }
+                   });
+                   href = route(actionItem.route, params);
+                } else if (actionItem.url_template) {
+                   href = actionItem.url_template;
+                   Object.keys(row).forEach(k => {
+                      href = href.replace(`{${k}}`, row[k] || '');
+                   });
+                }
+                
+                if (actionItem.type === 'external') {
+                  return (
+                    <a key={idx} href={href} target={actionItem.target || '_self'} className="block w-full text-left px-4 py-2 text-sm text-text hover:bg-common hover:text-primary transition-colors">
+                      {actionItem.label}
+                    </a>
+                  )
+                }
+
+                return (
+                  actionItem.method?.toUpperCase() === 'POST' ? (
+                    <button
+                      key={idx}
+                      onClick={() => handlePostAction(href, actionItem.data || {}, actionItem.label)}
+                      className={`h-10 w-full px-3 cursor-pointer flex items-center justify-start rounded-md transition-colors text-sm font-medium ${
+                        actionItem.label === 'Approve' ? 'text-green-600 hover:bg-green-100' :
+                        actionItem.label === 'Reject'  ? 'text-red-500 hover:bg-red-100' :
+                        actionItem.label === 'Delete'  ? 'text-red-700 hover:bg-red-100' :
+                        'text-heading hover:bg-primary hover:text-white'
+                      }`}
+                    >
+                      {actionItem.label}
+                    </button>
+                  ) : (
+                    <ActionDropdown.Link
+                      key={idx}
+                      method={actionItem.method || 'GET'}
+                      href={href}
+                      className={`h-10 w-full px-3 cursor-pointer flex items-center justify-start rounded-md transition-colors text-sm font-medium ${
+                        actionItem.label === 'Approve' ? 'text-green-600 hover:bg-green-100' :
+                        actionItem.label === 'Reject'  ? 'text-red-500 hover:bg-red-100' :
+                        actionItem.label === 'Delete'  ? 'text-red-700 hover:bg-red-100' :
+                        'text-heading hover:bg-primary hover:text-white'
+                      }`}
+                    >
+                      {actionItem.label}
+                    </ActionDropdown.Link>
+                  )
+                )
+              })}
+            </ActionDropdown.Context>
+          </ActionDropdown>
+        </div>
+      )
+    }
+
+    // Default action behavior
     return (
       <div className='w-full flex h-12 my-auto items-center gap-3 justify-center'>
         <ActionDropdown>
@@ -155,6 +261,7 @@ function Index({ data, table, type, stats }) {
                 Delete
               </ActionDropdown.Link>
             )}
+            
           </ActionDropdown.Context>
         </ActionDropdown>
       </div>
@@ -178,8 +285,21 @@ function Index({ data, table, type, stats }) {
         return renderDiscount(row, column)
       case 'status_dot':
         return renderStatusDot(row, column)
+      case 'status_badge': {
+        const s = row?.[column.column]
+        const map = {
+          approved: 'bg-green-100 text-green-700',
+          rejected: 'bg-red-100 text-red-600',
+          pending:  'bg-amber-100 text-amber-700',
+        }
+        return (
+          <span className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold capitalize ${ map[s] ?? 'bg-gray-100 text-gray-600'}`}>
+            {s ?? '—'}
+          </span>
+        )
+      }
       case 'action':
-        return renderAction(row)
+        return renderAction(row, column)
       case 'link':
         return renderLink(row, column)
       default:
@@ -324,7 +444,16 @@ function Index({ data, table, type, stats }) {
 
 
       <div className='flex justify-between items-center'>
-        <h1 className='text-xl font-medium capitalize text-primary'>{type}</h1>
+        <div className='flex items-center gap-3'>
+          <button
+            onClick={() => window.history.back()}
+            className='flex items-center justify-center size-8 rounded-lg bg-accent border border-secondary/20 hover:border-primary/40 hover:text-primary text-heading transition-all'
+            title='Go back'
+          >
+            <RiArrowLeftSLine className='size-4' />
+          </button>
+          <h1 className='text-xl font-medium capitalize text-primary'>{type}</h1>
+        </div>
         <div className='flex gap-3 items-center'>
           <select
             value={exportFormat}
@@ -393,6 +522,32 @@ function Index({ data, table, type, stats }) {
           ))}
         </Table.TBody>
       </Table>
+
+      {/* ── Toast Notifications ── */}
+      <div className='fixed bottom-6 right-6 z-[9999] flex flex-col gap-2.5 pointer-events-none'>
+        {toasts.map(toast => (
+          <div
+            key={toast.id}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl shadow-xl text-sm font-medium min-w-64 max-w-80 pointer-events-auto
+              animate-[slideInRight_0.3s_ease-out]
+              ${toast.type === 'success'
+                ? 'bg-green-600 text-white'
+                : 'bg-red-600 text-white'
+              }`}
+          >
+            <span className='shrink-0 size-5 rounded-full bg-white/20 flex items-center justify-center'>
+              {toast.type === 'success' ? <RiCheckLine className='size-3' /> : <RiErrorWarningLine className='size-3' />}
+            </span>
+            <span className='flex-1'>{toast.message}</span>
+            <button
+              onClick={() => setToasts(prev => prev.filter(t => t.id !== toast.id))}
+              className='shrink-0 opacity-70 hover:opacity-100'
+            >
+              <RiCloseLine className='size-4' />
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

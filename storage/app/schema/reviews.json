@@ -15,6 +15,11 @@
                 "index": true
             },
             {
+                "name": "parent_id",
+                "type": "unsignedBigInteger",
+                "default": null
+            },
+            {
                 "name": "user_id",
                 "type": "unsignedBigInteger",
                 "index": true
@@ -61,6 +66,7 @@
             "comment",
             "post_id",
             "user_id",
+            "parent_id",
             "status",
             "updated_at",
             "created_at"
@@ -152,7 +158,7 @@
                 "id": "status",
                 "label": "STATUS",
                 "column": "status",
-                "type": "text",
+                "type": "status_badge",
                 "width": "10%"
             },
             {
@@ -167,7 +173,33 @@
                 "label": "ACTION",
                 "column": "action",
                 "width": "20%",
-                "type": "action"
+                "type": "action",
+                "actions": [
+                    {
+                        "label": "Approve",
+                        "method": "POST",
+                        "route": "admin.reviews.status",
+                        "data": { "status": "approved" },
+                        "condition": { "key": "status", "operator": "!=", "value": "approved" }
+                    },
+                    {
+                        "label": "Reject",
+                        "method": "POST",
+                        "route": "admin.reviews.status",
+                        "data": { "status": "rejected" },
+                        "condition": { "key": "status", "operator": "!=", "value": "rejected" }
+                    },
+                    {
+                        "label": "View Replies",
+                        "method": "GET",
+                        "url_template": "/admin/reviews?id={id}"
+                    },
+                    {
+                        "label": "Delete",
+                        "method": "POST",
+                        "route": "admin.reviews.destroy"
+                    }
+                ]
             }
         ]
     },

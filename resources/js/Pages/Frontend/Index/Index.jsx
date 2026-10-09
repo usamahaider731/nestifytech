@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { usePage } from '@inertiajs/react';
 import FrontendLayout from '@/Layouts/FrontendLayout';
 import MainSlider from '@/Components/Index/MainSlider';
@@ -20,7 +20,7 @@ function Index({ data }) {
     const { __ } = useLang();
     const containerClass =
         setting.layout.Home.container_type === 'container' ? 'container mx-auto' : 'w-full';
-
+    const [services, SetServices] =  useState(setting.layout.Home.services ?? [])
     return (
         <div className="min-h-screen w-full bg-bg font-primary text-res">
             {data.main_slider && (
@@ -31,17 +31,12 @@ function Index({ data }) {
 
             <div className="border-b border-border">
                 <div className={`${containerClass} grid grid-cols-2 divide-x divide-border px-4 py-5 sm:px-6 md:grid-cols-4 lg:px-8`}>
-                    {[
-                        [RiTruckLine, __('Free delivery'), __('On orders over your limit')],
-                        [RiSecurePaymentLine, __('Secure payments'), __('Protected checkout')],
-                        [RiRefund2Line, __('Easy returns'), __('Simple return policy')],
-                        [RiCustomerService2Line, __('Expert support'), __('Here when you need us')],
-                    ].map(([Icon, title, detail]) => (
-                        <div key={title} className="flex items-center gap-3 px-3 first:pl-0 last:pr-0 md:px-5">
-                            <Icon className="shrink-0 text-2xl text-primary" />
+                    {services.map((service, index) => (
+                        <div key={index} className="flex items-center gap-3 px-3 first:pl-0 last:pr-0 md:px-5">
+                            <ImageViwer image={service.service_icon} alt={service.title} className="shrink-0 text-2xl h-8 w-8 text-primary" />
                             <div className="min-w-0">
-                                <p className="truncate text-xs font-bold uppercase tracking-wide text-heading">{title}</p>
-                                <p className="mt-1 truncate text-[11px] text-res">{detail}</p>
+                                <p className="truncate text-xs font-bold uppercase tracking-wide text-heading">{service.title}</p>
+                                <p className="mt-1 truncate text-[11px] text-res">{service.description}</p>
                             </div>
                         </div>
                     ))}
@@ -92,18 +87,18 @@ function Index({ data }) {
             <div className="relative z-10 w-full border-y border-border bg-white">
                 <div className={`${containerClass} px-4 sm:px-6 lg:px-8`}>
                     {data.popluar_products && (
-                        <PopularProducts products={data.popluar_products} cardType ={setting.layout.Home.popular_product_card_type} />
+                        <PopularProducts products={data.popluar_products} cardType={setting.layout.Home.popular_product_card_type} />
                     )}
                 </div>
             </div>
             <div className='w-full py-5'>
                 <div className={`${containerClass}  px-4 sm:px-6 lg:px-8`}>
-                    <AdsRender type='main' placement='home_bottom' className='w-full'  />
+                    <AdsRender type='main' placement='home_bottom' className='w-full' />
                 </div>
             </div>
             <div className='bg-white'>
-                    <BrandSlider />
-                    </div>
+                <BrandSlider />
+            </div>
 
         </div>
     );

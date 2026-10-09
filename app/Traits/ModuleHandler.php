@@ -112,7 +112,6 @@ trait ModuleHandler
             // Use ModuleHelper for complex queries (joins/selects)
             $query = \App\Helpers\ModuleHelper::buildQuery($tableName, $db);
         }
-
         // Search logic
         if ($request->search && isset($db['main_fields'])) {
             $search = $request->search;
@@ -134,10 +133,8 @@ trait ModuleHandler
         } else {
             $query->orderBy($tableName . '.id', 'desc');
         }
-
         // Fetch data
         $data = $query->paginate($perPage)->withQueryString();
-
         // Manual relation loading for Tables (Meta, Image)
         $data->getCollection()->transform(function ($item) use ($tableName, $type, $db) {
             if (is_array($item))
@@ -171,7 +168,6 @@ trait ModuleHandler
         if (method_exists($this, 'afterTableFetchHook')) {
             $this->afterTableFetchHook($data, $type);
         }
-
         return [
             'data' => $data,
             'table' => $tableConfigs,
@@ -231,7 +227,6 @@ trait ModuleHandler
                 }
             }
 
-            // dd($data);
             if (isset($db['columns'])) {
                 foreach ($db['columns'] as $col) {
                     $field = $col['id'];
@@ -250,7 +245,6 @@ trait ModuleHandler
                     $data[$autoSlugField] = Str::slug($data['title']);
                 }
                 else {
-                   dd($data[$autoSlugField]);
 
                 }
             }

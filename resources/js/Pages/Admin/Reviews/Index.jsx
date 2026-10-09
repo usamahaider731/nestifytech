@@ -8,7 +8,13 @@ import { RiStarFill, RiCheckLine, RiCloseLine, RiDeleteBinLine } from 'react-ico
 import { toast } from 'react-toastify'
 
 function ReviewIndex({ reviews: initialReviews }) {
-    const [reviews, setReviews] = useState(initialReviews);
+    const initialList = Array.isArray(initialReviews) ? initialReviews : (initialReviews?.data ?? []);
+    const [reviews, setReviews] = useState(initialList);
+    const selectedParentId = (() => {
+        if (typeof window === 'undefined') return null;
+        const match = window.location.pathname.match(/\/admin\/reviews\/(\d+)(?:\/)?$/);
+        return match ? Number(match[1]) : null;
+    })();
 
     const updateStatus = async (id, status) => {
         const r = toast.loading('Updating status...');
@@ -50,9 +56,24 @@ function ReviewIndex({ reviews: initialReviews }) {
         <div className='py-5 px-6'>
             <div className="mb-6 flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-heading font-roboto">Product Reviews</h1>
-                    <p className="text-sm text-res mt-1">Manage customer ratings and reviews across all products.</p>
+                    <h1 className="text-2xl font-bold text-heading font-roboto">
+                        {selectedParentId ? `Replies for Review #${selectedParentId}` : 'Product Reviews'}
+                    </h1>
+                    <p className="text-sm text-res mt-1">
+                        {selectedParentId
+                            ? 'Viewing review replies for the selected parent review.'
+                            : 'Manage customer ratings and reviews across all products.'}
+                    </p>
                 </div>
+
+                {selectedParentId && (
+                    <a
+                        href={route('admin.reviews.index')}
+                        className="inline-flex items-center rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-medium text-heading hover:bg-white/10"
+                    >
+                        Back to all reviews
+                    </a>
+                )}
             </div>
 
             <div className='bg-accent rounded-xl border border-white/5 shadow-xl overflow-hidden'>
@@ -108,6 +129,11 @@ function ReviewIndex({ reviews: initialReviews }) {
                                                     <TbDotsVertical className={`cursor-pointer size-4.25`} />
                                                 </ActionDropdown.Trigger>
                                                 <ActionDropdown.Context className={`flex flex-col gap-0.75 shadow-lg shadow-black/20`}>
+                                                    {!selectedParentId && (
+                                                        <ActionDropdown.List onClick={() => window.location.href = route('admin.reviews.index', { id: rev.id })} className='text-blue-500 hover:bg-blue-500/10 hover:text-blue-500'>
+                                                            View replies
+                                                        </ActionDropdown.List>
+                                                    )}
                                                     {rev.status !== 'approved' && (
                                                         <ActionDropdown.List onClick={() => updateStatus(rev.id, 'approved')} className='text-green-500 hover:bg-green-500/10 hover:text-green-500'>
                                                             <RiCheckLine /> Approve
