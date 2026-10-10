@@ -108,7 +108,11 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
             }
         });
 
-        formData.append('status', isDraft ? 'draft' : 'publish');
+        if (isDraft) {
+            formData.set('status', 'draft');
+        } else if (!data.status) {
+            formData.set('status', 'publish');
+        }
 
         const csrfToken = document.head.querySelector('meta[name="csrf-token"]')?.content;
         if (csrfToken) {
@@ -138,7 +142,12 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
                 onError: (errors) => {
                     if (!isSilent) {
                         toast.dismiss(r);
-                        toast.error(`${type} failed to submit`);
+                        const messages = Object.values(errors);
+                        if (messages.length > 0) {
+                            messages.forEach(msg => toast.error(msg));
+                        } else {
+                            toast.error(`${type} failed to submit`);
+                        }
                     }
                 },
                 onFinish: () => {

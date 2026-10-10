@@ -53,6 +53,21 @@ class FrontendController extends Controller
         ], $extra);
     }
 
+    private function blogQuery(array $extra = []): array
+    {
+
+        return array_merge([
+            'type' => 'blog',
+            'image' => true,
+            'meta' => true,
+            'category' => true,
+
+            'tags' => true,
+            'gallery' => true,
+            'status' => 'publish',
+        ], $extra);
+    }
+
     public function index()
     {
         $data = [];
@@ -67,6 +82,7 @@ class FrontendController extends Controller
                 'type' => 'category',
                 'id' => $index_settings['home_categories'],
                 'limit' => 10,
+
                 'image' => true,
                 'children' => true,
                 'meta' => true,
@@ -79,14 +95,14 @@ class FrontendController extends Controller
                 'latest' => true,
             ]));
         }
-            $data['popluar_products'] = get_posts($this->productQuery([
-                'limit' => 10,
+        $data['popluar_products'] = get_posts($this->productQuery([
+            'limit' => 10,
             'views' => 'desc',
-            ]));
-            $data['trending_products'] = get_posts($this->productQuery([
-                'limit' => 10,
-                'trending' => true,
-            ]));
+        ]));
+        $data['trending_products'] = get_posts($this->productQuery([
+            'limit' => 10,
+            'trending' => true,
+        ]));
         $blockImages = $index_settings['block_images'] ?? [];
         $heroImage = is_array($blockImages) && count($blockImages) > 0 ? $blockImages[0] : null;
 
@@ -104,7 +120,7 @@ class FrontendController extends Controller
             'data' => $data,
         ]);
     }
-    
+
     public function checkout()
     {
         return Inertia::render('Frontend/Checkout/Index');
@@ -183,7 +199,7 @@ class FrontendController extends Controller
                 'limit' => 40,
             ]);
 
-        $children = collect($taxonomy->children ?? [])->map(fn ($child) => [
+        $children = collect($taxonomy->children ?? [])->map(fn($child) => [
             'id' => $child->id,
             'title' => $child->title,
             'slug' => $child->slug ?? null,
@@ -194,7 +210,7 @@ class FrontendController extends Controller
             'products' => $products,
             'filters' => $applied,
             'filterOptions' => [
-                'brands' => collect($filterBrands)->map(fn ($brand) => [
+                'brands' => collect($filterBrands)->map(fn($brand) => [
                     'id' => $brand->id,
                     'title' => $brand->title,
                 ])->values(),
@@ -223,9 +239,9 @@ class FrontendController extends Controller
             'single' => true
         ]));
 
-$categoryId = array_map(function ($cat) {
-    return is_object($cat) ? $cat->id : $cat;
-}, $product->category ?? []);
+        $categoryId = array_map(function ($cat) {
+            return is_object($cat) ? $cat->id : $cat;
+        }, $product->category ?? []);
         $related_products = get_posts($this->productQuery([
             'limit' => 10,
             'category_id' => $categoryId,
@@ -339,5 +355,128 @@ $categoryId = array_map(function ($cat) {
         $redirect = $request->headers->get('referer') ?: route('index');
 
         return redirect($redirect)->cookie('locale', $prefix, 60 * 24 * 365);
+    }
+
+    public function blogIndex(Request $request)
+    {
+        $query = $this->blogQuery([
+            'limit' => 12,
+            'paginate' => true,
+            'latest' => true,
+            'keyword' => $request->search ?? null,
+        ]);
+
+        if ($request->category) {
+            $query['category_id'] = $request->category;
+        }
+
+        $blogs = get_posts($query);
+        $recent_blogs = get_posts($this->blogQuery([
+            'limit' => 5,
+            'latest' => true,
+        ]));
+
+        $categories = get_taxonomy([
+            'type' => 'blog_category',
+            'status' => 'publish',
+            'limit' => 30,
+        ]);
+
+        if (empty($categories)) {
+            $categories = get_taxonomy([
+                'type' => 'category',
+                'status' => 'publish',
+                'limit' => 30,
+            ]);
+        }
+
+        return Inertia::render('Frontend/Blog/Index', [
+            'blogs' => $blogs,
+            'recent_blogs' => $recent_blogs,
+            'categories' => $categories,
+            'filters' => [
+                'search' => $request->search ?? '',
+                'category' => $request->category ?? '',
+            ]
+        ]);
+    }
+
+    public function blogSingle(Request $request, $idOrSku)
+    {
+        $blog = get_posts($this->blogQuery([
+            'single' => true,
+            'type' => 'blog',
+            'id' => is_numeric($idOrSku) ? $idOrSku : null,
+            'sku' => !is_numeric($idOrSku) ? $idOrSku : null,
+
+        ]));
+
+        if (!$blog) {
+            $blog = get_posts($this->blogQuery([
+                'single' => true,
+                'type' => 'blog',
+                'id' => $idOrSku,
+            ]));
+        }
+
+        if (!$blog) {
+            abort(404);
+        }
+
+        $recent_blogs = get_posts($this->blogQuery([
+            'limit' => 4,
+            'type' => 'blog',
+            'latest' => true,
+            'exclude_id' => $blog->id ?? null,
+        ]));
+
+        $categories = get_taxonomy([
+            'type' => 'blog_category',
+            'status' => 'publish',
+            'limit' => 20,
+        ]);
+        if (empty($categories)) {
+            $categories = get_taxonomy([
+                'type' => 'category',
+                'status' => 'publish',
+                'limit' => 20,
+            ]);
+        }
+        return Inertia::render('Frontend/Blog/Single', [
+            'blog' => $blog,
+            'recent_blogs' => $recent_blogs,
+            'categories' => $categories,
+        ]);
+    }
+
+    public function dynamicPage(Request $request, string $slug)
+    {
+        $page = get_posts([
+            'type' => 'page',
+            'single' => true,
+            'sku' => $slug,
+            'status' => 'publish',
+            'image' => true,
+            'meta' => true,
+        ]);
+
+        if (!$page && is_numeric($slug)) {
+            $page = get_posts([
+                'type' => 'page',
+                'single' => true,
+                'id' => $slug,
+                'status' => 'publish',
+                'image' => true,
+                'meta' => true,
+            ]);
+        }
+
+        if (!$page) {
+            abort(404);
+        }
+
+        return Inertia::render('Frontend/Page/Single', [
+            'page' => $page,
+        ]);
     }
 }

@@ -1,0 +1,299 @@
+{
+    "db": {
+        "model": "App\\Models\\Posts",
+        "type": "blog",
+        "auto_slug": "sku",
+        "validation": {
+            "title": "required|string|max:255",
+            "description": "nullable|string|max:100000",
+            "status": "required|string|max:20"
+        },
+        "schema": [
+            {
+                "name": "user_id",
+                "type": "unsignedBigInteger",
+                "index": true
+            },
+            {
+                "name": "title",
+                "type": "string"
+            },
+            {
+                "name": "sku",
+                "type": "string",
+                "unique": true
+            },
+            {
+                "name": "description",
+                "type": "longText",
+                "nullable": true
+            },
+            {
+                "name": "status",
+                "type": "string",
+                "default": "publish"
+            },
+            {
+                "name": "type",
+                "type": "string",
+                "index": true
+            },
+            {
+                "name": "created_at",
+                "type": "timestamp",
+                "nullable": true
+            },
+            {
+                "name": "updated_at",
+                "type": "timestamp",
+                "nullable": true
+            }
+        ],
+        "main_fields": [
+            "title",
+            "sku",
+            "description",
+            "status",
+            "updated_at",
+            "created_at"
+        ],
+        "fixed_fields": {
+            "user_id": "auth_id",
+            "type": "blog"
+        },
+        "relations": {
+            "image": "single_image",
+            "gallery": "gallery_image"
+        },
+        "meta_fields": "auto",
+        "features": {
+            "blog_category": true,
+            "category": true,
+            "brand": false,
+            "attributes": false,
+            "variations": false,
+            "short_description": true,
+            "category_filter": true
+        },
+        "meta_processing": {
+            "blog_category": "json_array",
+            "category": "json_array"
+        },
+        "table": "posts"
+    },
+    "table": {
+        "card": {
+            "image": "image",
+            "title": "title",
+            "subtitle": "sku",
+            "top_right": "status",
+            "badges": ["blog_category"],
+            "actions": "action"
+        },
+        "keywords": true,
+        "paginationPerPage": 10,
+        "paginationList": [
+            10,
+            20,
+            50,
+            100
+        ],
+        "table": "posts",
+        "type": "blog",
+        "bulk": {
+            "table": "posts",
+            "type": "blog",
+            "route": "bulk.action",
+            "column": "status",
+            "is_meta": false,
+            "options": [
+                {
+                    "label": "Delete",
+                    "value": "delete"
+                },
+                {
+                    "label": "Publish",
+                    "value": "publish"
+                },
+                {
+                    "label": "Draft",
+                    "value": "Draft"
+                }
+            ]
+        },
+        "columns": [
+            {
+                "id": "id",
+                "label": "ID",
+                "column": "id",
+                "width": "5%",
+                "sort": true
+            },
+            {
+                "id": "image",
+                "label": "IMAGE",
+                "width": "10%",
+                "column": "image",
+                "type": "image",
+                "key": "filename"
+            },
+            {
+                "id": "title",
+                "label": "BLOG TITLE",
+                "column": "title",
+                "sort": true,
+                "width": "30%"
+            },
+            {
+                "id": "sku",
+                "label": "SLUG / SKU",
+                "column": "sku",
+                "width": "15%",
+                "sort": true
+            },
+            {
+                "id": "blog_category",
+                "column": "parent",
+                "label": "BLOG CATEGORY",
+                "type": "badage",
+                "field": "blog_category",
+                "meta": true,
+                "meta_key": "blog_category",
+                "value_table": "taxonomies",
+                "is_array": true,
+                "meta_value_type": "json",
+                "value_condition": {
+                    "pass_value_of_key": "id",
+                    "return_key": "title"
+                },
+                "width": "15%"
+            },
+            {
+                "id": "status",
+                "label": "STATUS",
+                "column": "status",
+                "width": "10%",
+                "type": "status_dot"
+            },
+            {
+                "id": "action",
+                "label": "ACTION",
+                "column": "action",
+                "width": "15%",
+                "type": "action"
+            }
+        ]
+    },
+    "form": [
+        {
+            "title": "Blog Information",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Blog Post Title",
+                    "name": "title",
+                    "type": "text",
+                    "placeholder": "Enter article title...",
+                    "attribute": "required",
+                    "style": 2
+                },
+                {
+                    "label": "Slug / Model",
+                    "name": "sku",
+                    "type": "text",
+                    "placeholder": "e.g. my-awesome-blog-post",
+                    "attribute": "required",
+                    "style": 2
+                },
+                {
+                    "label": "Excerpt / Short Description",
+                    "name": "short_description",
+                    "type": "textarea",
+                    "placeholder": "Write blog summary...",
+                    "translate": true,
+                    "style": 2
+                },
+                {
+                    "label": "Blog Article Content",
+                    "name": "description",
+                    "type": "desc",
+                    "placeholder": "Write full blog article here...",
+                    "translate": true
+                }
+            ]
+        },
+        {
+            "title": "Media Assets",
+            "style": "main",
+            "tab": "Media",
+            "fields": [
+                {
+                    "label": "Featured Cover Image",
+                    "name": "image",
+                    "type": "image"
+                },
+                {
+                    "label": "Article Gallery",
+                    "name": "gallery",
+                    "type": "image",
+                    "multiple": true
+                }
+            ]
+        },
+        {
+            "title": "Search Engine Optimization (SEO)",
+            "style": "main",
+            "tab": "SEO",
+            "fields": [
+                {
+                    "label": "SEO Title",
+                    "name": "seo_title",
+                    "type": "text",
+                    "placeholder": "SEO Title for search engine results",
+                    "style": 2
+                },
+                {
+                    "label": "SEO Keywords",
+                    "name": "seo_keywords",
+                    "type": "text",
+                    "placeholder": "blog, article, news",
+                    "style": 2
+                },
+                {
+                    "label": "SEO Description",
+                    "name": "seo_description",
+                    "type": "desc",
+                    "placeholder": "Summary of article for search result snippets..."
+                }
+            ]
+        },
+        {
+            "title": "Organize & Publish",
+            "style": "sidebar",
+            "fields": [
+                {
+                    "label": "Blog Category",
+                    "name": "blog_category",
+                    "type": "dropdown",
+                    "multiple": true,
+                    "searchable": true,
+                    "options": {
+                        "model": "Taxonomy",
+                        "type": "blog_category"
+                    }
+                },
+                {
+                    "label": "Tags",
+                    "name": "tags",
+                    "type": "dropdown",
+                    "multiple": true,
+                    "searchable": true,
+                    "options": {
+                        "model": "Taxonomy",
+                        "type": "tag"
+                    }
+                }
+            ]
+        }
+    ]
+}

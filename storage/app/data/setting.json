@@ -617,6 +617,8 @@
                     "name": "placement",
                     "label": "Placement",
                     "type": "dropdown",
+                    "unique": true,
+                    "searchable":false,
                     "options": [
                         {
                             "id": "home_top",

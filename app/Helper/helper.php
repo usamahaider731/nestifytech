@@ -148,7 +148,8 @@ function hydrate_posts($result, array $args, bool $attachCategory, bool $attachB
     });
 
     if ($attachCategory) {
-        $result = \App\Models\PostTaxonomy::get_attribute($result, 'taxonomies', '', 'from_meta', 'category', '');
+        $categoryMetaKey = ($args['type'] ?? '') === 'blog' ? 'blog_category' : 'category';
+        $result = \App\Models\PostTaxonomy::get_attribute($result, 'taxonomies', '', 'from_meta', $categoryMetaKey, '');
     }
     if ($attachBrand) {
         $result = \App\Models\PostTaxonomy::get_attribute($result, 'taxonomies', '', 'from_meta', 'brand', '');
@@ -191,16 +192,55 @@ function hydrate_posts($result, array $args, bool $attachCategory, bool $attachB
     return $result;
 }
 
-function attach_taxonomy_children_products($items)
+function attach_taxonomy_children_products($items, $taxonomyType = 'category')
 {
     foreach ($items as $item) {
         $children = DB::table('taxonomies')->where('parent_id', $item->id)->get();
 
-        foreach ($children as $child) {
-            $child->products = get_posts([
+        if ($taxonomyType === 'blog_category') {
+            foreach ($children as $child) {
+                $child->blogs = get_posts([
+                    'type' => 'blog',
+                    'blog_category' => $child->id,
+                    'limit' => 12,
+                    'image' => true,
+                    'meta' => true,
+                ]);
+            }
+            $item->blogs = get_posts([
+                'type' => 'blog',
+                'blog_category' => $item->id,
+                'limit' => 12,
+                'image' => true,
+                'meta' => true,
+            ]);
+            $allBlogs = collect($item->blogs)->merge(
+                collect($children)->flatMap(function ($child) {
+                    return $child->blogs ?? [];
+                })
+            )->unique('id')->values()->toArray();
+            $item->all_blogs = $allBlogs;
+            $item->children = attach_taxonomy_children_products($children, $taxonomyType);
+        } else {
+            foreach ($children as $child) {
+                $child->products = get_posts([
+                    'type' => 'product',
+                    'category' => true,
+                    'category_id' => $child->id,
+                    'limit' => 12,
+                    'image' => true,
+                    'meta' => true,
+                    'brand' => true,
+                    'gallery' => true,
+                    'parent' => true,
+                    'variation' => true,
+                    'address' => true,
+                ]);
+            }
+            $item->products = get_posts([
                 'type' => 'product',
                 'category' => true,
-                'category_id' => $child->id,
+                'category_id' => $item->id,
                 'limit' => 12,
                 'image' => true,
                 'meta' => true,
@@ -210,27 +250,14 @@ function attach_taxonomy_children_products($items)
                 'variation' => true,
                 'address' => true,
             ]);
+            $allProducts = collect($item->products)->merge(
+                collect($children)->flatMap(function ($child) {
+                    return $child->products ?? [];
+                })
+            )->unique('id')->values()->toArray();
+            $item->all_products = $allProducts;
+            $item->children = attach_taxonomy_children_products($children, $taxonomyType);
         }
-        $item->products = get_posts([
-            'type' => 'product',
-            'category' => true,
-            'category_id' => $item->id,
-            'limit' => 12,
-            'image' => true,
-            'meta' => true,
-            'brand' => true,
-            'gallery' => true,
-            'parent' => true,
-            'variation' => true,
-            'address' => true,
-        ]);
-        $allProducts = $item->products->merge(
-            $children->flatMap(function ($child) {
-                return $child->products;
-            })
-        )->unique('id')->values()->toArray();
-        $item->all_products = $allProducts;
-        $item->children = attach_taxonomy_children_products($children);
     }
 
     return $items;
@@ -248,7 +275,6 @@ function get_taxonomy($type = null, $key = null, $value = null, $limit = null)
     }
 
     $query = \App\Models\PostTaxonomy::query()->where('status', $args['status'] ?? 'publish');
-
     if (! empty($args['type'])) {
         $query->where('type', $args['type']);
     }
@@ -277,11 +303,14 @@ function get_taxonomy($type = null, $key = null, $value = null, $limit = null)
         $query->with('meta');
     }
 
+    $taxType = $args['type'] ?? 'category';
+
     if (($args['limit'] ?? null) == 1 || ! empty($args['single'])) {
         $item = $query->first();
         if ($item) {
             $item->children = attach_taxonomy_children_products(
-                DB::table('taxonomies')->where('parent_id', $item->id)->get()
+                DB::table('taxonomies')->where('parent_id', $item->id)->get(),
+                $taxType
             );
             if ($item->relationLoaded('meta')) {
                 $item->setRelation('meta', $item->meta->keyBy('key'));
@@ -292,7 +321,7 @@ function get_taxonomy($type = null, $key = null, $value = null, $limit = null)
     }
 
     $items = $query->get();
-    $items = attach_taxonomy_children_products($items);
+    $items = attach_taxonomy_children_products($items, $taxType);
     foreach ($items as $item) {
         if ($item->relationLoaded('meta')) {
             $item->setRelation('meta', $item->meta->keyBy('key'));
@@ -359,13 +388,17 @@ function get_posts(array $args = [])
     } elseif (! empty($args['latest'])) {
         $posts->orderBy('created_at', 'desc');
     }
-
     $categoryIds = helper_ids($args['category_id'] ?? ($args['category_ids'] ?? []));
     $brandIds = helper_ids($args['brand_id'] ?? ($args['brand_ids'] ?? []));
     $tagIds = helper_ids($args['tag_id'] ?? ($args['tag_ids'] ?? ($args['tags_id'] ?? [])));
 
     if ($categoryIds === [] && isset($args['category']) && $args['category'] !== true) {
-        $categoryIds = helper_ids($args['category']);
+        if ($args['type'] === 'blog') {
+
+            $categoryIds = helper_ids($args['blog_category']);
+        } else {
+            $categoryIds = helper_ids($args['category']);
+        }
     }
     if ($brandIds === [] && isset($args['brand']) && $args['brand'] !== true) {
         $brandIds = helper_ids($args['brand']);
@@ -375,7 +408,12 @@ function get_posts(array $args = [])
     }
 
     if ($categoryIds !== []) {
-        apply_post_meta_id_filter($posts, 'category', $categoryIds);
+
+        if ($args['type'] === 'blog') {
+            apply_post_meta_id_filter($posts, 'blog_category', $categoryIds);
+        } else {
+            apply_post_meta_id_filter($posts, 'category', $categoryIds);
+        }
     }
     if ($brandIds !== []) {
         apply_post_meta_id_filter($posts, 'brand', $brandIds);
@@ -446,7 +484,6 @@ function get_posts(array $args = [])
     $attachBrand = ! empty($args['brand']) || $brandIds !== [];
     $attachTags = ! empty($args['tags']) || $tagIds !== [];
     $attachAddress = ! empty($args['address']);
-
     if (! empty($args['meta']) || $attachCategory || $attachBrand || $attachTags || $attachAddress) {
         $posts->with('meta');
     }

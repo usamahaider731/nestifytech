@@ -29,6 +29,9 @@ Route::controller(FrontendController::class)->group(function () {
     Route::get('/compare', 'compare')->name('compare');
     Route::get('/view/specific/classification/{type}/{id}/{slug}', 'taxonomyView')->name('taxonomy.view');
     Route::get('/view/post/{type}/{sku}/{id}', 'singleProduct')->name('post');
+    Route::get('/blog', 'blogIndex')->name('blog.index');
+    Route::get('/blog/{idOrSku}', 'blogSingle')->name('blog.single');
+    Route::get('/page/{slug}', 'dynamicPage')->name('page.single');
     Route::get('/get_languages', 'get_languages')->name('languages');
     Route::get('/set-language/{prefix}', 'setLanguage')->name('language.set');
 });

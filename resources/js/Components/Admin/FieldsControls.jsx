@@ -91,6 +91,34 @@ const FieldControls = ({
         }
     }
 
+    // === TEXTAREA ===
+    if (field.type === 'textarea') {
+        if (!field.show_on || data[field.show_on] === "text" || data[field.show_on] === 'color') {
+            let value = getNestedValue(data, field.name)
+            if (typeof value === 'undefined' && field.value) {
+                value = field.value;
+            }
+            return (
+                <div className={`flex flex-col gap-2 ${colSpan} ${fieldClass}`} key={field.name}>
+                    <InputLabel className='text-heading'>{field.label}</InputLabel>
+                    <textarea
+                        name={field.name}
+                        value={value}
+                        placeholder={field.placeholder}
+                        onChange={(e) => updateField(field.name, e.target.value)}
+                        required={field.attribute === 'required'}
+                        className="border px-3 py-2 w-full rounded appearance-none"
+                    />
+                    {
+                        field.desc &&
+
+                        <p className="text-xs font-medium text-res italic">{field.desc}</p>
+                    }
+                </div>
+            );
+        }
+    }
+
     // === PHONE FIELD ===
     if (field.type === 'phone') {
         return (

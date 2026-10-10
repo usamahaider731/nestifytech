@@ -170,6 +170,50 @@
         ]
       },
       {
+        "id": "blog",
+        "title": "Blog",
+        "icon": "ri-article-line",
+        "permission": "blog-read",
+        "menu": [
+          {
+            "id": "add-blog",
+            "title": "Add Blog",
+            "route": "post.create",
+            "params": {
+              "type": "blog"
+            },
+            "permission": "blog-create"
+          },
+          {
+            "id": "view-blog",
+            "title": "View Blogs",
+            "route": "post.index",
+            "params": {
+              "type": "blog"
+            },
+            "permission": "blog-read"
+          },
+          {
+            "id": "view-blog-categories",
+            "title": "Blog Categories",
+            "route": "taxonomy.index",
+            "params": {
+              "type": "blog_category"
+            },
+            "permission": "blog-read"
+          },
+          {
+            "id": "create-blog-category",
+            "title": "Add Blog Category",
+            "route": "taxonomy.create",
+            "params": {
+              "type": "blog_category"
+            },
+            "permission": "blog-create"
+          }
+        ]
+      },
+      {
         "id": "category",
         "title": "Category",
         "icon": "ri-apps-line",
@@ -354,6 +398,32 @@
           "type": "Single_Category"
         },
         "permission": "layout-write"
+      },
+      {
+        "id": "pages",
+        "title": "Dynamic Pages",
+        "icon": "ri-file-text-line",
+        "permission": "page-read",
+        "menu": [
+          {
+            "id": "view-pages",
+            "title": "View Pages",
+            "route": "post.index",
+            "params": {
+              "type": "page"
+            },
+            "permission": "page-read"
+          },
+          {
+            "id": "create-page",
+            "title": "Add Page",
+            "route": "post.create",
+            "params": {
+              "type": "page"
+            },
+            "permission": "page-create"
+          }
+        ]
       }
     ]
   },

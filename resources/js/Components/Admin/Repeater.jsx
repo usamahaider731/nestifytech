@@ -105,6 +105,11 @@ function Repeater({ value = [], onChange, label = "Item", fields = [], dropdownO
 
     const duplicateItem = (index) => {
         const itemToCopy = { ...items[index] };
+        fields.forEach((field) => {
+            if (field.unique || field.unique_options || field.name === 'placement') {
+                itemToCopy[field.name] = '';
+            }
+        });
         const newItems = [...items];
         newItems.splice(index + 1, 0, itemToCopy);
         onChange(newItems);
@@ -181,9 +186,26 @@ function Repeater({ value = [], onChange, label = "Item", fields = [], dropdownO
                 );
 
             case 'dropdown': {
-                const options = Array.isArray(field.options)
+                const rawOptions = Array.isArray(field.options)
                     ? field.options
                     : (dropdownOptions[field.name] || dropdownOptions[field.options?.type] || []);
+
+                const isUniqueField = field.unique || field.unique_options || field.name === 'placement';
+                let options = rawOptions;
+
+                if (isUniqueField) {
+                    const currentVal = (item[field.name] ?? '').toString();
+                    const usedValues = items
+                        .filter((_, i) => i !== index)
+                        .map((it) => (it[field.name] ?? '').toString())
+                        .filter((val) => val !== '');
+
+                    options = rawOptions.filter((opt) => {
+                        const optVal = (opt.id ?? opt.value ?? opt.name ?? opt).toString();
+                        return optVal === currentVal || !usedValues.includes(optVal);
+                    });
+                }
+
                 return (
                     <DropdownSelect
                         {...commonProps}

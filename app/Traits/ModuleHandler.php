@@ -239,6 +239,9 @@ trait ModuleHandler
                     $data[$key] = ($val === 'auth_id') ? auth()->id() : $val;
                 }
             }
+            if (in_array('status', $db['main_fields'] ?? []) && empty($data['status'])) {
+                $data['status'] = 'publish';
+            }
             $autoSlugField = $db['auto_slug'] ?? null;
             if ($autoSlugField && isset($data['title'])) {
                 if ((empty($data[$autoSlugField]) || ($data[$autoSlugField] != null))  && (empty($request->input($autoSlugField)) ||$request->input($autoSlugField) != null)) {

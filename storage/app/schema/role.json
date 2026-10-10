@@ -144,6 +144,9 @@
                     "type": "matrix",
                     "rows": [
                         "Product",
+                        "Blog",
+                        "Blog Category",
+                        "Page",
                         "Category",
                         "Brand",
                         "Tag",

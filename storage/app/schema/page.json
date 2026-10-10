@@ -1,0 +1,260 @@
+{
+    "db": {
+        "model": "App\\Models\\Posts",
+        "type": "page",
+        "auto_slug": "sku",
+        "validation": {
+            "title": "required|string|max:255",
+            "description": "nullable|string|max:100000",
+            "status": "required|string|max:20"
+        },
+        "schema": [
+            {
+                "name": "user_id",
+                "type": "unsignedBigInteger",
+                "index": true
+            },
+            {
+                "name": "title",
+                "type": "string"
+            },
+            {
+                "name": "sku",
+                "type": "string",
+                "unique": true
+            },
+            {
+                "name": "description",
+                "type": "longText",
+                "nullable": true
+            },
+            {
+                "name": "status",
+                "type": "string",
+                "default": "publish"
+            },
+            {
+                "name": "type",
+                "type": "string",
+                "index": true
+            },
+            {
+                "name": "created_at",
+                "type": "timestamp",
+                "nullable": true
+            },
+            {
+                "name": "updated_at",
+                "type": "timestamp",
+                "nullable": true
+            }
+        ],
+        "main_fields": [
+            "title",
+            "sku",
+            "description",
+            "status",
+            "updated_at",
+            "created_at"
+        ],
+        "fixed_fields": {
+            "user_id": "auth_id",
+            "type": "page"
+        },
+        "relations": {
+            "image": "single_image"
+        },
+        "meta_fields": "auto",
+        "features": {
+            "category": false,
+            "brand": false,
+            "attributes": false,
+            "variations": false,
+            "short_description": true
+        },
+        "table": "posts"
+    },
+    "table": {
+        "card": {
+            "image": "image",
+            "title": "title",
+            "subtitle": "sku",
+            "top_right": "status",
+            "actions": "action"
+        },
+        "keywords": true,
+        "paginationPerPage": 10,
+        "paginationList": [
+            10,
+            20,
+            50,
+            100
+        ],
+        "table": "posts",
+        "type": "page",
+        "bulk": {
+            "table": "posts",
+            "type": "page",
+            "route": "bulk.action",
+            "column": "status",
+            "is_meta": false,
+            "options": [
+                {
+                    "label": "Delete",
+                    "value": "delete"
+                },
+                {
+                    "label": "Publish",
+                    "value": "publish"
+                },
+                {
+                    "label": "Draft",
+                    "value": "Draft"
+                }
+            ]
+        },
+        "columns": [
+            {
+                "id": "id",
+                "label": "ID",
+                "column": "id",
+                "width": "5%",
+                "sort": true
+            },
+            {
+                "id": "image",
+                "label": "IMAGE",
+                "width": "10%",
+                "column": "image",
+                "type": "image",
+                "key": "filename"
+            },
+            {
+                "id": "title",
+                "label": "PAGE TITLE",
+                "column": "title",
+                "sort": true,
+                "width": "35%"
+            },
+            {
+                "id": "sku",
+                "label": "SLUG / URL",
+                "column": "sku",
+                "width": "20%",
+                "sort": true
+            },
+            {
+                "id": "status",
+                "label": "STATUS",
+                "column": "status",
+                "width": "15%",
+                "type": "status_dot"
+            },
+            {
+                "id": "action",
+                "label": "ACTION",
+                "column": "action",
+                "width": "15%",
+                "type": "action"
+            }
+        ]
+    },
+    "form": [
+        {
+            "title": "Page Content",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Page Title",
+                    "name": "title",
+                    "type": "text",
+                    "placeholder": "e.g. About Us, Privacy Policy, Contact Us...",
+                    "attribute": "required",
+                    "style": 2
+                },
+                {
+                    "label": "Slug / URL Identifier",
+                    "name": "sku",
+                    "type": "text",
+                    "placeholder": "e.g. about-us",
+                    "attribute": "required",
+                    "style": 2
+                },
+                {
+                    "label": "Subtitle / Short Description",
+                    "name": "short_description",
+                    "type": "desc",
+                    "placeholder": "Short summary or subtitle for header...",
+                    "translate": true
+                },
+                {
+                    "label": "Page Content (Rich Text)",
+                    "name": "description",
+                    "type": "desc",
+                    "placeholder": "Write full page content here...",
+                    "translate": true
+                }
+            ]
+        },
+        {
+            "title": "Page Banner Image",
+            "style": "main",
+            "tab": "Media",
+            "fields": [
+                {
+                    "label": "Header Banner Image",
+                    "name": "image",
+                    "type": "image"
+                }
+            ]
+        },
+        {
+            "title": "Search Engine Optimization (SEO)",
+            "style": "main",
+            "tab": "SEO",
+            "fields": [
+                {
+                    "label": "SEO Meta Title",
+                    "name": "seo_title",
+                    "type": "text",
+                    "placeholder": "Meta title for search engines",
+                    "style": 2
+                },
+                {
+                    "label": "SEO Keywords",
+                    "name": "seo_keywords",
+                    "type": "text",
+                    "placeholder": "about, company, policy",
+                    "style": 2
+                },
+                {
+                    "label": "SEO Meta Description",
+                    "name": "seo_description",
+                    "type": "desc",
+                    "placeholder": "Meta description for search engine result snippets..."
+                }
+            ]
+        },
+        {
+            "title": "Publish Settings",
+            "style": "sidebar",
+            "fields": [
+                {
+                    "label": "Status",
+                    "name": "status",
+                    "type": "dropdown",
+                    "options": [
+                        {
+                            "title": "Publish",
+                            "id": "publish"
+                        },
+                        {
+                            "title": "Draft",
+                            "id": "draft"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

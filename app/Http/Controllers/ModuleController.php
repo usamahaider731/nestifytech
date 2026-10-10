@@ -25,8 +25,15 @@ class ModuleController extends Controller
         $user = User::find($user->id);
 
         $permission = strtolower($type) . '-' . strtolower($action);
-        if (!in_array($permission, $user->user_permissions)) {
-            abort(403, "Access Denied: Permission '{$permission}' is required.");
+        $userPerms = $user->user_permissions ?? [];
+
+        if (!in_array($permission, $userPerms)) {
+            $fallbackProduct = 'product-' . strtolower($action);
+            $fallbackPost = 'post-' . strtolower($action);
+            $fallbackBlog = 'blog-' . strtolower($action);
+            if (!in_array($fallbackProduct, $userPerms) && !in_array($fallbackPost, $userPerms) && !in_array($fallbackBlog, $userPerms)) {
+                abort(403, "Access Denied: Permission '{$permission}' is required.");
+            }
         }
     }
 
@@ -80,12 +87,13 @@ class ModuleController extends Controller
 
             // Specialized category filtering if configured
             if ($id && ($dbConfig['features']['category_filter'] ?? false)) {
-                $category = DB::table('taxonomies')->where(['type' => 'category', 'id' => $id])->first();
+                $category = DB::table('taxonomies')->where('id', $id)->first();
                 if ($category) {
                     $metaTable = $dbConfig['meta_table'] ?? (Str::singular($tableName) . '_meta');
                     $metaKey = $dbConfig['meta_key'] ?? (Str::singular($tableName) . '_id');
+                    $filterKey = ($type === 'blog' || isset($dbConfig['features']['blog_category'])) ? 'blog_category' : 'category';
                     $query->join($metaTable, "{$tableName}.id", '=', "{$metaTable}.{$metaKey}")
-                        ->where("{$metaTable}.key", 'category')
+                        ->where("{$metaTable}.key", $filterKey)
                         ->where("{$metaTable}.value", 'like', '%"' . $category->id . '"%')
                         ->select("{$tableName}.*");
                 }
@@ -270,8 +278,8 @@ class ModuleController extends Controller
             $type = $id;
             $id = $temp;
         }
-
         $response = $this->handleSubmission($request, $type, $id);
+
         if (($request->ajax() || $request->wantsJson()) && !$request->hasHeader('X-Inertia')) {
             return response()->json($response, $response['success'] ? 200 : 500);
         }
