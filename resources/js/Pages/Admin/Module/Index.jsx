@@ -63,9 +63,8 @@ function Index({ data, table, type, stats }) {
       width: `${Math.floor(100 / Math.max(safe.length, 1))}%`,
     }))
   }, [table?.columns, data])
-
-  const canWrite = hasPermission(auth?.user, `${type}-write`)
-  const canDelete = hasPermission(auth?.user, `${type}-delete`)
+  const canWrite = hasPermission(auth?.user, `${type.split('_')[0]}-write`)
+  const canDelete = hasPermission(auth?.user, `${type.split('_')[0]}-delete`)
   const baseRoutes = useMemo(() => {
     // Prefer unified module routes everywhere
     return {
@@ -567,8 +566,6 @@ function Index({ data, table, type, stats }) {
       }
     );
   }
-
-  console.log(stats)
   return (
     <div className='w-full py-7 flex flex-col gap-7.5'>
 
@@ -613,7 +610,7 @@ function Index({ data, table, type, stats }) {
           >
             <RiArrowLeftSLine className='size-4' />
           </button>
-          <h1 className='text-xl font-medium capitalize text-primary'>{type}</h1>
+          <h1 className='text-xl font-medium capitalize text-primary'>{type.replace('_', ' ')}</h1>
         </div>
         <div className='flex gap-3 items-center'>
           {/* View Toggle */}
@@ -656,9 +653,9 @@ function Index({ data, table, type, stats }) {
           {canWrite && (
             <Link
               href={route(baseRoutes.create, { type })}
-              className='bg-primary text-white px-4 py-2 rounded-md text-sm font-medium'
+              className='bg-primary text-white px-4 py-2 capitalize rounded-md text-sm font-medium'
             >
-              Create New {type}
+              Create New {type.replace('_', ' ')}
             </Link>
           )}
         </div>

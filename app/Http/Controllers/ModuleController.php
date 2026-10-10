@@ -124,6 +124,7 @@ class ModuleController extends Controller
                 });
             }
         }
+        
         $result = $this->handleTableRequest($request, $type, $query);
 
         if ($type === 'roles' || $type === 'role') {
