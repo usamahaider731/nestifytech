@@ -196,7 +196,6 @@ function attach_taxonomy_children_products($items, $taxonomyType = 'category')
 {
     foreach ($items as $item) {
         $children = DB::table('taxonomies')->where('parent_id', $item->id)->get();
-
         if ($taxonomyType === 'blog_category') {
             foreach ($children as $child) {
                 $child->blogs = get_posts([
@@ -391,10 +390,8 @@ function get_posts(array $args = [])
     $categoryIds = helper_ids($args['category_id'] ?? ($args['category_ids'] ?? []));
     $brandIds = helper_ids($args['brand_id'] ?? ($args['brand_ids'] ?? []));
     $tagIds = helper_ids($args['tag_id'] ?? ($args['tag_ids'] ?? ($args['tags_id'] ?? [])));
-
     if ($categoryIds === [] && isset($args['category']) && $args['category'] !== true) {
         if ($args['type'] === 'blog') {
-
             $categoryIds = helper_ids($args['blog_category']);
         } else {
             $categoryIds = helper_ids($args['category']);
@@ -410,6 +407,7 @@ function get_posts(array $args = [])
     if ($categoryIds !== []) {
 
         if ($args['type'] === 'blog') {
+
             apply_post_meta_id_filter($posts, 'blog_category', $categoryIds);
         } else {
             apply_post_meta_id_filter($posts, 'category', $categoryIds);

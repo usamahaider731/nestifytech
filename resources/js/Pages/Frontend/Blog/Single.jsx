@@ -4,10 +4,11 @@ import FrontendLayout from '@/Layouts/FrontendLayout';
 import ImageViwer from '@/Components/Admin/ImageViwer';
 import { RiCalendarLine, RiFolder3Line, RiArrowLeftLine, RiNewspaperLine, RiPriceTag3Line } from 'react-icons/ri';
 import { useLang } from '@/contexts/LanguageContext';
+import ArticalCard from '@/Components/ArticalCard';
 
 export default function BlogSingle({ blog, recent_blogs = [], categories = [] }) {
     const { __ } = useLang();
-    
+
     if (!blog) return null;
 
     const dateStr = blog.created_at
@@ -57,7 +58,7 @@ export default function BlogSingle({ blog, recent_blogs = [], categories = [] })
                                     ))}
                                 </div>
 
-                                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-heading font-oswald leading-tight tracking-tight">
+                                <h1 className="text-3xl sm:text-4xl font-bold text-heading font-oswald leading-tight tracking-tight">
                                     {blog.title}
                                 </h1>
 
@@ -86,7 +87,7 @@ export default function BlogSingle({ blog, recent_blogs = [], categories = [] })
 
                             {/* Short Description Excerpt */}
                             {blog?.meta?.short_description && (
-                                <div className="p-6 bg-bg rounded-2xl border-l-4 border-primary border text-heading text-lg font-medium italic">
+                                <div className="p-6 bg-bg rounded-2xl border-l-4 border-primary border text-heading text-base font-roboto font-medium italic">
                                     "{blog?.meta?.short_description.value}"
                                 </div>
                             )}
@@ -139,10 +140,10 @@ export default function BlogSingle({ blog, recent_blogs = [], categories = [] })
                                             <li key={cat.id}>
                                                 <Link
                                                     href={route('blog.index', { category: cat.slug || cat.id })}
-                                                    className="flex items-center justify-between text-sm font-medium text-res hover:text-primary transition-colors py-1 px-2 rounded-lg hover:bg-bg/40"
+                                                    className="flex items-center justify-between font-roboto text-sm font-medium text-res hover:text-primary transition-colors py-1 px-2 rounded-lg hover:bg-bg/40"
                                                 >
                                                     <span>{cat.title}</span>
-                                                    <span className="text-xs bg-common px-2 py-0.5 rounded-full border border-border/40 text-res/70">
+                                                    <span className="text-xs font-roboto bg-common px-2 py-0.5 rounded-full border border-border/40 text-res/70">
                                                         {cat.all_blogs ? cat.all_blogs.length : 0}
                                                     </span>
                                                 </Link>
@@ -154,7 +155,7 @@ export default function BlogSingle({ blog, recent_blogs = [], categories = [] })
 
                             {/* Recent Articles Widget */}
                             {recent_blogs.length > 0 && (
-                                <div className="bg-bg rounded-2xl border border-border/60 p-6 shadow-sm">
+                                <div className="bg-bg rounded border border-border/60 p-6 shadow-sm">
                                     <h3 className="text-lg font-bold text-heading font-oswald uppercase tracking-wider border-b border-border/40 pb-3 mb-4 flex items-center gap-2">
                                         <RiNewspaperLine className="text-primary" size={18} />
                                         <span>{__('Recent Posts')}</span>
@@ -162,13 +163,13 @@ export default function BlogSingle({ blog, recent_blogs = [], categories = [] })
                                     <div className="space-y-4">
                                         {recent_blogs.map((item) => (
                                             <div key={item.id} className="flex items-center gap-3 group">
-                                                <div className="w-16 h-16 rounded-lg overflow-hidden bg-dynamic flex-shrink-0 border border-border/40">
+                                                <div className="w-16 h-16 rounded overflow-hidden bg-dynamic flex-shrink-0 border border-border/40">
                                                     {item.image ? (
                                                         <ImageViwer
                                                             image={item.image}
                                                             alt={item.title}
-                                                            width={100}
-                                                            height={100}
+                                                            width={400}
+                                                            height={400}
                                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                                         />
                                                     ) : (
@@ -178,7 +179,7 @@ export default function BlogSingle({ blog, recent_blogs = [], categories = [] })
                                                     )}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <h4 className="text-xs font-bold text-heading group-hover:text-primary transition-colors line-clamp-2 leading-snug">
+                                                    <h4 className="text-xs font-bold text-heading font-roboto group-hover:text-primary transition-colors line-clamp-2 leading-snug">
                                                         <Link href={route('blog.single', { idOrSku: item.sku || item.id })}>
                                                             {item.title}
                                                         </Link>
@@ -203,32 +204,9 @@ export default function BlogSingle({ blog, recent_blogs = [], categories = [] })
                                 <span>{__('Related Articles')}</span>
                             </h2>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
                                 {recent_blogs.map((item) => (
-                                    <div
-                                        key={item.id}
-                                        className="bg-bg rounded-2xl border border-border/60 overflow-hidden hover:border-primary/40 transition-all flex flex-col group shadow-sm"
-                                    >
-                                        <div className="h-40 w-full overflow-hidden bg-dynamic">
-                                            {item.image ? (
-                                                <ImageViwer image={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                                            ) : (
-                                                <div className="w-full h-full bg-bg flex items-center justify-center text-res/30">
-                                                    <RiNewspaperLine size={32} />
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="p-4 flex-1 flex flex-col justify-between">
-                                            <h3 className="text-base font-bold text-heading group-hover:text-primary transition-colors line-clamp-2">
-                                                <Link href={route('blog.single', { idOrSku: item.sku || item.id })}>
-                                                    {item.title}
-                                                </Link>
-                                            </h3>
-                                            <span className="text-xs text-res/60 mt-3 block">
-                                                {item.created_at ? new Date(item.created_at).toLocaleDateString() : ''}
-                                            </span>
-                                        </div>
-                                    </div>
+                                    <ArticalCard blog={item} />
                                 ))}
                             </div>
                         </div>
