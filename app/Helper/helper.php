@@ -192,6 +192,35 @@ function hydrate_posts($result, array $args, bool $attachCategory, bool $attachB
     return $result;
 }
 
+function count_posts_for_taxonomy_ids(string $postType, string $metaKey, array $ids): int
+{
+    $ids = helper_ids($ids);
+    if ($ids === []) {
+        return 0;
+    }
+
+    $query = \App\Models\PostTaxonomy::forTable('posts')
+        ->where('posts.status', 'publish')
+        ->where('posts.type', $postType);
+
+    apply_post_meta_id_filter($query, $metaKey, $ids);
+
+    return (int) $query->distinct()->count('posts.id');
+}
+
+function taxonomy_descendant_ids($items): array
+{
+    $ids = [];
+    foreach ($items as $item) {
+        $ids[] = $item->id;
+        if (! empty($item->children)) {
+            $ids = array_merge($ids, taxonomy_descendant_ids($item->children));
+        }
+    }
+
+    return $ids;
+}
+
 function attach_taxonomy_children_products($items, $taxonomyType = 'category')
 {
     foreach ($items as $item) {
@@ -220,6 +249,11 @@ function attach_taxonomy_children_products($items, $taxonomyType = 'category')
             )->unique('id')->values()->toArray();
             $item->all_blogs = $allBlogs;
             $item->children = attach_taxonomy_children_products($children, $taxonomyType);
+            $item->blogs_count = count_posts_for_taxonomy_ids(
+                'blog',
+                'blog_category',
+                array_merge([$item->id], taxonomy_descendant_ids($item->children ?? []))
+            );
         } else {
             foreach ($children as $child) {
                 $child->products = get_posts([
@@ -256,6 +290,11 @@ function attach_taxonomy_children_products($items, $taxonomyType = 'category')
             )->unique('id')->values()->toArray();
             $item->all_products = $allProducts;
             $item->children = attach_taxonomy_children_products($children, $taxonomyType);
+            $item->products_count = count_posts_for_taxonomy_ids(
+                'product',
+                $taxonomyType === 'brand' ? 'brand' : 'category',
+                array_merge([$item->id], taxonomy_descendant_ids($item->children ?? []))
+            );
         }
     }
 
@@ -390,12 +429,11 @@ function get_posts(array $args = [])
     $categoryIds = helper_ids($args['category_id'] ?? ($args['category_ids'] ?? []));
     $brandIds = helper_ids($args['brand_id'] ?? ($args['brand_ids'] ?? []));
     $tagIds = helper_ids($args['tag_id'] ?? ($args['tag_ids'] ?? ($args['tags_id'] ?? [])));
+    if ($categoryIds === [] && isset($args['blog_category'])) {
+        $categoryIds = helper_ids($args['blog_category']);
+    }
     if ($categoryIds === [] && isset($args['category']) && $args['category'] !== true) {
-        if ($args['type'] === 'blog') {
-            $categoryIds = helper_ids($args['blog_category']);
-        } else {
-            $categoryIds = helper_ids($args['category']);
-        }
+        $categoryIds = helper_ids($args['category']);
     }
     if ($brandIds === [] && isset($args['brand']) && $args['brand'] !== true) {
         $brandIds = helper_ids($args['brand']);

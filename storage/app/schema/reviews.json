@@ -51,6 +51,16 @@
                 "index": true
             },
             {
+                "name": "likes",
+                "type": "integer",
+                "default": 0
+            },
+            {
+                "name": "reports",
+                "type": "integer",
+                "default": 0
+            },
+            {
                 "name": "created_at",
                 "type": "timestamp",
                 "nullable": true
@@ -68,6 +78,8 @@
             "user_id",
             "parent_id",
             "status",
+            "likes",
+            "reports",
             "updated_at",
             "created_at"
         ],

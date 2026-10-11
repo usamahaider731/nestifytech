@@ -1,0 +1,193 @@
+{
+    "db": {
+        "model": "App\\Models\\Taxonomy",
+        "type": "faq_category",
+        "auto_slug": "slug",
+        "validation": {
+            "title": "required|string|max:255",
+            "description": "nullable|string",
+            "status": "nullable|string",
+            "parent_id": "nullable|integer"
+        },
+        "schema": [
+            {
+                "name": "title",
+                "type": "string"
+            },
+            {
+                "name": "slug",
+                "type": "string"
+            },
+            {
+                "name": "description",
+                "type": "longText",
+                "nullable": true
+            },
+            {
+                "name": "status",
+                "type": "string",
+                "default": "publish"
+            },
+            {
+                "name": "parent_id",
+                "type": "unsignedBigInteger",
+                "default": 0,
+                "index": true
+            },
+            {
+                "name": "type",
+                "type": "string",
+                "index": true
+            },
+            {
+                "name": "created_at",
+                "type": "timestamp",
+                "nullable": true
+            },
+            {
+                "name": "updated_at",
+                "type": "timestamp",
+                "nullable": true
+            }
+        ],
+        "main_fields": [
+            "title",
+            "description",
+            "status",
+            "parent_id",
+            "slug"
+        ],
+        "fixed_fields": {
+            "type": "faq_category"
+        },
+        "relations": {
+            "image": "single_image"
+        },
+        "meta_fields": "auto",
+        "table": "taxonomies"
+    },
+    "table": {
+        "card": {
+            "title": "title",
+            "subtitle": "slug",
+            "top_right": "status",
+            "actions": "action"
+        },
+        "keywords": true,
+        "paginationPerPage": 10,
+        "paginationList": [
+            10,
+            20,
+            50,
+            100
+        ],
+        "table": "taxonomies",
+        "type": "faq_category",
+        "bulk": {
+            "table": "taxonomies",
+            "type": "faq_category",
+            "route": "bulk.action",
+            "column": "status",
+            "is_meta": false,
+            "options": [
+                {
+                    "label": "Delete",
+                    "value": "delete"
+                },
+                {
+                    "label": "Publish",
+                    "value": "publish"
+                }
+            ]
+        },
+        "columns": [
+            {
+                "id": "id",
+                "label": "ID",
+                "column": "id",
+                "width": "5%",
+                "sort": true
+            },
+            {
+                "id": "title",
+                "label": "CATEGORY TITLE",
+                "column": "title",
+                "sort": true,
+                "width": "50%"
+            },
+            {
+                "id": "slug",
+                "label": "SLUG",
+                "column": "slug",
+                "sort": true,
+                "width": "20%"
+            },
+            {
+                "id": "status",
+                "label": "STATUS",
+                "column": "status",
+                "width": "10%",
+                "type": "status_dot"
+            },
+            {
+                "id": "action",
+                "label": "ACTION",
+                "column": "action",
+                "width": "15%",
+                "type": "action"
+            }
+        ]
+    },
+    "form": [
+        {
+            "title": "FAQ Category Details",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Category Title",
+                    "name": "title",
+                    "type": "text",
+                    "placeholder": "e.g. Orders & Shipping",
+                    "attribute": "required",
+                    "style": 2
+                },
+                {
+                    "label": "Category Slug",
+                    "name": "slug",
+                    "type": "text",
+                    "placeholder": "e.g. orders-shipping",
+                    "attribute": "required",
+                    "style": 2
+                },
+                {
+                    "label": "Description",
+                    "name": "description",
+                    "type": "textarea",
+                    "placeholder": "Brief category description...",
+                    "style": 2
+                }
+            ]
+        },
+        {
+            "title": "Publish Status",
+            "style": "sidebar",
+            "fields": [
+                {
+                    "label": "Status",
+                    "name": "status",
+                    "type": "dropdown",
+                    "options": [
+                        {
+                            "id": "publish",
+                            "title": "Published"
+                        },
+                        {
+                            "id": "draft",
+                            "title": "Draft"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

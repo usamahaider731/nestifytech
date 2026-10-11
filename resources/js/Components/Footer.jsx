@@ -171,23 +171,71 @@ useEffect(() => {
                         </div>
                     </div>
 
-                    {FooterMenuList.length > 0 && FooterMenuList.map((menu, index) => (
-                    <div className="lg:col-span-3">
-                        
-                        <h4 className="mb-5 inline-block pb-2 text-sm font-bold uppercase text-heading">
-                            {menu.name}
-                        </h4>
-                        <ul className="space-y-2.5 text-sm text-text">
-                            {menu?.menus?.map((link, idx) => (
-                                <li key={idx}>
-                                    <Link href={link.link} className="transition-colors duration-200 hover:text-primary">
-                                        {link.title}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                    ))}
+                    {Array.isArray(FooterMenuList) && FooterMenuList.length > 0 ? (
+                        FooterMenuList.map((menu, index) => (
+                            <div key={index} className="lg:col-span-3">
+                                <h4 className="mb-5 inline-block pb-2 text-sm font-bold uppercase text-heading">
+                                    {menu.name}
+                                </h4>
+                                <ul className="space-y-2.5 text-sm text-text">
+                                    {menu?.menus?.map((link, idx) => (
+                                        <li key={idx}>
+                                            <Link href={link.url || link.link || '#'} className="transition-colors duration-200 hover:text-primary">
+                                                {link.title}
+                                            </Link>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ))
+                    ) : (
+                        <>
+                            <div className="lg:col-span-3">
+                                <h4 className="mb-5 inline-block pb-2 text-sm font-bold uppercase text-heading">
+                                    {__('Customer Care')}
+                                </h4>
+                                <ul className="space-y-2.5 text-sm text-text">
+                                    <li>
+                                        <Link href={route('faqs')} className="transition-colors duration-200 hover:text-primary font-medium text-primary">
+                                            {__('Help & FAQs')}
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link href="/blog" className="transition-colors duration-200 hover:text-primary">
+                                            {__('Latest News & Blog')}
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link href="/page/contact" className="transition-colors duration-200 hover:text-primary">
+                                            {__('Customer Service')}
+                                        </Link>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div className="lg:col-span-3">
+                                <h4 className="mb-5 inline-block pb-2 text-sm font-bold uppercase text-heading">
+                                    {__('Quick Links')}
+                                </h4>
+                                <ul className="space-y-2.5 text-sm text-text">
+                                    <li>
+                                        <Link href="/faqs" className="transition-colors duration-200 hover:text-primary">
+                                            {__('Shipping & Returns')}
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link href="/page/about" className="transition-colors duration-200 hover:text-primary">
+                                            {__('About NestifyTech')}
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link href="/page/privacy" className="transition-colors duration-200 hover:text-primary">
+                                            {__('Privacy Policy')}
+                                        </Link>
+                                    </li>
+                                </ul>
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
             <div className="relative border-t bg-common">

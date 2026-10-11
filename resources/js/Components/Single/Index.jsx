@@ -3,6 +3,7 @@ import axios from 'axios';
 import { RiFlagFill, RiFlagLine, RiMessage3Line, RiSendPlaneFill, RiStarFill, RiStarLine, RiThumbUpFill, RiThumbUpLine, RiUserLine } from 'react-icons/ri';
 import Textarea from '../Textarea';
 import { useLang } from '@/contexts/LanguageContext';
+import { toast } from 'react-toastify';
 
 const TABS = [
     { id: 'description', label: 'Description' },
@@ -62,9 +63,9 @@ const RatingSummary = ({ reviews }) => {
         count: reviews.filter((r) => r.rating === star).length,
     }));
     return (
-        <div className="flex flex-col sm:flex-row gap-6 p-6 bg-accent rounded-2xl border border-border/60">
+        <div className="flex flex-col sm:flex-row gap-6 p-6 bg-white rounded border border-border/60">
             <div className="flex flex-col items-center justify-center min-w-[110px]">
-                <span className="text-5xl font-black text-heading">{avg}</span>
+                <span className="text-4xl font-oswald font-bold text-heading">{avg}</span>
                 <StarRating value={Math.round(avg)} size="text-lg" />
                 <span className="text-xs text-res mt-1">{total} review{total !== 1 ? 's' : ''}</span>
             </div>
@@ -90,7 +91,7 @@ const RatingSummary = ({ reviews }) => {
 const ReviewCard = ({ review, onAction, replyTo, setReplyTo, replyForm, setReplyForm, onReplySubmit, submitting, __ }) => {
     const isReplying = replyTo === review.id;
     return (
-        <div className="flex flex-col gap-4 p-5 bg-permanent rounded-2xl border border-border/50 shadow-sm hover:shadow-md transition-shadow">
+        <div className="flex flex-col gap-4 p-5 bg-white rounded border border-border/50 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
                     <Avatar name={review.user?.name} />
@@ -112,21 +113,21 @@ const ReviewCard = ({ review, onAction, replyTo, setReplyTo, replyForm, setReply
             <div className="flex items-center gap-2 pl-12 flex-wrap">
                 <button
                     onClick={() => setReplyTo(isReplying ? null : review.id)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-dynamic text-res text-xs font-medium hover:bg-primary hover:text-white transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-bg text-res text-xs font-medium hover:bg-primary hover:text-white transition-colors"
                 >
                     <RiMessage3Line className="text-sm" />
                     {review.replies?.length > 0 ? `${review.replies.length} ${__('Replies')}` : __('Reply')}
                 </button>
                 <button
                     onClick={() => onAction(review.id, 'like')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${review.is_liked ? 'bg-primary/10 text-primary' : 'bg-dynamic text-res hover:bg-primary/10 hover:text-primary'}`}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 cursor-pointer rounded-full text-xs font-medium transition-colors ${review.is_liked ? 'bg-primary/10 text-primary' : 'bg-bg text-res hover:bg-primary/10 hover:text-primary'}`}
                 >
                     {review.is_liked ? <RiThumbUpFill /> : <RiThumbUpLine />}
                     {review.likes || 0} {__(review.is_liked ? 'Liked' : 'Like')}
                 </button>
                 <button
                     onClick={() => onAction(review.id, 'report')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${review.is_reported ? 'bg-red-50 text-red-500' : 'bg-dynamic text-res hover:bg-red-50 hover:text-red-500'}`}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 cursor-pointer rounded-full text-xs font-medium transition-colors ${review.is_reported ? 'bg-red-50 text-red-500' : 'bg-bg text-res hover:bg-red-50 hover:text-red-500'}`}
                 >
                     {review.is_reported ? <RiFlagFill /> : <RiFlagLine />}
                     {__(review.is_reported ? 'Reported' : 'Report')}
@@ -143,7 +144,7 @@ const ReviewCard = ({ review, onAction, replyTo, setReplyTo, replyForm, setReply
                     />
                     <div className="flex gap-2 justify-end">
                         <button type="button" onClick={() => setReplyTo(null)}
-                            className="px-4 py-1.5 text-xs font-semibold rounded-full bg-dynamic text-res hover:bg-border transition-colors">
+                            className="px-4 py-1.5 text-xs font-semibold rounded-full bg-common text-res hover:bg-border transition-colors">
                             {__('Cancel')}
                         </button>
                         <button type="submit" disabled={submitting}
@@ -166,11 +167,11 @@ const ReviewCard = ({ review, onAction, replyTo, setReplyTo, replyForm, setReply
                                 <p className="text-xs text-text leading-relaxed">{reply.comment}</p>
                                 <div className="flex gap-2 mt-1">
                                     <button onClick={() => onAction(reply.id, 'like')}
-                                        className={`flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full transition-colors ${reply.is_liked ? 'text-primary bg-primary/10' : 'text-res bg-dynamic hover:text-primary hover:bg-primary/10'}`}>
+                                        className={`flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full transition-colors ${reply.is_liked ? 'text-primary bg-primary/10' : 'text-res bg-bg hover:text-primary hover:bg-primary/10'}`}>
                                         {reply.is_liked ? <RiThumbUpFill /> : <RiThumbUpLine />} {reply.likes || 0}
                                     </button>
                                     <button onClick={() => onAction(reply.id, 'report')}
-                                        className={`flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full transition-colors ${reply.is_reported ? 'text-red-500 bg-red-50' : 'text-res bg-dynamic hover:text-red-500 hover:bg-red-50'}`}>
+                                        className={`flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full transition-colors ${reply.is_reported ? 'text-red-500 bg-red-50' : 'text-res bg-bg hover:text-red-500 hover:bg-red-50'}`}>
                                         {reply.is_reported ? <RiFlagFill /> : <RiFlagLine />}
                                     </button>
                                 </div>
@@ -220,9 +221,9 @@ const SingleProductTabs = ({ product }) => {
     const handleReviewAction = async (reviewId, action) => {
         try {
             const res = await axios.post(route(`api.reviews.${action}`, { id: reviewId }));
-            if (res.data?.success === false) alert(res.data.message);
+            if (res.data?.success === false) toast.error(res.data.message);
             else fetchReviews();
-        } catch (err) { alert(err.response?.data?.message || 'Something went wrong.'); }
+        } catch (err) { toast.error(err.response?.data?.message || 'Something went wrong.'); }
     };
 
     const handleReplySubmit = async (e, parentId) => {
@@ -299,7 +300,7 @@ const SingleProductTabs = ({ product }) => {
 
                         {reviewsLoading ? (
                             <div className="flex flex-col gap-3">
-                                {[1, 2, 3].map(i => <div key={i} className="h-28 bg-accent animate-pulse rounded-2xl" />)}
+                                {[1, 2, 3].map(i => <div key={i} className="h-28 bg-white animate-pulse rounded" />)}
                             </div>
                         ) : reviews.length === 0 ? (
                             <div className="flex flex-col items-center justify-center gap-3 py-16 text-res">

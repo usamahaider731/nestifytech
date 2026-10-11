@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class FrontendController extends Controller
@@ -478,5 +479,157 @@ class FrontendController extends Controller
         return Inertia::render('Frontend/Page/Single', [
             'page' => $page,
         ]);
+    }
+
+    public function faqs(Request $request)
+    {
+        $faqs = get_posts([
+            'type' => 'faq',
+            'status' => 'publish',
+            'meta' => true,
+        ]);
+
+        if (empty($faqs) || (is_countable($faqs) && count($faqs) === 0)) {
+            $this->seedInitialFaqs();
+            $faqs = get_posts([
+                'type' => 'faq',
+                'status' => 'publish',
+                'meta' => true,
+            ]);
+        }
+
+        $categories = get_taxonomy([
+            'type' => 'faq_category',
+            'status' => 'publish',
+        ]);
+
+        return Inertia::render('Frontend/Faqs/Index', [
+            'faqs' => $faqs,
+            'categories' => $categories,
+            'filters' => [
+                'search' => $request->search ?? '',
+                'category' => $request->category ?? '',
+            ]
+        ]);
+    }
+
+    private function seedInitialFaqs(): void
+    {
+        if (DB::table('posts')->where('type', 'faq')->exists()) {
+            return;
+        }
+
+        $userId = DB::table('users')->value('id') ?? 1;
+
+        $categories = [
+            ['title' => 'General Inquiries', 'slug' => 'general-inquiries'],
+            ['title' => 'Orders & Shipping', 'slug' => 'orders-shipping'],
+            ['title' => 'Payment & Checkout', 'slug' => 'payment-checkout'],
+            ['title' => 'Returns & Refunds', 'slug' => 'returns-refunds'],
+            ['title' => 'Products & Warranty', 'slug' => 'products-warranty'],
+            ['title' => 'Account & Security', 'slug' => 'account-security'],
+        ];
+
+        foreach ($categories as $cat) {
+            if (!DB::table('taxonomies')->where(['type' => 'faq_category', 'slug' => $cat['slug']])->exists()) {
+                DB::table('taxonomies')->insert([
+                    'title' => $cat['title'],
+                    'slug' => $cat['slug'],
+                    'type' => 'faq_category',
+                    'status' => 'publish',
+                    'parent_id' => 0,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
+
+        $defaultFaqs = [
+            [
+                'title' => 'How long does standard delivery take to arrive?',
+                'description' => '<p>Standard shipping typically takes <strong>3 to 5 business days</strong> within the domestic region. If you need your order expedited, we offer Express Shipping (1-2 business days) options during checkout. Tracking is provided as soon as your parcel leaves our fulfillment center.</p>',
+                'category' => 'Orders & Shipping',
+                'order' => 1,
+            ],
+            [
+                'title' => 'How can I track my shipment in real time?',
+                'description' => '<p>Once your order has been packed and handed over to our carrier, an automated confirmation email with your dedicated tracking number and link is sent to you. You can also view live delivery progress directly from your <strong>Account Dashboard</strong> under the "Orders" section.</p>',
+                'category' => 'Orders & Shipping',
+                'order' => 2,
+            ],
+            [
+                'title' => 'Can I edit or cancel an order after placing it?',
+                'description' => '<p>To ensure lightning-fast dispatch, orders enter processing almost immediately. If you need to make corrections to your shipping address or cancel an item, please reach out to our 24/7 customer support within <strong>60 minutes</strong> of placing the order.</p>',
+                'category' => 'Orders & Shipping',
+                'order' => 3,
+            ],
+            [
+                'title' => 'What payment methods and currencies do you support?',
+                'description' => '<p>We accept all major credit and debit cards including <strong>Visa, MasterCard, and American Express</strong>, along with PayPal, Apple Pay, Google Pay, and Stripe secure checkout. All charges are securely processed in USD or your local detected currency.</p>',
+                'category' => 'Payment & Checkout',
+                'order' => 4,
+            ],
+            [
+                'title' => 'Is my payment information and credit card data secure?',
+                'description' => '<p>Absolutely. Every financial transaction is safeguarded by <strong>256-bit SSL encryption</strong> and processed through tier-1 PCI-DSS Level 1 compliant financial gateways. We never store, log, or share your sensitive credit card information on our servers.</p>',
+                'category' => 'Payment & Checkout',
+                'order' => 5,
+            ],
+            [
+                'title' => 'What is your return and exchange policy?',
+                'description' => '<p>We offer a straightforward <strong>30-day return policy</strong>. If you are not completely satisfied with your purchase, you may return the item in its original condition and packaging for a full refund or replacement. Defective items qualify for complimentary return shipping.</p>',
+                'category' => 'Returns & Refunds',
+                'order' => 6,
+            ],
+            [
+                'title' => 'How long does it take to receive my refund?',
+                'description' => '<p>Once your returned item arrives at our warehouse and passes quality inspection (usually within 24-48 hours), your refund will be processed back to your original payment method. Depending on your bank or card issuer, funds will appear in your statement within <strong>3 to 7 business days</strong>.</p>',
+                'category' => 'Returns & Refunds',
+                'order' => 7,
+            ],
+            [
+                'title' => 'Do all electronic devices include a manufacturer warranty?',
+                'description' => '<p>Yes! Every brand-new electronic device comes standard with a minimum <strong>1-year official manufacturer warranty</strong> covering hardware malfunctions and defects. You can also opt for extended protection warranties during checkout.</p>',
+                'category' => 'Products & Warranty',
+                'order' => 8,
+            ],
+            [
+                'title' => 'Are all products 100% authentic and genuine?',
+                'description' => '<p>We are an authorized direct partner and distributor for all brands featured in our store. Every product is <strong>100% genuine, brand new, factory sealed</strong>, and accompanied by authentic serial numbers and documentation.</p>',
+                'category' => 'Products & Warranty',
+                'order' => 9,
+            ],
+            [
+                'title' => 'How do I reset my password or recover my account?',
+                'description' => '<p>Click on the "Forgot Password" link on the login page, enter your registered email address, and you will immediately receive a secure password reset link. For any other login difficulties, our support team can verify your identity and restore access.</p>',
+                'category' => 'Account & Security',
+                'order' => 10,
+            ],
+            [
+                'title' => 'How can I contact customer service for help?',
+                'description' => '<p>Our support representatives are standing by 24/7. You can reach us via our live chat widget on the website, email us at <strong>support@nestifytech.com</strong>, or call our toll-free phone line at <strong>+1 (800) 123-4567</strong>.</p>',
+                'category' => 'General Inquiries',
+                'order' => 11,
+            ],
+        ];
+
+        foreach ($defaultFaqs as $faq) {
+            $slug = Str::slug($faq['title']);
+            $postId = DB::table('posts')->insertGetId([
+                'user_id' => $userId,
+                'title' => $faq['title'],
+                'sku' => $slug,
+                'description' => $faq['description'],
+                'status' => 'publish',
+                'type' => 'faq',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            DB::table('post_meta')->insert([
+                ['post_id' => $postId, 'key' => 'faq_category', 'value' => $faq['category']],
+                ['post_id' => $postId, 'key' => 'order', 'value' => (string) $faq['order']],
+            ]);
+        }
     }
 }

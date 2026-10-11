@@ -1,0 +1,257 @@
+{
+    "db": {
+        "model": "App\\Models\\Posts",
+        "type": "faq",
+        "auto_slug": "sku",
+        "validation": {
+            "title": "required|string|max:500",
+            "description": "required|string",
+            "status": "nullable|string|max:20",
+            "order": "nullable|integer",
+            "faq_category": "nullable|string"
+        },
+        "schema": [
+            {
+                "name": "user_id",
+                "type": "unsignedBigInteger",
+                "index": true
+            },
+            {
+                "name": "title",
+                "type": "string"
+            },
+            {
+                "name": "sku",
+                "type": "string",
+                "unique": true
+            },
+            {
+                "name": "description",
+                "type": "longText",
+                "nullable": true
+            },
+            {
+                "name": "status",
+                "type": "string",
+                "default": "publish"
+            },
+            {
+                "name": "type",
+                "type": "string",
+                "index": true
+            },
+            {
+                "name": "created_at",
+                "type": "timestamp",
+                "nullable": true
+            },
+            {
+                "name": "updated_at",
+                "type": "timestamp",
+                "nullable": true
+            }
+        ],
+        "main_fields": [
+            "title",
+            "sku",
+            "description",
+            "status",
+            "updated_at",
+            "created_at"
+        ],
+        "fixed_fields": {
+            "user_id": "auth_id",
+            "type": "faq"
+        },
+        "relations": {
+            "image": "single_image"
+        },
+        "meta_fields": "auto",
+        "features": {
+            "category": false,
+            "brand": false,
+            "attributes": false,
+            "variations": false
+        },
+        "table": "posts"
+    },
+    "table": {
+        "card": {
+            "title": "title",
+            "subtitle": "sku",
+            "top_right": "status",
+            "badges": [
+                "faq_category"
+            ],
+            "actions": "action"
+        },
+        "keywords": true,
+        "paginationPerPage": 15,
+        "paginationList": [
+            10,
+            15,
+            25,
+            50,
+            100
+        ],
+        "table": "posts",
+        "type": "faq",
+        "bulk": {
+            "table": "posts",
+            "type": "faq",
+            "route": "bulk.action",
+            "column": "status",
+            "is_meta": false,
+            "options": [
+                {
+                    "label": "Delete",
+                    "value": "delete"
+                },
+                {
+                    "label": "Publish",
+                    "value": "publish"
+                },
+                {
+                    "label": "Draft",
+                    "value": "draft"
+                }
+            ]
+        },
+        "columns": [
+            {
+                "id": "id",
+                "label": "ID",
+                "column": "id",
+                "width": "5%",
+                "sort": true
+            },
+            {
+                "id": "title",
+                "label": "QUESTION",
+                "column": "title",
+                "sort": true,
+                "width": "40%"
+            },
+            {
+                "id": "faq_category",
+                "label": "CATEGORY",
+                "column": "faq_category",
+                "meta": true,
+                "meta_key": "faq_category",
+                "type": "badage",
+                "width": "20%"
+            },
+            {
+                "id": "order",
+                "label": "SORT ORDER",
+                "column": "order",
+                "meta": true,
+                "meta_key": "order",
+                "width": "10%"
+            },
+            {
+                "id": "status",
+                "label": "STATUS",
+                "column": "status",
+                "width": "10%",
+                "type": "status_dot"
+            },
+            {
+                "id": "action",
+                "label": "ACTION",
+                "column": "action",
+                "width": "15%",
+                "type": "action"
+            }
+        ]
+    },
+    "form": [
+        {
+            "title": "FAQ Question & Answer",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Question",
+                    "name": "title",
+                    "type": "text",
+                    "placeholder": "Enter the question, e.g. How do I track my order?",
+                    "attribute": "required",
+                    "style": 2
+                },
+                {
+                    "label": "Slug / Key",
+                    "name": "sku",
+                    "type": "text",
+                    "placeholder": "e.g. how-do-i-track-my-order",
+                    "style": 2
+                },
+                {
+                    "label": "Detailed Answer",
+                    "name": "description",
+                    "type": "desc",
+                    "placeholder": "Write the comprehensive answer to this question...",
+                    "attribute": "required"
+                }
+            ]
+        },
+        {
+            "title": "Categorization & Order",
+            "style": "sidebar",
+            "fields": [
+                {
+                    "label": "Status",
+                    "name": "status",
+                    "type": "dropdown",
+                    "options": [
+                        {
+                            "id": "publish",
+                            "title": "Published"
+                        },
+                        {
+                            "id": "draft",
+                            "title": "Draft"
+                        }
+                    ]
+                },
+                {
+                    "label": "FAQ Category",
+                    "name": "faq_category",
+                    "type": "dropdown",
+                    "searchable": true,
+                    "options": [
+                        {
+                            "id": "General",
+                            "title": "General Inquiries"
+                        },
+                        {
+                            "id": "Orders & Shipping",
+                            "title": "Orders & Shipping"
+                        },
+                        {
+                            "id": "Payment & Checkout",
+                            "title": "Payment & Checkout"
+                        },
+                        {
+                            "id": "Returns & Refunds",
+                            "title": "Returns & Refunds"
+                        },
+                        {
+                            "id": "Account & Security",
+                            "title": "Account & Security"
+                        },
+                        {
+                            "id": "Products & Warranty",
+                            "title": "Products & Warranty"
+                        }
+                    ]
+                },
+                {
+                    "label": "Display Priority / Order",
+                    "name": "order",
+                    "type": "number",
+                    "placeholder": "e.g. 1"
+                }
+            ]
+        }
+    ]
+}

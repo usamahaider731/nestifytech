@@ -31,7 +31,17 @@ class ModuleController extends Controller
             $fallbackProduct = 'product-' . strtolower($action);
             $fallbackPost = 'post-' . strtolower($action);
             $fallbackBlog = 'blog-' . strtolower($action);
-            if (!in_array($fallbackProduct, $userPerms) && !in_array($fallbackPost, $userPerms) && !in_array($fallbackBlog, $userPerms)) {
+            $fallbackPage = 'page-' . strtolower($action);
+            $fallbackFaq = 'faq-' . strtolower($action);
+            $fallbackCat = 'category-' . strtolower($action);
+            if (
+                !in_array($fallbackProduct, $userPerms) &&
+                !in_array($fallbackPost, $userPerms) &&
+                !in_array($fallbackBlog, $userPerms) &&
+                !in_array($fallbackPage, $userPerms) &&
+                !in_array($fallbackFaq, $userPerms) &&
+                !in_array($fallbackCat, $userPerms)
+            ) {
                 abort(403, "Access Denied: Permission '{$permission}' is required.");
             }
         }

@@ -32,6 +32,8 @@ Route::controller(FrontendController::class)->group(function () {
     Route::get('/blog', 'blogIndex')->name('blog.index');
     Route::get('/blog/{idOrSku}', 'blogSingle')->name('blog.single');
     Route::get('/page/{slug}', 'dynamicPage')->name('page.single');
+    Route::get('/faqs', 'faqs')->name('faqs');
+    Route::get('/faq', 'faqs')->name('faq');
     Route::get('/get_languages', 'get_languages')->name('languages');
     Route::get('/set-language/{prefix}', 'setLanguage')->name('language.set');
 });

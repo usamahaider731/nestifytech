@@ -144,7 +144,7 @@ export default function BlogSingle({ blog, recent_blogs = [], categories = [] })
                                                 >
                                                     <span>{cat.title}</span>
                                                     <span className="text-xs font-roboto bg-common px-2 py-0.5 rounded-full border border-border/40 text-res/70">
-                                                        {cat.all_blogs ? cat.all_blogs.length : 0}
+                                                        {cat.blogs_count ?? cat.products_count ?? cat.all_blogs?.length ?? cat.all_products?.length ?? 0}
                                                     </span>
                                                 </Link>
                                             </li>

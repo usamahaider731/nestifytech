@@ -214,6 +214,50 @@
         ]
       },
       {
+        "id": "faq",
+        "title": "FAQs",
+        "icon": "ri-question-line",
+        "permission": "faq-read",
+        "menu": [
+          {
+            "id": "add-faq",
+            "title": "Add FAQ",
+            "route": "post.create",
+            "params": {
+              "type": "faq"
+            },
+            "permission": "faq-create"
+          },
+          {
+            "id": "view-faq",
+            "title": "View FAQs",
+            "route": "post.index",
+            "params": {
+              "type": "faq"
+            },
+            "permission": "faq-read"
+          },
+          {
+            "id": "view-faq-categories",
+            "title": "FAQ Categories",
+            "route": "taxonomy.index",
+            "params": {
+              "type": "faq_category"
+            },
+            "permission": "faq-read"
+          },
+          {
+            "id": "create-faq-category",
+            "title": "Add FAQ Category",
+            "route": "taxonomy.create",
+            "params": {
+              "type": "faq_category"
+            },
+            "permission": "faq-create"
+          }
+        ]
+      },
+      {
         "id": "category",
         "title": "Category",
         "icon": "ri-apps-line",
