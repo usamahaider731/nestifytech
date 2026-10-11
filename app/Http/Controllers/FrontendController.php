@@ -104,6 +104,13 @@ class FrontendController extends Controller
             'limit' => 10,
             'trending' => true,
         ]));
+
+        // Latest blogs for home page
+        $data['latest_blogs'] = get_posts($this->blogQuery([
+            'limit' => 6,
+            'latest' => true,
+        ]));
+
         $blockImages = $index_settings['block_images'] ?? [];
         $heroImage = is_array($blockImages) && count($blockImages) > 0 ? $blockImages[0] : null;
 

@@ -12,7 +12,7 @@ const ArticalCard = ({ blog }) => {
     return (
         <article
             key={blog.id}
-            className="group rounded border border-border/60 hover:border-primary/40 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col"
+            className="group rounded border bg-white border-border/60 hover:border-primary/40 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col"
         >
             <div className="relative h-52 w-full overflow-hidden bg-dynamic">
                 {blog.image ? (

@@ -14,6 +14,7 @@ import PopularProducts from '@/Components/Index/PopluarProducts';
 import TrendingProducts from '@/Components/Index/TrendingProducts';
 import BrandSlider from '@/Components/BrandSlider';
 import Services from '@/Components/Index/Services';
+import LatestBlogs from '@/Components/Index/LatestBlogs';
 
 function Index({ data }) {
     const { setting } = usePage().props;
@@ -91,6 +92,13 @@ function Index({ data }) {
                     )}
                 </div>
             </div>
+            {/* Latest Blogs Section */}
+            {data.latest_blogs && data.latest_blogs.length > 0 && (
+                <div className={`${containerClass} px-4 sm:px-6 lg:px-8 border-t border-border`}>
+                    <LatestBlogs blogs={data.latest_blogs} />
+                </div>
+            )}
+
             <div className='w-full py-5'>
                 <div className={`${containerClass}  px-4 sm:px-6 lg:px-8`}>
                     <AdsRender type='main' placement='home_bottom' className='w-full' />

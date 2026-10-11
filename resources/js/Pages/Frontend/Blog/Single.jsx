@@ -139,7 +139,7 @@ export default function BlogSingle({ blog, recent_blogs = [], categories = [] })
                                         {categories.map((cat) => (
                                             <li key={cat.id}>
                                                 <Link
-                                                    href={route('blog.index', { category: cat.slug || cat.id })}
+                                                    href={route('blog.index', { category: cat.id || cat.id })}
                                                     className="flex items-center justify-between font-roboto text-sm font-medium text-res hover:text-primary transition-colors py-1 px-2 rounded-lg hover:bg-bg/40"
                                                 >
                                                     <span>{cat.title}</span>
