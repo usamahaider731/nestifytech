@@ -1,83 +1,5 @@
 {
     "layout": {
-        "Footer": [
-            {
-                "title": "Footer Main Settings",
-                "style": "main",
-                "fields": [
-                    {
-                        "title": "Footer Logo",
-                        "type": "dropdown",
-                        "style": 1,
-                        "label": "Footer Logo",
-                        "name": "footer_logo",
-                        "searchable": false,
-                        "value": "dark_logo",
-                        "options": [
-                            {
-                                "id": "dark_logo",
-                                "title": "Logo Dark"
-                            },
-                            {
-                                "id": "light_logo",
-                                "title": "Logo Light"
-                            }
-                        ]
-                    },
-                    {
-                        "label": "Show Footer Newsletter",
-                        "name": "footer_newslatter",
-                        "style": 1,
-                        "type": "checkbox",
-                        "value": true
-                    }
-                ]
-            },
-            {
-                "title": "Footer Menu Lists",
-                "style": "main",
-                "fields": [
-                    {
-                        "label": "Menu",
-                        "type": "repeater",
-                        "name": "footer_menu_lists",
-                        "value": [
-                            {
-                                "title": "Find It Fast",
-                                "menu_location": "find-it-fast"
-                            },
-                            {
-                                "title": "Customer care",
-                                "menu_location": "customer-care"
-                            },
-                            {
-                                "title": "Information",
-                                "menu_location": "information"
-                            }
-                        ],
-                        "fields": [
-                            {
-                                "name": "title",
-                                "label": "Title",
-                                "type": "text",
-                                "placeholder": "Enter list name..."
-                            },
-                            {
-                                "name": "menu_location",
-                                "label": "Select Menu",
-                                "type": "dropdown",
-                                "searchable": false,
-                                "search": false,
-                                "options": {
-                                    "model": "Menu",
-                                    "type": "locations"
-                                }
-                            }
-                        ]
-                    }
-                ]
-            }
-        ],
         "Home": [
             {
                 "title": "Gallery Settings",
@@ -89,11 +11,11 @@
                         "name": "main_slider",
                         "attribute": "required",
                         "value": [
-                            "1791444254_6039b3ff1a895b03a0d20722190f776c_main_slider0.jpg",
-                            "1791444254_6039b3ff1a895b03a0d20722190f776c_main_slider1.webp",
-                            "1791444254_6039b3ff1a895b03a0d20722190f776c_main_slider2.jpg",
-                            "1791444254_6039b3ff1a895b03a0d20722190f776c_main_slider3.webp",
-                            "1791444254_6039b3ff1a895b03a0d20722190f776c_main_slider4.webp"
+                            "1791818482_6039b3ff1a895b03a0d20722190f776c_main_slider0.jpg",
+                            "1791818482_6039b3ff1a895b03a0d20722190f776c_main_slider1.webp",
+                            "1791818482_6039b3ff1a895b03a0d20722190f776c_main_slider2.jpg",
+                            "1791818482_6039b3ff1a895b03a0d20722190f776c_main_slider3.webp",
+                            "1791818482_6039b3ff1a895b03a0d20722190f776c_main_slider4.webp"
                         ],
                         "multiple": true
                     },
@@ -270,7 +192,7 @@
                         "condition_value": true,
                         "name": "banner_image",
                         "attribute": "required",
-                        "value": "1791443675_6039b3ff1a895b03a0d20722190f776c_banner_image.png"
+                        "value": "1791818482_6039b3ff1a895b03a0d20722190f776c_banner_image.png"
                     }
                 ]
             },
@@ -508,6 +430,84 @@
                                 "label": "Select Background",
                                 "type": "image",
                                 "style": 2
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "Footer": [
+            {
+                "title": "Footer Main Settings",
+                "style": "main",
+                "fields": [
+                    {
+                        "title": "Footer Logo",
+                        "type": "dropdown",
+                        "style": 1,
+                        "label": "Footer Logo",
+                        "name": "footer_logo",
+                        "searchable": false,
+                        "value": "dark_logo",
+                        "options": [
+                            {
+                                "id": "dark_logo",
+                                "title": "Logo Dark"
+                            },
+                            {
+                                "id": "light_logo",
+                                "title": "Logo Light"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Show Footer Newsletter",
+                        "name": "footer_newslatter",
+                        "style": 1,
+                        "type": "checkbox",
+                        "value": true
+                    }
+                ]
+            },
+            {
+                "title": "Footer Menu Lists",
+                "style": "main",
+                "fields": [
+                    {
+                        "label": "Menu",
+                        "type": "repeater",
+                        "name": "footer_menu_lists",
+                        "value": [
+                            {
+                                "title": "Find It Fast",
+                                "menu_location": "find-it-fast"
+                            },
+                            {
+                                "title": "Customer care",
+                                "menu_location": "customer-care"
+                            },
+                            {
+                                "title": "Information",
+                                "menu_location": "information"
+                            }
+                        ],
+                        "fields": [
+                            {
+                                "name": "title",
+                                "label": "Title",
+                                "type": "text",
+                                "placeholder": "Enter list name..."
+                            },
+                            {
+                                "name": "menu_location",
+                                "label": "Select Menu",
+                                "type": "dropdown",
+                                "searchable": false,
+                                "search": false,
+                                "options": {
+                                    "model": "Menu",
+                                    "type": "locations"
+                                }
                             }
                         ]
                     }

@@ -148,6 +148,16 @@ class CartController extends Controller
 
             DB::commit();
 
+            if ($userId) {
+                record_user_activity('order_placed', [
+                    'title' => 'Placed an order',
+                    'category' => 'order',
+                    'detail' => 'Placed order #' . $orderId,
+                    'order_id' => $orderId,
+                    'total' => $total,
+                ], (int) $userId);
+            }
+
             return response()->json([
                 'success'  => true,
                 'message'  => 'Order placed successfully.',

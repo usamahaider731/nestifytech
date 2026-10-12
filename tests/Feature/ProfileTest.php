@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class ProfileTest extends TestCase
@@ -24,8 +26,10 @@ class ProfileTest extends TestCase
     public function test_profile_information_can_be_updated(): void
     {
         $user = User::factory()->create();
+        $this->withoutMiddleware(ValidateCsrfToken::class);
 
         $response = $this
+            ->from('/profile')
             ->actingAs($user)
             ->patch('/profile', [
                 'name' => 'Test User',
@@ -41,6 +45,30 @@ class ProfileTest extends TestCase
         $this->assertSame('Test User', $user->name);
         $this->assertSame('test@example.com', $user->email);
         $this->assertNull($user->email_verified_at);
+
+        $activity = DB::table('user_activities')->where('user_id', $user->id)->latest('id')->first();
+        $this->assertNotNull($activity);
+        $this->assertSame('profile_updated', json_decode($activity->payload, true)['action']);
+    }
+
+    public function test_wishlist_clear_records_a_meaningful_activity(): void
+    {
+        $user = User::factory()->create();
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+
+        $this->actingAs($user)
+            ->post('/profile/wishlist/activity', [
+                'action' => 'wishlist_cleared',
+                'count' => 3,
+            ])
+            ->assertNoContent();
+
+        $activity = DB::table('user_activities')->where('user_id', $user->id)->latest('id')->first();
+        $payload = json_decode($activity->payload, true);
+
+        $this->assertSame('wishlist_cleared', $payload['action']);
+        $this->assertSame('wishlist', $payload['category']);
+        $this->assertSame('Removed 3 items from your wishlist', $payload['detail']);
     }
 
     public function test_email_verification_status_is_unchanged_when_the_email_address_is_unchanged(): void

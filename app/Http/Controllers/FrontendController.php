@@ -263,7 +263,7 @@ class FrontendController extends Controller
             'exclude_id' => $product->id,
         ]));
 
-        $this->recordProductView($request, (int) $product->id);
+        $this->recordProductView($request, (int) $product->id, (string) $product->title);
 
         return Inertia::render('Frontend/Single/Index', [
             'product' => $product,
@@ -273,10 +273,11 @@ class FrontendController extends Controller
         ]);
     }
 
-    private function recordProductView(Request $request, int $productId): void
+    private function recordProductView(Request $request, int $productId, string $productTitle): void
     {
         $userId = Auth::id();
         if ($userId) {
+            $viewedIds = [];
             $viewed = DB::table('user_meta')
                 ->where('user_id', $userId)
                 ->where('key', 'viewed_products')
@@ -303,6 +304,14 @@ class FrontendController extends Controller
             }
 
             $request->session()->put($sessionKey, true);
+            record_user_activity('product_viewed', [
+                'title' => 'Viewed product',
+                'category' => 'product',
+                'detail' => 'Viewed ' . $productTitle,
+                'product_id' => $productId,
+                'product_title' => $productTitle,
+            ], (int) $userId);
+
             if (! in_array((string) $productId, $viewedIds, true)) {
                 $updated = DB::table('post_meta')
                     ->where('post_id', $productId)
@@ -483,8 +492,41 @@ class FrontendController extends Controller
             abort(404);
         }
 
+        // Supporting data for dynamic widgets (recent articles, categories, related pages, FAQs)
+        $recentBlogs = get_posts([
+            'type'   => 'blog',
+            'status' => 'publish',
+            'limit'  => 4,
+            'image'  => true,
+            'latest' => true,
+        ]);
+
+        $categories = get_taxonomy([
+            'type'   => 'category',
+            'status' => 'publish',
+            'limit'  => 8,
+        ]);
+
+        $otherPages = get_posts([
+            'type'   => 'page',
+            'status' => 'publish',
+            'limit'  => 12,
+            'meta'   => true,
+        ]);
+
+        $faqs = get_posts([
+            'type'   => 'faq',
+            'status' => 'publish',
+            'limit'  => 5,
+            'meta'   => true,
+        ]);
+
         return Inertia::render('Frontend/Page/Single', [
-            'page' => $page,
+            'page'         => $page,
+            'recent_blogs' => $recentBlogs ?? [],
+            'categories'   => $categories ?? [],
+            'other_pages'  => $otherPages ?? [],
+            'faqs'         => $faqs ?? [],
         ]);
     }
 

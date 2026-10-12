@@ -197,6 +197,143 @@
             ]
         },
         {
+            "title": "Page Layout & Structure",
+            "style": "main",
+            "tab": "Layout",
+            "fields": [
+                {
+                    "label": "Page Layout Type",
+                    "name": "layout_type",
+                    "type": "dropdown",
+                    "placeholder": "Select page layout...",
+                    "style": 2,
+                    "options": [
+                        { "id": "sidebar_right", "title": "Sidebar Right (Content 2/3 + Sidebar 1/3)" },
+                        { "id": "sidebar_left", "title": "Sidebar Left (Sidebar 1/3 + Content 2/3)" },
+                        { "id": "narrow_center", "title": "Narrow Centered (Focused Reading View)" },
+                        { "id": "full_width", "title": "Full Width (Single Column)" }
+                    ]
+                },
+                {
+                    "label": "Container Width",
+                    "name": "container_width",
+                    "type": "dropdown",
+                    "style": 2,
+                    "options": [
+                        { "id": "container", "title": "Standard (max-w-6xl)" },
+                        { "id": "narrow", "title": "Narrow (max-w-4xl)" },
+                        { "id": "wide", "title": "Wide (max-w-7xl)" },
+                        { "id": "full", "title": "Full Width (100%)" }
+                    ]
+                },
+                {
+                    "label": "Header Style",
+                    "name": "header_style",
+                    "type": "dropdown",
+                    "style": 2,
+                    "options": [
+                        { "id": "hero_gradient", "title": "Hero Gradient Banner" },
+                        { "id": "clean_minimal", "title": "Clean Minimal Title Bar" },
+                        { "id": "with_image", "title": "Featured Banner Image" },
+                        { "id": "none", "title": "No Header (Content Only)" }
+                    ]
+                },
+                {
+                    "label": "Show Breadcrumbs",
+                    "name": "show_breadcrumbs",
+                    "type": "checkbox",
+                    "value": true
+                },
+                {
+                    "label": "Sticky Sidebar on Scroll",
+                    "name": "sticky_sidebar",
+                    "type": "checkbox",
+                    "value": true
+                }
+            ]
+        },
+        {
+            "title": "Sidebar & Pre-Footer Widgets",
+            "style": "main",
+            "tab": "Layout",
+            "fields": [
+                {
+                    "label": "Sidebar Widgets (Choose & Enable)",
+                    "name": "sidebar_widgets",
+                    "type": "dropdown",
+                    "multiple": true,
+                    "placeholder": "Select widgets to display in sidebar...",
+                    "options": [
+                        { "id": "toc", "title": "Table of Contents (Auto Headings Navigation)" },
+                        { "id": "recent_blogs", "title": "Recent Blog Articles" },
+                        { "id": "categories", "title": "Explore Categories" },
+                        { "id": "contact_card", "title": "Need Help? Contact Card" },
+                        { "id": "newsletter", "title": "Newsletter Subscription Box" },
+                        { "id": "related_pages", "title": "Related Company Pages" },
+                        { "id": "custom_cta", "title": "Custom Call-to-Action Card" }
+                    ]
+                },
+                {
+                    "label": "Bottom / Pre-Footer Section (Above Footer)",
+                    "name": "footer_widget",
+                    "type": "dropdown",
+                    "options": [
+                        { "id": "none", "title": "None (No Pre-Footer Widget)" },
+                        { "id": "cta_banner", "title": "Call-To-Action Banner" },
+                        { "id": "faq_accordion", "title": "FAQ Accordion (Top Questions)" },
+                        { "id": "contact_grid", "title": "3-Column Contact & Support Grid" },
+                        { "id": "recent_blogs", "title": "Latest Blog Articles Grid" },
+                        { "id": "newsletter", "title": "Newsletter Banner Section" }
+                    ]
+                },
+                {
+                    "label": "Bottom CTA Heading",
+                    "name": "footer_cta_title",
+                    "type": "text",
+                    "placeholder": "e.g. Have questions or need assistance?",
+                    "style": 2
+                },
+                {
+                    "label": "Bottom CTA Button Text",
+                    "name": "footer_cta_btn_text",
+                    "type": "text",
+                    "placeholder": "e.g. Contact Support",
+                    "style": 2
+                },
+                {
+                    "label": "Bottom CTA Button Link",
+                    "name": "footer_cta_btn_url",
+                    "type": "text",
+                    "placeholder": "e.g. /page/contact-us",
+                    "style": 2
+                },
+                {
+                    "label": "Bottom CTA Description",
+                    "name": "footer_cta_desc",
+                    "type": "textarea",
+                    "placeholder": "Our customer support team is available 24/7 to assist you."
+                }
+            ]
+        },
+        {
+            "title": "Custom Widget Cards (Optional)",
+            "style": "main",
+            "tab": "Layout",
+            "fields": [
+                {
+                    "label": "Custom Widget Cards",
+                    "name": "custom_widgets",
+                    "type": "repeater",
+                    "fields": [
+                        { "name": "title", "label": "Widget Title", "type": "text", "placeholder": "e.g. Special Offer or Notice" },
+                        { "name": "content", "label": "Widget Content", "type": "textarea", "placeholder": "Enter widget details or description..." },
+                        { "name": "button_text", "label": "Button Label", "type": "text", "placeholder": "e.g. Learn More" },
+                        { "name": "button_url", "label": "Button URL", "type": "text", "placeholder": "e.g. /blog" }
+                    ]
+                }
+            ]
+        },
+        {
             "title": "Page Banner Image",
             "style": "main",
             "tab": "Media",

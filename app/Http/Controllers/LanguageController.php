@@ -106,6 +106,7 @@ class LanguageController extends Controller
      */
     public function edit($prefix)
     {
+
         $languages = json_decode(File::get($this->file), true) ?: [];
         $language = collect($languages)->firstWhere('prefix', $prefix);
         if (!$language) abort(404);

@@ -11,9 +11,10 @@ import ImageViwer from '@/Components/Admin/ImageViwer';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectWishlistItems, selectWishlistCount, removeFromWishlist, toggleWishlist, selectIsWishlistOpen } from '@/store/wishListSlice';
 import { IoBagCheckOutline } from 'react-icons/io5';
+import { recordWishlistActivity } from '@/Utils/recordWishlistActivity';
 
 export default function WishlistDrawer() {
-    const { setting } = usePage().props;
+    const { setting, auth } = usePage().props;
     const currency = setting?.site?.currency?.value ?? 'PKR';
     const isOpen = useSelector(selectIsWishlistOpen);
     const { __ } = useLang();
@@ -139,7 +140,10 @@ export default function WishlistDrawer() {
                                                                     )}
                                                                     <button
                                                                         type="button"
-                                                                        onClick={() => dispatch(removeFromWishlist(item.productId))}
+                                                                        onClick={() => {
+                                                                            dispatch(removeFromWishlist(item.productId));
+                                                                            if (auth?.user) recordWishlistActivity('wishlist_removed', item.productId);
+                                                                        }}
                                                                         className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors ml-auto"
                                                                         aria-label={__('Remove item')}
                                                                     >

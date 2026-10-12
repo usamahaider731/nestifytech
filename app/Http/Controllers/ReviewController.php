@@ -67,6 +67,16 @@ class ReviewController extends Controller
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
+        $productTitle = DB::table('posts')->where('id', $request->post_id)->value('title');
+        record_user_activity('review_submitted', [
+            'title' => 'Submitted a review',
+            'category' => 'review',
+            'detail' => 'Reviewed ' . ($productTitle ?: 'a product'),
+            'product_id' => (int) $request->post_id,
+            'product_title' => $productTitle,
+        ]);
+
         return response()->json(['message' => 'Review submitted successfully', 'review' => $review]);
     }
 
@@ -144,6 +154,12 @@ class ReviewController extends Controller
                     'updated_at' => now()
                 ]);
                 DB::table($this->review_table)->where('id', $id)->decrement('likes');
+                record_user_activity('review_unliked', [
+                    'title' => 'Removed a review like',
+                    'category' => 'review',
+                    'detail' => 'Removed your helpful vote from a review',
+                    'review_id' => (int) $id,
+                ]);
                 return response()->json(['success' => true, 'action' => 'unliked']);
             }
             $likedReviews[] = $id;
@@ -162,6 +178,12 @@ class ReviewController extends Controller
         }
 
         DB::table($this->review_table)->where('id', $id)->increment('likes');
+        record_user_activity('review_liked', [
+            'title' => 'Liked a review',
+            'category' => 'review',
+            'detail' => 'Marked a review as helpful',
+            'review_id' => (int) $id,
+        ]);
         return response()->json(['success' => true]);
     }
 

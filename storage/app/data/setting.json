@@ -94,18 +94,18 @@
         "favicon": {
             "label": "Favicon",
             "type": "image",
-            "value": "1788771195_28560d7113ad464752dd19ff0de702a8_favicon.svg",
+            "value": "1791818351_28560d7113ad464752dd19ff0de702a8_favicon.png",
             "style": 2
         },
         "light_logo": {
             "label": "Light Logo",
             "type": "image",
-            "value": "1790605208_28560d7113ad464752dd19ff0de702a8_light_logo.png"
+            "value": "1791818351_28560d7113ad464752dd19ff0de702a8_light_logo.png"
         },
         "dark_logo": {
             "label": "Dark Logo",
             "type": "image",
-            "value": "1790605208_28560d7113ad464752dd19ff0de702a8_dark_logo.png"
+            "value": "1791818351_28560d7113ad464752dd19ff0de702a8_dark_logo.png"
         }
     },
     "backend-color": {
@@ -618,7 +618,7 @@
                     "label": "Placement",
                     "type": "dropdown",
                     "unique": true,
-                    "searchable":false,
+                    "searchable": false,
                     "options": [
                         {
                             "id": "home_top",

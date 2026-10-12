@@ -83,7 +83,16 @@ function Header() {
                             <Dropdown>
                                 <Dropdown.Trigger className='relative cursor-pointer transition-transform hover:scale-105 ml-1'>
                                     <div className='relative'>
+                                        {
+                                                auth.user.user_avater && auth.user.user_avater.filename && auth.user.user_avater.filename.trim() !== '' && auth.user.user_avater.filename != undefined ? (
+                                             
                                         <ImageViwer image={auth.user.user_avater} className='size-9 rounded-full border-2 border-primary/40 p-0.5 object-cover shadow-sm' />
+                                                )
+                                                :
+                                                 <div className='size-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center'>
+                                                        <span className='text-primary text-lg font-bold'>{auth.user.name.charAt(0).toUpperCase()}</span>
+                                                    </div>
+}
                                         <span className={`absolute bottom-0 right-0 size-2.5 rounded-full border-2 border-accent ${auth.user.active ? 'bg-green-500' : 'bg-red-500'}`} />
                                     </div>
                                 </Dropdown.Trigger>
@@ -91,11 +100,11 @@ function Header() {
                                     <div className='px-4 py-3.5 border-b border-permanent/30 bg-dynamic/30'>
                                         <div className='flex items-center gap-3'>
                                             {
-                                                auth?.user?.user_avater && auth?.user?.user_avater?.filename && auth?.user?.user_avater?.filename.trim() !== '' ? (
-                                                    <ImageViwer image={auth?.user?.user_avater} className='size-10 rounded-full bg-primary/10 border border-primary/20 object-cover' />
+                                                auth.user.user_avater && auth.user.user_avater.filename && auth.user.user_avater.filename.trim() !== '' && auth.user.user_avater.filename != undefined ? (
+                                                    <ImageViwer image={auth.user.user_avater} className='size-10 rounded-full bg-primary/10 border border-primary/20 object-cover' />
                                                 ) : (
                                                     <div className='size-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center'>
-                                                        <span className='text-primary text-lg font-bold'>{auth?.user?.name.charAt(0).toUpperCase()}</span>
+                                                        <span className='text-primary text-lg font-bold'>{auth.user.name.charAt(0).toUpperCase()}</span>
                                                     </div>
                                                 )
                                             }

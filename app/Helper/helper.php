@@ -540,3 +540,35 @@ function get_posts(array $args = [])
 
     return $result;
 }
+
+/**
+ * Record a meaningful user activity in the user_activities module table.
+ */
+function record_user_activity(string $action, array $data = [], ?int $userId = null): void
+{
+    $userId = $userId ?? \Illuminate\Support\Facades\Auth::id();
+    if (!$userId) {
+        return;
+    }
+
+    try {
+        $request = request();
+        $payload = array_merge([
+            'action' => $action,
+            'logged_at' => now()->toIso8601String(),
+        ], $data);
+
+        \Illuminate\Support\Facades\DB::table('user_activities')->insert([
+            'user_id' => $userId,
+            'url' => $data['url'] ?? ($request ? $request->fullUrl() : null),
+            'method' => $data['method'] ?? ($request ? $request->method() : 'GET'),
+            'ip' => $request ? $request->ip() : null,
+            'user_agent' => $request ? $request->userAgent() : null,
+            'payload' => json_encode($payload),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    } catch (\Throwable $e) {
+        // Silently catch to prevent interrupting main user operations
+    }
+}

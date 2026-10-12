@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use App\Http\Controllers\ReviewController;
+
 Route::controller(FilterController::class)->group(function () {
     Route::post("bulk/action", "bulk_action")->name("bulk.action");
 });
@@ -86,17 +87,20 @@ Route::prefix('/admin')->middleware(['auth', 'verified'])->group(function () {
         Route::get('/{id?}', 'index')->name('module.index.with_id');
         Route::post('/{id}/destroy', 'destroy')->name('module.delete');
     });
-    // Keeping legacy names for backward compatibility by mapping them to ModuleController
+    // Keeping legacy names for backward compatibility by mapping them to ModuleController id must be intiger
     Route::get('/users', [ModuleController::class, 'index'])->defaults('type', 'user')->name('users');
-    Route::get('/{type}/edit/{id}', [ModuleController::class, 'edit'])->defaults('type', 'user')->name('user.edit');
+    Route::get('/{type}/edit/{id}', [ModuleController::class, 'edit'])
+        ->defaults('type', 'user')
+        ->whereNumber('id')
+        ->name('user.edit');
     Route::post('/{type}/edit/{id}', [ModuleController::class, 'submit'])->defaults('type', 'user')->name('submit.user');
-    
-    Route::group(['middleware' => ['permission:role-read']], function() {
+
+    Route::group(['middleware' => ['permission:role-read']], function () {
         Route::get('/users-role', [ModuleController::class, 'index'])->defaults('type', 'role')->name('role');
         Route::get('/users-role/details/{id}', [ModuleController::class, 'edit'])->defaults('type', 'role')->name('role.detail');
     });
 
-    Route::group(['middleware' => ['permission:role-write']], function() {
+    Route::group(['middleware' => ['permission:role-write']], function () {
         Route::get('/users-role/create', [ModuleController::class, 'create'])->defaults('type', 'role')->name('role.create');
         Route::post('/users-role/create/{status}', [ModuleController::class, 'submit'])->defaults('type', 'role')->name('submit.role');
         Route::get('/users-role/edit/{id}', [ModuleController::class, 'edit'])->defaults('type', 'role')->name('edit.role');
@@ -125,7 +129,7 @@ Route::prefix('/admin')->middleware(['auth', 'verified'])->group(function () {
         Route::post('/{id}', 'submit')->defaults('type', 'attributes')->name('admin.attributes.update')->middleware('permission:attribute-write');
         // destroy/options still need special handling if not unified, but let's keep them in AttributeController for now or unify them too
     });
-    
+
     // Add missing destroy and options routes to ModuleController
     Route::delete('/attributes/{id}', [ModuleController::class, 'destroy'])->name('admin.attributes.destroy')->middleware('permission:attribute-write');
     Route::get('/attributes/options/list', [ModuleController::class, 'getAttributesOptions'])->name('admin.attributes.options');
@@ -134,7 +138,7 @@ Route::prefix('/admin')->middleware(['auth', 'verified'])->group(function () {
     Route::get('/category', fn() => redirect()->route('taxonomy.index', ['type' => 'category']))->name('category.index');
     Route::get('/brand', fn() => redirect()->route('taxonomy.index', ['type' => 'brand']))->name('brand.index');
     Route::get('/tags', fn() => redirect()->route('taxonomy.index', ['type' => 'tag']))->name('admin.tags.index');
- 
+
     Route::prefix('/language')->controller(LanguageController::class)->middleware('permission:setting-read')->group(function () {
         Route::get('/', 'index')->name('admin.lang.index');
         Route::get('/create', 'create')->name('admin.lang.create');
@@ -169,5 +173,24 @@ Route::prefix('/admin')->middleware(['auth', 'verified'])->group(function () {
         Route::get('/export', 'export')->name('admin.export');
     });
 });
+
+// Customer Profile Routes
+Route::middleware(['auth'])->prefix('/profile')->name('profile.')->controller(ProfileController::class)->group(function () {
+    Route::get('/', 'index')->name('index');
+    Route::get('/orders', 'orders')->name('orders');
+    Route::get('/wishlist', 'wishlist')->name('wishlist');
+    Route::get('/reviews', 'reviews')->name('reviews');
+    Route::get('/activity', 'activity')->name('activity');
+    Route::post('/wishlist/activity', 'wishlistActivity')->name('wishlist.activity');
+    Route::get('/settings', 'settings')->name('settings');
+    Route::get('/edit', 'edit')->name('edit');
+    Route::post('/update', 'update')->name('update');
+    Route::patch('/', 'update')->name('patch');
+    Route::post('/avatar', 'updateAvatar')->name('avatar.update');
+    Route::delete('/avatar', 'removeAvatar')->name('avatar.remove');
+    Route::put('/password', 'updatePassword')->name('password.update');
+    Route::delete('/', 'destroy')->name('destroy');
+});
+
 require __DIR__ . '/auth.php';
 // require __DIR__ . '/api.php';

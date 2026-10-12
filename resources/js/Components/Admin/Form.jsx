@@ -336,6 +336,11 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
                 <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
             </svg>
         ),
+        'Layout': (
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h11A1.5 1.5 0 0 1 15 2.5v11a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 13.5v-11zM2.5 2a.5.5 0 0 0-.5.5v11a.5.5 0 0 0 .5.5H6V2H2.5zm4.5 0v12h6.5a.5.5 0 0 0 .5-.5v-11a.5.5 0 0 0-.5-.5H7z"/>
+            </svg>
+        ),
     };
 
     const sharedFieldProps = { data, normalizeImageValue, updateField, rolesList, dropdownOptions, loadingStates, id };

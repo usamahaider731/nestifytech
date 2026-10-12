@@ -1,7 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import React from 'react';
 import ImageViwer from '../Admin/ImageViwer';
-import { RiHeartLine, RiMenuLine, RiMessage2Line, RiRepeat2Line, RiShoppingBag3Line } from 'react-icons/ri';
+import { RiHeartLine, RiMenuLine, RiMessage2Line, RiRepeat2Line, RiShoppingBag3Line, RiUserLine, RiUser3Line } from 'react-icons/ri';
 import HeaderSearch from './HeaderSearch';
 import { useCart } from '@/contexts/CartContext';
 import { useLang } from '@/contexts/LanguageContext';
@@ -11,7 +11,7 @@ import { selectWishlistCount, toggleWishlist } from '@/store/wishListSlice';
 import { selectCompareCount, toggleCompare } from '@/store/compareSlice';
 
 const MainNav = ({ ContainerType, isScrolled = false }) => {
-    const { setting } = usePage().props;
+    const { setting, auth } = usePage().props;
     const { setIsOpen } = useCart();
     const { __ } = useLang();
     const dispatch = useDispatch();
@@ -98,6 +98,71 @@ const MainNav = ({ ContainerType, isScrolled = false }) => {
                                 </span>
                             )}
                         </button>
+
+                        {/* Account / Profile */}
+                        {auth?.user ? (
+                            <div className="relative group flex items-center">
+                                <Link
+                                    href={route('profile.index')}
+                                    className="flex cursor-pointer items-center text-text transition hover:text-primary"
+                                    aria-label={__('My Account')}
+                                    title={auth.user.name || __('My Account')}
+                                >
+                                    <RiUserLine size={20} />
+                                </Link>
+                                <div className="absolute right-0 top-full pt-2 hidden group-hover:block z-50 min-w-44">
+                                    <div className="bg-bg border border-border rounded shadow-lg py-1.5 text-xs text-text">
+                                        <div className="px-3 py-1.5 border-b border-border font-semibold text-res text-[11px] truncate">
+                                            {auth.user.name || auth.user.email}
+                                        </div>
+                                        <Link
+                                            href={route('profile.index')}
+                                            className="block px-3 py-1.5 hover:bg-bg hover:text-primary transition-colors"
+                                        >
+                                            {__('Dashboard')}
+                                        </Link>
+                                        <Link
+                                            href={route('profile.orders')}
+                                            className="block px-3 py-1.5 hover:bg-bg hover:text-primary transition-colors"
+                                        >
+                                            {__('My Orders')}
+                                        </Link>
+                                        <Link
+                                            href={route('profile.wishlist')}
+                                            className="block px-3 py-1.5 hover:bg-bg hover:text-primary transition-colors"
+                                        >
+                                            {__('Wishlist')}
+                                        </Link>
+                                        <Link
+                                            href={route('profile.settings')}
+                                            className="block px-3 py-1.5 hover:bg-bg hover:text-primary transition-colors"
+                                        >
+                                            {__('Settings')}
+                                        </Link>
+                                        <div className="border-t border-border mt-1 pt-1">
+                                            <Link
+                                                href={route('logout')}
+                                                method="post"
+                                                as="button"
+                                                className="w-full text-left px-3 py-1.5 text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                                            >
+                                                {__('Log Out')}
+                                            </Link>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <Link
+                                href={route('login')}
+                                className="flex cursor-pointer items-center text-text transition hover:text-primary"
+                                aria-label={__('Sign In')}
+                                title={__('Sign In')}
+                            >
+                                <RiUser3Line size={20} />
+                            </Link>
+                        )}
+
                         {/* Cart — always shown */}
                         <button
                             type="button"
@@ -114,11 +179,11 @@ const MainNav = ({ ContainerType, isScrolled = false }) => {
                                 )}
                             </div>
                             {/* Show subtotal only in non-sticky mode */}
-                                <div className="flex flex-col">
-                                    <span className="text-md font-semibold">
-                                        {currency} {subtotal.toLocaleString()}
-                                    </span>
-                                </div>
+                            <div className="flex flex-col">
+                                <span className="text-md font-semibold">
+                                    {currency} {subtotal.toLocaleString()}
+                                </span>
+                            </div>
                         </button>
                     </div>
                 </div>

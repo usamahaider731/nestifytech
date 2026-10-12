@@ -36,7 +36,6 @@ class AppServiceProvider extends ServiceProvider
         $settings = $filesystem->exists($settingsPath) ? $filesystem->get($settingsPath) : '{}';
         $layout = $filesystem->exists($layoutPath) ? $filesystem->get($layoutPath) : '{}';
         $sidebarMenuContent = $filesystem->exists($sidebarMenuPath) ? $filesystem->get($sidebarMenuPath) : '[]';
-
         $layoutArr = json_decode($layout, true);
         $qes = [];
         $datas = [];

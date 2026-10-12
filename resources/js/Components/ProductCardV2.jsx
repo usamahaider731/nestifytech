@@ -20,9 +20,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { addToCompare, removeFromCompare, selectIsInCompare } from '@/store/compareSlice';
 import { addToWishlist, removeFromWishlist, selectIsInWishlist } from '@/store/wishListSlice';
 import { RiHeart2Fill } from 'react-icons/ri';
+import { recordWishlistActivity } from '@/Utils/recordWishlistActivity';
 
 const ProductCardV2 = ({ className = '', product = {} }) => {
-    const { setting } = usePage().props;
+    const { setting, auth } = usePage().props;
     const cardSetting = setting.layout.Product_Card_V2;
     const currency = setting.site.currency.value ?? 'PKR';
     const { addItem } = useCart();
@@ -43,8 +44,10 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
     const wishlistHandle = () => {
         if(isWishlist){
             dispatch(removeFromWishlist(product.id));
+            if (auth?.user) recordWishlistActivity('wishlist_removed', product.id);
         }else{
             dispatch(addToWishlist({ productId: product.id, product }));
+            if (auth?.user) recordWishlistActivity('wishlist_added', product.id);
         }
     }
 

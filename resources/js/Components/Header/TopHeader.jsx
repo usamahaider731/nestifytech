@@ -37,7 +37,7 @@ const TopHeader = ({ show_language, ContainerType }) => {
                                 </Link>
                             </li>
                         </ul> */}
-                            <p className='text-xs font-medium text-res'>
+                        <p className='text-xs font-medium text-res'>
                             {__('Welcome to Worldwide Electronics Store')}
                         </p>
                     </div>
@@ -45,13 +45,13 @@ const TopHeader = ({ show_language, ContainerType }) => {
                     <div className='flex items-center'>
                         <ul className='flex leading-9.5 items-center'>
                             <li className='px-3.75 text-[13px]'>
-                                    <Link className='flex items-center gap-1 font-medium transition-colors hover:text-primary'>
+                                <Link className='flex items-center gap-1 font-medium transition-colors hover:text-primary'>
                                     <BiMap size={13} />
                                     {__('Store Locator')}
                                 </Link>
                             </li>
                             <li className='px-3.75 text-[13px] h-4 border-l-2 border-l-border flex'>
-                                <Link className='flex items-center gap-1 font-medium transition-colors hover:text-primary'>
+                                <Link href={props.auth?.user ? route('profile.orders') : route('login')} className='flex items-center gap-1 font-medium transition-colors hover:text-primary'>
                                     <TbTruckDelivery size={18} />
                                     {__('Track Your Order')}
                                 </Link>
@@ -64,13 +64,64 @@ const TopHeader = ({ show_language, ContainerType }) => {
                                     </div>
                                 </li>
                             }
-                            <li className='px-3.75 text-[13px] h-4 flex items-center border-l-2 border-border'>
-                                {props.auth.user ? <Link href={route('admin.dashboard')} className='font-medium hover:text-primary flex items-center gap-1'><RiUserLine size={16} /> {__('My Account')}</Link> :
+                            <li className='px-3.75 text-[13px] h-4 flex items-center border-l-2 border-border relative'>
+                                {props.auth.user ? (
+                                    <div className="relative group">
+                                        <Link
+                                            href={route('profile.index')}
+                                            className="font-medium hover:text-primary flex items-center gap-1 cursor-pointer"
+                                        >
+                                            <RiUserLine size={16} />
+                                            <span className="truncate max-w-[120px]">{props.auth.user.name || __('My Account')}</span>
+                                        </Link>
+                                        <div className="absolute right-0 top-full pt-2 hidden group-hover:block z-50 min-w-44">
+                                            <div className="bg-bg border border-border rounded shadow-lg py-1.5 text-xs text-text">
+                                                <div className="px-3 py-1.5 border-b border-border font-semibold text-res text-[11px] truncate">
+                                                    {props.auth.user.email}
+                                                </div>
+                                                <Link
+                                                    href={route('profile.index')}
+                                                    className="block px-3 py-1.5 hover:bg-bg hover:text-primary transition-colors"
+                                                >
+                                                    {__('Dashboard')}
+                                                </Link>
+                                                <Link
+                                                    href={route('profile.orders')}
+                                                    className="block px-3 py-1.5 hover:bg-bg hover:text-primary transition-colors"
+                                                >
+                                                    {__('My Orders')}
+                                                </Link>
+                                                <Link
+                                                    href={route('profile.wishlist')}
+                                                    className="block px-3 py-1.5 hover:bg-bg hover:text-primary transition-colors"
+                                                >
+                                                    {__('Wishlist')}
+                                                </Link>
+                                                <Link
+                                                    href={route('profile.settings')}
+                                                    className="block px-3 py-1.5 hover:bg-bg hover:text-primary transition-colors"
+                                                >
+                                                    {__('Settings')}
+                                                </Link>
+                                                <div className="border-t border-border mt-1 pt-1">
+                                                    <Link
+                                                        href={route('logout')}
+                                                        method="post"
+                                                        as="button"
+                                                        className="w-full text-left px-3 py-1.5 text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                                                    >
+                                                        {__('Log Out')}
+                                                    </Link>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
                                     <Link href={route('login')} className='font-medium hover:text-primary flex items-center gap-1'>
                                         <RiUser3Line size={16} />
                                         {__('Register Or SignIn')}
                                     </Link>
-                                }
+                                )}
                             </li>
                         </ul>
                     </div>

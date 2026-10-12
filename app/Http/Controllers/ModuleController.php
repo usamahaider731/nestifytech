@@ -17,6 +17,7 @@ class ModuleController extends Controller
 {
     use ModuleHandler;
 
+
     private function checkPermission(string $type, string $action)
     {
         $user = auth()->user();
@@ -24,6 +25,20 @@ class ModuleController extends Controller
             abort(403);
         $user = User::find($user->id);
 
+        // ── Administrator bypass ──────────────────────────────────────────────
+        $userRoles = is_string($user->roles)
+            ? json_decode($user->roles, true)
+            : (array) $user->roles;
+
+        if (!empty($userRoles)) {
+            $isAdmin = DB::table('roles')
+                ->whereIn('id', $userRoles)
+                ->where('title', 'Administrator')
+                ->exists();
+            if ($isAdmin) return;
+        }
+
+        // ── Standard permission check ─────────────────────────────────────────
         $permission = strtolower($type) . '-' . strtolower($action);
         $userPerms = $user->user_permissions ?? [];
 
@@ -46,6 +61,7 @@ class ModuleController extends Controller
             }
         }
     }
+
 
     /**
      * Restrict review lists to top-level entries by default and to a parent review when provided.
