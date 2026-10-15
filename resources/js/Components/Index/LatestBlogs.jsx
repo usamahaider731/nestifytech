@@ -34,9 +34,8 @@ export default function LatestBlogs({ blogs = [] }) {
                 </Link>
             </div>
 
-            {/* Layout: featured (left) + list (right) */}
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                {/* Featured Post */}
+            {/* Layout: responsive card grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {blogs.map((blog) => (
                     <ArticalCard key={blog.id} blog={blog} />
                 ))}

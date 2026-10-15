@@ -91,6 +91,36 @@
             },
             "icon": "ri-sparkling-2-line",
             "permission": "setting-write"
+          },
+          {
+            "id": "payment-setting",
+            "title": "Payment Gateways",
+            "route": "admin.setting",
+            "params": {
+              "type": "payment"
+            },
+            "icon": "ri-bank-card-line",
+            "permission": "setting-read"
+          },
+          {
+            "id": "whatsapp-setting",
+            "title": "WhatsApp API",
+            "route": "admin.setting",
+            "params": {
+              "type": "whatsapp"
+            },
+            "icon": "ri-whatsapp-line",
+            "permission": "setting-read"
+          },
+          {
+            "id": "mail-setting",
+            "title": "Email / Mailtrap",
+            "route": "admin.setting",
+            "params": {
+              "type": "mail"
+            },
+            "icon": "ri-mail-settings-line",
+            "permission": "setting-read"
           }
         ]
       },

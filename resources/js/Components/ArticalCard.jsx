@@ -14,7 +14,7 @@ const ArticalCard = ({ blog }) => {
             key={blog.id}
             className="group rounded border bg-white border-border/60 hover:border-primary/40 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col"
         >
-            <div className="relative h-52 w-full overflow-hidden bg-dynamic">
+            <div className="relative h-52 w-full overflow-hidden bg-accent/30">
                 {blog.image ? (
                     <ImageViwer
                         image={blog.image}

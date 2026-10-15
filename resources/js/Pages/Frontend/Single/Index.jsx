@@ -92,7 +92,7 @@ const SingleProduct = ({ product, latest_product, related_products = [], popular
                                     <RiMapPin2Fill size={26} className='mt-0 text-secondary' />
                                     <div>
                                         <h1 className='text-base font-medium text-primary'>{__('Location')}</h1>
-                                        <p className='text-sm'>{product.meta.address.value}, {product.city?.title}, {product.state.title}</p>
+                                        <p className='text-sm'>{product.meta.address?.value}, {product.city?.title}, {product.state?.title}</p>
                                     </div>
                                 </div>
                             </div>

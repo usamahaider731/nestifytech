@@ -83,30 +83,68 @@ class LogUserActivity
 
                 if (!$recentLog) {
                     $action = 'page_visit';
-                    $title = 'Browsed Page';
+                    $title = 'Home';
+                    $category = 'general';
 
                     if ($path === '' || $path === '/') {
                         $action = 'visit_home';
-                        $title = 'Visited Homepage';
+                        $title = 'Home';
+                        $category = 'general';
                     } elseif (str_starts_with($path, 'checkout')) {
                         $action = 'view_checkout';
-                        $title = 'Viewed Checkout Page';
+                        $title = 'Checkout';
+                        $category = 'order';
                     } elseif (str_starts_with($path, 'compare')) {
                         $action = 'view_compare';
-                        $title = 'Viewed Product Comparison';
+                        $title = 'Compare';
+                        $category = 'product';
+                    } elseif (str_starts_with($path, 'profile/wishlist') || $path === 'wishlist') {
+                        $action = 'view_wishlist';
+                        $title = 'Wishlist';
+                        $category = 'wishlist';
+                    } elseif (str_starts_with($path, 'profile/orders')) {
+                        $action = 'view_orders';
+                        $title = 'Orders';
+                        $category = 'order';
+                    } elseif (str_starts_with($path, 'profile/reviews')) {
+                        $action = 'view_reviews';
+                        $title = 'Reviews';
+                        $category = 'review';
+                    } elseif (str_starts_with($path, 'profile/activity')) {
+                        $action = 'view_activity';
+                        $title = 'Activity';
+                        $category = 'profile';
+                    } elseif (str_starts_with($path, 'profile/settings')) {
+                        $action = 'view_settings';
+                        $title = 'Settings';
+                        $category = 'profile';
+                    } elseif ($path === 'profile') {
+                        $action = 'view_dashboard';
+                        $title = 'Dashboard';
+                        $category = 'profile';
+                    } elseif (str_starts_with($path, 'store')) {
+                        $action = 'view_store';
+                        $title = 'Store';
+                        $category = 'product';
                     } elseif (str_starts_with($path, 'blog/')) {
+                        $slug = str_replace('blog/', '', $path);
+                        $postTitle = DB::table('posts')->where('sku', $slug)->orWhere('id', is_numeric($slug) ? (int)$slug : 0)->value('title');
                         $action = 'read_blog';
-                        $title = 'Read Blog Article';
+                        $title = $postTitle ?: ('Blog: ' . ucwords(str_replace('-', ' ', $slug)));
+                        $category = 'general';
                     } elseif (str_starts_with($path, 'blog')) {
                         $action = 'browse_blog';
-                        $title = 'Browsed Blog Articles';
+                        $title = 'Blog';
+                        $category = 'general';
                     } elseif (str_starts_with($path, 'faqs') || str_starts_with($path, 'faq')) {
                         $action = 'view_faqs';
-                        $title = 'Browsed Help & FAQs';
+                        $title = 'FAQs';
+                        $category = 'general';
                     } elseif (str_starts_with($path, 'page/')) {
                         $slug = str_replace('page/', '', $path);
                         $action = 'view_page';
-                        $title = 'Viewed ' . ucwords(str_replace('-', ' ', $slug)) . ' Page';
+                        $title = ucwords(str_replace('-', ' ', $slug));
+                        $category = 'general';
                     }
 
                     // Only insert if it is a meaningful categorized customer action
@@ -120,6 +158,7 @@ class LogUserActivity
                             'payload' => json_encode([
                                 'action' => $action,
                                 'title' => $title,
+                                'category' => $category,
                                 'path' => '/' . $path,
                             ]),
                             'created_at' => now(),

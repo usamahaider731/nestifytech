@@ -7,7 +7,6 @@ import {
     removeFromWishlist,
     clearWishlist,
 } from '@/store/wishListSlice';
-import { useCart } from '@/contexts/CartContext';
 import { useLang } from '@/contexts/LanguageContext';
 import { recordWishlistActivity } from '@/Utils/recordWishlistActivity';
 import ProductCardV2 from '@/Components/ProductCardV2';
@@ -17,6 +16,7 @@ import {
     RiDeleteBinLine,
     RiArrowRightLine,
     RiSparklingLine,
+    RiEyeLine,
 } from 'react-icons/ri';
 
 export default function Wishlist({ profile, recommended_products = [] }) {
@@ -25,12 +25,7 @@ export default function Wishlist({ profile, recommended_products = [] }) {
     const currency = setting?.currency_symbol || '$';
 
     const dispatch = useDispatch();
-    const { addItem } = useCart();
     const wishlistItems = useSelector(selectWishlistItems) || [];
-
-    const handleAddToCart = (product) => {
-        addItem(product);
-    };
 
     const handleRemove = (productId) => {
         dispatch(removeFromWishlist(productId));
@@ -155,14 +150,19 @@ export default function Wishlist({ profile, recommended_products = [] }) {
 
                                     {/* Action Footers */}
                                     <div className="p-3 bg-bg/40 border-t border-border flex items-center gap-2">
-                                        <button
-                                            type="button"
-                                            onClick={() => handleAddToCart(product)}
-                                            className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold bg-common hover:opacity-90 text-white rounded transition-opacity cursor-pointer"
-                                        >
-                                            <RiShoppingBag3Line size={14} />
-                                            {__('Add to Cart')}
-                                        </button>
+                                        {sku ? (
+                                            <Link
+                                                href={route('post', { type: 'product', sku: sku, id: productId })}
+                                                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold bg-common hover:opacity-90 text-white rounded transition-opacity"
+                                            >
+                                                <RiEyeLine size={14} />
+                                                {__('View Details')}
+                                            </Link>
+                                        ) : (
+                                            <span className="flex-1 text-center text-xs text-res py-2">
+                                                {__('Unavailable')}
+                                            </span>
+                                        )}
                                         <button
                                             type="button"
                                             onClick={() => handleRemove(productId)}

@@ -37,16 +37,125 @@ class ApiController extends Controller
             'limit' => ['nullable', 'integer', 'min:1', 'max:10'],
         ]);
 
-        $response = Http::retry([100, 300])
-            ->timeout(5)
-            ->connectTimeout(3)
-            ->get('https://photon.komoot.io/api/', [
-                'q' => $validated['q'],
-                'limit' => $validated['limit'] ?? 5,
-            ]);
+        $q = $validated['q'];
+        $limit = $validated['limit'] ?? 5;
 
-        return response()->json($response->successful() ? $response->json() : [], $response->status());
+        try {
+            $response = Http::timeout(4)
+                ->connectTimeout(3)
+                ->withHeaders([
+                    'User-Agent' => 'NestifyTech/1.0',
+                ])
+                ->get('https://photon.komoot.io/api/', [
+                    'q' => $q,
+                    'limit' => $limit,
+                ]);
+
+            if ($response->successful()) {
+                return response()->json($response->json());
+            }
+        } catch (\Throwable $e) {
+            // Photon timed out or connection refused, fallback to Nominatim
+        }
+
+        try {
+            $osmResponse = Http::timeout(4)
+                ->connectTimeout(3)
+                ->withHeaders([
+                    'User-Agent' => 'NestifyTech-App/1.0 (contact@nestifytech.com)',
+                ])
+                ->get('https://nominatim.openstreetmap.org/search', [
+                    'q' => $q,
+                    'format' => 'geojson',
+                    'addressdetails' => 1,
+                    'limit' => $limit,
+                ]);
+
+            if ($osmResponse->successful()) {
+                return response()->json($osmResponse->json());
+            }
+        } catch (\Throwable $e) {
+            // Both external providers failed
+        }
+
+        return response()->json(['type' => 'FeatureCollection', 'features' => []]);
     }
+
+    public function detectCountry(Request $request)
+    {
+        $ip = $request->ip();
+
+        // Local development fallback
+        if (in_array($ip, ['127.0.0.1', '::1', 'localhost']) || str_starts_with($ip, '192.168.') || str_starts_with($ip, '10.')) {
+            $siteSetting = $this->site_setting();
+            $country = $siteSetting['country'] ?? 'Pakistan';
+            return response()->json([
+                'ip'           => $ip,
+                'country'      => $country,
+                'country_code' => 'PK',
+                'region'       => 'Punjab',
+                'city'         => 'Lahore',
+                'postal'       => '',
+                'latitude'     => 31.5204,
+                'longitude'    => 74.3587,
+                'timezone'     => 'Asia/Karachi',
+                'org'          => 'Localhost',
+            ]);
+        }
+
+        try {
+            $response = Http::timeout(4)->get("https://ipapi.co/{$ip}/json/");
+            if ($response->successful() && !empty($response->json('country_name'))) {
+                $data = $response->json();
+                return response()->json([
+                    'ip'           => $data['ip'] ?? $ip,
+                    'country'      => $data['country_name'] ?? '',
+                    'country_code' => $data['country_code'] ?? '',
+                    'region'       => $data['region'] ?? '',
+                    'city'         => $data['city'] ?? '',
+                    'postal'       => $data['postal'] ?? '',
+                    'latitude'     => $data['latitude'] ?? null,
+                    'longitude'    => $data['longitude'] ?? null,
+                    'timezone'     => $data['timezone'] ?? '',
+                    'org'          => $data['org'] ?? '',
+                ]);
+            }
+        } catch (\Throwable $e) {}
+
+        try {
+            $response = Http::timeout(4)->get("https://ipwho.is/{$ip}");
+            if ($response->successful() && !empty($response->json('country'))) {
+                $data = $response->json();
+                return response()->json([
+                    'ip'           => $data['ip'] ?? $ip,
+                    'country'      => $data['country'] ?? '',
+                    'country_code' => $data['country_code'] ?? '',
+                    'region'       => $data['region'] ?? '',
+                    'city'         => $data['city'] ?? '',
+                    'postal'       => $data['postal'] ?? '',
+                    'latitude'     => $data['latitude'] ?? null,
+                    'longitude'    => $data['longitude'] ?? null,
+                    'timezone'     => $data['timezone']['id'] ?? '',
+                    'org'          => $data['connection']['org'] ?? '',
+                ]);
+            }
+        } catch (\Throwable $e) {}
+
+        $siteSetting = $this->site_setting();
+        return response()->json([
+            'ip'           => $ip,
+            'country'      => $siteSetting['country'] ?? 'United States',
+            'country_code' => '',
+            'region'       => '',
+            'city'         => '',
+            'postal'       => '',
+            'latitude'     => null,
+            'longitude'    => null,
+            'timezone'     => '',
+            'org'          => '',
+        ]);
+    }
+
     public function menu(Request $request)
     {
         $query = DB::table('menu')->orderBy('sort_order', 'asc');

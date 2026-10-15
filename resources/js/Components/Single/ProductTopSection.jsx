@@ -11,6 +11,7 @@ import ProductQRCode from './ProductQRCode';
 
 const ProductTopSection = ({ product }) => {
     const { __ } = useLang();
+    console.log(product)
     return (
         <div className='flex flex-col w-full'>
             <div className='flex justify-between mx-auto w-full'>
@@ -57,9 +58,9 @@ const ProductTopSection = ({ product }) => {
                             </h1>
                             <div className='flex flex-col gap-2 font-roboto'>
                                 <div className='flex gap-4 items-start flex-col'>
-                                    {product?.brand && 
+                                    {product?.brand && Object.keys(product.brand).length !== 0 && 
                                     <div className='flex flex-col items-start'>
-                                        <Link href={route('taxonomy.view', {type: "brand", id: product.brand?.id, slug: product.brand?.slug, time: new Date().getTime()})} title={product.brand?.title}><ImageViwer image={product.brand?.image?.filename} alt={product.brand?.title} className='cursor-pointer max-w-36 flex items-start text-start justify-start h-12' /></Link>
+                                        <Link href={route('taxonomy.view', {type: "brand", id: product.brand.id, slug: product.brand.slug, time: new Date().getTime()})} title={product.brand.title}><ImageViwer image={product.brand?.image?.filename} alt={product.brand?.title} className='cursor-pointer max-w-36 flex items-start text-start justify-start h-12' /></Link>
                                     </div>}
                                     <div className='flex gap-2 items-center'>
                                         <span className='text-lg text-heading font-semibold'>{__('SKU:')}</span>

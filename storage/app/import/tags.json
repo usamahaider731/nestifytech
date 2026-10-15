@@ -1,34 +1,45 @@
-[
-    {
-        "title": "New",
-        "slug": "new"
-    },
-    {
-        "title": "Sale",
-        "slug": "sale"
-    },
-    {
-        "title": "Bestseller",
-        "slug": "bestseller"
-    },
-    {
-        "title": "Limited",
-        "slug": "limited"
-    },
-    {
-        "title": "Free shipping",
-        "slug": "free-shipping"
-    },
-    {
-        "title": "Eco",
-        "slug": "eco"
-    },
-    {
-        "title": "Gift idea",
-        "slug": "gift-idea"
-    },
-    {
-        "title": "Pro",
-        "slug": "pro"
-    }
-]
+{
+    "table": "taxonomy",
+    "data": [
+        {
+            "title": "New",
+            "slug": "new",
+            "type": "tag"
+        },
+        {
+            "title": "Sale",
+            "slug": "sale",
+            "type": "tag"
+        },
+        {
+            "title": "Bestseller",
+            "slug": "bestseller",
+            "type": "tag"
+        },
+        {
+            "title": "Limited",
+            "slug": "limited",
+            "type": "tag"
+        },
+        {
+            "title": "Free shipping",
+            "slug": "free-shipping",
+            "type": "tag"
+        },
+        {
+            "title": "Eco",
+            "slug": "eco",
+            "type": "tag"
+        },
+        {
+            "title": "Gift idea",
+            "slug": "gift-idea",
+            "type": "tag"
+        },
+        {
+            "title": "Pro",
+            "slug": "pro",
+            "type": "tag"
+        }
+    ]
+}

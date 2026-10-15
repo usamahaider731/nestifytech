@@ -597,7 +597,7 @@
                     "open_new_tab": true,
                     "iframe": null,
                     "html": null,
-                    "image": "1790318796_03be58c579881cc455b0a5a1f800d9c0_Your paragraph text.png"
+                    "image": "1791903223_03be58c579881cc455b0a5a1f800d9c0_Your paragraph text.png"
                 }
             ],
             "fields": [
@@ -780,6 +780,572 @@
             "type": "text",
             "value": "services",
             "placeholder": "Enter location name"
+        }
+    },
+    "payment": {
+        "stripe_section": {
+            "type": "section",
+            "label": "Stripe Card Payments",
+            "description": "Accept all major debit\/credit cards securely via Stripe.",
+            "icon": "ri-bank-card-line",
+            "toggle_field": "stripe_enabled"
+        },
+        "stripe_enabled": {
+            "label": "Enable Stripe Card Payments",
+            "type": "checkbox",
+            "style": 1,
+            "value_label": "Enable Stripe",
+            "value": true
+        },
+        "stripe_mode": {
+            "label": "Stripe Environment Mode",
+            "type": "dropdown",
+            "style": 2,
+            "searchable": false,
+            "condition": {
+                "field": "stripe_enabled",
+                "value": true
+            },
+            "options": {
+                "test": {
+                    "label": "Test \/ Sandbox",
+                    "value": "test"
+                },
+                "live": {
+                    "label": "Live \/ Production",
+                    "value": "live"
+                }
+            },
+            "value": "test"
+        },
+        "stripe_publishable_key": {
+            "label": "Stripe Publishable Key",
+            "type": "text",
+            "style": 2,
+            "placeholder": "pk_test_... or pk_live_...",
+            "condition": {
+                "field": "stripe_enabled",
+                "value": true
+            },
+            "value": "pk_test_51UJo7aGy3HXmj7sy09u6u7U4h1W9900000000000"
+        },
+        "stripe_secret_key": {
+            "label": "Stripe Secret Key",
+            "type": "password",
+            "style": 2,
+            "placeholder": "sk_test_... or sk_live_...",
+            "condition": {
+                "field": "stripe_enabled",
+                "value": true
+            },
+            "value": "sk_test_51UJo7aGy3HXmj7syORR6ffyvOnkWk9Bz5N6GyRB2l8idlFqT26URnU0DexfyI8OpveQibkTgftzi2K5KwB0zvfYU005Shd340r"
+        },
+        "stripe_webhook_secret": {
+            "label": "Stripe Webhook Secret (Optional)",
+            "type": "password",
+            "style": 2,
+            "placeholder": "whsec_...",
+            "condition": {
+                "field": "stripe_enabled",
+                "value": true
+            },
+            "value": null
+        },
+        "stripe_currency": {
+            "label": "Stripe Processing Currency",
+            "type": "dropdown",
+            "style": 2,
+            "searchable": true,
+            "condition": {
+                "field": "stripe_enabled",
+                "value": true
+            },
+            "options": {
+                "usd": {
+                    "label": "USD - US Dollar ($)",
+                    "value": "usd"
+                },
+                "pkr": {
+                    "label": "PKR - Pakistani Rupee (Rs)",
+                    "value": "pkr"
+                },
+                "eur": {
+                    "label": "EUR - Euro (€)",
+                    "value": "eur"
+                },
+                "gbp": {
+                    "label": "GBP - British Pound (£)",
+                    "value": "gbp"
+                },
+                "cad": {
+                    "label": "CAD - Canadian Dollar ($)",
+                    "value": "cad"
+                },
+                "aud": {
+                    "label": "AUD - Australian Dollar ($)",
+                    "value": "aud"
+                },
+                "aed": {
+                    "label": "AED - UAE Dirham (AED)",
+                    "value": "aed"
+                },
+                "sar": {
+                    "label": "SAR - Saudi Riyal (SAR)",
+                    "value": "sar"
+                }
+            },
+            "value": "usd"
+        },
+        "paypal_section": {
+            "type": "section",
+            "label": "PayPal Express & Smart Buttons",
+            "description": "Accept payments via PayPal account balances, Venmo, and credit cards worldwide.",
+            "icon": "ri-paypal-line",
+            "toggle_field": "paypal_enabled"
+        },
+        "paypal_enabled": {
+            "label": "Enable PayPal Gateway",
+            "type": "checkbox",
+            "style": 1,
+            "value_label": "Enable PayPal",
+            "value": true
+        },
+        "paypal_mode": {
+            "label": "PayPal Mode",
+            "type": "dropdown",
+            "style": 2,
+            "searchable": false,
+            "condition": {
+                "field": "paypal_enabled",
+                "value": true
+            },
+            "options": {
+                "sandbox": {
+                    "label": "Sandbox \/ Testing",
+                    "value": "sandbox"
+                },
+                "live": {
+                    "label": "Live \/ Production",
+                    "value": "live"
+                }
+            },
+            "value": "sandbox"
+        },
+        "paypal_client_id": {
+            "label": "PayPal Client ID",
+            "type": "text",
+            "style": 2,
+            "placeholder": "Enter PayPal REST API Client ID",
+            "condition": {
+                "field": "paypal_enabled",
+                "value": true
+            },
+            "value": "info@nestifytech.com"
+        },
+        "paypal_secret": {
+            "label": "PayPal Client Secret",
+            "type": "password",
+            "style": 2,
+            "placeholder": "Enter PayPal REST API Secret",
+            "condition": {
+                "field": "paypal_enabled",
+                "value": true
+            },
+            "value": "Admin123"
+        },
+        "paypal_currency": {
+            "label": "PayPal Currency",
+            "type": "dropdown",
+            "style": 2,
+            "searchable": true,
+            "condition": {
+                "field": "paypal_enabled",
+                "value": true
+            },
+            "options": {
+                "USD": {
+                    "label": "USD - US Dollar ($)",
+                    "value": "USD"
+                },
+                "EUR": {
+                    "label": "EUR - Euro (€)",
+                    "value": "EUR"
+                },
+                "GBP": {
+                    "label": "GBP - British Pound (£)",
+                    "value": "GBP"
+                },
+                "CAD": {
+                    "label": "CAD - Canadian Dollar ($)",
+                    "value": "CAD"
+                },
+                "AUD": {
+                    "label": "AUD - Australian Dollar ($)",
+                    "value": "AUD"
+                }
+            },
+            "value": "USD"
+        },
+        "cod_section": {
+            "type": "section",
+            "label": "Cash on Delivery (COD)",
+            "description": "Allow buyers to pay cash in hand when their order arrives.",
+            "icon": "ri-hand-coin-line",
+            "toggle_field": "cod_enabled"
+        },
+        "cod_enabled": {
+            "label": "Enable Cash on Delivery",
+            "type": "checkbox",
+            "style": 1,
+            "value_label": "Enable Cash on Delivery",
+            "value": true
+        },
+        "cod_instructions": {
+            "label": "Cash on Delivery Instructions for Customer",
+            "type": "textarea",
+            "placeholder": "e.g. Please keep the exact cash amount ready at the time of delivery.",
+            "condition": {
+                "field": "cod_enabled",
+                "value": true
+            },
+            "value": "Pay in cash upon delivery of your items. Please ensure you have the exact amount ready."
+        },
+        "payoneer_section": {
+            "type": "section",
+            "label": "Payoneer Mass Payouts & Checkout",
+            "description": "Accept payments globally via Payoneer — ideal for international sellers and freelance marketplaces.",
+            "icon": "ri-global-line",
+            "toggle_field": "payoneer_enabled"
+        },
+        "payoneer_enabled": {
+            "label": "Enable Payoneer Gateway",
+            "type": "checkbox",
+            "style": 1,
+            "value_label": "Enable Payoneer",
+            "value": true
+        },
+        "payoneer_mode": {
+            "label": "Payoneer Environment Mode",
+            "type": "dropdown",
+            "style": 2,
+            "searchable": false,
+            "condition": {
+                "field": "payoneer_enabled",
+                "value": true
+            },
+            "options": {
+                "sandbox": {
+                    "label": "Sandbox \/ Testing",
+                    "value": "sandbox"
+                },
+                "live": {
+                    "label": "Live \/ Production",
+                    "value": "live"
+                }
+            },
+            "value": "sandbox"
+        },
+        "payoneer_program_id": {
+            "label": "Payoneer Program ID",
+            "type": "text",
+            "style": 2,
+            "placeholder": "Enter your Payoneer Program ID",
+            "condition": {
+                "field": "payoneer_enabled",
+                "value": true
+            },
+            "value": null
+        },
+        "payoneer_username": {
+            "label": "Payoneer API Username",
+            "type": "text",
+            "style": 2,
+            "placeholder": "Enter Payoneer API username (your account email)",
+            "condition": {
+                "field": "payoneer_enabled",
+                "value": true
+            },
+            "value": "info@nestifytech.com"
+        },
+        "payoneer_api_password": {
+            "label": "Payoneer API Password",
+            "type": "password",
+            "style": 2,
+            "placeholder": "Enter your Payoneer API password",
+            "condition": {
+                "field": "payoneer_enabled",
+                "value": true
+            },
+            "value": "Admin123"
+        },
+        "payoneer_partner_id": {
+            "label": "Payoneer Partner ID (p4)",
+            "type": "text",
+            "style": 2,
+            "placeholder": "Optional — Enter Payoneer Partner ID if provided",
+            "condition": {
+                "field": "payoneer_enabled",
+                "value": true
+            },
+            "value": null
+        },
+        "payoneer_currency": {
+            "label": "Payoneer Payout Currency",
+            "type": "dropdown",
+            "style": 2,
+            "searchable": true,
+            "condition": {
+                "field": "payoneer_enabled",
+                "value": true
+            },
+            "options": {
+                "USD": {
+                    "label": "USD - US Dollar ($)",
+                    "value": "USD"
+                },
+                "EUR": {
+                    "label": "EUR - Euro (€)",
+                    "value": "EUR"
+                },
+                "GBP": {
+                    "label": "GBP - British Pound (£)",
+                    "value": "GBP"
+                },
+                "CAD": {
+                    "label": "CAD - Canadian Dollar ($)",
+                    "value": "CAD"
+                },
+                "AUD": {
+                    "label": "AUD - Australian Dollar ($)",
+                    "value": "AUD"
+                },
+                "AED": {
+                    "label": "AED - UAE Dirham",
+                    "value": "AED"
+                },
+                "SAR": {
+                    "label": "SAR - Saudi Riyal",
+                    "value": "SAR"
+                },
+                "PKR": {
+                    "label": "PKR - Pakistani Rupee",
+                    "value": "PKR"
+                }
+            },
+            "value": "USD"
+        }
+    },
+    "whatsapp": {
+        "whatsapp_section": {
+            "type": "section",
+            "label": "WhatsApp Gateway (WASenderAPI)",
+            "description": "Send automated customer notifications, order confirmations, and phone verification codes via WhatsApp.",
+            "icon": "ri-whatsapp-line",
+            "toggle_field": "whatsapp_enabled"
+        },
+        "whatsapp_enabled": {
+            "label": "Enable WhatsApp Messaging & OTP",
+            "type": "checkbox",
+            "style": 1,
+            "value_label": "Enable WhatsApp Notifications",
+            "value": true
+        },
+        "provider": {
+            "label": "WhatsApp Gateway Provider",
+            "type": "dropdown",
+            "style": 2,
+            "searchable": false,
+            "search": false,
+            "condition": {
+                "field": "whatsapp_enabled",
+                "value": true
+            },
+            "options": {
+                "wasenderapi": {
+                    "label": "WASenderAPI (wasenderapi.com)",
+                    "value": "wasenderapi"
+                }
+            },
+            "value": "wasenderapi"
+        },
+        "api_endpoint": {
+            "label": "API Endpoint URL",
+            "type": "text",
+            "style": 2,
+            "placeholder": "https:\/\/www.wasenderapi.com\/api\/send-message",
+            "condition": {
+                "field": "whatsapp_enabled",
+                "value": true
+            },
+            "value": "https:\/\/www.wasenderapi.com\/api\/send-message"
+        },
+        "api_key": {
+            "label": "WASenderAPI Key \/ Access Token",
+            "type": "password",
+            "style": 2,
+            "placeholder": "Enter your WASenderAPI Personal Access Token",
+            "condition": {
+                "field": "whatsapp_enabled",
+                "value": true
+            },
+            "value": "282c3e25bea828a846fe2cd971818fe90ad181dc893a1413d8faee04f8f9e6a5"
+        },
+        "sender_phone": {
+            "label": "WhatsApp Connected Number (Display \/ Support)",
+            "type": "phone",
+            "style": 2,
+            "placeholder": "+1234567890",
+            "condition": {
+                "field": "whatsapp_enabled",
+                "value": true
+            },
+            "value": "+923146608799"
+        },
+        "otp_template": {
+            "label": "OTP Verification Message Template",
+            "type": "textarea",
+            "placeholder": "Use {otp} as the verification code placeholder and {minutes} for validity",
+            "condition": {
+                "field": "whatsapp_enabled",
+                "value": true
+            },
+            "value": "Your NestifyTech verification code is: {otp}. It is valid for {minutes} minutes. Please do not share this code with anyone."
+        }
+    },
+    "mail": {
+        "mail_section": {
+            "type": "section",
+            "label": "SMTP \/ Mailtrap Email Configuration",
+            "description": "Configure outgoing transactional and notification emails using Mailtrap sandbox or production SMTP.",
+            "icon": "ri-mail-settings-line",
+            "toggle_field": "mail_enabled"
+        },
+        "mail_enabled": {
+            "label": "Enable Email Notifications",
+            "type": "checkbox",
+            "style": 1,
+            "value_label": "Enable Outgoing Emails",
+            "value": true
+        },
+        "mail_provider": {
+            "label": "Mail Service \/ Gateway",
+            "type": "dropdown",
+            "style": 2,
+            "searchable": false,
+            "condition": {
+                "field": "mail_enabled",
+                "value": true
+            },
+            "options": {
+                "mailtrap": {
+                    "label": "Mailtrap (Testing & Sandbox \/ Production)",
+                    "value": "mailtrap"
+                },
+                "smtp": {
+                    "label": "Custom SMTP Server",
+                    "value": "smtp"
+                },
+                "sendgrid": {
+                    "label": "SendGrid SMTP",
+                    "value": "sendgrid"
+                },
+                "mailgun": {
+                    "label": "Mailgun SMTP",
+                    "value": "mailgun"
+                }
+            },
+            "value": "mailtrap"
+        },
+        "mail_host": {
+            "label": "SMTP Host",
+            "type": "text",
+            "style": 2,
+            "placeholder": "e.g. sandbox.smtp.mailtrap.io",
+            "condition": {
+                "field": "mail_enabled",
+                "value": true
+            },
+            "value": "sandbox.smtp.mailtrap.io"
+        },
+        "mail_port": {
+            "label": "SMTP Port",
+            "type": "number",
+            "style": 2,
+            "placeholder": "2525, 587, or 465",
+            "condition": {
+                "field": "mail_enabled",
+                "value": true
+            },
+            "value": 2525
+        },
+        "mail_encryption": {
+            "label": "Encryption Protocol",
+            "type": "dropdown",
+            "style": 2,
+            "searchable": false,
+            "condition": {
+                "field": "mail_enabled",
+                "value": true
+            },
+            "options": {
+                "tls": {
+                    "label": "TLS",
+                    "value": "tls"
+                },
+                "ssl": {
+                    "label": "SSL",
+                    "value": "ssl"
+                },
+                "none": {
+                    "label": "None (Unencrypted)",
+                    "value": "none"
+                }
+            },
+            "value": "tls"
+        },
+        "mail_username": {
+            "label": "SMTP Username \/ API User",
+            "type": "text",
+            "style": 2,
+            "placeholder": "Enter SMTP Username",
+            "condition": {
+                "field": "mail_enabled",
+                "value": true
+            },
+            "value": "72ef4b055c7052"
+        },
+        "mail_password": {
+            "label": "SMTP Password \/ API Key",
+            "type": "password",
+            "style": 2,
+            "placeholder": "Enter SMTP Password or Token",
+            "condition": {
+                "field": "mail_enabled",
+                "value": true
+            },
+            "value": "5f883e5b94d1c9"
+        },
+        "mail_from_address": {
+            "label": "From Email Address",
+            "type": "text",
+            "style": 2,
+            "placeholder": "noreply@nestifytech.com",
+            "condition": {
+                "field": "mail_enabled",
+                "value": true
+            },
+            "value": "noreply@nestifytech.com"
+        },
+        "mail_from_name": {
+            "label": "From Display Name",
+            "type": "text",
+            "style": 2,
+            "placeholder": "NestifyTech",
+            "condition": {
+                "field": "mail_enabled",
+                "value": true
+            },
+            "value": "NestifyTech"
         }
     }
 }

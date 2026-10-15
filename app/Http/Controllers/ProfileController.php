@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
@@ -108,6 +109,8 @@ class ProfileController extends Controller
                 'last_seen_at' => $user->last_seen_at ?? null,
                 'meta' => [
                     'phone' => $metaRows['phone'] ?? '',
+                    'phone_verified' => !empty($metaRows['phone_verified_at']),
+                    'phone_verified_at' => $metaRows['phone_verified_at'] ?? null,
                     'bio' => $metaRows['bio'] ?? '',
                     'address' => $metaRows['address'] ?? '',
                     'city' => $metaRows['city'] ?? '',
@@ -265,16 +268,18 @@ class ProfileController extends Controller
 
         return $activities->map(function ($act) {
             $payload = json_decode($act->payload ?? '', true);
-            if (! is_array($payload) || empty($payload['action']) || empty($payload['category'])) {
+            if (! is_array($payload)) {
                 return null;
             }
 
+            $category = $payload['category'] ?? 'general';
+            $title = $payload['title'] ?? ucfirst(str_replace('_', ' ', $payload['action'] ?? 'page_visit'));
             $createdAt = $act->created_at ? Carbon::parse($act->created_at) : now();
 
             return [
                 'id' => $act->id,
-                'title' => $payload['title'] ?? ucfirst(str_replace('_', ' ', $payload['action'])),
-                'category' => $payload['category'],
+                'title' => $title,
+                'category' => $category,
                 'detail' => $payload['detail'] ?? null,
                 'time_ago' => $createdAt->diffForHumans(),
                 'date_formatted' => $createdAt->format('M d, Y h:i A'),
@@ -583,5 +588,303 @@ class ProfileController extends Controller
         $request->session()->regenerateToken();
 
         return Redirect::to('/');
+    }
+
+    /**
+     * Save detected country and complete IP geolocation metadata to user_meta.
+     */
+    public function saveCountry(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        }
+
+        $validated = $request->validate([
+            'ip'           => ['nullable', 'string', 'max:50'],
+            'country'      => ['nullable', 'string', 'max:100'],
+            'country_code' => ['nullable', 'string', 'max:10'],
+            'region'       => ['nullable', 'string', 'max:100'],
+            'city'         => ['nullable', 'string', 'max:100'],
+            'postal'       => ['nullable', 'string', 'max:50'],
+            'latitude'     => ['nullable', 'numeric'],
+            'longitude'    => ['nullable', 'numeric'],
+            'timezone'     => ['nullable', 'string', 'max:100'],
+            'org'          => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $ip = trim($validated['ip'] ?? $request->ip() ?? '');
+        $country = trim($validated['country'] ?? '');
+        $countryCode = trim($validated['country_code'] ?? '');
+        $region = trim($validated['region'] ?? '');
+        $city = trim($validated['city'] ?? '');
+        $postal = trim($validated['postal'] ?? '');
+        $lat = $validated['latitude'] ?? null;
+        $lon = $validated['longitude'] ?? null;
+        $timezone = trim($validated['timezone'] ?? '');
+        $org = trim($validated['org'] ?? '');
+
+        // 1. Always record/update complete IP address and IP metadata
+        if (!empty($ip)) {
+            DB::table('user_meta')->updateOrInsert(
+                ['user_id' => $user->id, 'key' => 'ip_address'],
+                ['value' => $ip, 'updated_at' => now()]
+            );
+        }
+
+        if (!empty($country)) {
+            // Save country if not already set or empty
+            $existingCountry = DB::table('user_meta')
+                ->where('user_id', $user->id)
+                ->where('key', 'country')
+                ->first();
+
+            if (!$existingCountry || empty($existingCountry->value)) {
+                DB::table('user_meta')->updateOrInsert(
+                    ['user_id' => $user->id, 'key' => 'country'],
+                    ['value' => $country, 'updated_at' => now()]
+                );
+            }
+        }
+
+        if (!empty($countryCode)) {
+            DB::table('user_meta')->updateOrInsert(
+                ['user_id' => $user->id, 'key' => 'ip_country_code'],
+                ['value' => $countryCode, 'updated_at' => now()]
+            );
+        }
+
+        if (!empty($region)) {
+            DB::table('user_meta')->updateOrInsert(
+                ['user_id' => $user->id, 'key' => 'ip_region'],
+                ['value' => $region, 'updated_at' => now()]
+            );
+        }
+
+        if (!empty($city)) {
+            DB::table('user_meta')->updateOrInsert(
+                ['user_id' => $user->id, 'key' => 'ip_city'],
+                ['value' => $city, 'updated_at' => now()]
+            );
+        }
+
+        if (!empty($postal)) {
+            DB::table('user_meta')->updateOrInsert(
+                ['user_id' => $user->id, 'key' => 'ip_postal'],
+                ['value' => $postal, 'updated_at' => now()]
+            );
+        }
+
+        if ($lat !== null && $lon !== null) {
+            DB::table('user_meta')->updateOrInsert(
+                ['user_id' => $user->id, 'key' => 'ip_coordinates'],
+                ['value' => json_encode(['latitude' => $lat, 'longitude' => $lon]), 'updated_at' => now()]
+            );
+        }
+
+        if (!empty($timezone)) {
+            DB::table('user_meta')->updateOrInsert(
+                ['user_id' => $user->id, 'key' => 'ip_timezone'],
+                ['value' => $timezone, 'updated_at' => now()]
+            );
+        }
+
+        if (!empty($org)) {
+            DB::table('user_meta')->updateOrInsert(
+                ['user_id' => $user->id, 'key' => 'ip_org'],
+                ['value' => $org, 'updated_at' => now()]
+            );
+        }
+
+        // Store complete payload in ip_detect_meta for comprehensive tracking
+        $fullDetails = [
+            'ip'           => $ip,
+            'country'      => $country,
+            'country_code' => $countryCode,
+            'region'       => $region,
+            'city'         => $city,
+            'postal'       => $postal,
+            'latitude'     => $lat,
+            'longitude'    => $lon,
+            'timezone'     => $timezone,
+            'org'          => $org,
+            'user_agent'   => $request->userAgent(),
+            'detected_at'  => now()->toDateTimeString(),
+        ];
+
+        DB::table('user_meta')->updateOrInsert(
+            ['user_id' => $user->id, 'key' => 'ip_detect_meta'],
+            ['value' => json_encode($fullDetails), 'updated_at' => now()]
+        );
+
+        return response()->json([
+            'success' => true,
+            'ip'      => $ip,
+            'country' => $country,
+            'meta'    => $fullDetails,
+        ]);
+    }
+
+    /**
+     * Send OTP for phone verification via SMS or WhatsApp.
+     */
+    public function sendPhoneOtp(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        }
+
+        $validated = $request->validate([
+            'phone'   => ['required', 'string', 'max:30'],
+            'channel' => ['nullable', 'string', 'in:whatsapp,sms'],
+        ]);
+
+        $phone = preg_replace('/[^\d+]/', '', trim($validated['phone']));
+        $channel = $validated['channel'] ?? 'whatsapp';
+
+        if (strlen($phone) < 8) {
+            return response()->json(['success' => false, 'message' => 'Please provide a valid phone number with country code.'], 422);
+        }
+
+        // If sending OTP for a different number than currently verified, clear the verified flag
+        $existingPhone = DB::table('user_meta')
+            ->where('user_id', $user->id)->where('key', 'phone')->value('value');
+
+        if ($existingPhone && $existingPhone !== $phone) {
+            DB::table('user_meta')->updateOrInsert(
+                ['user_id' => $user->id, 'key' => 'phone_verified'],
+                ['value' => '0', 'updated_at' => now()]
+            );
+        }
+
+        // Generate a secure 6-digit OTP
+        $otp = (string) random_int(100000, 999999);
+
+        // Store OTP in cache for 10 minutes
+        $cacheKey = 'phone_otp_' . $user->id;
+        Cache::put($cacheKey, [
+            'otp' => $otp,
+            'phone' => $phone,
+            'channel' => $channel,
+            'created_at' => now()->toIso8601String(),
+        ], now()->addMinutes(10));
+
+        $cleanDigits = preg_replace('/[^\d]/', '', $phone);
+        $message = "Your NestifyTech verification code is: {$otp}. It is valid for 10 minutes.";
+        $sentViaApi = false;
+        $apiError = null;
+
+        // 1. WhatsApp via WASenderAPI (configured in Admin Settings)
+        $waApiKey = null;
+        $waEndpoint = 'https://www.wasenderapi.com/api/send-message';
+        $settingFile = storage_path('app/data/setting.json');
+        if (file_exists($settingFile)) {
+            $settings = json_decode(file_get_contents($settingFile), true) ?: [];
+            $waApiKey = $settings['whatsapp']['api_key']['value'] ?? null;
+            $waEndpoint = $settings['whatsapp']['api_endpoint']['value'] ?? $waEndpoint;
+            if (!empty($settings['whatsapp']['otp_template']['value'])) {
+                $template = $settings['whatsapp']['otp_template']['value'];
+                $message = str_replace(['{otp}', '{minutes}'], [$otp, '10'], $template);
+            }
+        }
+
+        if (empty($waApiKey)) {
+            $waApiKey = env('WASENDERAPI_API_KEY') ?: config('services.wasender.api_key');
+        }
+
+        if ($channel === 'whatsapp' && !empty($waApiKey)) {
+            try {
+                $response = \Illuminate\Support\Facades\Http::timeout(10)
+                    ->withHeaders([
+                        'Authorization' => 'Bearer ' . $waApiKey,
+                        'Content-Type'  => 'application/json',
+                    ])
+                    ->post($waEndpoint, [
+                        'to'   => '+' . $cleanDigits,
+                        'text' => $message,
+                    ]);
+
+                if ($response->successful()) {
+                    $sentViaApi = true;
+                } else {
+                    $apiError = $response->json('message') ?? 'WASenderAPI delivery failed.';
+                }
+            } catch (\Throwable $e) {
+                $apiError = $e->getMessage();
+            }
+        }
+
+        return response()->json([
+            'success'      => true,
+            'message'      => $sentViaApi
+                ? 'Verification code sent to your WhatsApp!'
+                : 'Verification code generated! (WASenderAPI key not configured)',
+            'channel'      => 'whatsapp',
+            'phone'        => $phone,
+            'sent_via_api' => $sentViaApi,
+            'api_error'    => $apiError,
+        ]);
+    }
+
+    /**
+     * Verify submitted phone OTP and mark phone as verified in user_meta.
+     */
+    public function verifyPhoneOtp(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        }
+
+        $validated = $request->validate([
+            'otp'   => ['required', 'string', 'max:10'],
+            'phone' => ['required', 'string', 'max:30'],
+        ]);
+
+        $submittedOtp = trim($validated['otp']);
+        $submittedPhone = preg_replace('/[^\d+]/', '', trim($validated['phone']));
+
+        $cacheKey = 'phone_otp_' . $user->id;
+        $cachedData = Cache::get($cacheKey);
+
+        if (!$cachedData) {
+            return response()->json(['success' => false, 'message' => 'Verification code expired or not found. Please request a new one.'], 422);
+        }
+
+        if ($cachedData['otp'] !== $submittedOtp) {
+            return response()->json(['success' => false, 'message' => 'Invalid verification code. Please check and try again.'], 422);
+        }
+
+        // OTP matched - save verified phone and verification timestamp in user_meta
+        DB::table('user_meta')->updateOrInsert(
+            ['user_id' => $user->id, 'key' => 'phone'],
+            ['value' => $submittedPhone, 'updated_at' => now()]
+        );
+
+        DB::table('user_meta')->updateOrInsert(
+            ['user_id' => $user->id, 'key' => 'phone_verified'],
+            ['value' => '1', 'updated_at' => now()]
+        );
+
+        DB::table('user_meta')->updateOrInsert(
+            ['user_id' => $user->id, 'key' => 'phone_verified_at'],
+            ['value' => now()->toDateTimeString(), 'updated_at' => now()]
+        );
+
+        // Clear used OTP
+        Cache::forget($cacheKey);
+
+        record_user_activity('phone_verified', [
+            'title' => 'Phone Verified',
+            'category' => 'profile',
+            'detail' => 'Verified phone number ' . $submittedPhone,
+        ], (int) $user->id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Phone number verified successfully!',
+            'phone'   => $submittedPhone,
+        ]);
     }
 }

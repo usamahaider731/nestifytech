@@ -15,6 +15,7 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\TaxonomyController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\ImportExportController;
+use App\Http\Controllers\DeveloperController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
@@ -26,8 +27,10 @@ Route::controller(FilterController::class)->group(function () {
 });
 Route::controller(FrontendController::class)->group(function () {
     Route::get('/', 'index')->name('index');
+    Route::get('/developer', 'developer')->name('developer');
     Route::get('/checkout', 'checkout')->name('checkout');
     Route::get('/compare', 'compare')->name('compare');
+    Route::get('/store','store')->name('store');
     Route::get('/view/specific/classification/{type}/{id}/{slug}', 'taxonomyView')->name('taxonomy.view');
     Route::get('/view/post/{type}/{sku}/{id}', 'singleProduct')->name('post');
     Route::get('/blog', 'blogIndex')->name('blog.index');
@@ -38,7 +41,9 @@ Route::controller(FrontendController::class)->group(function () {
     Route::get('/get_languages', 'get_languages')->name('languages');
     Route::get('/set-language/{prefix}', 'setLanguage')->name('language.set');
 });
-
+Route::prefix('/developer')->controller(DeveloperController::class)->group(function () {
+    Route::get('/reset', 'reset')->name('developer.reset');
+});
 Route::post('/checkout/create-payment-intent', [\App\Http\Controllers\StripeController::class, 'createPaymentIntent'])->name('checkout.payment-intent');
 Route::get('/image/{filename}_{height}_{width}.{extension}', [MediaController::class, 'thumbimageUrl'])
     ->where([

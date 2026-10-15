@@ -78,6 +78,7 @@ function img_svg($filename, $class = '', $thumb = false, $path = 'storage/upload
 }
 function helper_ids($value): array
 {
+
     if ($value === true || $value === false || $value === null || $value === '') {
         return [];
     }
@@ -102,8 +103,15 @@ function apply_post_meta_id_filter($query, string $metaKey, array $ids): void
             ->where('post_meta.key', $metaKey)
             ->where(function ($inner) use ($ids) {
                 foreach ($ids as $id) {
-                    $inner->orWhere('post_meta.value', 'like', '%"' . $id . '"%')
-                        ->orWhere('post_meta.value', (string) $id);
+                    $sid = (string) $id;
+                    // Match quoted string in JSON array: ["28"] or ["28","29"]
+                    $inner->orWhere('post_meta.value', 'like', '%"' . $sid . '"%')
+                        // Match unquoted integer in JSON array: [28] or [28,29] or [28,"x"]
+                        ->orWhere('post_meta.value', 'like', '[' . $sid . ']')
+                        ->orWhere('post_meta.value', 'like', '[' . $sid . ',%')
+                        ->orWhere('post_meta.value', 'like', '%,' . $sid . ']')
+                        ->orWhere('post_meta.value', 'like', '%,' . $sid . ',%')
+                        ->orWhere('post_meta.value', $sid);
                 }
             });
     });
@@ -225,6 +233,7 @@ function attach_taxonomy_children_products($items, $taxonomyType = 'category')
 {
     foreach ($items as $item) {
         $children = DB::table('taxonomies')->where('parent_id', $item->id)->get();
+
         if ($taxonomyType === 'blog_category') {
             foreach ($children as $child) {
                 $child->blogs = get_posts([
@@ -256,6 +265,7 @@ function attach_taxonomy_children_products($items, $taxonomyType = 'category')
             );
         } else {
             foreach ($children as $child) {
+
                 $child->products = get_posts([
                     'type' => 'product',
                     'category' => true,
@@ -289,15 +299,17 @@ function attach_taxonomy_children_products($items, $taxonomyType = 'category')
                 })
             )->unique('id')->values()->toArray();
             $item->all_products = $allProducts;
+
             $item->children = attach_taxonomy_children_products($children, $taxonomyType);
             $item->products_count = count_posts_for_taxonomy_ids(
                 'product',
                 $taxonomyType === 'brand' ? 'brand' : 'category',
                 array_merge([$item->id], taxonomy_descendant_ids($item->children ?? []))
             );
+
+            
         }
     }
-
     return $items;
 }
 
@@ -365,6 +377,7 @@ function get_taxonomy($type = null, $key = null, $value = null, $limit = null)
             $item->setRelation('meta', $item->meta->keyBy('key'));
         }
     }
+
     return $items;
 }
 
@@ -426,6 +439,8 @@ function get_posts(array $args = [])
     } elseif (! empty($args['latest'])) {
         $posts->orderBy('created_at', 'desc');
     }
+
+
     $categoryIds = helper_ids($args['category_id'] ?? ($args['category_ids'] ?? []));
     $brandIds = helper_ids($args['brand_id'] ?? ($args['brand_ids'] ?? []));
     $tagIds = helper_ids($args['tag_id'] ?? ($args['tag_ids'] ?? ($args['tags_id'] ?? [])));
@@ -448,6 +463,7 @@ function get_posts(array $args = [])
 
             apply_post_meta_id_filter($posts, 'blog_category', $categoryIds);
         } else {
+
             apply_post_meta_id_filter($posts, 'category', $categoryIds);
         }
     }

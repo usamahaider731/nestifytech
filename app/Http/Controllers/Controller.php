@@ -5,14 +5,19 @@ namespace App\Http\Controllers;
 abstract class Controller
 {
     protected string $json_file_location;
+    protected string $json_import_location;
 
     public function __construct()
     {
-        $this->json_file_location = storage_path('app/data');
 
+        $this->json_file_location = storage_path('app/data');
+        $this->json_import_location = storage_path('app/import');
         // Ensure directory exists
         if (!file_exists($this->json_file_location)) {
             mkdir($this->json_file_location, 0755, true);
+        }
+        if (!file_exists($this->json_import_location)) {
+            mkdir($this->json_import_location, 0755, true);
         }
     }
 }

@@ -38,6 +38,10 @@ class SettingController extends Controller
             'backend-color' => 'setting-read',
             'ai' => 'setting-write',
             'ads' => 'ads-read',
+            'payment' => 'setting-read',
+            'stripe' => 'setting-read',
+            'whatsapp' => 'setting-read',
+            'mail' => 'setting-read',
         ];
 
         $permissionKey = strtolower($request->type);
@@ -50,6 +54,17 @@ class SettingController extends Controller
 
         if (in_array($request->type, ['color', 'backend-color'], true)) {
             $this->ensureColorTypes($request->type);
+        }
+
+        if ($request->type === 'site') {
+            try {
+                $this->processStates();
+                $this->processCities();
+            } catch (\Throwable $exception) {
+                Log::error('Failed to sync states and cities on site setting load.', [
+                    'message' => $exception->getMessage(),
+                ]);
+            }
         }
 
         $type = $this->data[$request->type];
@@ -151,6 +166,10 @@ class SettingController extends Controller
             'backend-color' => 'setting-write',
             'ai' => 'setting-write',
             'ads' => 'ads-write',
+            'payment' => 'setting-write',
+            'stripe' => 'setting-write',
+            'whatsapp' => 'setting-write',
+            'mail' => 'setting-write',
         ];
         $permissionKey = strtolower($request->type);
         if (isset($typePermissionMap[$permissionKey])) {
@@ -239,10 +258,10 @@ class SettingController extends Controller
             $this->data = $currentSettings;
 
             try {
-                // States are small enough to sync during save; cities.json is ~50MB and must not block saves.
                 $this->processStates();
+                $this->processCities();
             } catch (\Throwable $exception) {
-                Log::error('Failed to sync states while saving site settings.', [
+                Log::error('Failed to sync states and cities while saving site settings.', [
                     'message' => $exception->getMessage(),
                 ]);
             }
@@ -440,46 +459,93 @@ class SettingController extends Controller
 
         $country = DB::table('taxonomies')->where(['type' => 'country', 'title' => $countryName])->first();
         if (!$country) return;
-        // dd($countryName);
 
         $countryMeta = DB::table('taxonomy_meta')->where([
             'taxonomy_id' => $country->id,
-            'key' => 'id',
+            'key'         => 'id',
         ])->first();
 
         $country_id = $countryMeta->value ?? null;
-        if (! $country_id) {
-            return;
-        }
+        if (!$country_id) return;
 
         $stateFile = $this->json_file_location . '/states.json';
         if (!File::exists($stateFile)) return;
 
+        // Always delete states/cities and their meta belonging to any OTHER country
+        $this->cleanupOtherCountries($country->id);
 
         $exists = DB::table('taxonomies')->where(['type' => 'state', 'parent_id' => $country->id])->exists();
-        if (!$exists) {
 
+        if (!$exists) {
             $stateData = json_decode(File::get($stateFile));
             $states = array_filter($stateData, fn($item) => $item->country_id == $country_id);
             foreach ($states as $value) {
                 $stateId = DB::table('taxonomies')->insertGetId([
-                    'title' => $value->name,
-                    'slug' => Str::slug($value->name),
-                    'type' => 'state',
+                    'title'     => $value->name,
+                    'slug'      => Str::slug($value->name),
+                    'type'      => 'state',
                     'parent_id' => $country->id,
-                    'status' => 'publish'
+                    'status'    => 'publish'
                 ]);
                 foreach ($value as $key => $val) {
                     if ($key === 'name') continue;
                     DB::table('taxonomy_meta')->insert([
                         'taxonomy_id' => $stateId,
-                        'key' => $key,
-                        'value' => is_array($val) ? json_encode($val) : $val
+                        'key'         => $key,
+                        'value'       => is_array($val) ? json_encode($val) : $val
                     ]);
                 }
             }
         }
     }
+
+    /**
+     * Delete all states, cities and their taxonomy_meta for every country
+     * except the currently selected one.
+     */
+    protected function cleanupOtherCountries(int $currentCountryTaxonomyId): void
+    {
+        // Find all countries that are NOT the current one
+        $otherCountries = DB::table('taxonomies')
+            ->where('type', 'country')
+            ->where('id', '!=', $currentCountryTaxonomyId)
+            ->pluck('id');
+
+        foreach ($otherCountries as $otherCountryId) {
+            $this->cleanupCountryData($otherCountryId);
+        }
+    }
+
+    /**
+     * Delete all states and cities (with their meta) for a given country taxonomy ID.
+     */
+    protected function cleanupCountryData(int $countryTaxonomyId): void
+    {
+        // Get all states for this country
+        $states = DB::table('taxonomies')
+            ->where(['type' => 'state', 'parent_id' => $countryTaxonomyId])
+            ->get();
+
+        foreach ($states as $state) {
+            // Get all cities for this state
+            $cities = DB::table('taxonomies')
+                ->where(['type' => 'city', 'parent_id' => $state->id])
+                ->pluck('id');
+
+            if ($cities->isNotEmpty()) {
+                // Delete city meta
+                DB::table('taxonomy_meta')->whereIn('taxonomy_id', $cities)->delete();
+                // Delete cities
+                DB::table('taxonomies')->whereIn('id', $cities)->delete();
+            }
+
+            // Delete state meta
+            DB::table('taxonomy_meta')->where('taxonomy_id', $state->id)->delete();
+            // Delete state
+            DB::table('taxonomies')->where('id', $state->id)->delete();
+        }
+    }
+
 
     protected function processCities(): bool
     {
@@ -512,10 +578,9 @@ class SettingController extends Controller
             return false;
         }
 
-        $cityData = json_decode(File::get($cityPath));
-        if (! is_array($cityData)) {
-            return false;
-        }
+        // cities.json is ~51MB with 150k+ items; allow adequate memory/time
+        @ini_set('memory_limit', '1024M');
+        @set_time_limit(300);
 
         $states = DB::table('taxonomies')->where(['type' => 'state', 'parent_id' => $country->id])->get();
         if ($states->isEmpty()) {
@@ -534,39 +599,62 @@ class SettingController extends Controller
             }
         }
 
+        $jsonContent = File::get($cityPath);
+
+        // Fast extraction: filter JSON objects by "country_id": <id> before full parsing,
+        // or decode directly with 1024M memory available.
+        $cityData = json_decode($jsonContent, true);
+        if (! is_array($cityData) || empty($cityData)) {
+            return false;
+        }
+
         $imported = false;
 
-        foreach ($cityData as $city) {
-            if ((string) ($city->country_id ?? '') !== (string) $country_id) {
-                continue;
-            }
-
-            $stateTaxonomyId = $stateMap[(string) ($city->state_id ?? '')] ?? null;
-            if (! $stateTaxonomyId) {
-                continue;
-            }
-
-            $cityId = DB::table('taxonomies')->insertGetId([
-                'parent_id' => $stateTaxonomyId,
-                'title' => $city->name,
-                'slug' => Str::slug($city->name),
-                'type' => 'city',
-                'status' => 'publish',
-            ]);
-
-            foreach ((array) $city as $key => $value) {
-                if ($key === 'name') {
+        DB::beginTransaction();
+        try {
+            foreach ($cityData as $city) {
+                if ((string) ($city['country_id'] ?? '') !== (string) $country_id) {
                     continue;
                 }
 
-                DB::table('taxonomy_meta')->insert([
-                    'key' => $key,
-                    'value' => is_array($value) ? json_encode($value) : $value,
-                    'taxonomy_id' => $cityId,
+                $stateTaxonomyId = $stateMap[(string) ($city['state_id'] ?? '')] ?? null;
+                if (! $stateTaxonomyId) {
+                    continue;
+                }
+
+                $cityId = DB::table('taxonomies')->insertGetId([
+                    'parent_id' => $stateTaxonomyId,
+                    'title'     => $city['name'],
+                    'slug'      => Str::slug($city['name']),
+                    'type'      => 'city',
+                    'status'    => 'publish',
                 ]);
+
+                $metaInserts = [];
+                foreach ($city as $key => $value) {
+                    if ($key === 'name') {
+                        continue;
+                    }
+
+                    $metaInserts[] = [
+                        'key'         => $key,
+                        'value'       => is_array($value) ? json_encode($value) : (string) $value,
+                        'taxonomy_id' => $cityId,
+                    ];
+                }
+
+                if (! empty($metaInserts)) {
+                    DB::table('taxonomy_meta')->insert($metaInserts);
+                }
+
+                $imported = true;
             }
 
-            $imported = true;
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('Error inserting cities: ' . $e->getMessage());
+            throw $e;
         }
 
         return $imported;

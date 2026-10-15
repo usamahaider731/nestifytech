@@ -75,7 +75,8 @@ function DropdownSelect({
     };
 
     useEffect(() => {
-        if (!isApiSearch || localValue.trim().length < 3) {
+        // Only perform API search if the dropdown is open (i.e. user is actively interacting) and query is >= 3 chars
+        if (!isApiSearch || !isOpen || localValue.trim().length < 3) {
             setRemoteOptions([]);
             setRemoteLoading(false);
             return undefined;

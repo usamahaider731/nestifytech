@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import ImageViwer from './Admin/ImageViwer';
-import { useCart } from '@/contexts/CartContext';
 import { useLang } from '@/contexts/LanguageContext';
 import { normalizeProduct } from '@/Utils/normalizeProduct';
 import {
@@ -26,7 +25,6 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
     const { setting, auth } = usePage().props;
     const cardSetting = setting.layout.Product_Card_V2;
     const currency = setting.site.currency.value ?? 'PKR';
-    const { addItem } = useCart();
     const { __ } = useLang();
     const dispatch = useDispatch();
 
@@ -95,14 +93,6 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
         }
     }, [product, firstPrice, secondPrice]);
 
-    const handleAddToCart = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const cartItem = normalizeProduct(product, currency);
-        if (cartItem) {
-            addItem(cartItem);
-        }
-    };
 
     return (
         <article className={`group flex flex-col overflow-hidden rounded h-40 border border-border bg-white shadow-sm transition duration-300 hover:border-primary/40 hover:shadow-xl sm:flex-row ${className}`}>

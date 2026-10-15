@@ -22,15 +22,21 @@ class MediaController extends Controller
             return response()->file($thumbPath);
         }
 
+        $placeholderPath = public_path('assets/image/placeholder.svg');
+
         if (!file_exists($originalPath)) {
-            
+            if (file_exists($placeholderPath)) {
+                return response()->file($placeholderPath, [
+                    'Content-Type' => 'image/svg+xml',
+                ]);
+            }
             abort(404, 'Original image not found');
         }
 
         try {
             $manager = new ImageManager(new Driver());
             $image = $manager->read($originalPath);
-            $image->scaleDown(width: $width, height: $height);
+            $image->scaleDown(width: (int) $width, height: (int) $height);
 
             if (!file_exists(dirname($thumbPath))) {
                 mkdir(dirname($thumbPath), 0755, true);
@@ -40,6 +46,11 @@ class MediaController extends Controller
             return response()->file($thumbPath);
         } catch (\Throwable $e) {
             report($e);
+            if (file_exists($placeholderPath)) {
+                return response()->file($placeholderPath, [
+                    'Content-Type' => 'image/svg+xml',
+                ]);
+            }
             abort(500, 'Unable to generate image thumbnail.');
         }
     }

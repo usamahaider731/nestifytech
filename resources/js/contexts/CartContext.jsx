@@ -71,7 +71,17 @@ export function CartProvider({ children }) {
 export function useCart() {
     const context = useContext(CartContext);
     if (!context) {
-        throw new Error('useCart must be used within a CartProvider');
+        return {
+            items: [],
+            isOpen: false,
+            setIsOpen: () => {},
+            addItem: () => {},
+            removeItem: () => {},
+            updateQuantity: () => {},
+            clearCart: () => {},
+            subtotal: 0,
+            itemCount: 0,
+        };
     }
     return context;
 }

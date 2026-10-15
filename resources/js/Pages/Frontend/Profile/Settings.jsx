@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useForm, usePage, router } from '@inertiajs/react';
 import ProfileLayout from './ProfileLayout';
 import {
@@ -13,19 +13,37 @@ import {
     RiCloseLine,
     RiEyeLine,
     RiEyeOffLine,
+    RiWhatsappLine,
+    RiShieldCheckLine,
 } from 'react-icons/ri';
 import { useLang } from '@/contexts/LanguageContext';
 import { toast } from 'react-toastify';
+import PhoneInput from '@/Components/Admin/PhoneInput';
+import DropdownSelect from '@/Components/DropdownSelect';
+import axios from 'axios';
 
 export default function Settings({ profile, mustVerifyEmail, status }) {
     const { __ } = useLang();
     const user = profile?.user || {};
     const meta = user.meta || {};
 
+    const [states, setStates] = useState([]);
+    const [cities, setCities] = useState([]);
+    const [loadingStates, setLoadingStates] = useState(false);
+    const [loadingCities, setLoadingCities] = useState(false);
+
     const [activeSection, setActiveSection] = useState('profile'); // 'profile' | 'password' | 'notifications' | 'danger'
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+    // Phone OTP Verification State
+    const [phoneVerified, setPhoneVerified] = useState(!!meta.phone_verified);
+    const [changingNumber, setChangingNumber] = useState(false);
+    const [otpCode, setOtpCode] = useState('');
+    const [otpSent, setOtpSent] = useState(false);
+    const [otpLoading, setOtpLoading] = useState(false);
+    const [whatsappLink, setWhatsappLink] = useState('');
 
     const avatarInputRef = useRef(null);
 
@@ -51,10 +69,182 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
         password_confirmation: '',
     });
 
+    // Fetch States on load (stores taxonomy ID)
+    useEffect(() => {
+        let isMounted = true;
+        setLoadingStates(true);
+        axios.get('/api/taxonomy-options/state', {
+            params: { use_value: false, as_options: true }
+        }).then(res => {
+            if (isMounted) {
+                setStates(Array.isArray(res.data) ? res.data : []);
+            }
+        }).catch(err => {
+            console.error('Failed to load states', err);
+        }).finally(() => {
+            if (isMounted) setLoadingStates(false);
+        });
+
+        return () => { isMounted = false; };
+    }, []);
+
+    // Fetch Cities whenever State ID changes
+    useEffect(() => {
+        let isMounted = true;
+        const currentStateId = profileForm.data.state;
+
+        if (!currentStateId) {
+            setCities([]);
+            return;
+        }
+
+        setLoadingCities(true);
+        axios.get('/api/taxonomy-options/city', {
+            params: {
+                use_value: false,
+                as_options: true,
+                parent_id: currentStateId
+            }
+        })
+            .then(res => {
+                if (isMounted) {
+                    setCities(Array.isArray(res.data) ? res.data : []);
+                }
+            })
+            .catch(err => {
+                console.error('Failed to load cities', err);
+            })
+            .finally(() => {
+                if (isMounted) setLoadingCities(false);
+            });
+
+        return () => { isMounted = false; };
+    }, [profileForm.data.state]);
+
+    // Auto-detect Country by IP / Geolocation if not already saved, and persist to user_meta
+    useEffect(() => {
+        if (profileForm.data.country) return;
+
+        let isMounted = true;
+
+        const saveLocationToMeta = async (locationData) => {
+            if (!locationData) return;
+            try {
+                await axios.post('/api/user/save-country', locationData);
+            } catch (err) {
+                console.error('Failed to auto-save detected country/ip to user_meta', err);
+            }
+        };
+
+        const detectCountry = async () => {
+            try {
+                // Call server endpoint (no CORS restrictions and has fallback)
+                const res = await axios.get('/api/detect-country');
+                if (isMounted && res.data?.country) {
+                    profileForm.setData('country', res.data.country);
+                    saveLocationToMeta(res.data);
+                    return;
+                }
+            } catch (err) {
+                // Browser geolocation fallback
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(async (pos) => {
+                        try {
+                            const geoRes = await axios.get('/api/geocode', {
+                                params: { q: `${pos.coords.latitude},${pos.coords.longitude}`, limit: 1 }
+                            });
+                            const feat = geoRes.data?.features?.[0]?.properties;
+                            if (isMounted && feat) {
+                                if (feat.country) {
+                                    profileForm.setData('country', feat.country);
+                                }
+                                saveLocationToMeta({
+                                    country: feat.country || '',
+                                    region: feat.state || '',
+                                    city: feat.city || '',
+                                    postal: feat.postcode || '',
+                                    latitude: pos.coords.latitude,
+                                    longitude: pos.coords.longitude,
+                                });
+                            }
+                        } catch (_) { }
+                    }, () => { });
+                }
+            }
+        };
+
+        detectCountry();
+
+        return () => { isMounted = false; };
+    }, []);
+
     // Delete Account Form
     const deleteForm = useForm({
         password: '',
     });
+
+    // Send OTP for phone verification
+    const handleSendPhoneOtp = async () => {
+        const phone = profileForm.data.phone;
+        if (!phone || phone.trim().length < 8) {
+            toast.error(__('Please enter a valid phone number first.'));
+            return;
+        }
+
+        setOtpLoading(true);
+        try {
+            const res = await axios.post('/api/user/phone/send-otp', {
+                phone: phone,
+                channel: 'whatsapp',
+            });
+
+            if (res.data?.success) {
+                setOtpSent(true);
+                toast.success(res.data.message || __('Verification code sent!'));
+                setOtpCode(''); // Keep blank so user types the code received on their phone
+            } else {
+                toast.error(res.data?.message || __('Failed to send OTP code.'));
+            }
+        } catch (err) {
+            toast.error(err.response?.data?.message || __('Error sending verification code.'));
+        } finally {
+            setOtpLoading(false);
+        }
+    };
+
+    // Verify OTP code
+    const handleVerifyPhoneOtp = async () => {
+        if (!otpCode || otpCode.trim().length < 4) {
+            toast.error(__('Please enter the verification code.'));
+            return;
+        }
+
+        setOtpLoading(true);
+        try {
+            const res = await axios.post('/api/user/phone/verify-otp', {
+                phone: profileForm.data.phone,
+                otp: otpCode.trim(),
+            });
+
+            if (res.data?.success) {
+                setPhoneVerified(true);
+                setChangingNumber(false);
+                setOtpSent(false);
+                setOtpCode('');
+                // Update form so the saved phone reflects the new verified number
+                if (res.data.phone) {
+                    profileForm.setData('phone', res.data.phone);
+                }
+                toast.success(res.data.message || __('Phone number verified successfully!'));
+            } else {
+                toast.error(res.data?.message || __('Invalid verification code.'));
+            }
+        } catch (err) {
+            toast.error(err.response?.data?.message || __('Verification failed. Please try again.'));
+        } finally {
+            setOtpLoading(false);
+        }
+    };
 
     // Handle Profile Form Submit
     const handleProfileSubmit = (e) => {
@@ -159,8 +349,8 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                             type="button"
                             onClick={() => setActiveSection('profile')}
                             className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors whitespace-nowrap cursor-pointer ${activeSection === 'profile'
-                                    ? 'bg-common text-white shadow-xs font-semibold'
-                                    : 'bg-bg text-res hover:text-text hover:bg-border'
+                                ? 'bg-secondary text-white shadow-xs font-semibold'
+                                : 'bg-bg text-res hover:text-text hover:bg-border'
                                 }`}
                         >
                             <RiUserLine size={14} />
@@ -171,8 +361,8 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                             type="button"
                             onClick={() => setActiveSection('password')}
                             className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors whitespace-nowrap cursor-pointer ${activeSection === 'password'
-                                    ? 'bg-common text-white shadow-xs font-semibold'
-                                    : 'bg-bg text-res hover:text-text hover:bg-border'
+                                ? 'bg-secondary text-white shadow-xs font-semibold'
+                                : 'bg-bg text-res hover:text-text hover:bg-border'
                                 }`}
                         >
                             <RiLockPasswordLine size={14} />
@@ -183,8 +373,8 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                             type="button"
                             onClick={() => setActiveSection('notifications')}
                             className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors whitespace-nowrap cursor-pointer ${activeSection === 'notifications'
-                                    ? 'bg-common text-white shadow-xs font-semibold'
-                                    : 'bg-bg text-res hover:text-text hover:bg-border'
+                                ? 'bg-secondary text-white shadow-xs font-semibold'
+                                : 'bg-bg text-res hover:text-text hover:bg-border'
                                 }`}
                         >
                             <RiNotification3Line size={14} />
@@ -195,8 +385,8 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                             type="button"
                             onClick={() => setActiveSection('danger')}
                             className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors whitespace-nowrap cursor-pointer ${activeSection === 'danger'
-                                    ? 'bg-rose-600 text-white shadow-xs font-semibold'
-                                    : 'bg-bg text-rose-600 hover:bg-rose-50'
+                                ? 'bg-rose-600 text-white shadow-xs font-semibold'
+                                : 'bg-bg text-rose-600 hover:bg-rose-50'
                                 }`}
                         >
                             <RiDeleteBinLine size={14} />
@@ -245,7 +435,7 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                                     <button
                                         type="button"
                                         onClick={() => avatarInputRef.current?.click()}
-                                        className="px-3 py-1.5 text-xs font-medium bg-common text-white rounded hover:opacity-90 transition-opacity cursor-pointer inline-flex items-center gap-1.5 shadow-xs"
+                                        className="px-3 py-1.5 text-xs font-medium bg-secondary text-white rounded hover:opacity-90 transition-opacity cursor-pointer inline-flex items-center gap-1.5 shadow-xs"
                                     >
                                         <RiCameraLine size={14} />
                                         {__('Upload Photo')}
@@ -272,7 +462,7 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                                 </h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     {/* Name */}
-                                    <div>
+                                    <div className=''>
                                         <label className="block text-xs font-semibold text-text mb-1">
                                             {__('Full Name')} <span className="text-rose-500">*</span>
                                         </label>
@@ -281,7 +471,7 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                                             value={profileForm.data.name}
                                             onChange={(e) => profileForm.setData('name', e.target.value)}
                                             required
-                                            className="w-full px-3 py-2 text-xs bg-bg border border-border rounded text-text focus:outline-hidden focus:border-primary transition-colors"
+                                            className="w-full px-3 py-2 text-xs h-10.5 bg-bg border border-border rounded text-text focus:outline-hidden focus:border-primary transition-colors"
                                         />
                                         {profileForm.errors.name && (
                                             <p className="text-[11px] text-rose-500 mt-1">{profileForm.errors.name}</p>
@@ -298,7 +488,7 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                                             value={profileForm.data.email}
                                             onChange={(e) => profileForm.setData('email', e.target.value)}
                                             required
-                                            className="w-full px-3 py-2 text-xs bg-bg border border-border rounded text-text focus:outline-hidden focus:border-primary transition-colors"
+                                            className="w-full px-3 py-2 text-xs h-10.5 bg-bg border border-border rounded text-text focus:outline-hidden focus:border-primary transition-colors"
                                         />
                                         {profileForm.errors.email && (
                                             <p className="text-[11px] text-rose-500 mt-1">{profileForm.errors.email}</p>
@@ -306,26 +496,126 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                                     </div>
 
                                     {/* Phone */}
-                                    <div>
-                                        <label className="block text-xs font-semibold text-text mb-1">
-                                            {__('Phone Number')}
-                                        </label>
-                                        <input
-                                            type="tel"
-                                            value={profileForm.data.phone}
-                                            onChange={(e) => profileForm.setData('phone', e.target.value)}
-                                            placeholder="+1 (555) 000-0000"
-                                            className="w-full px-3 py-2 text-xs bg-bg border border-border rounded text-text focus:outline-hidden focus:border-primary transition-colors"
-                                        />
+                                    <div className="space-y-2 col-span-2">
+                                        <div className="flex items-center justify-between">
+                                            <label className="block text-xs font-semibold text-text">
+                                                {__('Phone Number')}
+                                            </label>
+                                            {phoneVerified && !changingNumber ? (
+                                                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded border border-emerald-200">
+                                                    <RiShieldCheckLine size={13} /> {__('Verified')}
+                                                </span>
+                                            ) : (
+                                                <span className="text-[11px] font-medium text-amber-600 bg-amber-50 dark:bg-amber-950/30 px-2 py-0.5 rounded border border-amber-200">
+                                                    {changingNumber ? __('Pending Verification') : __('Unverified')}
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        {/* Verified — locked display with Change Number option */}
+                                        {phoneVerified && !changingNumber ? (
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex-1 flex items-center gap-2 px-3 py-2 text-xs bg-bg border border-emerald-300 rounded text-text">
+                                                    <RiShieldCheckLine size={14} className="text-emerald-600 shrink-0" />
+                                                    <span className="font-mono tracking-wide">{profileForm.data.phone}</span>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setChangingNumber(true);
+                                                        setPhoneVerified(false);
+                                                        setOtpSent(false);
+                                                        setOtpCode('');
+                                                        profileForm.setData('phone', '');
+                                                    }}
+                                                    className="px-3 py-2 text-[11px] font-semibold bg-bg border border-border text-res hover:text-text hover:bg-border rounded transition-colors cursor-pointer whitespace-nowrap"
+                                                >
+                                                    {__('Change Number')}
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <PhoneInput
+                                                    value={profileForm.data.phone || ''}
+                                                    onChange={(val) => {
+                                                        profileForm.setData('phone', val);
+                                                        // Reset OTP state if the number changes while typing
+                                                        setOtpSent(false);
+                                                        setOtpCode('');
+                                                    }}
+                                                    error={profileForm.errors.phone}
+                                                    inputClassName="w-full px-3 py-2 text-xs bg-bg border border-border rounded text-text focus:outline-hidden focus:border-primary transition-colors"
+                                                />
+
+                                                {/* Cancel change — go back to verified display */}
+                                                {changingNumber && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setChangingNumber(false);
+                                                            setPhoneVerified(true);
+                                                            setOtpSent(false);
+                                                            setOtpCode('');
+                                                            profileForm.setData('phone', meta.phone || '');
+                                                        }}
+                                                        className="inline-flex items-center gap-1 text-[11px] text-res hover:text-text cursor-pointer"
+                                                    >
+                                                        <RiCloseLine size={13} /> {__('Cancel — keep current number')}
+                                                    </button>
+                                                )}
+                                            </>
+                                        )}
+
+                                        {/* Phone Verification Actions (only when not verified and phone entered) */}
+                                        {!phoneVerified && profileForm.data.phone && profileForm.data.phone.length > 7 && (
+                                            <div className="p-3 bg-bg border border-border rounded text-xs space-y-2 mt-2">
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600">
+                                                        <RiWhatsappLine size={13} /> {__('Verify via WhatsApp')}
+                                                    </span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={handleSendPhoneOtp}
+                                                        disabled={otpLoading}
+                                                        className="px-2.5 py-1 text-[11px] font-semibold bg-secondary text-white rounded hover:opacity-90 disabled:opacity-50 cursor-pointer shadow-xs transition-opacity"
+                                                    >
+                                                        {otpLoading ? __('Sending...') : (otpSent ? __('Resend Code') : __('Get Code'))}
+                                                    </button>
+                                                </div>
+
+                                                {/* Verification Input */}
+                                                {otpSent && (
+                                                    <div className="space-y-2 pt-2 border-t border-border">
+                                                        <div className="flex items-center gap-2">
+                                                            <input
+                                                                type="text"
+                                                                placeholder={__('Enter 6-digit OTP')}
+                                                                value={otpCode}
+                                                                maxLength={6}
+                                                                onChange={(e) => setOtpCode(e.target.value)}
+                                                                className="flex-1 px-3 py-1.5 text-xs bg-bg border border-border rounded text-text font-mono tracking-widest focus:outline-hidden focus:border-primary"
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                onClick={handleVerifyPhoneOtp}
+                                                                disabled={otpLoading || !otpCode}
+                                                                className="px-3 py-1.5 text-xs font-semibold bg-emerald-600 text-white rounded hover:bg-emerald-700 disabled:opacity-50 cursor-pointer shadow-xs transition-colors"
+                                                            >
+                                                                {otpLoading ? __('Verifying...') : __('Verify')}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* Bio */}
-                                    <div>
+                                    <div className='col-span-2'>
                                         <label className="block text-xs font-semibold text-text mb-1">
                                             {__('Bio / About')}
                                         </label>
-                                        <input
-                                            type="text"
+                                        <textarea
                                             value={profileForm.data.bio}
                                             onChange={(e) => profileForm.setData('bio', e.target.value)}
                                             placeholder={__('Brief note about yourself...')}
@@ -341,45 +631,62 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                                     {__('Default Shipping & Delivery Address')}
                                 </h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    {/* Street Address */}
+                                    {/* Street Address with Photon Geocode Autocomplete like user.json */}
                                     <div className="sm:col-span-2">
                                         <label className="block text-xs font-semibold text-text mb-1">
                                             {__('Street Address')}
                                         </label>
-                                        <input
-                                            type="text"
-                                            value={profileForm.data.address}
-                                            onChange={(e) => profileForm.setData('address', e.target.value)}
-                                            placeholder="123 Main Street, Suite 4B"
-                                            className="w-full px-3 py-2 text-xs bg-bg border border-border rounded text-text focus:outline-hidden focus:border-primary transition-colors"
+                                        <DropdownSelect
+                                            name="address"
+                                            searchable={true}
+                                            value={profileForm.data.address || ''}
+                                            options={[]}
+                                            apiConfig={{
+                                                api: 'https://photon.komoot.io',
+                                                endpoint: '/api/?q={query}&limit=5',
+                                                proxy: '/api/geocode',
+                                            }}
+                                            onChange={(val) => profileForm.setData('address', val)}
+                                            error={profileForm.errors.address}
                                         />
                                     </div>
 
-                                    {/* City */}
-                                    <div>
-                                        <label className="block text-xs font-semibold text-text mb-1">
-                                            {__('City')}
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={profileForm.data.city}
-                                            onChange={(e) => profileForm.setData('city', e.target.value)}
-                                            placeholder="New York"
-                                            className="w-full px-3 py-2 text-xs bg-bg border border-border rounded text-text focus:outline-hidden focus:border-primary transition-colors"
-                                        />
-                                    </div>
-
-                                    {/* State / Province */}
+                                    {/* State / Province (Dynamic Taxonomy dropdown from user.json) */}
                                     <div>
                                         <label className="block text-xs font-semibold text-text mb-1">
                                             {__('State / Province')}
                                         </label>
-                                        <input
-                                            type="text"
-                                            value={profileForm.data.state}
-                                            onChange={(e) => profileForm.setData('state', e.target.value)}
-                                            placeholder="NY"
-                                            className="w-full px-3 py-2 text-xs bg-bg border border-border rounded text-text focus:outline-hidden focus:border-primary transition-colors"
+                                        <DropdownSelect
+                                            name="state"
+                                            searchable={true}
+                                            value={profileForm.data.state || ''}
+                                            options={states}
+                                            isLoading={loadingStates}
+                                            onChange={(val) => {
+                                                profileForm.setData(prev => ({
+                                                    ...prev,
+                                                    state: val,
+                                                    city: '', // reset city when state changes
+                                                }));
+                                            }}
+                                            error={profileForm.errors.state}
+                                        />
+                                    </div>
+
+                                    {/* City (Dependent on State from user.json) */}
+                                    <div>
+                                        <label className="block text-xs font-semibold text-text mb-1">
+                                            {__('City')}
+                                        </label>
+                                        <DropdownSelect
+                                            name="city"
+                                            searchable={true}
+                                            value={profileForm.data.city || ''}
+                                            options={cities}
+                                            isLoading={loadingCities}
+                                            disabled={!profileForm.data.state}
+                                            onChange={(val) => profileForm.setData('city', val)}
+                                            error={profileForm.errors.city}
                                         />
                                     </div>
 
@@ -390,10 +697,11 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                                         </label>
                                         <input
                                             type="text"
-                                            value={profileForm.data.country}
+                                            value={profileForm.data.country || ''}
                                             onChange={(e) => profileForm.setData('country', e.target.value)}
-                                            placeholder="United States"
-                                            className="w-full px-3 py-2 text-xs bg-bg border border-border rounded text-text focus:outline-hidden focus:border-primary transition-colors"
+                                            placeholder={__('Detecting country...')}
+                                            disabled
+                                            className="w-full px-3 py-2 text-xs h-10.5 bg-bg border border-border rounded text-text focus:outline-hidden focus:border-primary transition-colors cursor-not-allowed opacity-80"
                                         />
                                     </div>
 
@@ -407,7 +715,7 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                                             value={profileForm.data.postal_code}
                                             onChange={(e) => profileForm.setData('postal_code', e.target.value)}
                                             placeholder="10001"
-                                            className="w-full px-3 py-2 text-xs bg-bg border border-border rounded text-text focus:outline-hidden focus:border-primary transition-colors"
+                                            className="w-full px-3 py-2 text-xs h-10.5 bg-bg border border-border rounded text-text focus:outline-hidden focus:border-primary transition-colors"
                                         />
                                     </div>
                                 </div>
@@ -418,7 +726,7 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                                 <button
                                     type="submit"
                                     disabled={profileForm.processing}
-                                    className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold bg-common hover:opacity-90 text-white rounded shadow-xs transition-opacity cursor-pointer disabled:opacity-50"
+                                    className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold bg-secondary hover:opacity-90 text-white rounded shadow-xs transition-opacity cursor-pointer disabled:opacity-50"
                                 >
                                     <RiSaveLine size={15} />
                                     <span>{profileForm.processing ? __('Saving...') : __('Save Changes')}</span>
@@ -452,7 +760,7 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                                         value={passwordForm.data.current_password}
                                         onChange={(e) => passwordForm.setData('current_password', e.target.value)}
                                         required
-                                        className="w-full px-3 py-2 pr-10 text-xs bg-bg border border-border rounded text-text focus:outline-hidden focus:border-primary transition-colors"
+                                        className="w-full px-3 h-10.5 py-2 pr-10 text-xs bg-bg border border-border rounded text-text focus:outline-hidden focus:border-primary transition-colors"
                                     />
                                     <button
                                         type="button"
@@ -478,7 +786,7 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                                         value={passwordForm.data.password}
                                         onChange={(e) => passwordForm.setData('password', e.target.value)}
                                         required
-                                        className="w-full px-3 py-2 pr-10 text-xs bg-bg border border-border rounded text-text focus:outline-hidden focus:border-primary transition-colors"
+                                        className="w-full px-3 py-2 h-10.5 pr-10 text-xs bg-bg border border-border rounded text-text focus:outline-hidden focus:border-primary transition-colors"
                                     />
                                     <button
                                         type="button"
@@ -503,7 +811,7 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                                     value={passwordForm.data.password_confirmation}
                                     onChange={(e) => passwordForm.setData('password_confirmation', e.target.value)}
                                     required
-                                    className="w-full px-3 py-2 text-xs bg-bg border border-border rounded text-text focus:outline-hidden focus:border-primary transition-colors"
+                                    className="w-full px-3 py-2 text-xs h-10.5 bg-bg border border-border rounded text-text focus:outline-hidden focus:border-primary transition-colors"
                                 />
                                 {passwordForm.errors.password_confirmation && (
                                     <p className="text-[11px] text-rose-500 mt-1">{passwordForm.errors.password_confirmation}</p>
@@ -514,7 +822,7 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                                 <button
                                     type="submit"
                                     disabled={passwordForm.processing}
-                                    className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold bg-common hover:opacity-90 text-white rounded shadow-xs transition-opacity cursor-pointer disabled:opacity-50"
+                                    className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold bg-secondary hover:opacity-90 text-white rounded shadow-xs transition-opacity cursor-pointer disabled:opacity-50"
                                 >
                                     <RiLockPasswordLine size={15} />
                                     <span>{passwordForm.processing ? __('Updating...') : __('Update Password')}</span>
@@ -577,7 +885,7 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                                 <button
                                     type="submit"
                                     disabled={profileForm.processing}
-                                    className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold bg-common hover:opacity-90 text-white rounded shadow-xs transition-opacity cursor-pointer disabled:opacity-50"
+                                    className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold bg-secondary hover:opacity-90 text-white rounded shadow-xs transition-opacity cursor-pointer disabled:opacity-50"
                                 >
                                     <RiSaveLine size={15} />
                                     <span>{profileForm.processing ? __('Saving...') : __('Save Preferences')}</span>

@@ -12,7 +12,20 @@ class StripeController extends Controller
 {
     private function setApiKey(): void
     {
-        Stripe::setApiKey(env('STRIPE_SECRET')?? "sk_test_51UJo7aGy3HXmj7syORR6ffyvOnkWk9Bz5N6GyRB2l8idlFqT26URnU0DexfyI8OpveQibkTgftzi2K5KwB0zvfYU005Shd340r");
+        $secret = null;
+        $settingFile = storage_path('app/data/setting.json');
+        if (file_exists($settingFile)) {
+            $settings = json_decode(file_get_contents($settingFile), true) ?: [];
+            $secret = $settings['payment']['stripe_secret_key']['value'] 
+                ?? $settings['stripe']['stripe_secret_key']['value'] 
+                ?? null;
+        }
+
+        if (empty($secret)) {
+            $secret = env('STRIPE_SECRET') ?: "sk_test_51UJo7aGy3HXmj7syORR6ffyvOnkWk9Bz5N6GyRB2l8idlFqT26URnU0DexfyI8OpveQibkTgftzi2K5KwB0zvfYU005Shd340r";
+        }
+
+        Stripe::setApiKey($secret);
     }
 
     /**

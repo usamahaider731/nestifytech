@@ -8,11 +8,13 @@ import CompareDrawer from '@/Components/Frontend/CompareDrawer';
 import { CartProvider } from '@/contexts/CartContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import BrandSlider from '@/Components/BrandSlider';
+import CountryDetector from '@/Components/CountryDetector';
 import { ToastContainer } from 'react-toastify';
 
 export default function FrontendLayout({ children, title }) {
     return (
         <LanguageProvider>
+            <CountryDetector />
             <ToastContainer
                 position="top-right"
                 autoClose={3500}

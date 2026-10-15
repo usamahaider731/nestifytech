@@ -306,15 +306,32 @@ trait ModuleHandler
                 );
                 $metaData = $request->except($ignore);
 
+                // Only category must be stored as a JSON-encoded string array (["id1","id2"])
+                $jsonArrayKeys = ['category', 'category_id'];
+
                 foreach ($metaData as $key => $value) {
                     if ($value instanceof \Illuminate\Http\UploadedFile)
                         continue;
+
+                    if (in_array($key, $jsonArrayKeys, true)) {
+                        // Normalise to an array of clean string IDs
+                        $arr = is_array($value) ? $value : (array) $value;
+                        $arr = array_values(array_filter(
+                            array_map(fn($v) => trim((string) $v), $arr),
+                            fn($v) => $v !== ''
+                        ));
+                        $encoded = json_encode($arr, JSON_UNESCAPED_UNICODE);
+                    } else {
+                        $encoded = is_array($value) ? json_encode($value) : $value;
+                    }
+
                     DB::table($metaTable)->updateOrInsert(
                         [$foreignKey => $recordId, 'key' => $key],
-                        ['value' => is_array($value) ? json_encode($value) : $value]
+                        ['value' => $encoded]
                     );
                 }
             }
+
 
             // 1. Handle Attributes (Key-Value Specs)
             if ($request->has('attributes')) {

@@ -53,8 +53,40 @@ class AppServiceProvider extends ServiceProvider
         $data = json_decode($settings, true) ?: [];
         $menu = [];
 
+        // Dynamically apply email settings from Admin Settings (Mailtrap/SMTP)
+        if (!empty($data['mail'])) {
+            $mailSettings = $data['mail'];
+            if (!empty($mailSettings['mail_host']['value'])) {
+                config(['mail.mailers.smtp.host' => $mailSettings['mail_host']['value']]);
+            }
+            if (!empty($mailSettings['mail_port']['value'])) {
+                config(['mail.mailers.smtp.port' => (int) $mailSettings['mail_port']['value']]);
+            }
+            if (!empty($mailSettings['mail_username']['value'])) {
+                config(['mail.mailers.smtp.username' => $mailSettings['mail_username']['value']]);
+            }
+            if (!empty($mailSettings['mail_password']['value'])) {
+                config(['mail.mailers.smtp.password' => $mailSettings['mail_password']['value']]);
+            }
+            if (isset($mailSettings['mail_encryption']['value'])) {
+                $enc = $mailSettings['mail_encryption']['value'];
+                config(['mail.mailers.smtp.encryption' => $enc === 'none' ? null : $enc]);
+            }
+            if (!empty($mailSettings['mail_from_address']['value'])) {
+                config(['mail.from.address' => $mailSettings['mail_from_address']['value']]);
+            }
+            if (!empty($mailSettings['mail_from_name']['value'])) {
+                config(['mail.from.name' => $mailSettings['mail_from_name']['value']]);
+            }
+        }
+
         if (!$this->app->runningInConsole()) {
             try {
+                // Auto-recovery guard: if database is emptied, auto-restore immediately
+                if (DB::getSchemaBuilder()->hasTable('posts') && DB::table('posts')->count() === 0) {
+                    \Illuminate\Support\Facades\Artisan::call('db:auto-restore');
+                }
+
                 if (DB::getSchemaBuilder()->hasTable('menu')) {
                     $allMenus = DB::table('menu')->get()->toArray();
                     $menu = $this->buildMenuTree($allMenus);
@@ -67,11 +99,25 @@ class AppServiceProvider extends ServiceProvider
         $sidebarMenu = json_decode($sidebarMenuContent, true) ?: [];
         $data = array_merge($data, ['menu' => $menu], ['layout' => $datas], ['sidebar_menu' => $sidebarMenu]);
 
-        // Never expose the AI provider secret in shared browser props.
+        // Never expose secrets or sensitive server-side credentials in shared browser props.
         unset($data['ai']['api_key']);
+        unset($data['payment']['stripe_secret_key'], $data['payment']['stripe_webhook_secret']);
+        unset($data['payment']['paypal_secret']);
+        unset($data['payment']['payoneer_api_password']);
+        unset($data['whatsapp']['api_key']);
+        unset($data['mail']['mail_password']);
 
         if (! request()->is('admin', 'admin/*')) {
-            unset($data['ai'], $data['backend-color'], $data['sidebar_menu']);
+            unset($data['ai'], $data['backend-color'], $data['sidebar_menu'], $data['whatsapp'], $data['mail']);
+            // Frontend only needs public payment status, public keys, and currencies
+            if (isset($data['payment'])) {
+                unset(
+                    $data['payment']['stripe_secret_key'],
+                    $data['payment']['stripe_webhook_secret'],
+                    $data['payment']['paypal_secret'],
+                    $data['payment']['payoneer_api_password']
+                );
+            }
         }
 
         // Share with Inertia & Blade

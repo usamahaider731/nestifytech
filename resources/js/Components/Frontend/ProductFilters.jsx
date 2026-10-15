@@ -26,6 +26,9 @@ function toQuery(next, bounds = {}) {
     if (next.brands?.length) {
         params.brands = next.brands.join(',');
     }
+    if (next.category?.length) {
+        params.category = next.category.join(',');
+    }
     if (next.subcategory?.length) {
         params.subcategory = next.subcategory.join(',');
     }
@@ -48,10 +51,14 @@ export default function ProductFilters({
 }) {
     const { __ } = useLang();
     const price = options?.price ?? { min: 0, max: 100000 };
+    const categoryKey = options?.categoryKey ?? (options?.isStore ? 'category' : 'subcategory');
+    const categoriesTitle = options?.categoriesTitle ?? (options?.isStore ? __('Categories') : __('Subcategories'));
+
     const [local, setLocal] = useState({
         min_price: filters?.min_price ?? price.min,
         max_price: filters?.max_price ?? price.max,
         brands: filters?.brands ?? [],
+        category: filters?.category ?? [],
         subcategory: filters?.subcategory ?? [],
         in_stock: Boolean(filters?.in_stock),
         sort: filters?.sort ?? 'latest',
@@ -62,6 +69,7 @@ export default function ProductFilters({
             min_price: filters?.min_price ?? price.min,
             max_price: filters?.max_price ?? price.max,
             brands: filters?.brands ?? [],
+            category: filters?.category ?? [],
             subcategory: filters?.subcategory ?? [],
             in_stock: Boolean(filters?.in_stock),
             sort: filters?.sort ?? 'latest',
@@ -71,6 +79,7 @@ export default function ProductFilters({
     const activeCount = useMemo(() => {
         let count = 0;
         if (filters?.brands?.length) count += filters.brands.length;
+        if (filters?.category?.length) count += filters.category.length;
         if (filters?.subcategory?.length) count += filters.subcategory.length;
         if (filters?.in_stock) count += 1;
         if (filters?.min_price != null || filters?.max_price != null) count += 1;
@@ -111,6 +120,7 @@ export default function ProductFilters({
             min_price: price.min,
             max_price: price.max,
             brands: [],
+            category: [],
             subcategory: [],
             in_stock: false,
             sort: 'latest',
@@ -187,19 +197,22 @@ export default function ProductFilters({
 
             {options?.categories?.length > 0 && (
                 <section className="flex flex-col gap-3">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-res">{__('Subcategories')}</h3>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-res">{categoriesTitle}</h3>
                     <div className="flex max-h-48 flex-col gap-2 overflow-y-auto pr-1">
-                        {options.categories.map((category) => (
-                            <label key={category.id} className="flex cursor-pointer items-center gap-2 text-sm text-heading">
-                                <input
-                                    type="checkbox"
-                                    checked={local.subcategory.map(String).includes(String(category.id))}
-                                    onChange={() => toggleId('subcategory', category.id)}
-                                    className="size-4 rounded border-border text-primary focus:ring-primary"
-                                />
-                                <span className="line-clamp-1">{category.title}</span>
-                            </label>
-                        ))}
+                        {options.categories.map((category) => {
+                            const isChecked = (local[categoryKey] ?? []).map(String).includes(String(category.id));
+                            return (
+                                <label key={category.id} className="flex cursor-pointer items-center gap-2 text-sm text-heading">
+                                    <input
+                                        type="checkbox"
+                                        checked={isChecked}
+                                        onChange={() => toggleId(categoryKey, category.id)}
+                                        className="size-4 rounded border-border text-primary focus:ring-primary"
+                                    />
+                                    <span className="line-clamp-1">{category.title}</span>
+                                </label>
+                            );
+                        })}
                     </div>
                 </section>
             )}

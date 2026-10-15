@@ -15,11 +15,13 @@ import ColorTypeSelector from '@/Components/Admin/ColorTypeSelector';
 import { ColorAppearanceMockup, normalizeAppearanceColors } from '@/Components/Admin/ColorAppearancePreview';
 import { buildPalettesFromTypes } from '@/Utils/colorPalettes';
 import { applyThemeColors, extractColorPayload } from '@/Utils/applyThemeColors';
+import { RiEyeLine, RiEyeOffLine } from 'react-icons/ri';
 
 function Form({ Data = [], name = '', link = '', type = '', colorPalettes = {} }) {
     const [dropdownOptions, setDropdownOptions] = useState({});
     const [loadingStates, setLoadingStates] = useState({});
     const [savingThemes, setSavingThemes] = useState(false);
+    const [showPassword, setShowPassword] = useState({});
     const persistTimerRef = useRef(null);
 
     const { data, setData, post, processing, errors } = useForm(() => {
@@ -42,6 +44,38 @@ function Form({ Data = [], name = '', link = '', type = '', colorPalettes = {} }
     const colorTypeEntries = dataEntries.filter(([, setting]) => setting.type === 'color_type');
     const colorEntries = dataEntries.filter(([, setting]) => setting.type === 'color');
     const colorKeys = useMemo(() => colorEntries.map(([key]) => key), [colorEntries]);
+
+    // Group fields into tabs if sections exist (e.g. Payment gateways, WhatsApp, etc.)
+    const sections = useMemo(() => {
+        const list = [];
+        let currentSection = null;
+
+        dataEntries.forEach(([key, setting]) => {
+            if (setting.type === 'color_type' || setting.type === 'color' || key === 'color_types') return;
+
+            if (setting.type === 'section') {
+                currentSection = {
+                    key,
+                    setting,
+                    fields: [],
+                };
+                list.push(currentSection);
+            } else if (currentSection) {
+                currentSection.fields.push([key, setting]);
+            }
+        });
+
+        return list;
+    }, [dataEntries]);
+
+    const hasSections = sections.length > 0;
+    const [activeTab, setActiveTab] = useState(() => (sections[0]?.key || ''));
+
+    useEffect(() => {
+        if (hasSections && (!activeTab || !sections.some(s => s.key === activeTab))) {
+            setActiveTab(sections[0]?.key || '');
+        }
+    }, [hasSections, sections]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -126,16 +160,68 @@ function Form({ Data = [], name = '', link = '', type = '', colorPalettes = {} }
         return true;
     });
 
-    const renderSettingField = (key, setting) => (
+    // Evaluate if a field should be shown based on condition: { field: 'some_key', value: true }
+    const isFieldVisible = (setting) => {
+        if (!setting.condition) return true;
+        const targetValue = data[setting.condition.field];
+        if (setting.condition.value !== undefined) {
+            return targetValue === setting.condition.value;
+        }
+        return !!targetValue;
+    };
+
+    const renderSettingField = (key, setting) => {
+        if (!isFieldVisible(setting)) return null;
+
+        // Render standalone section card (only when tabs aren't in use)
+        if (setting.type === 'section') {
+            const isEnabled = setting.toggle_field ? !!data[setting.toggle_field] : true;
+            return (
+                <div key={key} className="col-span-4 mt-2 border border-secondary/20 rounded-2xl p-5 bg-permanent/10 shadow-sm transition-all">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-secondary/20">
+                        <div className="flex items-center gap-3">
+                            {setting.icon && (
+                                <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                                    <i className={`${setting.icon} text-xl`} />
+                                </div>
+                            )}
+                            <div>
+                                <h5 className="text-base font-semibold text-heading">{setting.label}</h5>
+                                {setting.description && (
+                                    <p className="text-xs text-res mt-0.5">{setting.description}</p>
+                                )}
+                            </div>
+                        </div>
+
+                        {setting.toggle_field && (
+                            <div className="flex items-center gap-2.5 bg-bg/60 px-3 py-1.5 rounded-xl border border-secondary/20">
+                                <span className={`text-xs font-semibold ${isEnabled ? 'text-primary' : 'text-res'}`}>
+                                    {isEnabled ? 'Enabled' : 'Disabled'}
+                                </span>
+                                <Togglebox
+                                    id={setting.toggle_field}
+                                    name={setting.toggle_field}
+                                    checked={!!data[setting.toggle_field]}
+                                    onChange={(e) => handleChange(e, setting.toggle_field)}
+                                    className="h-4 w-4"
+                                />
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        return (
         <div
             className={`
-                ${(setting.type === 'text' || setting.type === 'phone' || setting.type === 'dropdown' || setting.type === 'image') && ((setting.style && setting.style == 2) ? 'col-span-4' : 'col-span-2')} 
+                ${(setting.type === 'text' || setting.type === 'password' || setting.type === 'number' || setting.type === 'phone' || setting.type === 'dropdown' || setting.type === 'image') && ((setting.style && setting.style == 2) ? 'col-span-4' : 'col-span-2')} 
                 ${setting.type === 'color' && 'col-span-1'} 
                 ${setting.type === 'color_type' && 'col-span-4'}
                 ${setting.type === 'textarea' && 'col-span-4'}
                 ${setting.type === 'repeater' && 'col-span-4'}
                 ${setting.type === 'checkbox' && 'col-span-4 flex-col gap-3'}
-                flex flex-col gap-2
+                flex flex-col gap-2 transition-all
             `}
             key={key}
         >
@@ -155,6 +241,42 @@ function Form({ Data = [], name = '', link = '', type = '', colorPalettes = {} }
                     onChange={(e) => handleChange(e, key)}
                     error={errors[key]}
                 />
+            )}
+
+            {setting.type === 'number' && (
+                <TextInput
+                    id={key}
+                    name={key}
+                    type="number"
+                    value={data[key] ?? ''}
+                    className='w-full'
+                    placeholder={setting.placeholder ?? ''}
+                    onChange={(e) => handleChange(e, key)}
+                    error={errors[key]}
+                />
+            )}
+
+            {setting.type === 'password' && (
+                <div className="relative w-full">
+                    <TextInput
+                        id={key}
+                        name={key}
+                        type={showPassword[key] ? 'text' : 'password'}
+                        value={data[key] || ''}
+                        className='w-full pr-10'
+                        placeholder={setting.placeholder ?? ''}
+                        onChange={(e) => handleChange(e, key)}
+                        error={errors[key]}
+                    />
+                    <button
+                        type="button"
+                        onClick={() => setShowPassword(prev => ({ ...prev, [key]: !prev[key] }))}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-res hover:text-heading transition-colors cursor-pointer"
+                        tabIndex={-1}
+                    >
+                        {showPassword[key] ? <RiEyeOffLine size={18} /> : <RiEyeLine size={18} />}
+                    </button>
+                </div>
             )}
 
             {setting.type === 'phone' && (
@@ -281,7 +403,8 @@ function Form({ Data = [], name = '', link = '', type = '', colorPalettes = {} }
                 <p className='text-sm text-red-600'>{errors[key]}</p>
             )}
         </div>
-    );
+        );
+    };
 
     const processOptions = (options) => {
         if (!options) return [];
@@ -394,54 +517,151 @@ function Form({ Data = [], name = '', link = '', type = '', colorPalettes = {} }
                     </h4>
                 </div>
 
-                <div className='grid grid-cols-4 w-full gap-5 p-5'>
-                    {otherEntries.map(([key, setting]) => renderSettingField(key, setting))}
+                {hasSections ? (
+                    <div className="w-full flex flex-col gap-6 px-5">
+                        {/* Gateway Tabs Header */}
+                        <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-bg/50 border border-secondary/20">
+                            {sections.map(({ key, setting }) => {
+                                const isEnabled = setting.toggle_field ? !!data[setting.toggle_field] : true;
+                                const isActive = activeTab === key;
+                                return (
+                                    <button
+                                        key={key}
+                                        type="button"
+                                        onClick={() => setActiveTab(key)}
+                                        className={`flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-medium transition-all duration-200 cursor-pointer ${
+                                            isActive
+                                                ? 'bg-primary text-white shadow-md shadow-primary/25'
+                                                : 'text-res hover:text-heading hover:bg-permanent/30'
+                                        }`}
+                                    >
+                                        {setting.icon && <i className={`${setting.icon} text-lg`} />}
+                                        <span>{setting.label?.replace(/ Payments| Gateway| Mass Payouts & Checkout/i, '') || setting.label}</span>
+                                        <span
+                                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide uppercase ${
+                                                isEnabled
+                                                    ? isActive
+                                                        ? 'bg-white/20 text-white'
+                                                        : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                                                    : isActive
+                                                    ? 'bg-black/20 text-white/70'
+                                                    : 'bg-res/10 text-res/70 border border-res/20'
+                                            }`}
+                                        >
+                                            {isEnabled ? 'Active' : 'Off'}
+                                        </span>
+                                    </button>
+                                );
+                            })}
+                        </div>
 
-                    {colorTypesEntries.length > 0 && (
-                        <div className='col-span-4 space-y-4'>
-                            {colorTypesEntries.map(([key, setting]) => renderSettingField(key, setting))}
-                            <div className="flex items-center justify-between gap-4 pt-2 border-t border-secondary/20">
-                                <p className="text-sm text-res">Save to store theme definitions in the repeater list.</p>
-                                <PrimaryButton
-                                    type="submit"
-                                    className='min-w-32 flex items-center bg-primary justify-center h-9'
-                                    disabled={savingThemes || processing}
-                                >
-                                    {savingThemes || processing ? 'Saving...' : 'Save Themes'}
-                                </PrimaryButton>
+                        {/* Active Section Tab Card */}
+                        {sections
+                            .filter(({ key }) => key === activeTab)
+                            .map(({ key, setting, fields }) => {
+                                const isEnabled = setting.toggle_field ? !!data[setting.toggle_field] : true;
+                                return (
+                                    <div
+                                        key={key}
+                                        className="border border-secondary/20 rounded-2xl p-6 bg-permanent/10 shadow-sm flex flex-col gap-6"
+                                    >
+                                        {/* Gateway Banner / Header with Master Toggle */}
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-secondary/20">
+                                            <div className="flex items-center gap-3.5">
+                                                {setting.icon && (
+                                                    <div className="p-3 rounded-2xl bg-primary/10 text-primary border border-primary/20">
+                                                        <i className={`${setting.icon} text-2xl`} />
+                                                    </div>
+                                                )}
+                                                <div>
+                                                    <h5 className="text-lg font-semibold text-heading">{setting.label}</h5>
+                                                    {setting.description && (
+                                                        <p className="text-xs text-res mt-0.5 max-w-xl">{setting.description}</p>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {setting.toggle_field && (
+                                                <div className="flex items-center gap-3 bg-bg/80 px-4 py-2 rounded-xl border border-secondary/20 shrink-0">
+                                                    <span className={`text-xs font-semibold uppercase tracking-wider ${isEnabled ? 'text-primary' : 'text-res'}`}>
+                                                        {isEnabled ? 'Gateway Enabled' : 'Gateway Disabled'}
+                                                    </span>
+                                                    <Togglebox
+                                                        id={setting.toggle_field}
+                                                        name={setting.toggle_field}
+                                                        checked={!!data[setting.toggle_field]}
+                                                        onChange={(e) => handleChange(e, setting.toggle_field)}
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Fields List */}
+                                        {!isEnabled ? (
+                                            <div className="py-10 text-center flex flex-col items-center justify-center gap-2 border border-dashed border-secondary/20 rounded-xl bg-bg/20">
+                                                <i className="ri-toggle-line text-3xl text-res/50" />
+                                                <p className="text-sm font-medium text-heading">This gateway is currently disabled.</p>
+                                                <p className="text-xs text-res">Toggle the switch above to enable and configure its credentials.</p>
+                                            </div>
+                                        ) : (
+                                            <div className="grid grid-cols-4 gap-5">
+                                                {fields.map(([fieldKey, fieldSetting]) => renderSettingField(fieldKey, fieldSetting))}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                    </div>
+                ) : (
+                    <div className='grid grid-cols-4 w-full gap-5 p-5'>
+                        {otherEntries.map(([key, setting]) => renderSettingField(key, setting))}
+
+                        {colorTypesEntries.length > 0 && (
+                            <div className='col-span-4 space-y-4'>
+                                {colorTypesEntries.map(([key, setting]) => renderSettingField(key, setting))}
+                                <div className="flex items-center justify-between gap-4 pt-2 border-t border-secondary/20">
+                                    <p className="text-sm text-res">Save to store theme definitions in the repeater list.</p>
+                                    <PrimaryButton
+                                        type="submit"
+                                        className='min-w-32 flex items-center bg-primary justify-center h-9'
+                                        disabled={savingThemes || processing}
+                                    >
+                                        {savingThemes || processing ? 'Saving...' : 'Save Themes'}
+                                    </PrimaryButton>
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    {colorTypeEntries.map(([key, setting]) => (
-                        <div key={key} className="col-span-4 space-y-2">
-                            {renderSettingField(key, setting)}
-                            <p className="text-xs text-res italic px-1">Appearance applies instantly — no save needed.</p>
-                        </div>
-                    ))}
-
-                    {hasColorTypeField && (
-                        <div className="col-span-4 rounded-2xl border border-secondary/30 bg-permanent/20 p-5">
-                            <h5 className="text-lg font-medium text-heading capitalize mb-1">Live Color Appearance</h5>
-                            <p className="text-sm text-res mb-4">Preview updates as you select a theme or change color variations.</p>
-                            <div className="max-w-md mx-auto">
-                                <ColorAppearanceMockup colors={activeAppearanceColors} />
+                        {colorTypeEntries.map(([key, setting]) => (
+                            <div key={key} className="col-span-4 space-y-2">
+                                {renderSettingField(key, setting)}
+                                <p className="text-xs text-res italic px-1">Appearance applies instantly — no save needed.</p>
                             </div>
-                        </div>
-                    )}
+                        ))}
 
-                    {hasColorTypeField && colorEntries.length > 0 && (
-                        <div className='col-span-4 pt-2 border-t border-secondary/30'>
-                            <h5 className='text-lg font-medium text-heading capitalize mb-1'>Customize Color Variations</h5>
-                            <p className='text-sm text-res mb-4'>Fine-tune each color — changes apply instantly across the app.</p>
-                            <div className='grid grid-cols-4 gap-5'>
-                                {colorEntries.map(([key, setting]) => renderSettingField(key, setting))}
+                        {hasColorTypeField && (
+                            <div className="col-span-4 rounded-2xl border border-secondary/30 bg-permanent/20 p-5">
+                                <h5 className="text-lg font-medium text-heading capitalize mb-1">Live Color Appearance</h5>
+                                <p className="text-sm text-res mb-4">Preview updates as you select a theme or change color variations.</p>
+                                <div className="max-w-md mx-auto">
+                                    <ColorAppearanceMockup colors={activeAppearanceColors} />
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    {!hasColorTypeField && colorEntries.map(([key, setting]) => renderSettingField(key, setting))}
-                </div>
+                        {hasColorTypeField && colorEntries.length > 0 && (
+                            <div className='col-span-4 pt-2 border-t border-secondary/30'>
+                                <h5 className='text-lg font-medium text-heading capitalize mb-1'>Customize Color Variations</h5>
+                                <p className='text-sm text-res mb-4'>Fine-tune each color — changes apply instantly across the app.</p>
+                                <div className='grid grid-cols-4 gap-5'>
+                                    {colorEntries.map(([key, setting]) => renderSettingField(key, setting))}
+                                </div>
+                            </div>
+                        )}
+
+                        {!hasColorTypeField && colorEntries.map(([key, setting]) => renderSettingField(key, setting))}
+                    </div>
+                )}
 
                 {!hasColorTypeField && (
                     <div className="flex justify-end px-5 pb-5">

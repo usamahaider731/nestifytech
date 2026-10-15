@@ -1,0 +1,65 @@
+{
+    "table": "users",
+    "data": [
+        {
+            "name": "Admin",
+            "email": "info@nestifytech.com",
+            "password": "Admin123",
+            "roles": [
+                "1"
+            ],
+            "active": 1,
+            "last_seen_at": "{now}",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                {
+                    "table": "roles",
+                    "insert_in": "main_table",
+                    "where": {
+                        "column": "title",
+                        "value": "Administrator",
+                        "operater": "="
+                    },
+                    "value_column": "roles",
+                    "set_type": "array",
+                    "relation_column_value": "id"
+                },
+                {
+                    "table": "media",
+                    "insert_in": "related_table",
+                    "data": {
+                        "filename": "admin.png",
+                        "name": "Admin Avatar",
+                        "parent_id": "{insert_id}",
+                        "type": "user",
+                        "created_at": "{now}",
+                        "updated_at": "{now}"
+                    }
+                },
+                {
+                    "table": "user_meta",
+                    "insert_in": "related_table",
+                    "data": {
+                        "user_id": "{insert_id}",
+                        "key": "bio",
+                        "value": "",
+                        "created_at": "{now}",
+                        "updated_at": "{now}"
+                    }
+                },
+                {
+                    "table": "user_meta",
+                    "insert_in": "related_table",
+                    "data": {
+                        "user_id": "{insert_id}",
+                        "key": "phone",
+                        "value": "+923218086139",
+                        "created_at": "{now}",
+                        "updated_at": "{now}"
+                    }
+                }
+            ]
+        }
+    ]
+}

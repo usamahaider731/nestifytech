@@ -74,6 +74,7 @@ Route::get('/hello', function () {
 });
 Route::get('/ads', [ApiController::class, 'ads'])->name('api.ads');
 Route::get('/geocode', [ApiController::class, 'geocode'])->name('api.geocode');
+Route::get('/detect-country', [ApiController::class, 'detectCountry'])->name('api.detect-country');
 Route::get('/banners-message', [
     ApiController::class,
     'bannersMessage'
@@ -109,4 +110,11 @@ Route::middleware('web')->group(function () {
     // Order cancellation & refund
     Route::post('/orders/{orderId}/cancel', [\App\Http\Controllers\StripeController::class, 'cancelOrder'])->name('api.orders.cancel');
     Route::post('/orders/{orderId}/attach-payment', [\App\Http\Controllers\StripeController::class, 'attachPaymentIntent'])->name('api.orders.attach-payment');
+
+    // Auto-detected country saving
+    Route::post('/user/save-country', [\App\Http\Controllers\ProfileController::class, 'saveCountry'])->name('api.user.save-country');
+
+    // Phone OTP Verification via SMS / WhatsApp
+    Route::post('/user/phone/send-otp', [\App\Http\Controllers\ProfileController::class, 'sendPhoneOtp'])->name('api.user.phone.send-otp');
+    Route::post('/user/phone/verify-otp', [\App\Http\Controllers\ProfileController::class, 'verifyPhoneOtp'])->name('api.user.phone.verify-otp');
 });
