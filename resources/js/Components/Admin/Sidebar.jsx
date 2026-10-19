@@ -64,7 +64,7 @@ function Sidebar() {
       group.menu.forEach((item) => {
         if (item.menu) {
           item.menu.forEach((sub) => {
-            if (url === new URL(sub.route, window.location.origin).pathname) {
+            if (isActive(sub.route)) {
               setOpen(item.id);
             }
           });
@@ -73,8 +73,32 @@ function Sidebar() {
     });
   }, [url]);
 
-  const isActive = (itemRoute) =>
-    url === new URL(itemRoute, window.location.origin).pathname;
+  const isActive = (itemRoute) => {
+    if (!itemRoute) return false;
+    const targetUrl = new URL(itemRoute, window.location.origin);
+    const currentUrl = new URL(url, window.location.origin);
+
+    if (currentUrl.pathname !== targetUrl.pathname) {
+      return false;
+    }
+
+    // If target has query params (e.g. ?tab=team or ?tab=customers), match them strictly
+    if (targetUrl.search) {
+      for (const [key, val] of targetUrl.searchParams.entries()) {
+        if (currentUrl.searchParams.get(key) !== val) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    // If current URL has a tab param but the target route does not, don't mark as active
+    if (currentUrl.searchParams.has('tab')) {
+      return false;
+    }
+
+    return true;
+  };
 
   const toggleMenu = (id) => {
     setOpen(open === id ? null : id);

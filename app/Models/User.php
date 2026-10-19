@@ -116,12 +116,16 @@ class User extends Authenticatable implements MustVerifyEmail
             // dd($role);
             
             if (is_array($permissions)) {
-                // Flatten nested structure: { "content": ["Product-Read", ...], ... }
+                // Support both flat list ["delivery-read", ...] and nested { "content": ["Product-Read"] }
                 foreach ($permissions as $category => $perms) {
                     if (is_array($perms)) {
                         foreach ($perms as $p) {
-                            $allPermissions[] = strtolower(trim($p));
+                            if (is_string($p)) {
+                                $allPermissions[] = strtolower(trim($p));
+                            }
                         }
+                    } elseif (is_string($perms)) {
+                        $allPermissions[] = strtolower(trim($perms));
                     }
                 }
             } else {

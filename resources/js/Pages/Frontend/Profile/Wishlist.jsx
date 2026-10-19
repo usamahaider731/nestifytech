@@ -18,11 +18,12 @@ import {
     RiSparklingLine,
     RiEyeLine,
 } from 'react-icons/ri';
+import ProductCardV1 from '@/Components/ProductCardV1';
 
 export default function Wishlist({ profile, recommended_products = [] }) {
     const { __ } = useLang();
     const { setting } = usePage().props;
-    const currency = setting?.currency_symbol || '$';
+    const currency = setting?.site?.currency?.value || setting?.currency_symbol || 'PKR';
 
     const dispatch = useDispatch();
     const wishlistItems = useSelector(selectWishlistItems) || [];
@@ -196,7 +197,7 @@ export default function Wishlist({ profile, recommended_products = [] }) {
                                 </div>
                             </div>
                             <Link
-                                href={route('index')}
+                                href={route('store')}
                                 className="text-xs font-medium text-primary hover:underline flex items-center gap-1"
                             >
                                 {__('View All')} <RiArrowRightLine size={14} />
@@ -205,7 +206,7 @@ export default function Wishlist({ profile, recommended_products = [] }) {
 
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                             {recommended_products.map((prod) => (
-                                <ProductCardV2 key={prod.id} product={prod} />
+                                <ProductCardV1 key={prod.id} product={prod} />
                             ))}
                         </div>
                     </div>

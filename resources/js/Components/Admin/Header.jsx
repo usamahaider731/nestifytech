@@ -118,6 +118,12 @@ function Header() {
                                     </div>
 
                                     <div className='p-2 space-y-1 text-xs font-medium'>
+                                        <Dropdown.Link href={route('delivery.orders.index')} className='flex items-center gap-3 px-3 py-2 rounded-lg transition-colors hover:bg-emerald-500/10 hover:text-emerald-600 text-res'>
+                                            <svg className="size-4 text-emerald-500" fill="currentColor">
+                                                <use href="/assets/icon/remix/remixicon.symbol.svg#ri-e-bike-2-line" />
+                                            </svg>
+                                            <span className="font-semibold text-emerald-600">Delivery Boy Panel</span>
+                                        </Dropdown.Link>
                                         <Dropdown.Link href={route('user.edit', { id: auth.user.id, type: 'user' })} className='flex items-center gap-3 px-3 py-2 rounded-lg transition-colors hover:bg-primary/10 hover:text-primary text-res'>
                                             <RiUser3Line className='text-base text-secondary' />
                                             <span>My Profile</span>

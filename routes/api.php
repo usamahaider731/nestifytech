@@ -13,13 +13,119 @@ Route::get('/taxonomy-options/{type}', function (Request $request, $type) {
     $parent_id = $request->input('parent_id', null);
     $not_id = $request->input('not_id', null);
 
+    $effectiveParent = !is_null($parent) ? $parent : $parent_id;
+
+    // Auto-resolve string titles to taxonomy ID if parent is passed as name
+    $resolvedParentId = null;
+    if (!empty($effectiveParent)) {
+        if (is_numeric($effectiveParent)) {
+            $resolvedParentId = (int) $effectiveParent;
+        } else {
+            $foundParent = \Illuminate\Support\Facades\DB::table('taxonomies')->where('title', $effectiveParent)->first();
+            if ($foundParent) {
+                $resolvedParentId = $foundParent->id;
+            }
+        }
+    }
+
+    // On-demand State/City population from states.json and cities.json if not yet imported
+    if ($type === 'state' && $resolvedParentId) {
+        $stateCount = \Illuminate\Support\Facades\DB::table('taxonomies')
+            ->where('type', 'state')
+            ->where('parent_id', $resolvedParentId)
+            ->count();
+
+        if ($stateCount === 0) {
+            $countryMeta = \Illuminate\Support\Facades\DB::table('taxonomy_meta')
+                ->where('taxonomy_id', $resolvedParentId)
+                ->where('key', 'id')
+                ->first();
+
+            $jsonCountryId = $countryMeta->value ?? null;
+            $stateFile = storage_path('app/data/states.json');
+
+            if ($jsonCountryId && \Illuminate\Support\Facades\File::exists($stateFile)) {
+                $allStates = json_decode(\Illuminate\Support\Facades\File::get($stateFile), true) ?: [];
+                $countryStates = array_filter($allStates, fn($item) => (string)($item['country_id'] ?? '') === (string)$jsonCountryId);
+
+                foreach ($countryStates as $s) {
+                    $newStId = \Illuminate\Support\Facades\DB::table('taxonomies')->insertGetId([
+                        'title'     => $s['name'],
+                        'slug'      => \Illuminate\Support\Str::slug($s['name']),
+                        'type'      => 'state',
+                        'parent_id' => $resolvedParentId,
+                        'status'    => 'publish',
+                    ]);
+                    foreach ($s as $k => $v) {
+                        if ($k === 'name') continue;
+                        \Illuminate\Support\Facades\DB::table('taxonomy_meta')->insert([
+                            'taxonomy_id' => $newStId,
+                            'key'         => $k,
+                            'value'       => is_array($v) ? json_encode($v) : $v,
+                        ]);
+                    }
+                }
+            }
+        }
+    }
+
+    if ($type === 'city' && $resolvedParentId) {
+        $cityCount = \Illuminate\Support\Facades\DB::table('taxonomies')
+            ->where('type', 'city')
+            ->where('parent_id', $resolvedParentId)
+            ->count();
+
+        if ($cityCount === 0) {
+            $stateMeta = \Illuminate\Support\Facades\DB::table('taxonomy_meta')
+                ->where('taxonomy_id', $resolvedParentId)
+                ->where('key', 'id')
+                ->first();
+
+            $jsonStateId = $stateMeta->value ?? null;
+            $cityFile = storage_path('app/data/cities.json');
+
+            if ($jsonStateId && \Illuminate\Support\Facades\File::exists($cityFile)) {
+                @ini_set('memory_limit', '1024M');
+                @set_time_limit(180);
+                $allCities = json_decode(\Illuminate\Support\Facades\File::get($cityFile), true) ?: [];
+
+                foreach ($allCities as $c) {
+                    if ((string)($c['state_id'] ?? '') !== (string)$jsonStateId) {
+                        continue;
+                    }
+                    $newCityId = \Illuminate\Support\Facades\DB::table('taxonomies')->insertGetId([
+                        'title'     => $c['name'],
+                        'slug'      => \Illuminate\Support\Str::slug($c['name']),
+                        'type'      => 'city',
+                        'parent_id' => $resolvedParentId,
+                        'status'    => 'publish',
+                    ]);
+                    foreach ($c as $k => $v) {
+                        if ($k === 'name') continue;
+                        \Illuminate\Support\Facades\DB::table('taxonomy_meta')->insert([
+                            'taxonomy_id' => $newCityId,
+                            'key'         => $k,
+                            'value'       => is_array($v) ? json_encode($v) : $v,
+                        ]);
+                    }
+                }
+            }
+        }
+    }
+
     $query = \Illuminate\Support\Facades\DB::table('taxonomies')->where('type', $type);
 
-    if (!is_null($parent)) $query->where('parent_id', $parent);
-    if (!is_null($parent_id)) $query->where('parent_id', $parent_id);
-    if (!is_null($not_id)) $query->where('id', '!=', $not_id);
+    if (!is_null($resolvedParentId)) {
+        $query->where('parent_id', $resolvedParentId);
+    } elseif (!is_null($effectiveParent)) {
+        $query->where('parent_id', $effectiveParent);
+    }
 
-    $results = $query->get();
+    if (!is_null($not_id)) {
+        $query->where('id', '!=', $not_id);
+    }
+
+    $results = $query->orderBy('title', 'asc')->get();
 
     if ($asOptions || $useValue) {
         $options = [];
@@ -117,4 +223,11 @@ Route::middleware('web')->group(function () {
     // Phone OTP Verification via SMS / WhatsApp
     Route::post('/user/phone/send-otp', [\App\Http\Controllers\ProfileController::class, 'sendPhoneOtp'])->name('api.user.phone.send-otp');
     Route::post('/user/phone/verify-otp', [\App\Http\Controllers\ProfileController::class, 'verifyPhoneOtp'])->name('api.user.phone.verify-otp');
+
+    // Email OTP Verification (Delete Account, Change Email, Verification)
+    Route::post('/user/email/send-otp', [\App\Http\Controllers\ProfileController::class, 'sendEmailOtp'])->name('api.user.email.send-otp');
+    Route::post('/user/email/verify-otp', [\App\Http\Controllers\ProfileController::class, 'verifyEmailOtp'])->name('api.user.email.verify-otp');
+
+    // Notifications (New Products & Orders + Chrome Web Notifications)
+    Route::get('/notifications', [\App\Http\Controllers\FrontendController::class, 'getNotifications'])->name('api.notifications');
 });

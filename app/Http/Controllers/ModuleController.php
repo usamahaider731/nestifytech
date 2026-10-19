@@ -124,6 +124,26 @@ class ModuleController extends Controller
                         ->select("{$tableName}.*");
                 }
             }
+
+            // Customer vs Staff/Team filtering for users module
+            if ($type === 'users' || $type === 'user') {
+                $tab = $request->query('tab');
+                if ($tab === 'customers' || $tab === 'customer') {
+                    $query->where(function ($q) {
+                        $q->whereNull('roles')
+                            ->orWhere('roles', '[]')
+                            ->orWhere('roles', '')
+                            ->orWhere('roles', 'null');
+                    });
+                } elseif ($tab === 'team' || $tab === 'staff') {
+                    $query->where(function ($q) {
+                        $q->whereNotNull('roles')
+                            ->where('roles', '!=', '[]')
+                            ->where('roles', '!=', '')
+                            ->where('roles', '!=', 'null');
+                    });
+                }
+            }
         }
 
         if (!$query) {
@@ -375,19 +395,39 @@ class ModuleController extends Controller
     private function getAdditionalTableData($type, $result)
     {
         if ($type === 'users') {
-            $totalUsers        = DB::table('users')->count();
-            $activeUsers       = DB::table('users')->where('active', 1)->count();
-            $inactiveUsers     = $totalUsers - $activeUsers;
-            $recentlyActive    = DB::table('users')->where('updated_at', '>=', now()->subDays(7))->count();
-            $onlineUsers       = DB::table('users')->where('last_seen_at', '>=', now()->subMinutes(5))->count();
+            $tab = request()->query('tab');
 
-            $previousTotal     = DB::table('users')->where('created_at', '<', now()->subDays(7))->count();
+            $baseQuery = DB::table('users');
+            if ($tab === 'customers' || $tab === 'customer') {
+                $baseQuery->where(function ($q) {
+                    $q->whereNull('roles')
+                        ->orWhere('roles', '[]')
+                        ->orWhere('roles', '')
+                        ->orWhere('roles', 'null');
+                });
+            } elseif ($tab === 'team' || $tab === 'staff') {
+                $baseQuery->where(function ($q) {
+                    $q->whereNotNull('roles')
+                        ->where('roles', '!=', '[]')
+                        ->where('roles', '!=', '')
+                        ->where('roles', '!=', 'null');
+                });
+            }
+
+            $totalUsers        = (clone $baseQuery)->count();
+            $activeUsers       = (clone $baseQuery)->where('active', 1)->count();
+            $inactiveUsers     = $totalUsers - $activeUsers;
+            $recentlyActive    = (clone $baseQuery)->where('updated_at', '>=', now()->subDays(7))->count();
+            $onlineUsers       = (clone $baseQuery)->where('last_seen_at', '>=', now()->subMinutes(5))->count();
+
+            $previousTotal     = (clone $baseQuery)->where('created_at', '<', now()->subDays(7))->count();
             $percentChange     = $previousTotal > 0 ? round((($totalUsers - $previousTotal) / $previousTotal) * 100, 1) : ($totalUsers > 0 ? 100 : 0);
             $activePercentage  = $totalUsers > 0 ? round(($recentlyActive / $totalUsers) * 100, 1) : 0;
             $onlinePercentage  = $totalUsers > 0 ? round(($onlineUsers / $totalUsers) * 100, 1) : 0;
 
             return [
                 'users'     => $result['data'],
+                'currentTab' => $tab ?: 'all',
                 'userStats' => [
                     'total'                 => $totalUsers,
                     'active_count'          => $activeUsers,

@@ -1,45 +1,71 @@
 {
-    "table": "taxonomy",
+    "table": "taxonomies",
     "data": [
         {
-            "title": "New",
-            "slug": "new",
-            "type": "tag"
+            "related_id": "717",
+            "title": "Featured",
+            "slug": "featured",
+            "description": "Featured top products",
+            "parent_id": 0,
+            "type": "tag",
+            "status": "publish",
+            "created_at": "{now}",
+            "updated_at": "{now}"
         },
         {
-            "title": "Sale",
-            "slug": "sale",
-            "type": "tag"
+            "related_id": "716",
+            "title": "Trending",
+            "slug": "trending",
+            "description": "Trending hot items",
+            "parent_id": 0,
+            "type": "tag",
+            "status": "publish",
+            "created_at": "{now}",
+            "updated_at": "{now}"
         },
         {
+            "related_id": "715",
             "title": "Bestseller",
             "slug": "bestseller",
-            "type": "tag"
+            "description": "Top-selling best items",
+            "parent_id": 0,
+            "type": "tag",
+            "status": "publish",
+            "created_at": "{now}",
+            "updated_at": "{now}"
         },
         {
+            "related_id": "714",
+            "title": "New",
+            "slug": "new",
+            "description": "Newly arrived products",
+            "parent_id": 0,
+            "type": "tag",
+            "status": "publish",
+            "created_at": "{now}",
+            "updated_at": "{now}"
+        },
+        {
+            "related_id": "713",
+            "title": "Sale",
+            "slug": "sale",
+            "description": "On sale with discounts",
+            "parent_id": 0,
+            "type": "tag",
+            "status": "publish",
+            "created_at": "{now}",
+            "updated_at": "{now}"
+        },
+        {
+            "related_id": "712",
             "title": "Limited",
             "slug": "limited",
-            "type": "tag"
-        },
-        {
-            "title": "Free shipping",
-            "slug": "free-shipping",
-            "type": "tag"
-        },
-        {
-            "title": "Eco",
-            "slug": "eco",
-            "type": "tag"
-        },
-        {
-            "title": "Gift idea",
-            "slug": "gift-idea",
-            "type": "tag"
-        },
-        {
-            "title": "Pro",
-            "slug": "pro",
-            "type": "tag"
+            "description": "Limited edition items",
+            "parent_id": 0,
+            "type": "tag",
+            "status": "publish",
+            "created_at": "{now}",
+            "updated_at": "{now}"
         }
     ]
 }

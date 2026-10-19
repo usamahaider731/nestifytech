@@ -498,7 +498,7 @@ function Menu({ menu, menu_options }) {
                         </div>
                         <button
                             type="button"
-                            onClick={() => handleAddBulkItems('Category', categories, checkedCategories, setCheckedCategories, c => `/category/${c.id}`)}
+                            onClick={() => handleAddBulkItems('Category', categories, checkedCategories, setCheckedCategories, c => `/view/specific/classification/category/${c.slug}/${c.id}`)}
                             disabled={addingBulk || checkedCategories.length === 0}
                             className="w-full h-8 bg-secondary/10 text-primary border border-secondary/20 text-xs font-semibold rounded flex items-center justify-center gap-1.5 hover:bg-secondary/20 disabled:opacity-50 transition-colors"
                         >
@@ -524,7 +524,7 @@ function Menu({ menu, menu_options }) {
                         </div>
                         <button
                             type="button"
-                            onClick={() => handleAddBulkItems('Brand', brands, checkedBrands, setCheckedBrands, b => `/brand/${b.id}`)}
+                            onClick={() => handleAddBulkItems('Brand', brands, checkedBrands, setCheckedBrands, b => `/view/specific/classification/brand/${b.slug}/${b.id}`)}
                             disabled={addingBulk || checkedBrands.length === 0}
                             className="w-full h-8 bg-secondary/10 text-primary border border-secondary/20 text-xs font-semibold rounded flex items-center justify-center gap-1.5 hover:bg-secondary/20 disabled:opacity-50 transition-colors"
                         >

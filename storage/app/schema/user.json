@@ -163,6 +163,20 @@
                     "placeholder": "User Email"
                 },
                 {
+                    "name": "date_of_birth",
+                    "label": "Date of Birth",
+                    "type": "date",
+                    "style": 1,
+                    "placeholder": "YYYY-MM-DD"
+                },
+                {
+                    "name": "cnic",
+                    "label": "CNIC Number",
+                    "type": "text",
+                    "style": 1,
+                    "placeholder": "e.g. 35202-1234567-1"
+                },
+                {
                     "name": "phone",
                     "label": "Phone Number",
                     "type": "phone",
@@ -242,6 +256,7 @@
                     "style": 1,
                     "name": "image",
                     "type": "image",
+                    "auto_avatar": true,
                     "value": ""
                 }
             ]

@@ -22,7 +22,7 @@ import { useLang } from '@/contexts/LanguageContext';
 export default function Index({ profile, recent_orders = [], recent_activities = [], recent_reviews = [] }) {
     const { __ } = useLang();
     const { setting } = usePage().props;
-    const currency = setting?.currency_symbol || '$';
+    const currency = setting?.site?.currency?.value || setting?.currency_symbol || 'PKR';
 
     const user = profile?.user || {};
     const stats = profile?.stats || {};

@@ -26,103 +26,528 @@ class ImportExportController extends Controller
             return $tableName;
         }, DB::select('SHOW TABLES'));
 
+        $existingPackages = [];
+        $importDir = storage_path('app/import');
+        if (File::isDirectory($importDir)) {
+            $files = File::files($importDir);
+            foreach ($files as $f) {
+                if (strtolower($f->getExtension()) === 'zip') {
+                    $existingPackages[] = [
+                        'name' => $f->getFilename(),
+                        'size' => round($f->getSize() / 1024, 1) . ' KB',
+                        'date' => date('Y-m-d H:i', $f->getMTime()),
+                    ];
+                }
+            }
+        }
+
         return Inertia::render('Admin/ImportExport/Index', [
             'tables' => $tables,
+            'existingPackages' => $existingPackages,
         ]);
     }
 
     public function import(Request $request)
     {
         $request->validate([
-            'table' => 'required|string',
-            'format' => 'required|in:csv,xlsx,json,xml',
             'file' => 'required|file',
+            'table' => 'nullable|string',
+            'format' => 'nullable|string',
         ]);
 
-        $table = $request->table;
-        $format = $request->format;
         $file = $request->file('file');
+        $table = $request->input('table');
+        $format = $request->input('format');
         $type = $request->input('type');
-        $extension = $file->getClientOriginalExtension();
+        $extension = strtolower($file->getClientOriginalExtension());
 
         if ($extension === 'zip') {
-            return $this->importZip($file, $table, $type, $format);
+            try {
+                $result = $this->processZipPackage($file->getRealPath(), $file->getClientOriginalName());
+                $msg = "Imported {$result['tables_count']} tables ({$result['total_rows']} records) and {$result['images_count']} images successfully.";
+                return back()->with('success', $msg);
+            } catch (\Exception $e) {
+                return back()->withErrors(['file' => 'Error importing ZIP package: ' . $e->getMessage()]);
+            }
         }
 
-        if (!Schema::hasTable($table)) {
-            return back()->withErrors(['table' => 'Table does not exist.']);
+        if (empty($table) || !Schema::hasTable($table)) {
+            return back()->withErrors(['table' => 'Valid database table is required for single-file import.']);
         }
 
         try {
-            $this->importFileToTable($file->getRealPath(), $table, $format);
-            return back()->with('success', 'Data imported successfully.');
+            $rowsCount = $this->importFileToTable($file->getRealPath(), $table, $format ?: $extension);
+            return back()->with('success', "Imported {$rowsCount} records into {$table} successfully.");
         } catch (\Exception $e) {
             return back()->withErrors(['file' => 'Error importing data: ' . $e->getMessage()]);
         }
     }
 
-    protected function importZip($file, $tableName, $type, $format)
+    public function importPackage(Request $request)
+    {
+        $request->validate([
+            'filename' => 'required|string',
+        ]);
+
+        $filename = basename($request->filename);
+        $fullPath = storage_path('app/import/' . $filename);
+
+        if (!File::exists($fullPath)) {
+            return back()->withErrors(['file' => 'Export package not found: ' . $filename]);
+        }
+
+        try {
+            $result = $this->processZipPackage($fullPath, $filename);
+            $msg = "Package '{$filename}' imported successfully: {$result['tables_count']} tables ({$result['total_rows']} records), {$result['images_count']} images copied.";
+            return back()->with('success', $msg);
+        } catch (\Exception $e) {
+            return back()->withErrors(['file' => 'Error importing package: ' . $e->getMessage()]);
+        }
+    }
+
+    protected function processZipPackage($zipPath, $originalName = '')
     {
         $zip = new \ZipArchive();
-        if ($zip->open($file->getRealPath()) === true) {
-            $extractPath = storage_path('app/temp_import_' . time());
-            $zip->extractTo($extractPath);
-            $zip->close();
+        if ($zip->open($zipPath) !== true) {
+            throw new \Exception('Could not open ZIP package.');
+        }
 
+        $extractPath = storage_path('app/temp_import_' . uniqid());
+        $zip->extractTo($extractPath);
+        $zip->close();
+
+        $imagesCount = 0;
+        $totalRows = 0;
+        $tablesProcessed = 0;
+
+        // Default admin user ID (or fallback to 1)
+        $admin = DB::table('users')->where('email', 'info@nestify.com')->first();
+        $adminId = $admin ? (int) $admin->id : ((int) (DB::table('users')->first()?->id ?? 1));
+
+        // In-memory mapping of old file IDs -> new database auto-increment IDs
+        $taxIdMap = [];
+        $postIdMap = [];
+        $attrIdMap = [];
+        $attrValIdMap = [];
+        $variationIdMap = [];
+
+        try {
+            // 1. Process media/images folder
+            $imagesDir = $extractPath . '/images';
+            if (File::isDirectory($imagesDir)) {
+                $images = File::files($imagesDir);
+                $destDir = storage_path('app/public/uploads/image');
+                if (!File::isDirectory($destDir)) {
+                    File::makeDirectory($destDir, 0755, true, true);
+                }
+                foreach ($images as $img) {
+                    File::copy($img->getRealPath(), $destDir . '/' . $img->getFilename());
+                    $imagesCount++;
+                }
+            }
+
+            // 2. Process data files in sequence
             $files = File::files($extractPath);
-            
-            $files = File::files($extractPath);
-            
-            // Sort files alphabetically to respect the numbered sequence prefix
             usort($files, function($a, $b) {
                 return strcmp($a->getFilename(), $b->getFilename());
             });
 
-            try {
-                foreach ($files as $f) {
-                    if ($f->isDir()) continue;
-                    
-                    $fileName = $f->getFilenameWithoutExtension();
-                    
-                    // Extract actual table name by stripping out the '0X_' sequence prefix
-                    $targetTable = preg_replace('/^\d+_/', '', $fileName);
-                    
-                    // Map split media tables back to 'media' table
-                    if (in_array($targetTable, ['featured_image', 'gallery', 'variation_images'])) {
-                        $targetTable = 'media';
+            foreach ($files as $f) {
+                if ($f->isDir()) continue;
+
+                $fileName = $f->getFilenameWithoutExtension();
+                $ext = strtolower($f->getExtension());
+
+                if (!in_array($ext, ['csv', 'json', 'xlsx', 'xml'])) {
+                    continue;
+                }
+
+                // Strip sequence prefix e.g. 01_taxonomies -> taxonomies
+                $targetTable = preg_replace('/^\d+_/', '', $fileName);
+
+                // Map split media tables back to 'media' table
+                if (in_array($targetTable, ['featured_image', 'gallery', 'variation_images'])) {
+                    $targetTable = 'media';
+                }
+
+                if (!Schema::hasTable($targetTable)) {
+                    continue;
+                }
+
+                $rawRows = [];
+                if ($ext === 'csv') {
+                    $rawRows = $this->parseCsvFile($f->getRealPath());
+                } elseif ($ext === 'json') {
+                    $content = file_get_contents($f->getRealPath());
+                    $decoded = json_decode($content, true);
+                    $rawRows = is_array($decoded) ? $decoded : [];
+                } elseif ($ext === 'xlsx') {
+                    $importedData = Excel::toArray(new GenericImport($targetTable), $f->getRealPath());
+                    $rawRows = $importedData[0] ?? [];
+                }
+
+                $columns = Schema::getColumnListing($targetTable);
+                $tableRowsCount = 0;
+
+                foreach ($rawRows as $r) {
+                    $row = (array) $r;
+                    $oldId = $row['id'] ?? null;
+
+                    // A. TAXONOMIES (categories, brands, tags)
+                    if ($targetTable === 'taxonomies') {
+                        $clean = $this->cleanRowForTable('taxonomies', $row, $columns);
+                        unset($clean['id']); // Let MySQL assign fresh ID
+
+                        // Resolve parent_id if old ID was supplied
+                        if (!empty($clean['parent_id']) && $clean['parent_id'] != 0) {
+                            $parentOldId = $clean['parent_id'];
+                            $newParent = $taxIdMap[$parentOldId] ?? DB::table('taxonomy_meta')->where('key', 'related_id')->where('value', (string)$parentOldId)->value('taxonomy_id');
+                            $clean['parent_id'] = $newParent ?: 0;
+                        }
+
+                        $newTaxId = DB::table('taxonomies')->insertGetId($clean);
+                        if ($oldId !== null) {
+                            $taxIdMap[$oldId] = $newTaxId;
+                            DB::table('taxonomy_meta')->insert([
+                                'taxonomy_id' => $newTaxId,
+                                'key' => 'related_id',
+                                'value' => (string) $oldId,
+                            ]);
+                        }
+                        $tableRowsCount++;
                     }
 
-                    if (Schema::hasTable($targetTable)) {
-                        $this->importFileToTable($f->getRealPath(), $targetTable, $format);
+                    // B. TAXONOMY_META
+                    elseif ($targetTable === 'taxonomy_meta') {
+                        $clean = $this->cleanRowForTable('taxonomy_meta', $row, $columns);
+                        unset($clean['id']);
+
+                        if (!empty($clean['taxonomy_id'])) {
+                            $oldTax = $clean['taxonomy_id'];
+                            $newTax = $taxIdMap[$oldTax] ?? DB::table('taxonomy_meta')->where('key', 'related_id')->where('value', (string)$oldTax)->value('taxonomy_id');
+                            if ($newTax) {
+                                $clean['taxonomy_id'] = $newTax;
+                                DB::table('taxonomy_meta')->insert($clean);
+                                $tableRowsCount++;
+                            }
+                        }
+                    }
+
+                    // C. POSTS (products, blogs, pages)
+                    elseif ($targetTable === 'posts') {
+                        $clean = $this->cleanRowForTable('posts', $row, $columns);
+                        unset($clean['id']); // Let MySQL assign fresh ID
+                        $clean['user_id'] = $adminId; // Use admin id or 1
+
+                        // Ensure unique SKU if already exists
+                        if (isset($clean['sku']) && DB::table('posts')->where('sku', $clean['sku'])->exists()) {
+                            $clean['sku'] = $clean['sku'] . '-' . uniqid();
+                        }
+
+                        $newPostId = DB::table('posts')->insertGetId($clean);
+                        if ($oldId !== null) {
+                            $postIdMap[$oldId] = $newPostId;
+                            DB::table('post_meta')->insert([
+                                'post_id' => $newPostId,
+                                'key' => 'related_id',
+                                'value' => (string) $oldId,
+                            ]);
+                        }
+                        $tableRowsCount++;
+                    }
+
+                    // D. POST_META
+                    elseif ($targetTable === 'post_meta') {
+                        $clean = $this->cleanRowForTable('post_meta', $row, $columns);
+                        unset($clean['id']);
+
+                        if (!empty($clean['post_id'])) {
+                            $oldPost = $clean['post_id'];
+                            $newPost = $postIdMap[$oldPost] ?? DB::table('post_meta')->where('key', 'related_id')->where('value', (string)$oldPost)->value('post_id');
+                            if ($newPost) {
+                                $clean['post_id'] = $newPost;
+
+                                // If key is user_id, map to adminId
+                                if ($clean['key'] === 'user_id') {
+                                    $clean['value'] = (string) $adminId;
+                                }
+
+                                // If key is category, resolve old taxonomy IDs via taxonomy_meta related_id
+                                elseif ($clean['key'] === 'category') {
+                                    $catIds = json_decode($clean['value'], true);
+                                    if (is_array($catIds)) {
+                                        $newCatIds = [];
+                                        foreach ($catIds as $cId) {
+                                            $res = $taxIdMap[$cId] ?? DB::table('taxonomy_meta')->where('key', 'related_id')->where('value', (string)$cId)->value('taxonomy_id');
+                                            if ($res) $newCatIds[] = (string) $res;
+                                        }
+                                        $clean['value'] = json_encode($newCatIds);
+                                    }
+                                }
+
+                                // If key is brand, resolve old brand ID via taxonomy_meta related_id
+                                elseif ($clean['key'] === 'brand') {
+                                    $bId = $clean['value'];
+                                    if (!empty($bId)) {
+                                        $res = $taxIdMap[$bId] ?? DB::table('taxonomy_meta')->where('key', 'related_id')->where('value', (string)$bId)->value('taxonomy_id');
+                                        if ($res) $clean['value'] = (string) $res;
+                                    }
+                                }
+
+                                // If key is tags, resolve old tag IDs via taxonomy_meta related_id
+                                elseif ($clean['key'] === 'tags') {
+                                    $tagIds = json_decode($clean['value'], true);
+                                    if (is_array($tagIds)) {
+                                        $newTagIds = [];
+                                        foreach ($tagIds as $tId) {
+                                            $res = $taxIdMap[$tId] ?? DB::table('taxonomy_meta')->where('key', 'related_id')->where('value', (string)$tId)->value('taxonomy_id');
+                                            if ($res) $newTagIds[] = (string) $res;
+                                        }
+                                        $clean['value'] = json_encode($newTagIds);
+                                    }
+                                }
+
+                                DB::table('post_meta')->insert($clean);
+                                $tableRowsCount++;
+                            }
+                        }
+                    }
+
+                    // E. ATTRIBUTES
+                    elseif ($targetTable === 'attributes') {
+                        $clean = $this->cleanRowForTable('attributes', $row, $columns);
+                        $attrName = $clean['name'] ?? null;
+                        if ($attrName) {
+                            $existing = DB::table('attributes')->where('name', $attrName)->first();
+                            if ($existing) {
+                                $newAttrId = $existing->id;
+                            } else {
+                                unset($clean['id']);
+                                $newAttrId = DB::table('attributes')->insertGetId($clean);
+                            }
+                            if ($oldId !== null) {
+                                $attrIdMap[$oldId] = $newAttrId;
+                            }
+                            $tableRowsCount++;
+                        }
+                    }
+
+                    // F. ATTRIBUTE_VALUES
+                    elseif ($targetTable === 'attribute_values') {
+                        $clean = $this->cleanRowForTable('attribute_values', $row, $columns);
+                        unset($clean['id']);
+
+                        if (!empty($clean['attribute_id'])) {
+                            $clean['attribute_id'] = $attrIdMap[$clean['attribute_id']] ?? $clean['attribute_id'];
+                        }
+                        if (($clean['parent_type'] ?? '') === 'post' && !empty($clean['parent_id'])) {
+                            $clean['parent_id'] = $postIdMap[$clean['parent_id']] ?? DB::table('post_meta')->where('key', 'related_id')->where('value', (string)$clean['parent_id'])->value('post_id') ?? $clean['parent_id'];
+                        }
+
+                        $newValId = DB::table('attribute_values')->insertGetId($clean);
+                        if ($oldId !== null) {
+                            $attrValIdMap[$oldId] = $newValId;
+                        }
+                        $tableRowsCount++;
+                    }
+
+                    // G. POST_VARIATIONS
+                    elseif ($targetTable === 'post_variations') {
+                        $clean = $this->cleanRowForTable('post_variations', $row, $columns);
+                        unset($clean['id']);
+
+                        if (!empty($clean['post_id'])) {
+                            $clean['post_id'] = $postIdMap[$clean['post_id']] ?? DB::table('post_meta')->where('key', 'related_id')->where('value', (string)$clean['post_id'])->value('post_id') ?? $clean['post_id'];
+                        }
+                        if (!empty($clean['parent_id'])) {
+                            $clean['parent_id'] = $variationIdMap[$clean['parent_id']] ?? null;
+                        }
+
+                        $newVarId = DB::table('post_variations')->insertGetId($clean);
+                        if ($oldId !== null) {
+                            $variationIdMap[$oldId] = $newVarId;
+                        }
+                        $tableRowsCount++;
+                    }
+
+                    // H. PRODUCT_VARIATION_VALUES
+                    elseif ($targetTable === 'product_variation_values') {
+                        $clean = $this->cleanRowForTable('product_variation_values', $row, $columns);
+                        unset($clean['id']);
+
+                        if (!empty($clean['variation_id'])) {
+                            $clean['variation_id'] = $variationIdMap[$clean['variation_id']] ?? $clean['variation_id'];
+                        }
+                        if (!empty($clean['attribute_option_id'])) {
+                            $clean['attribute_option_id'] = $attrValIdMap[$clean['attribute_option_id']] ?? $clean['attribute_option_id'];
+                        }
+
+                        DB::table('product_variation_values')->insert($clean);
+                        $tableRowsCount++;
+                    }
+
+                    // I. MEDIA (featured_image, gallery, variation_images)
+                    elseif ($targetTable === 'media') {
+                        $clean = $this->cleanRowForTable('media', $row, $columns);
+                        unset($clean['id']);
+
+                        $mediaType = $clean['type'] ?? '';
+                        if ($mediaType === 'taxonomy') {
+                            $oldParent = $clean['parent_id'];
+                            $clean['parent_id'] = $taxIdMap[$oldParent] ?? DB::table('taxonomy_meta')->where('key', 'related_id')->where('value', (string)$oldParent)->value('taxonomy_id') ?? $oldParent;
+                        } elseif ($mediaType === 'post' || $mediaType === 'post_gallery') {
+                            $oldParent = $clean['parent_id'];
+                            $clean['parent_id'] = $postIdMap[$oldParent] ?? DB::table('post_meta')->where('key', 'related_id')->where('value', (string)$oldParent)->value('post_id') ?? $oldParent;
+                        } elseif ($mediaType === 'post_variation') {
+                            $oldParent = $clean['parent_id'];
+                            $clean['parent_id'] = $variationIdMap[$oldParent] ?? $postIdMap[$oldParent] ?? $oldParent;
+                        } elseif ($mediaType === 'user') {
+                            $clean['parent_id'] = $adminId;
+                        }
+
+                        // Prevent duplicate media entries
+                        $exists = DB::table('media')
+                            ->where('filename', $clean['filename'])
+                            ->where('parent_id', $clean['parent_id'])
+                            ->where('type', $clean['type'])
+                            ->exists();
+
+                        if (!$exists) {
+                            DB::table('media')->insert($clean);
+                            $tableRowsCount++;
+                        }
+                    }
+
+                    // J. USERS
+                    elseif ($targetTable === 'users') {
+                        $clean = $this->cleanRowForTable('users', $row, $columns);
+                        if (!empty($clean['email'])) {
+                            $existingUser = DB::table('users')->where('email', $clean['email'])->first();
+                            if ($existingUser) {
+                                unset($clean['id']);
+                                DB::table('users')->where('id', $existingUser->id)->update($clean);
+                            } else {
+                                unset($clean['id']);
+                                DB::table('users')->insert($clean);
+                            }
+                            $tableRowsCount++;
+                        }
+                    }
+
+                    // K. ANY OTHER TABLE
+                    else {
+                        $clean = $this->cleanRowForTable($targetTable, $row, $columns);
+                        if (!empty($clean)) {
+                            if (isset($clean['id']) && !empty($clean['id'])) {
+                                DB::table($targetTable)->updateOrInsert(['id' => $clean['id']], $clean);
+                            } else {
+                                DB::table($targetTable)->insert($clean);
+                            }
+                            $tableRowsCount++;
+                        }
                     }
                 }
-                File::deleteDirectory($extractPath);
-                return back()->with('success', 'Technical Data Sequence imported successfully.');
-            } catch (\Exception $e) {
-                File::deleteDirectory($extractPath);
-                return back()->withErrors(['file' => 'Error importing ZIP: ' . $e->getMessage()]);
+
+                $totalRows += $tableRowsCount;
+                $tablesProcessed++;
             }
+
+            File::deleteDirectory($extractPath);
+
+            return [
+                'tables_count' => $tablesProcessed,
+                'total_rows' => $totalRows,
+                'images_count' => $imagesCount,
+            ];
+        } catch (\Exception $e) {
+            if (File::isDirectory($extractPath)) {
+                File::deleteDirectory($extractPath);
+            }
+            throw $e;
         }
-        return back()->withErrors(['file' => 'Could not open ZIP file.']);
     }
 
-    protected function importFileToTable($path, $table, $format)
+    protected function importFileToTable($path, $table, $format = 'csv')
     {
-        if ($format === 'csv' || $format === 'xlsx') {
-            Excel::import(new GenericImport($table), $path);
+        if (!Schema::hasTable($table)) {
+            return 0;
+        }
+
+        $columns = Schema::getColumnListing($table);
+        $rows = [];
+
+        if ($format === 'csv') {
+            $rows = $this->parseCsvFile($path);
         } elseif ($format === 'json') {
-            $data = json_decode(file_get_contents($path), true);
-            if (is_array($data)) {
-                DB::table($table)->insert($data);
-            }
+            $content = file_get_contents($path);
+            $decoded = json_decode($content, true);
+            $rows = is_array($decoded) ? $decoded : [];
+        } elseif ($format === 'xlsx') {
+            $importedData = Excel::toArray(new GenericImport($table), $path);
+            $rows = $importedData[0] ?? [];
         } elseif ($format === 'xml') {
             $xml = simplexml_load_file($path);
             $json = json_encode($xml);
             $data = json_decode($json, true);
-            if (isset($data['item']) && is_array($data['item'])) {
-                DB::table($table)->insert($data['item']);
+            $rows = $data['item'] ?? [];
+            if (!empty($rows) && !isset($rows[0])) {
+                $rows = [$rows];
             }
         }
+
+        $processed = 0;
+        foreach ($rows as $r) {
+            $clean = $this->cleanRowForTable($table, (array) $r, $columns);
+            if (empty($clean)) continue;
+
+            if (isset($clean['id']) && !empty($clean['id'])) {
+                DB::table($table)->updateOrInsert(['id' => $clean['id']], $clean);
+            } else {
+                DB::table($table)->insert($clean);
+            }
+            $processed++;
+        }
+
+        return $processed;
+    }
+
+    protected function cleanRowForTable($table, array $row, array $columns)
+    {
+        $cleaned = [];
+        foreach ($row as $k => $v) {
+            $key = trim($k);
+            if (!in_array($key, $columns)) {
+                continue;
+            }
+            if (is_string($v)) {
+                $v = trim($v);
+                if ($v === '' || strtolower($v) === 'null') {
+                    $v = null;
+                }
+            }
+            $cleaned[$key] = $v;
+        }
+        return $cleaned;
+    }
+
+    protected function parseCsvFile($filePath)
+    {
+        $rows = [];
+        if (($handle = fopen($filePath, 'r')) !== false) {
+            $header = null;
+            while (($data = fgetcsv($handle, 0, ',')) !== false) {
+                if (!$header) {
+                    $data[0] = preg_replace('/^\xEF\xBB\xBF/', '', $data[0]); // Remove BOM
+                    $header = array_map('trim', $data);
+                } else {
+                    if (count($data) === count($header)) {
+                        $rows[] = array_combine($header, $data);
+                    }
+                }
+            }
+            fclose($handle);
+        }
+        return $rows;
     }
 
     public function export(Request $request)

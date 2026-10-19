@@ -14,6 +14,12 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password;
+use App\Mail\UserEmailChangedNewMail;
+use App\Mail\UserEmailChangedOldMail;
+use App\Mail\UserOtpMail;
+use App\Models\User;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -117,6 +123,8 @@ class ProfileController extends Controller
                     'state' => $metaRows['state'] ?? '',
                     'country' => $metaRows['country'] ?? '',
                     'postal_code' => $metaRows['postal_code'] ?? '',
+                    'date_of_birth' => $metaRows['date_of_birth'] ?? '',
+                    'cnic' => $metaRows['cnic'] ?? '',
                     'order_notifications' => ($metaRows['order_notifications'] ?? '1') === '1',
                     'newsletter' => ($metaRows['newsletter'] ?? '1') === '1',
                 ],
@@ -143,7 +151,8 @@ class ProfileController extends Controller
             ->where('user_id', $userId)
             ->orderByDesc('id');
 
-        if ($status && in_array($status, ['pending', 'completed', 'cancelled'])) {
+        $validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'completed', 'cancelled'];
+        if ($status && in_array($status, $validStatuses)) {
             $query->where('status', $status);
         }
 
@@ -201,6 +210,11 @@ class ProfileController extends Controller
                 'status' => $order->status,
                 'payment_method' => ucfirst($order->payment_method ?? 'card'),
                 'payment_status' => ucfirst($order->payment_status ?? 'unpaid'),
+                'tracking_number' => $order->tracking_number ?? null,
+                'shipping_carrier' => $order->shipping_carrier ?? null,
+                'shipping_address' => $order->shipping_address ?? null,
+                'shipping_city' => $order->shipping_city ?? null,
+                'customer_notes' => $order->customer_notes ?? null,
                 'order_date' => $orderDate,
                 'completed_date' => $order->completed_date ? date('M d, Y', strtotime($order->completed_date)) : null,
                 'cancelled_date' => $order->cancelled_date ? date('M d, Y', strtotime($order->cancelled_date)) : null,
@@ -449,10 +463,12 @@ class ProfileController extends Controller
             'phone' => ['nullable', 'string', 'max:30'],
             'bio' => ['nullable', 'string', 'max:1000'],
             'address' => ['nullable', 'string', 'max:255'],
-            'city' => ['nullable', 'string', 'max:100'],
-            'state' => ['nullable', 'string', 'max:100'],
+            'city' => ['nullable', 'max:100'],
+            'state' => ['nullable', 'max:100'],
             'country' => ['nullable', 'string', 'max:100'],
             'postal_code' => ['nullable', 'string', 'max:20'],
+            'date_of_birth' => ['nullable', 'date', 'before:today'],
+            'cnic' => ['nullable', 'string', 'max:20'],
             'order_notifications' => ['nullable', 'boolean'],
             'newsletter' => ['nullable', 'boolean'],
         ]);
@@ -462,12 +478,56 @@ class ProfileController extends Controller
             'updated_at' => now(),
         ];
 
-        if ($user->email !== $validated['email']) {
+        $oldEmail = $user->email;
+        $emailChanged = ($oldEmail !== $validated['email']);
+
+        if ($emailChanged) {
+            // Verify that OTP was validated for changing email
+            $otpVerifiedKey = "email_otp_verified_{$user->id}_change_email";
+            $isOtpVerified = Cache::get($otpVerifiedKey);
+
+            // Also check if an otp was passed directly in request
+            $submittedOtp = trim($request->input('email_otp', ''));
+            $pendingOtpData = Cache::get("email_otp_{$user->id}_change_email");
+
+            if (!$isOtpVerified && (!$pendingOtpData || empty($submittedOtp) || $pendingOtpData['otp'] !== $submittedOtp)) {
+                return Redirect::back()->withErrors([
+                    'email' => __('Please verify your new email address with the verification code sent to it before saving.'),
+                ]);
+            }
+
+            Cache::forget($otpVerifiedKey);
+            Cache::forget("email_otp_{$user->id}_change_email");
+
             $userData['email'] = $validated['email'];
-            $userData['email_verified_at'] = null;
+            $userData['email_verified_at'] = now();
         }
 
         DB::table('users')->where('id', $user->id)->update($userData);
+
+        if ($emailChanged) {
+            try {
+                $userModel = User::find($user->id) ?? (object) ['name' => $validated['name'], 'id' => $user->id];
+
+                // Send notification to old email address
+                Mail::to($oldEmail)->send(new UserEmailChangedOldMail($userModel, $oldEmail, $validated['email']));
+
+                // Send confirmation notification to new email address
+                Mail::to($validated['email'])->send(new UserEmailChangedNewMail($userModel, $oldEmail, $validated['email']));
+
+                record_user_activity('email_updated', [
+                    'title' => 'Email address changed',
+                    'category' => 'security',
+                    'detail' => "Changed email from {$oldEmail} to {$validated['email']}",
+                ], (int) $user->id);
+            } catch (\Throwable $e) {
+                Log::error('Failed sending email change notifications: ' . $e->getMessage(), [
+                    'user_id' => $user->id,
+                    'old_email' => $oldEmail,
+                    'new_email' => $validated['email'],
+                ]);
+            }
+        }
 
         // Update meta fields in user_meta table
         $metaFields = [
@@ -478,6 +538,8 @@ class ProfileController extends Controller
             'state' => $validated['state'] ?? '',
             'country' => $validated['country'] ?? '',
             'postal_code' => $validated['postal_code'] ?? '',
+            'date_of_birth' => $validated['date_of_birth'] ?? '',
+            'cnic' => $validated['cnic'] ?? '',
             'order_notifications' => !empty($validated['order_notifications']) ? '1' : '0',
             'newsletter' => !empty($validated['newsletter']) ? '1' : '0',
         ];
@@ -504,7 +566,7 @@ class ProfileController extends Controller
     public function updateAvatar(Request $request): RedirectResponse
     {
         $request->validate([
-            'avatar' => ['required', 'image', 'mimes:jpeg,png,jpg,webp,gif', 'max:5120'],
+            'avatar' => ['required', 'file', 'mimes:jpeg,png,jpg,webp,gif,svg', 'max:5120'],
         ]);
 
         $user = $this->getAuthUser();
@@ -575,7 +637,28 @@ class ProfileController extends Controller
                     $fail(__('The password provided is incorrect.'));
                 }
             }],
+            'otp' => ['nullable', 'string'],
         ]);
+
+        // Check OTP verification
+        $otpVerifiedKey = "email_otp_verified_{$user->id}_delete_account";
+        $isPreVerified = Cache::get($otpVerifiedKey);
+
+        if (!$isPreVerified) {
+            // Check direct OTP code submitted in request
+            $submittedOtp = trim($request->input('otp', ''));
+            $pendingOtpData = Cache::get("email_otp_{$user->id}_delete_account");
+
+            if (!$pendingOtpData || empty($submittedOtp) || $pendingOtpData['otp'] !== $submittedOtp) {
+                return Redirect::back()->withErrors([
+                    'otp' => __('A valid email verification code is required to delete your account. Please click "Send Verification Code" and enter the 6-digit code sent to your email.'),
+                ]);
+            }
+
+            Cache::forget("email_otp_{$user->id}_delete_account");
+        } else {
+            Cache::forget($otpVerifiedKey);
+        }
 
         Auth::logout();
 
@@ -775,14 +858,15 @@ class ProfileController extends Controller
         $sentViaApi = false;
         $apiError = null;
 
-        // 1. WhatsApp via WASenderAPI (configured in Admin Settings)
+        // 1. WhatsApp via Facebook Graph API or WASenderAPI (configured in Admin Settings)
         $waApiKey = null;
-        $waEndpoint = 'https://www.wasenderapi.com/api/send-message';
+        $waEndpoint = null;
         $settingFile = storage_path('app/data/setting.json');
         if (file_exists($settingFile)) {
             $settings = json_decode(file_get_contents($settingFile), true) ?: [];
             $waApiKey = $settings['whatsapp']['api_key']['value'] ?? null;
-            $waEndpoint = $settings['whatsapp']['api_endpoint']['value'] ?? $waEndpoint;
+            $waEndpoint = $settings['whatsapp']['api_endpoint']['value'] ?? null;
+            $phoneNumberId = $settings['whatsapp']['phone_number_id']['value'] ?? null;
             if (!empty($settings['whatsapp']['otp_template']['value'])) {
                 $template = $settings['whatsapp']['otp_template']['value'];
                 $message = str_replace(['{otp}', '{minutes}'], [$otp, '10'], $template);
@@ -790,25 +874,48 @@ class ProfileController extends Controller
         }
 
         if (empty($waApiKey)) {
-            $waApiKey = env('WASENDERAPI_API_KEY') ?: config('services.wasender.api_key');
+            $waApiKey = env('FACEBOOK_WHATSAPP_ACCESS_TOKEN') ?: env('WASENDERAPI_API_KEY');
+        }
+
+        if (empty($waEndpoint)) {
+            $phoneId = $phoneNumberId ?? env('FACEBOOK_WHATSAPP_PHONE_NUMBER_ID', '1368734399657650');
+            $waEndpoint = "https://graph.facebook.com/v20.0/{$phoneId}/messages";
         }
 
         if ($channel === 'whatsapp' && !empty($waApiKey)) {
             try {
+                $isFacebookGraph = str_contains($waEndpoint, 'graph.facebook.com');
+
+                if ($isFacebookGraph) {
+                    $payload = [
+                        'messaging_product' => 'whatsapp',
+                        'recipient_type'    => 'individual',
+                        'to'                => $cleanDigits,
+                        'type'              => 'text',
+                        'text'              => [
+                            'preview_url' => false,
+                            'body'        => $message,
+                        ],
+                    ];
+                } else {
+                    $payload = [
+                        'to'   => '+' . $cleanDigits,
+                        'text' => $message,
+                    ];
+                }
+
                 $response = \Illuminate\Support\Facades\Http::timeout(10)
                     ->withHeaders([
                         'Authorization' => 'Bearer ' . $waApiKey,
                         'Content-Type'  => 'application/json',
                     ])
-                    ->post($waEndpoint, [
-                        'to'   => '+' . $cleanDigits,
-                        'text' => $message,
-                    ]);
+                    ->post($waEndpoint, $payload);
 
                 if ($response->successful()) {
                     $sentViaApi = true;
                 } else {
-                    $apiError = $response->json('message') ?? 'WASenderAPI delivery failed.';
+                    $resJson = $response->json();
+                    $apiError = $resJson['error']['message'] ?? ($resJson['message'] ?? 'WhatsApp API delivery failed.');
                 }
             } catch (\Throwable $e) {
                 $apiError = $e->getMessage();
@@ -819,7 +926,7 @@ class ProfileController extends Controller
             'success'      => true,
             'message'      => $sentViaApi
                 ? 'Verification code sent to your WhatsApp!'
-                : 'Verification code generated! (WASenderAPI key not configured)',
+                : 'Verification code generated! (WhatsApp Gateway token pending or error: ' . ($apiError ?? 'not configured') . ')',
             'channel'      => 'whatsapp',
             'phone'        => $phone,
             'sent_via_api' => $sentViaApi,
@@ -885,6 +992,103 @@ class ProfileController extends Controller
             'success' => true,
             'message' => 'Phone number verified successfully!',
             'phone'   => $submittedPhone,
+        ]);
+    }
+
+    /**
+     * Send an OTP code to the user's email for actions like delete_account, change_email, or general verification.
+     */
+    public function sendEmailOtp(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        }
+
+        $validated = $request->validate([
+            'action' => ['required', 'string', 'in:delete_account,change_email,verification'],
+            'email'  => ['nullable', 'email', 'max:255'],
+        ]);
+
+        $action = $validated['action'];
+        // Send OTP to existing account email by default (for delete_account or confirming change from old address)
+        // Or to the provided email if verifying a new email address
+        $targetEmail = !empty($validated['email']) ? $validated['email'] : $user->email;
+
+        // Generate 6-digit secure code
+        $otp = (string) random_int(100000, 999999);
+
+        // Store OTP in cache for 10 minutes
+        $cacheKey = "email_otp_{$user->id}_{$action}";
+        Cache::put($cacheKey, [
+            'otp'          => $otp,
+            'target_email' => $targetEmail,
+            'action'       => $action,
+            'created_at'   => now()->toIso8601String(),
+        ], now()->addMinutes(10));
+
+        try {
+            Mail::to($targetEmail)->send(new UserOtpMail($user, $otp, $action, 10));
+
+            return response()->json([
+                'success' => true,
+                'message' => "Verification code sent to {$targetEmail}!",
+                'email'   => $targetEmail,
+                'action'  => $action,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error("Failed to send OTP to {$targetEmail}: " . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Unable to send verification code. Please check mail settings and try again.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Verify an email OTP code.
+     */
+    public function verifyEmailOtp(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        }
+
+        $validated = $request->validate([
+            'action' => ['required', 'string', 'in:delete_account,change_email,verification'],
+            'otp'    => ['required', 'string', 'max:10'],
+        ]);
+
+        $action = $validated['action'];
+        $submittedOtp = trim($validated['otp']);
+        $cacheKey = "email_otp_{$user->id}_{$action}";
+        $cachedData = Cache::get($cacheKey);
+
+        if (!$cachedData) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Verification code expired or not found. Please request a new code.',
+            ], 422);
+        }
+
+        if ($cachedData['otp'] !== $submittedOtp) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid verification code. Please check and try again.',
+            ], 422);
+        }
+
+        // Cache a verified flag for 5 minutes so subsequent action (like destroy account) can succeed
+        Cache::put("email_otp_verified_{$user->id}_{$action}", true, now()->addMinutes(5));
+        Cache::forget($cacheKey);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Code verified successfully!',
+            'action'  => $action,
         ]);
     }
 }

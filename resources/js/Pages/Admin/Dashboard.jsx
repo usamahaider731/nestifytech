@@ -566,10 +566,13 @@ function Dashboard({ data, ecommerce }) {
         <div className='lg:col-span-8 bg-accent p-6 rounded shadow-[0_4px_18px_0_rgba(15,20,34,0.36)] border border-permanent/30 flex flex-col justify-between'>
           <div className='flex items-center justify-between mb-4'>
             <div>
-              <h4 className='text-base font-bold text-heading'>Transactions</h4>
+              <h4 className='text-base font-bold text-heading'>Transactions & Orders</h4>
               <p className='text-xs text-secondary'>Latest customer payments and settlement orders</p>
             </div>
-            <span className='text-xs font-bold text-primary'>Realtime Stream</span>
+            <Link href={route('admin.orders.index')} className='text-xs font-bold text-primary hover:underline flex items-center gap-1'>
+              <span>View All Orders</span>
+              <RiArrowRightUpLine size={14} />
+            </Link>
           </div>
 
           <div className='flex flex-col divide-y divide-permanent/10'>

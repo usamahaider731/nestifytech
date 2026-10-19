@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class PostTaxonomy extends Model
 {
@@ -87,6 +88,27 @@ class PostTaxonomy extends Model
             foreach ($fetched as $id => $item) {
                 $item->image = $media[$id] ?? null;
                 $related[$id] = $item;
+            }
+
+            if ($table === 'taxonomies' && Schema::hasTable('taxonomy_meta')) {
+                $taxMetas = \Illuminate\Support\Facades\DB::table('taxonomy_meta')
+                    ->whereIn('taxonomy_id', $allIds)
+                    ->get()
+                    ->groupBy('taxonomy_id');
+
+                foreach ($related as $id => $item) {
+                    $itemMetas = $taxMetas->get($id, collect());
+                    $metaAssoc = [];
+                    foreach ($itemMetas as $tm) {
+                        $metaAssoc[$tm->key] = $tm->value;
+                    }
+                    $item->meta = $metaAssoc;
+                    foreach ($metaAssoc as $mKey => $mVal) {
+                        if (!isset($item->$mKey)) {
+                            $item->$mKey = $mVal;
+                        }
+                    }
+                }
             }
         }
 

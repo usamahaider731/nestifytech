@@ -62,7 +62,7 @@ const FieldControls = ({
 
 
     // === TEXT FIELD ===
-    if (field.type === 'text' || field.type === 'number') {
+    if (field.type === 'text' || field.type === 'number' || field.type === 'date' || field.type === 'email' || field.type === 'password') {
         if (!field.show_on || data[field.show_on] === "text" || data[field.show_on] === 'color') {
 
             let value = getNestedValue(data, field.name)
@@ -186,6 +186,8 @@ const FieldControls = ({
                     name={field.name}
                     multiple={!!field.multiple}
                     value={value}
+                    autoAvatar={field.auto_avatar ?? (field.name === 'image')}
+                    avatarSeed={data.name || data.email || ''}
                     onChange={(files) => updateField(field.name, files)}
                 />
             </div>

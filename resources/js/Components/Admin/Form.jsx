@@ -184,7 +184,9 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
             section.fields.forEach(field => {
                 if (field.type === 'dropdown' && field.options?.model ) {
                     const hasDependency = field.depends_on;
-                    const canFetch = !hasDependency || (hasDependency && data[hasDependency]);
+                    const depVal = hasDependency ? data[hasDependency] : null;
+                    const depHasValue = Array.isArray(depVal) ? depVal.length > 0 : Boolean(depVal);
+                    const canFetch = !hasDependency || depHasValue;
 
                     const shouldFetch =
                         override[field.name] || (canFetch && !dropdownOptions[field.name]);
@@ -199,7 +201,9 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
                     field.fields.forEach(f => {
                         if (f.type === 'dropdown' && f.options?.model) {
                             const hasDependency = f.depends_on;
-                            const canFetch = !hasDependency || (hasDependency && data[hasDependency]);
+                            const depVal = hasDependency ? data[hasDependency] : null;
+                            const depHasValue = Array.isArray(depVal) ? depVal.length > 0 : Boolean(depVal);
+                            const canFetch = !hasDependency || depHasValue;
 
                             const shouldFetch =
                                 override[f.name] || (canFetch && !dropdownOptions[f.name]);
@@ -217,15 +221,12 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
         for (const [fieldName, config] of Object.entries(fetchFields)) {
             try {
                 const field = rows.flatMap(section => section.fields).find(f => f.name === fieldName);
-                const params = {
+                const baseParams = {
                     use_value: config.use_value || false,
                     as_options: true,
                     parent_id: config.parent_id || null,
                     not_id: config.not_id ? data.id : null,
                 };
-                if (field?.depends_on && data[field.depends_on]) {
-                    params.parent = data[field.depends_on];
-                }
 
                 let endpoint;
                 if (config.model === 'Menu') {
@@ -235,11 +236,41 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
                 } else {
                     endpoint = `/api/${config.model.toLowerCase()}-options/${config.type ?? ''}`;
                 }
-                const response = await axios.get(endpoint, { params });
 
-                const mapped = response.data;
+                // Handle multiple parent values (e.g. city depends on multiple selected states)
+                const dependsOnValue = field?.depends_on ? data[field.depends_on] : null;
+                const parentIds = Array.isArray(dependsOnValue)
+                    ? dependsOnValue.map(v => (typeof v === 'object' ? v.id ?? v : v)).filter(Boolean)
+                    : dependsOnValue
+                    ? [typeof dependsOnValue === 'object' ? dependsOnValue.id ?? dependsOnValue : dependsOnValue]
+                    : [];
 
-                setDropdownOptions(prev => ({ ...prev, [fieldName]: mapped }));
+                let merged = [];
+                if (parentIds.length > 0) {
+                    // Parallel fetch for each parent ID then merge & deduplicate
+                    const responses = await Promise.all(
+                        parentIds.map(pid =>
+                            axios.get(endpoint, { params: { ...baseParams, parent: pid } })
+                        )
+                    );
+                    const seen = new Set();
+                    for (const res of responses) {
+                        for (const item of (res.data || [])) {
+                            const key = item.id ?? item.title;
+                            if (!seen.has(key)) {
+                                seen.add(key);
+                                merged.push(item);
+                            }
+                        }
+                    }
+                    // Sort merged list alphabetically by title
+                    merged.sort((a, b) => (a.title ?? '').localeCompare(b.title ?? ''));
+                } else {
+                    const response = await axios.get(endpoint, { params: baseParams });
+                    merged = response.data || [];
+                }
+
+                setDropdownOptions(prev => ({ ...prev, [fieldName]: merged }));
             } catch (err) {
                 console.error(`Dropdown fetch failed for ${fieldName}`, err);
                 setDropdownOptions(prev => ({ ...prev, [fieldName]: [] }));
@@ -334,6 +365,12 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
         'Address': (
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                 <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+            </svg>
+        ),
+        'Services': (
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8.932.727c-.246-.48-.962-.48-1.208 0l-5.61 10.938A.68.68 0 0 0 2.73 12.6l4.77-1.363 4.77 1.363a.68.68 0 0 0 .616-.935L8.932.727zM8 10.334l-3.92.934 4.085-7.96 4.085 7.96L8 10.334z"/>
+                <path d="M8 12.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/>
             </svg>
         ),
         'Layout': (

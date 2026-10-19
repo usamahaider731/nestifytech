@@ -11,28 +11,32 @@
         "permission": "dashboard-read"
       },
       {
-        "id": "users",
-        "title": "Users",
-        "icon": "ri-user-line",
-        "route": "users",
-        "permission": "user-read"
-      },
-      {
-        "id": "role",
-        "title": "Roles & Permissions",
-        "icon": "ri-shield-user-line",
-        "permission": "role-read",
+        "id": "our-team",
+        "title": "Our Team",
+        "icon": "ri-team-line",
         "menu": [
           {
+            "id": "team-employees",
+            "title": "Employees & Staff",
+            "route": "users",
+            "params": {
+              "tab": "team"
+            },
+            "icon": "ri-user-star-line",
+            "permission": "user-read"
+          },
+          {
             "id": "view-roles",
-            "title": "View Roles",
+            "title": "Roles & Permissions",
             "route": "role",
+            "icon": "ri-shield-user-line",
             "permission": "role-read"
           },
           {
             "id": "create-role",
             "title": "Create Role",
             "route": "role.create",
+            "icon": "ri-add-circle-line",
             "permission": "role-write"
           }
         ]
@@ -198,6 +202,30 @@
             "permission": "review-read"
           }
         ]
+      },
+      {
+        "id": "order-management",
+        "title": "Orders",
+        "icon": "ri-truck-line",
+        "permission": "order-read",
+        "route": "admin.orders.index"
+      },
+      {
+        "id": "customers",
+        "title": "Customers",
+        "icon": "ri-user-heart-line",
+        "permission": "user-read",
+        "route": "users",
+        "params": {
+          "tab": "customers"
+        }
+      },
+      {
+        "id": "delivery-portal",
+        "title": "Delivery Boy Panel",
+        "icon": "ri-e-bike-2-line",
+        "permission": "delivery-read",
+        "route": "delivery.orders.index"
       },
       {
         "id": "blog",

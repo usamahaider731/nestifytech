@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import ImageViwer from '../Admin/ImageViwer';
 import { usePage } from '@inertiajs/react';
 import QuantitySelector from './QuantitySelector';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '../../store/cartSlice';
 import { useLang } from '@/contexts/LanguageContext';
+import { calculateAdjustedPrice, parseNumericPrice } from '@/Utils/helper';
+import { RiPercentLine, RiShieldCheckLine } from 'react-icons/ri';
 
 const Variations = ({ product }) => {
-    const { setting } = usePage().props;
+    const { setting, auth } = usePage().props;
     const { __ } = useLang();
     const variations = product?.variations || [];
     
@@ -16,15 +18,8 @@ const Variations = ({ product }) => {
     const [qty, setQty] = useState(1);
     const dispatch = useDispatch();
 
-    const parsePrice = (priceVal) => {
-        if (typeof priceVal === 'number') return priceVal;
-        if (!priceVal) return 0;
-        const cleanedValue = String(priceVal).replace(/,/g, '');
-        const parsed = Number(cleanedValue);
-        return isNaN(parsed) ? 0 : parsed;
-    };
-    const first_price = parsePrice(product.meta?.first_price?.value);
-    const second_price = parsePrice(product.meta?.second_price?.value);
+    const first_price = parseNumericPrice(product.meta?.first_price?.value);
+    const second_price = parseNumericPrice(product.meta?.second_price?.value);
 
     // Reset combination and qty when color changes
     useEffect(() => {
@@ -35,6 +30,35 @@ const Variations = ({ product }) => {
         }
         setQty(1);
     }, [selectedColor]);
+
+    // Compute active base and regular price for current selection
+    const activeBasePrice = useMemo(() => {
+        if (variations.length > 0 && selectedCombo) {
+            return parseNumericPrice(selectedCombo.price);
+        }
+        return (first_price > second_price && second_price > 0 ? second_price : first_price) || parseNumericPrice(product?.price);
+    }, [variations, selectedCombo, first_price, second_price, product]);
+
+    const activeRegularPrice = useMemo(() => {
+        if (variations.length > 0 && selectedCombo) {
+            return parseNumericPrice(selectedCombo.price);
+        }
+        return first_price || activeBasePrice;
+    }, [variations, selectedCombo, first_price, activeBasePrice]);
+
+    // User discount: if user has a custom discount or vip discount attached
+    const userDiscountPercent = parseNumericPrice(auth?.user?.discount || 0);
+
+    // Calculate fully adjusted price with category discount, user discount, and tax
+    const priceCalculation = useMemo(() => {
+        return calculateAdjustedPrice({
+            basePrice: activeBasePrice,
+            regularPrice: activeRegularPrice,
+            category: product?.category,
+            userDiscount: userDiscountPercent,
+            userDiscountType: 'percentage',
+        });
+    }, [activeBasePrice, activeRegularPrice, product?.category, userDiscountPercent]);
 
     const handleAddToCart = () => {
         if (variations.length > 0 && (!selectedColor || !selectedCombo)) return;
@@ -47,7 +71,7 @@ const Variations = ({ product }) => {
         let cId = null;
         let cColor = null;
         let pAttr = [];
-        let pPrice = product.price;
+        let pPrice = priceCalculation.finalPrice;
         let combo_id = null;
 
         if (variations.length > 0) {
@@ -57,13 +81,11 @@ const Variations = ({ product }) => {
              cId = selectedColor.id;
              cColor = selectedColor.color;
              pAttr = selectedCombo.attributes ?? [];
-             pPrice = selectedCombo.price;
              combo_id = selectedCombo.id;
         } else {
              const pStock = product.meta?.stock?.value ?? 100;
              if (addQty < 1 || pStock < 1) return;
              maxStock = pStock;
-             pPrice = (first_price > second_price ? second_price : first_price) || product.price;
              combo_id = product.id; 
         }
 
@@ -83,32 +105,54 @@ const Variations = ({ product }) => {
         );
     };
 
-    let priceDisplay = null;
-    if (variations.length > 0 && selectedCombo) {
-        priceDisplay = (
-            <div className='text-lg font-semibold font-primary text-text'>
-              <span className='text-primary'>{__('Price:')}</span>  {setting?.site?.currency?.value} {selectedCombo.price}
-            </div>
-        );
-    } else {
-        priceDisplay = (
-            <div className='text-lg font-semibold font-primary text-text flex items-center gap-3'>
+    const currencySymbol = setting?.site?.currency?.value ?? 'PKR';
+
+    const priceDisplay = (
+        <div className='flex flex-col gap-1.5'>
+            <div className='text-lg font-semibold font-primary text-text flex items-center flex-wrap gap-3'>
                 <span className='text-primary'>{__('Price:')}</span>
-                {first_price > second_price ? (
-                    <>
-                        <span>{setting?.site?.currency?.value} {second_price?.toLocaleString()}</span>
-                        <span className="text-sm text-slate-400 line-through font-normal">{setting?.site?.currency?.value} {first_price?.toLocaleString()}</span>
-                    </>
-                ) : (
-                    <span>{setting?.site?.currency?.value} {(first_price || product.price)?.toLocaleString()}</span>
+                <span className='text-2xl font-bold text-heading font-oswald'>
+                    {currencySymbol} {priceCalculation.finalPrice.toLocaleString()}
+                </span>
+                {(priceCalculation.totalSavings > 0 || (priceCalculation.hasSalePrice && activeRegularPrice > priceCalculation.finalPrice)) && (
+                    <span className="text-sm text-slate-400 line-through font-normal">
+                        {currencySymbol} {activeRegularPrice?.toLocaleString()}
+                    </span>
+                )}
+                {priceCalculation.totalDiscountPercentage > 0 && (
+                    <span className='bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-xs px-2 py-0.5 rounded-full font-semibold flex items-center gap-1'>
+                        <RiPercentLine className='size-3' />
+                        {priceCalculation.totalDiscountPercentage}% {__('OFF')}
+                    </span>
                 )}
             </div>
-        );
-    }
+
+            {/* Micro badges showing category tax / discount breakdown */}
+            {(priceCalculation.categoryTaxPercent > 0 || priceCalculation.categoryDiscountPercent > 0 || priceCalculation.userDiscountPercent > 0) && (
+                <div className='flex items-center gap-2 flex-wrap text-[11px] text-res font-medium mt-0.5'>
+                    {priceCalculation.categoryDiscountPercent > 0 && (
+                        <span className='bg-primary/10 text-primary px-2 py-0.5 rounded'>
+                            {__('Category Discount:')} -{priceCalculation.categoryDiscountPercent}%
+                        </span>
+                    )}
+                    {priceCalculation.userDiscountPercent > 0 && (
+                        <span className='bg-violet-500/10 text-violet-600 px-2 py-0.5 rounded'>
+                            {__('User Discount:')} -{priceCalculation.userDiscountPercent}%
+                        </span>
+                    )}
+                    {priceCalculation.categoryTaxPercent > 0 && (
+                        <span className='bg-slate-100 text-slate-600 px-2 py-0.5 rounded'>
+                            {__('Incl. Tax:')} +{priceCalculation.categoryTaxPercent}% ({currencySymbol} {priceCalculation.taxAmount.toLocaleString()})
+                        </span>
+                    )}
+                </div>
+            )}
+        </div>
+    );
 
     const availableStock = variations.length > 0 
         ? (selectedCombo ? selectedCombo.stock : 0) 
-        : (product.meta.stock.value ?? 0);
+        : (product.meta?.stock?.value ?? 0);
 
     return (
         <div className='flex flex-col gap-6 mt-6'>

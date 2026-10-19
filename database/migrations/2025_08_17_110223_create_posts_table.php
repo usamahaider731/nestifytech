@@ -40,7 +40,7 @@ return new class extends Migration
                 $table->id();
                 $table->unsignedBigInteger('post_id');
                 $table->string('key');
-                $table->string('value')->nullable();
+                $table->longText('value')->nullable();
             });
 
             Schema::table('post_meta', function (Blueprint $table) {

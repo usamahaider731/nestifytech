@@ -770,4 +770,81 @@ class FrontendController extends Controller
             ]);
         }
     }
+
+    /**
+     * Get real-time notifications for orders and newly published products.
+     */
+    public function getNotifications(Request $request)
+    {
+        $userId = Auth::id() ?? optional(Auth::guard('web')->user())->id;
+        $notifications = [];
+
+        // 1. New products published in the last 7 days
+        $newProducts = DB::table('posts')
+            ->where('type', 'product')
+            ->where('status', 'publish')
+            ->orderBy('id', 'desc')
+            ->limit(5)
+            ->get(['id', 'title', 'sku', 'created_at']);
+
+        foreach ($newProducts as $product) {
+            $imageMeta = DB::table('media')
+                ->where('parent_id', $product->id)
+                ->where('type', 'product')
+                ->first();
+
+            $imagePath = $imageMeta ? '/storage/uploads/image/' . $imageMeta->name : '/assets/image/placeholder.png';
+
+            $notifications[] = [
+                'id'         => 'prod_' . $product->id,
+                'type'       => 'new_product',
+                'title'      => 'New Arrival: ' . $product->title,
+                'body'       => 'Check out our latest product ' . $product->title . ' now available in store!',
+                'url'        => route('post', ['type' => 'product', 'sku' => $product->sku ?? $product->id, 'id' => $product->id]),
+                'image'      => $imagePath,
+                'timestamp'  => $product->created_at,
+                'category'   => 'product',
+            ];
+        }
+
+        // 2. Order notifications (if logged in, for this user; otherwise recent store order updates if authorized or requested)
+        if ($userId) {
+            $userOrders = DB::table('orders')
+                ->where('user_id', $userId)
+                ->orderBy('id', 'desc')
+                ->limit(5)
+                ->get();
+
+            foreach ($userOrders as $order) {
+                $statusLabels = [
+                    'pending'    => 'Order Placed & Processing',
+                    'processing' => 'Order is Being Packed',
+                    'completed'  => 'Order Delivered Successfully',
+                    'cancelled'  => 'Order Cancelled',
+                ];
+
+                $notifications[] = [
+                    'id'         => 'order_' . $order->id . '_' . $order->status,
+                    'type'       => 'order_update',
+                    'title'      => 'Order #' . $order->id . ' - ' . ($statusLabels[$order->status] ?? ucfirst($order->status)),
+                    'body'       => 'Total: PKR ' . number_format((float) $order->total_price, 2) . ' • Status: ' . ucfirst($order->status),
+                    'url'        => route('profile.orders'),
+                    'image'      => '/assets/image/favicon.png',
+                    'timestamp'  => $order->order_date ?? $order->created_at ?? now()->toDateTimeString(),
+                    'category'   => 'order',
+                ];
+            }
+        }
+
+        // Sort descending by timestamp
+        usort($notifications, function ($a, $b) {
+            return strtotime($b['timestamp'] ?? 'now') - strtotime($a['timestamp'] ?? 'now');
+        });
+
+        return response()->json([
+            'success'       => true,
+            'notifications' => array_slice($notifications, 0, 10),
+            'unread_count'  => count($notifications),
+        ]);
+    }
 }

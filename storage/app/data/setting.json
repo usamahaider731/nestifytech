@@ -49,6 +49,12 @@
             "depend_on": "country",
             "meta_value": "currency"
         },
+        "order_cancellation_fee": {
+            "label": "Order Cancellation Fee (%)",
+            "type": "number",
+            "value": "5",
+            "description": "Percentage deducted from paid orders upon user cancellation before refunding remaining amount back."
+        },
         "featured_tag": {
             "label": "Featured Tag",
             "type": "dropdown",
@@ -85,6 +91,18 @@
             "label": "Deviliry Package Per Order",
             "type": "text",
             "value": "250"
+        },
+        "delivery_role": {
+            "label": "Delivery Boy / Rider Staff Role",
+            "type": "dropdown",
+            "value": "2",
+            "searchable": false,
+            "description": "Select which staff role is treated as Delivery Boy/Rider for order dispatch.",
+            "options": {
+                "model": "App\\Models\\Roles",
+                "type": "role",
+                "use_value": false
+            }
         },
         "default_tax_fee": {
             "label": "Default Tax Fees Per Product",
@@ -908,7 +926,7 @@
             "type": "checkbox",
             "style": 1,
             "value_label": "Enable PayPal",
-            "value": true
+            "value": false
         },
         "paypal_mode": {
             "label": "PayPal Mode",
@@ -1022,7 +1040,7 @@
             "type": "checkbox",
             "style": 1,
             "value_label": "Enable Payoneer",
-            "value": true
+            "value": false
         },
         "payoneer_mode": {
             "label": "Payoneer Environment Mode",
@@ -1138,8 +1156,8 @@
     "whatsapp": {
         "whatsapp_section": {
             "type": "section",
-            "label": "WhatsApp Gateway (WASenderAPI)",
-            "description": "Send automated customer notifications, order confirmations, and phone verification codes via WhatsApp.",
+            "label": "WhatsApp Gateway (Facebook Graph API)",
+            "description": "Send automated customer notifications, order delivery OTPs, and phone verification codes via WhatsApp Business Cloud API.",
             "icon": "ri-whatsapp-line",
             "toggle_field": "whatsapp_enabled"
         },
@@ -1161,6 +1179,10 @@
                 "value": true
             },
             "options": {
+                "facebook": {
+                    "label": "Facebook Graph API (WhatsApp Cloud API)",
+                    "value": "facebook"
+                },
                 "wasenderapi": {
                     "label": "WASenderAPI (wasenderapi.com)",
                     "value": "wasenderapi"
@@ -1172,23 +1194,34 @@
             "label": "API Endpoint URL",
             "type": "text",
             "style": 2,
-            "placeholder": "https:\/\/www.wasenderapi.com\/api\/send-message",
+            "placeholder": "https:\/\/graph.facebook.com\/v20.0\/{phone_number_id}\/messages",
             "condition": {
                 "field": "whatsapp_enabled",
                 "value": true
             },
-            "value": "https:\/\/www.wasenderapi.com\/api\/send-message"
+            "value": "https:\/\/wasenderapi.com\/api\/send-message"
         },
         "api_key": {
-            "label": "WASenderAPI Key \/ Access Token",
+            "label": "Meta \/ Facebook Access Token",
             "type": "password",
             "style": 2,
-            "placeholder": "Enter your WASenderAPI Personal Access Token",
+            "placeholder": "Enter your Meta System User or User Access Token (EAA...)",
             "condition": {
                 "field": "whatsapp_enabled",
                 "value": true
             },
-            "value": "282c3e25bea828a846fe2cd971818fe90ad181dc893a1413d8faee04f8f9e6a5"
+            "value": "5c09a258390484b595f37ff1312c26a7bcc2557cb71c66e07745fb7c03c5bbea"
+        },
+        "phone_number_id": {
+            "label": "WhatsApp Phone Number ID",
+            "type": "text",
+            "style": 2,
+            "placeholder": "1396790376847486",
+            "condition": {
+                "field": "whatsapp_enabled",
+                "value": true
+            },
+            "value": "1396790376847486"
         },
         "sender_phone": {
             "label": "WhatsApp Connected Number (Display \/ Support)",

@@ -4,7 +4,7 @@ import FrontendLayout from '@/Layouts/FrontendLayout';
 import { usePage } from '@inertiajs/react';
 import ProductTopSection from '@/Components/Single/ProductTopSection';
 import SingleProductTabs from '@/Components/Single/Index';
-import { RiInformationLine, RiInstagramLine, RiMapPin2Fill, RiShare2Line, RiShareLine, RiTwitterXLine, RiWhatsappLine } from 'react-icons/ri';
+import { RiInformationLine, RiInstagramLine, RiMapPin2Fill, RiShare2Line, RiShareLine, RiTwitterXLine, RiWhatsappLine, RiShieldCheckLine, RiExchangeFundsLine, RiBankCardLine } from 'react-icons/ri';
 import { useLang } from '@/contexts/LanguageContext';
 import ProductGrid from '@/Components/Frontend/ProductGrid';
 import { FaFacebookF, FaRegCopy } from 'react-icons/fa';
@@ -42,8 +42,9 @@ const SingleProduct = ({ product, latest_product, related_products = [], popular
     const pageRef = useRef(null);
     const locationName = [
         product?.meta?.address?.value,
-        product?.city?.title,
-        product?.state?.title,
+        ...(Array.isArray(product?.city) ? product.city.map(c => c?.title) : [product?.city?.title]),
+        ...(Array.isArray(product?.state) ? product.state.map(s => s?.title) : [product?.state?.title]),
+        ...(Array.isArray(product?.country) ? product.country.map(c => c?.title) : [product?.country?.title || product?.meta?.country?.value]),
     ].filter(Boolean).join(', ');
     const mapUrl = `https://www.google.com/maps?q=${encodeURIComponent(locationName)}&t=k&z=17&output=embed`;
 
@@ -84,63 +85,171 @@ const SingleProduct = ({ product, latest_product, related_products = [], popular
                             </div>
                         }
                     </div>
-                    <div className='flex-1 sticky top-20 h-fit right-0'>
-                        {setting.address &&
-                            <div className='w-full bg-white p-4 mb-4'>
-                                <h1 className='text-base font-semibold mb-4'>{__('Available in your area')}</h1>
-                                <div className='flex items-start  gap-2'>
-                                    <RiMapPin2Fill size={26} className='mt-0 text-secondary' />
-                                    <div>
-                                        <h1 className='text-base font-medium text-primary'>{__('Location')}</h1>
-                                        <p className='text-sm'>{product.meta.address?.value}, {product.city?.title}, {product.state?.title}</p>
+                    <div className='flex-1 sticky top-20 h-fit right-0 flex flex-col gap-4'>
+                        {/* Location & Country Availability */}
+                        {setting.address && (
+                            <div className='w-full bg-white p-4 shadow-xs rounded border border-border/50'>
+                                <h1 className='text-base font-semibold mb-3 text-heading'>{__('Available in your area')}</h1>
+                                <div className='flex items-start gap-2.5'>
+                                    <RiMapPin2Fill size={24} className='mt-0.5 text-secondary shrink-0' />
+                                    <div className='flex flex-col gap-2 flex-1'>
+                                        <h2 className='text-sm font-semibold text-primary'>{__('Location & Coverage')}</h2>
+
+                                        {/* Countries */}
+                                        {(() => {
+                                            const countries = Array.isArray(product.country)
+                                                ? product.country
+                                                : product.country ? [product.country] : [];
+                                            return countries.length > 0 && (
+                                                <div className='flex flex-col gap-1'>
+                                                    <span className='text-[11px] font-semibold text-res uppercase tracking-wide'>{__('Country')}</span>
+                                                    <div className='flex flex-wrap gap-1.5'>
+                                                        {countries.map((c, i) => (
+                                                            <span key={i} className='text-[11px] bg-primary/10 text-primary px-2 py-0.5 rounded font-medium'>
+                                                                {c?.title ?? c}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })()}
+
+                                        {/* States */}
+                                        {(() => {
+                                            const states = Array.isArray(product.state)
+                                                ? product.state
+                                                : product.state ? [product.state] : [];
+                                            return states.length > 0 && (
+                                                <div className='flex flex-col gap-1'>
+                                                    <span className='text-[11px] font-semibold text-res uppercase tracking-wide'>{__('State / Province')}</span>
+                                                    <div className='flex flex-wrap gap-1.5'>
+                                                        {states.map((s, i) => (
+                                                            <span key={i} className='text-[11px] bg-secondary/10 text-secondary px-2 py-0.5 rounded font-medium'>
+                                                                {s?.title ?? s}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })()}
+
+                                        {/* Cities */}
+                                        {(() => {
+                                            const cities = Array.isArray(product.city)
+                                                ? product.city
+                                                : product.city ? [product.city] : [];
+                                            return cities.length > 0 ? (
+                                                <div className='flex flex-col gap-1'>
+                                                    <span className='text-[11px] font-semibold text-res uppercase tracking-wide'>{__('Cities')}</span>
+                                                    <div className='flex flex-wrap gap-1.5'>
+                                                        {cities.map((c, i) => (
+                                                            <span key={i} className='text-[11px] bg-bg border border-border text-heading px-2 py-0.5 rounded font-medium'>
+                                                                {c?.title ?? c}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <p className='text-xs text-text leading-relaxed'>{__('Nationwide Delivery Available')}</p>
+                                            );
+                                        })()}
+
+                                        {/* Street address if any */}
+                                        {product.meta?.address?.value && (
+                                            <p className='text-[11px] text-res mt-1 leading-relaxed'>
+                                                📍 {product.meta.address.value}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
                             </div>
-                        }
-                        {setting.information && 
-                        <div className='w-full'>
-                            <div className='w-full bg-white p-4'>
-                                <h5 className='text-base font-semibold mb-4 flex items-center '><RiInformationLine className='inline mr-2 text-lg text-primary' /> {__('Information')}</h5>
-                                <p className='text-sm font-medium italic text-accent'>
+                        )}
+
+                        {/* Services, Warranty, Exchange & Installment */}
+                        {(product.meta?.warranty?.value || product.meta?.exchange?.value || product.meta?.installment?.value) && (
+                            <div className='w-full bg-white p-4 shadow-xs rounded border border-border/50'>
+                                <h5 className='text-base font-semibold mb-3 text-heading flex items-center gap-2'>
+                                    <RiShieldCheckLine className='text-primary text-lg shrink-0' />
+                                    {__('Services & Policy')}
+                                </h5>
+                                <div className='flex flex-col gap-3 text-xs'>
+                                    {product.meta?.warranty?.value && (
+                                        <div className='flex items-start gap-2.5 p-2.5 rounded bg-bg/80 border border-border/40'>
+                                            <RiShieldCheckLine className='text-emerald-600 text-base shrink-0 mt-0.5' />
+                                            <div>
+                                                <span className='font-semibold text-heading block'>{__('Warranty')}</span>
+                                                <span className='text-res leading-relaxed'>{product.meta.warranty.value}</span>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {product.meta?.exchange?.value && (
+                                        <div className='flex items-start gap-2.5 p-2.5 rounded bg-bg/80 border border-border/40'>
+                                            <RiExchangeFundsLine className='text-blue-600 text-base shrink-0 mt-0.5' />
+                                            <div>
+                                                <span className='font-semibold text-heading block'>{__('Exchange / Return')}</span>
+                                                <span className='text-res leading-relaxed'>{product.meta.exchange.value}</span>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {product.meta?.installment?.value && (
+                                        <div className='flex items-start gap-2.5 p-2.5 rounded bg-bg/80 border border-border/40'>
+                                            <RiBankCardLine className='text-amber-600 text-base shrink-0 mt-0.5' />
+                                            <div>
+                                                <span className='font-semibold text-heading block'>{__('Installment Plan')}</span>
+                                                <span className='text-res leading-relaxed'>{product.meta.installment.value}</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Order & Price Information */}
+                        {setting.information && (
+                            <div className='w-full bg-white p-4 shadow-xs rounded border border-border/50'>
+                                <h5 className='text-base font-semibold mb-3 flex items-center gap-2 text-heading'>
+                                    <RiInformationLine className='text-primary text-lg shrink-0' />
+                                    {__('Pricing & Discounts')}
+                                </h5>
+                                <p className='text-xs font-medium text-res leading-relaxed'>
                                     {__('The final price includes applicable category-based taxes and active discounts. Please review your cart total before proceeding to checkout to ensure all promotional rates are correctly applied.')}
                                 </p>
                             </div>
-                        </div>
-}
-                        {setting.share &&
-                            <div className='mt-4 w-full'>
-                                <div className='bg-white p-4 w-full'>
-                                    <h5 className='text-base font-semibold mb-4 flex items-center'>
-                                        <RiShareLine className='inline mr-2 text-lg text-primary' /> {" "} {
-                                            __('Share')
-                                        }
-                                    </h5>
-                                    <div className='flex gap-4'>
-                                        <button onClick={() => shareProduct(window.location.href, 'copy')} className='bg-bg p-2 cursor-pointer rounded-full hover:bg-primary hover:text-white transition-all duration-300'>
-                                            <FaRegCopy size={14} />
-                                        </button>
-                                        <button onClick={() => shareProduct(window.location.href, 'facebook')} className='bg-bg p-2 cursor-pointer rounded-full hover:bg-primary hover:text-white transition-all duration-300'>
-                                            <FaFacebookF size={14} />
-                                        </button>
-                                        <button onClick={() => shareProduct(window.location.href, 'twitter')} className='bg-bg p-2 cursor-pointer rounded-full hover:bg-primary hover:text-white transition-all duration-300'>
-                                            <RiTwitterXLine size={14} />
-                                        </button>
-                                        <button onClick={() => shareProduct(window.location.href, 'whatsapp')} className='bg-bg p-2 cursor-pointer rounded-full hover:bg-primary hover:text-white transition-all duration-300'>
-                                            <RiWhatsappLine size={14} />
-                                        </button>
-                                        <button onClick={() => shareProduct(window.location.href, 'instagram')} className='bg-bg p-2 cursor-pointer rounded-full hover:bg-primary hover:text-white transition-all duration-300'>
-                                            <RiInstagramLine size={14} />
-                                        </button>
-                                    </div>
-                                    <div className='mt-6'>
-                                        <p className='text-xs font-medium italic text-accent'>
-                                            {__('Note: ') + __("You can't share the product if it is not published")}
-                                        </p>
-                                    </div>
-                                </div>
+                        )}
 
+                        {/* Share Product */}
+                        {setting.share && (
+                            <div className='w-full bg-white p-4 shadow-xs rounded border border-border/50'>
+                                <h5 className='text-base font-semibold mb-3 flex items-center gap-2 text-heading'>
+                                    <RiShareLine className='text-primary text-lg shrink-0' />
+                                    {__('Share')}
+                                </h5>
+                                <div className='flex gap-3 flex-wrap'>
+                                    <button onClick={() => shareProduct(window.location.href, 'copy')} title={__('Copy Link')} className='bg-bg p-2.5 cursor-pointer rounded-full hover:bg-primary hover:text-white transition-all duration-300'>
+                                        <FaRegCopy size={14} />
+                                    </button>
+                                    <button onClick={() => shareProduct(window.location.href, 'facebook')} title="Facebook" className='bg-bg p-2.5 cursor-pointer rounded-full hover:bg-primary hover:text-white transition-all duration-300'>
+                                        <FaFacebookF size={14} />
+                                    </button>
+                                    <button onClick={() => shareProduct(window.location.href, 'twitter')} title="Twitter / X" className='bg-bg p-2.5 cursor-pointer rounded-full hover:bg-primary hover:text-white transition-all duration-300'>
+                                        <RiTwitterXLine size={14} />
+                                    </button>
+                                    <button onClick={() => shareProduct(window.location.href, 'whatsapp')} title="WhatsApp" className='bg-bg p-2.5 cursor-pointer rounded-full hover:bg-primary hover:text-white transition-all duration-300'>
+                                        <RiWhatsappLine size={14} />
+                                    </button>
+                                    <button onClick={() => shareProduct(window.location.href, 'instagram')} title="Instagram" className='bg-bg p-2.5 cursor-pointer rounded-full hover:bg-primary hover:text-white transition-all duration-300'>
+                                        <RiInstagramLine size={14} />
+                                    </button>
+                                </div>
+                                <div className='mt-4'>
+                                    <p className='text-[11px] font-medium italic text-res'>
+                                        {__('Note: ') + __("You can't share the product if it is not published")}
+                                    </p>
+                                </div>
                             </div>
-                        }
+                        )}
                     </div>
                 </div>
 

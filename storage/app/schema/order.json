@@ -1,0 +1,206 @@
+{
+    "db": {
+        "type": "order",
+        "table": "orders",
+        "validation": {
+            "status": "required|in:pending,processing,shipped,delivered,completed,cancelled"
+        },
+        "schema": [
+            { "name": "user_id", "type": "unsignedBigInteger", "index": true },
+            { "name": "product_id", "type": "unsignedBigInteger" },
+            { "name": "quantity", "type": "integer" },
+            { "name": "price", "type": "decimal" },
+            { "name": "total_price", "type": "decimal" },
+            { "name": "status", "type": "enum", "values": ["pending", "processing", "shipped", "delivered", "completed", "cancelled"], "default": "pending" },
+            { "name": "payment_method", "type": "string" },
+            { "name": "payment_status", "type": "string" },
+            { "name": "tracking_number", "type": "string", "nullable": true },
+            { "name": "shipping_carrier", "type": "string", "nullable": true },
+            { "name": "shipping_address", "type": "text", "nullable": true },
+            { "name": "shipping_city", "type": "string", "nullable": true },
+            { "name": "shipping_state", "type": "string", "nullable": true },
+            { "name": "shipping_country", "type": "string", "nullable": true },
+            { "name": "admin_notes", "type": "text", "nullable": true },
+            { "name": "order_date", "type": "timestamp" },
+            { "name": "completed_date", "type": "timestamp", "nullable": true },
+            { "name": "shipped_date", "type": "timestamp", "nullable": true },
+            { "name": "cancelled_date", "type": "timestamp", "nullable": true }
+        ],
+        "main_fields": [
+            "status",
+            "payment_status",
+            "tracking_number",
+            "shipping_carrier",
+            "shipping_address",
+            "shipping_city",
+            "shipping_state",
+            "shipping_country",
+            "admin_notes",
+            "completed_date",
+            "shipped_date",
+            "cancelled_date",
+            "updated_at"
+        ]
+    },
+    "table": {
+        "table": "orders",
+        "keywords": true,
+        "paginationPerPage": 15,
+        "paginationList": [10, 15, 25, 50, 100],
+        "bulk": {
+            "table": "orders",
+            "route": "bulk.action",
+            "column": "status",
+            "is_meta": false,
+            "options": [
+                { "label": "Mark as Processing", "value": "processing" },
+                { "label": "Mark as Shipped", "value": "shipped" },
+                { "label": "Mark as Delivered", "value": "delivered" },
+                { "label": "Mark as Completed", "value": "completed" },
+                { "label": "Mark as Cancelled", "value": "cancelled" },
+                { "label": "Delete", "value": "delete" }
+            ]
+        },
+        "columns": [
+            {
+                "id": "id",
+                "label": "ORDER #",
+                "column": "id",
+                "width": "8%",
+                "sort": true
+            },
+            {
+                "id": "user",
+                "label": "CUSTOMER",
+                "column": "user_id",
+                "type": "link",
+                "value_table": "users",
+                "value_condition": {
+                    "pass_value_of_key": "id",
+                    "return_key": "name"
+                },
+                "width": "18%"
+            },
+            {
+                "id": "total_price",
+                "label": "TOTAL",
+                "column": "total_price",
+                "type": "text",
+                "width": "10%",
+                "sort": true
+            },
+            {
+                "id": "payment_method",
+                "label": "PAYMENT",
+                "column": "payment_method",
+                "type": "text",
+                "width": "12%"
+            },
+            {
+                "id": "payment_status",
+                "label": "PAYMENT STATUS",
+                "column": "payment_status",
+                "type": "status_badge",
+                "width": "12%"
+            },
+            {
+                "id": "status",
+                "label": "ORDER STATUS",
+                "column": "status",
+                "type": "status_badge",
+                "width": "14%",
+                "sort": true
+            },
+            {
+                "id": "order_date",
+                "label": "DATE",
+                "column": "order_date",
+                "type": "text",
+                "width": "14%",
+                "sort": true
+            },
+            {
+                "id": "action",
+                "label": "ACTIONS",
+                "column": "action",
+                "type": "action",
+                "width": "12%"
+            }
+        ]
+    },
+    "form": [
+        {
+            "title": "Order Processing",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Order Status",
+                    "name": "status",
+                    "type": "select",
+                    "options": [
+                        { "label": "Pending", "value": "pending" },
+                        { "label": "Processing", "value": "processing" },
+                        { "label": "Shipped", "value": "shipped" },
+                        { "label": "Delivered", "value": "delivered" },
+                        { "label": "Completed", "value": "completed" },
+                        { "label": "Cancelled", "value": "cancelled" }
+                    ]
+                },
+                {
+                    "label": "Payment Status",
+                    "name": "payment_status",
+                    "type": "select",
+                    "options": [
+                        { "label": "Paid", "value": "paid" },
+                        { "label": "Unpaid", "value": "unpaid" },
+                        { "label": "Refunded", "value": "refunded" }
+                    ]
+                },
+                {
+                    "label": "Tracking Number",
+                    "name": "tracking_number",
+                    "type": "text",
+                    "placeholder": "e.g. TRK98321489"
+                },
+                {
+                    "label": "Shipping Carrier",
+                    "name": "shipping_carrier",
+                    "type": "text",
+                    "placeholder": "e.g. DHL Express, FedEx, TCS"
+                },
+                {
+                    "label": "Internal Staff Notes",
+                    "name": "admin_notes",
+                    "type": "textarea",
+                    "placeholder": "Processing notes or instructions"
+                }
+            ]
+        },
+        {
+            "title": "Shipping Destination",
+            "style": "sidebar",
+            "fields": [
+                {
+                    "label": "Delivery Address",
+                    "name": "shipping_address",
+                    "type": "textarea"
+                },
+                {
+                    "label": "City",
+                    "name": "shipping_city",
+                    "type": "text"
+                },
+                {
+                    "label": "State / Province",
+                    "name": "shipping_state",
+                    "type": "text"
+                },
+                {
+                    "label": "Country",
+                    "name": "shipping_country",
+                    "type": "text"
+                }
+            ]
+        }
+    ]
+}

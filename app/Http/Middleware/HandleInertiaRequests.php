@@ -57,6 +57,10 @@ class HandleInertiaRequests extends Middleware
             'languages' => $language['languages'],
             'currentLanguage' => $currentLanguage,
             'translations' => $request->is('admin', 'admin/*') ? [] : $language['translations'],
+            'flash' => [
+                'success' => $request->session()->get('success'),
+                'error' => $request->session()->get('error'),
+            ],
         ];
 
         if (! $request->is('admin', 'admin/*')) {

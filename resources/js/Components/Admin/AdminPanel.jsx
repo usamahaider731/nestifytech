@@ -9,7 +9,7 @@ function AdminPanel() {
   const isSvg = setting?.site?.light_logo?.value?.endsWith('.svg');
   return (
     <div className='w-full scroll-hidden bg-accent text-res overflow-y-auto flex flex-col pb-2 gap-2 h-full'>
-      <div className='sticky top-0 left-0 justify-between bg-accent/95 backdrop-blur-md z-50 py-2 h-24 flex items-center px-5 border-b border-permanent/30'>
+      <div className='sticky top-0 left-0 justify-between bg-accent/95 backdrop-blur-md z-50 py-2 min-h-22 flex items-center px-5 border-b border-permanent/30'>
         <a href="/" className='flex items-center gap-3 font-semibold text-lg tracking-tight text-heading hover:text-primary transition-colors'>
           <div className='size-8 rounded-lg bg-gradient-to-tr from-primary to-[#9e95f5] flex items-center justify-center shadow-md shadow-primary/30 text-white font-bold text-base'>
             N

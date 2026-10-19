@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { RiUpload2Fill } from 'react-icons/ri';
+import { RiUpload2Fill, RiSparklingLine, RiUserSmileLine } from 'react-icons/ri';
 
 const ImageUploader = React.memo(function ImageUploader({
     className = '',
@@ -7,8 +7,11 @@ const ImageUploader = React.memo(function ImageUploader({
     name = '',
     value = [],
     multiple = false,
+    autoAvatar = false,
+    avatarSeed = '',
 }) {
     const [images, setImages] = useState([]);
+    const [generatingAvatar, setGeneratingAvatar] = useState(false);
     const initializedRef = useRef(false);
 
     const formatFileSize = (bytes) => {
@@ -17,6 +20,38 @@ const ImageUploader = React.memo(function ImageUploader({
         const sizes = ['Bytes', 'KB', 'MB', 'GB'];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
+    };
+
+    const handleAutoGenerateAvatar = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setGeneratingAvatar(true);
+        try {
+            const seed = (avatarSeed || 'user_' + Math.floor(Math.random() * 999999)).toString().trim().replace(/\s+/g, '-');
+            const styles = ['bottts', 'adventurer', 'avataaars', 'fun-emoji', 'thumbs', 'lorelei'];
+            const randomStyle = styles[Math.floor(Math.random() * styles.length)];
+            const avatarUrl = `https://api.dicebear.com/7.x/${randomStyle}/svg?seed=${encodeURIComponent(seed)}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`;
+
+            const res = await fetch(avatarUrl);
+            const blob = await res.blob();
+            const file = new File([blob], `avatar-${seed}.svg`, { type: 'image/svg+xml' });
+
+            const preview = {
+                url: URL.createObjectURL(file),
+                name: file.name,
+                size: file.size,
+                isLocal: true,
+                file: file,
+            };
+
+            const updatedImages = multiple ? [...images, preview] : [preview];
+            setImages(updatedImages);
+            onChange(multiple ? updatedImages.map(img => img.file).filter(Boolean) : file);
+        } catch (err) {
+            console.error('Failed to generate avatar', err);
+        } finally {
+            setGeneratingAvatar(false);
+        }
     };
 
     /* 🔹 Initialize from value (ONLY ONCE) */
@@ -164,7 +199,29 @@ const ImageUploader = React.memo(function ImageUploader({
                     <span className="bg-primary/30 text-primary rounded text-sm px-3.5 py-1.5 font-roboto">
                         Browse Images
                     </span>
+                    {autoAvatar && (
+                        <button
+                            type="button"
+                            onClick={handleAutoGenerateAvatar}
+                            disabled={generatingAvatar}
+                            className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-500/10 text-emerald-600 border border-emerald-500/30 hover:bg-emerald-500/20 transition-all cursor-pointer shadow-xs disabled:opacity-50"
+                        >
+                            <RiSparklingLine className={`size-3.5 ${generatingAvatar ? 'animate-spin' : ''}`} />
+                            {generatingAvatar ? 'Generating Avatar...' : 'Auto-Generate Avatar'}
+                        </button>
+                    )}
                 </div>
+            )}
+            {autoAvatar && images.length > 0 && (
+                <button
+                    type="button"
+                    onClick={handleAutoGenerateAvatar}
+                    disabled={generatingAvatar}
+                    className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-500/10 text-emerald-600 border border-emerald-500/30 hover:bg-emerald-500/20 transition-all cursor-pointer shadow-xs disabled:opacity-50"
+                >
+                    <RiSparklingLine className={`size-3.5 ${generatingAvatar ? 'animate-spin' : ''}`} />
+                    {generatingAvatar ? 'Generating Avatar...' : 'Generate New Avatar'}
+                </button>
             )}
         </label>
     );

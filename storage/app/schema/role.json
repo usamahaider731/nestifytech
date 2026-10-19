@@ -206,6 +206,24 @@
                     ]
                 }
             ]
+        },
+        {
+            "title": "Delivery permission",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Delivery Boy Access",
+                    "name": "permission.delivery",
+                    "type": "matrix",
+                    "rows": [
+                        "Delivery"
+                    ],
+                    "cols": [
+                        "Read",
+                        "Write"
+                    ]
+                }
+            ]
         }
     ]
 }

@@ -1,0 +1,225 @@
+{
+    "table": "menu",
+    "data": [
+        {
+            "parent_id": 0,
+            "slug": "/",
+            "name": "Home",
+            "location": "header",
+            "link": "/",
+            "sort_order": 1,
+            "created_at": "{now}",
+            "updated_at": "{now}"
+        },
+        {
+            "parent_id": 0,
+            "slug": "/shop",
+            "name": "Shop",
+            "location": "header",
+            "link": "/shop",
+            "sort_order": 2,
+            "created_at": "{now}",
+            "updated_at": "{now}"
+        },
+        {
+            "parent_id": 0,
+            "slug": "/category/electronics",
+            "name": "Electronics",
+            "location": "header",
+            "link": "/category/electronics",
+            "sort_order": 3,
+            "created_at": "{now}",
+            "updated_at": "{now}"
+        },
+        {
+            "parent_id": 0,
+            "slug": "/category/home-living",
+            "name": "Home & Living",
+            "location": "header",
+            "link": "/category/home-living",
+            "sort_order": 4,
+            "created_at": "{now}",
+            "updated_at": "{now}"
+        },
+        {
+            "parent_id": 0,
+            "slug": "/blog",
+            "name": "Blog",
+            "location": "header",
+            "link": "/blog",
+            "sort_order": 5,
+            "created_at": "{now}",
+            "updated_at": "{now}"
+        },
+        {
+            "parent_id": 0,
+            "slug": "/page/contact-us",
+            "name": "Contact",
+            "location": "header",
+            "link": "/page/contact-us",
+            "sort_order": 6,
+            "created_at": "{now}",
+            "updated_at": "{now}"
+        },
+        {
+            "parent_id": 0,
+            "slug": "/",
+            "name": "Home",
+            "location": "footer",
+            "link": "/",
+            "sort_order": 1,
+            "created_at": "{now}",
+            "updated_at": "{now}"
+        },
+        {
+            "parent_id": 0,
+            "slug": "/shop",
+            "name": "Shop",
+            "location": "footer",
+            "link": "/shop",
+            "sort_order": 2,
+            "created_at": "{now}",
+            "updated_at": "{now}"
+        },
+        {
+            "parent_id": 0,
+            "slug": "/blog",
+            "name": "Blog",
+            "location": "footer",
+            "link": "/blog",
+            "sort_order": 3,
+            "created_at": "{now}",
+            "updated_at": "{now}"
+        },
+        {
+            "parent_id": 0,
+            "slug": "/page/contact-us",
+            "name": "Contact Us",
+            "location": "footer",
+            "link": "/page/contact-us",
+            "sort_order": 4,
+            "created_at": "{now}",
+            "updated_at": "{now}"
+        },
+        {
+            "parent_id": 0,
+            "slug": "/page/about-us",
+            "name": "About Us",
+            "location": "footer",
+            "link": "/page/about-us",
+            "sort_order": 5,
+            "created_at": "{now}",
+            "updated_at": "{now}"
+        },
+        {
+            "parent_id": 0,
+            "slug": "/page/privacy-policy",
+            "name": "Privacy Policy",
+            "location": "useful_links",
+            "link": "/page/privacy-policy",
+            "sort_order": 1,
+            "created_at": "{now}",
+            "updated_at": "{now}"
+        },
+        {
+            "parent_id": 0,
+            "slug": "/page/terms-and-conditions",
+            "name": "Terms & Conditions",
+            "location": "useful_links",
+            "link": "/page/terms-and-conditions",
+            "sort_order": 2,
+            "created_at": "{now}",
+            "updated_at": "{now}"
+        },
+        {
+            "parent_id": 0,
+            "slug": "/page/return-refund-policy",
+            "name": "Return & Refund Policy",
+            "location": "useful_links",
+            "link": "/page/return-refund-policy",
+            "sort_order": 3,
+            "created_at": "{now}",
+            "updated_at": "{now}"
+        },
+        {
+            "parent_id": 0,
+            "slug": "/page/shipping-policy",
+            "name": "Shipping Policy",
+            "location": "useful_links",
+            "link": "/page/shipping-policy",
+            "sort_order": 4,
+            "created_at": "{now}",
+            "updated_at": "{now}"
+        },
+        {
+            "parent_id": 0,
+            "slug": "/page/cookie-policy",
+            "name": "Cookie Policy",
+            "location": "useful_links",
+            "link": "/page/cookie-policy",
+            "sort_order": 5,
+            "created_at": "{now}",
+            "updated_at": "{now}"
+        },
+        {
+            "parent_id": 0,
+            "slug": "/category/phones",
+            "name": "Phones",
+            "location": "services",
+            "link": "/category/phones",
+            "sort_order": 1,
+            "created_at": "{now}",
+            "updated_at": "{now}"
+        },
+        {
+            "parent_id": 0,
+            "slug": "/category/laptops",
+            "name": "Laptops",
+            "location": "services",
+            "link": "/category/laptops",
+            "sort_order": 2,
+            "created_at": "{now}",
+            "updated_at": "{now}"
+        },
+        {
+            "parent_id": 0,
+            "slug": "/category/audio",
+            "name": "Audio",
+            "location": "services",
+            "link": "/category/audio",
+            "sort_order": 3,
+            "created_at": "{now}",
+            "updated_at": "{now}"
+        },
+        {
+            "parent_id": 0,
+            "slug": "/category/wearables",
+            "name": "Wearables",
+            "location": "services",
+            "link": "/category/wearables",
+            "sort_order": 4,
+            "created_at": "{now}",
+            "updated_at": "{now}"
+        },
+        {
+            "parent_id": 0,
+            "slug": "/category/accessories",
+            "name": "Accessories",
+            "location": "services",
+            "link": "/category/accessories",
+            "sort_order": 5,
+            "created_at": "{now}",
+            "updated_at": "{now}"
+        },
+        {
+            "parent_id": 0,
+            "slug": "/category/home-living",
+            "name": "Home & Living",
+            "location": "services",
+            "link": "/category/home-living",
+            "sort_order": 6,
+            "created_at": "{now}",
+            "updated_at": "{now}"
+        }
+    ]
+}

@@ -1,0 +1,45 @@
+{
+    "table": "taxonomies",
+    "data": [
+        {
+            "title": "Tech Trends",
+            "slug": "tech-trends",
+            "description": "Latest trends in technology",
+            "parent_id": 0,
+            "type": "blog_category",
+            "status": "publish",
+            "created_at": "{now}",
+            "updated_at": "{now}"
+        },
+        {
+            "title": "Product Reviews",
+            "slug": "product-reviews",
+            "description": "In-depth product reviews and analysis",
+            "parent_id": 0,
+            "type": "blog_category",
+            "status": "publish",
+            "created_at": "{now}",
+            "updated_at": "{now}"
+        },
+        {
+            "title": "Buying Guides",
+            "slug": "buying-guides",
+            "description": "Expert buying guides to help you decide",
+            "parent_id": 0,
+            "type": "blog_category",
+            "status": "publish",
+            "created_at": "{now}",
+            "updated_at": "{now}"
+        },
+        {
+            "title": "Smart Home",
+            "slug": "smart-home",
+            "description": "Smart home automation and lifestyle",
+            "parent_id": 0,
+            "type": "blog_category",
+            "status": "publish",
+            "created_at": "{now}",
+            "updated_at": "{now}"
+        }
+    ]
+}

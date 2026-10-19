@@ -55,7 +55,7 @@ class LayoutController extends Controller
     {
         $validated = $request->validate([
             'name' => 'string|required|max:50',
-            'link' => 'string|required|max:50',
+            'link' => 'string|required|max:100',
             'location' => 'string|nullable|max:50',
         ]);
 
@@ -75,7 +75,7 @@ class LayoutController extends Controller
     {
         $validated = $request->validate([
             'name' => 'string|required|max:50',
-            'link' => 'string|required|max:50',
+            'link' => 'string|required|max:100',
             'location' => 'string|nullable|max:50',
         ]);
 

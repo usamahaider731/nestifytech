@@ -3,6 +3,7 @@ import React from 'react';
 import ImageViwer from '../Admin/ImageViwer';
 import { RiHeartLine, RiMenuLine, RiMessage2Line, RiRepeat2Line, RiShoppingBag3Line, RiUserLine, RiUser3Line } from 'react-icons/ri';
 import HeaderSearch from './HeaderSearch';
+import NotificationBell from './NotificationBell';
 import { useCart } from '@/contexts/CartContext';
 import { useLang } from '@/contexts/LanguageContext';
 import { useSelector, useDispatch } from 'react-redux';
@@ -22,7 +23,7 @@ const MainNav = ({ ContainerType, isScrolled = false }) => {
     const compareCount = useSelector(selectCompareCount);
 
     const currency = setting?.site?.currency?.value ?? 'PKR';
-    const is_index = location.href === 'http://nestifytech.localhost/' || location.href === 'http://nestifytech.localhost';
+    const is_index = window.location.pathname === '/' || window.location.pathname === '';
 
     const getLogoName = (logo_name) => {
         if (logo_name === 'logo_light') return 'light_logo';
@@ -98,6 +99,9 @@ const MainNav = ({ ContainerType, isScrolled = false }) => {
                                 </span>
                             )}
                         </button>
+
+                        {/* Notifications Bell */}
+                        <NotificationBell />
 
                         {/* Account / Profile */}
                         {auth?.user ? (

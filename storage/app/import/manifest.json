@@ -1,4 +1,12 @@
 {
-    "roles": "roles.json",
-    "users": "users.json"
+    "roles":           "roles.json",
+    "users":           "users.json",
+    "tags":            "tags.json",
+    "brands":          "brands.json",
+    "categories":      "categories.json",
+    "blog_categories": "blog_categories.json",
+    "pages":           "pages.json",
+    "blogs":           "blogs.json",
+    "products":        "products.json",
+    "menus":           "menus.json"
 }

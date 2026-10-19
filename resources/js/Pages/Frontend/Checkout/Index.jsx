@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import FrontendLayout from '@/Layouts/FrontendLayout';
 import { useLang } from '@/contexts/LanguageContext';
-import { RiDeleteBinLine, RiSecurePaymentLine, RiTruckLine, RiShieldCheckLine } from 'react-icons/ri';
+import { RiDeleteBinLine, RiSecurePaymentLine, RiTruckLine, RiShieldCheckLine, RiBankCardLine, RiPaypalLine, RiHandCoinLine, RiGlobalLine } from 'react-icons/ri';
 import ImageViwer from '@/Components/Admin/ImageViwer';
 import { useCart } from '@/contexts/CartContext';
 import { selectCartItems, selectCartCount, selectCartTotal, setComboQty, removeFromCart, clearCart } from '@/store/cartSlice';
@@ -12,13 +12,9 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import QuantitySelector from '@/Components/Single/QuantitySelector';
 
-// Initialize Stripe outside of the component to avoid recreating the `Stripe` object on every render.
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_KEY || 'pk_test_51UJo7aGy3HXmj7syMxgPwUGkHesj5DgbXY3zeFQEs0UyUpuRaIA6w2Cxrm2gvnj37GDa0YAWguiiCWH25qoOKsSM0040HXjtZq');
-
 function CheckoutFormContent() {
     const { setting } = usePage().props;
     const { __ } = useLang();
-
 
     const dispatch = useDispatch();
     const stripe = useStripe();
@@ -33,6 +29,30 @@ function CheckoutFormContent() {
     const shippingAmount = totalAmount > 0 ? 250 : 0; // Example flat rate
     const finalAmount = totalAmount + shippingAmount;
 
+    // Detect enabled payment gateways from setting.json
+    const paymentSettings = setting?.payment || {};
+    const stripeEnabled  = paymentSettings.stripe_enabled?.value  ?? true;
+    // PayPal: only show if enabled AND a real client_id is configured
+    const paypalClientId = paymentSettings.paypal_client_id?.value || '';
+    const paypalEnabled  = (paymentSettings.paypal_enabled?.value  ?? false)
+                           && paypalClientId.length > 0
+                           && !paypalClientId.includes('@'); // exclude placeholder emails
+    // COD: enabled by default
+    const codEnabled     = paymentSettings.cod_enabled?.value     ?? true;
+    // Payoneer: only show if enabled AND a real program_id is configured
+    const payoneerProgramId = paymentSettings.payoneer_program_id?.value || '';
+    const payoneerEnabled   = (paymentSettings.payoneer_enabled?.value ?? false)
+                              && payoneerProgramId.length > 0;
+
+    // Determine default payment method
+    const defaultMethod = useMemo(() => {
+        if (codEnabled) return 'cod';
+        if (stripeEnabled) return 'card';
+        if (paypalEnabled) return 'paypal';
+        if (payoneerEnabled) return 'payoneer';
+        return 'cod';
+    }, [codEnabled, stripeEnabled, paypalEnabled, payoneerEnabled]);
+
     const [form, setForm] = useState({
         first_name: '',
         last_name: '',
@@ -41,7 +61,7 @@ function CheckoutFormContent() {
         address: '',
         city: '',
         postal_code: '',
-        payment_method: 'cod'
+        payment_method: defaultMethod
     });
 
     const [isProcessing, setIsProcessing] = useState(false);
@@ -119,6 +139,14 @@ function CheckoutFormContent() {
                             items: items,
                             payment_method: 'card',
                             payment_intent_id: paymentIntent.id,
+                            shipping_amount: shippingAmount,
+                            first_name: form.first_name,
+                            last_name: form.last_name,
+                            email: form.email,
+                            phone: form.phone,
+                            address: form.address,
+                            city: form.city,
+                            postal_code: form.postal_code,
                         }),
                     });
                     const orderData = await orderRes.json();
@@ -139,8 +167,11 @@ function CheckoutFormContent() {
             setIsProcessing(false);
 
         } else {
-            // Handle COD — place order without payment
+            // Handle COD, PayPal, or Payoneer order placement
             const csrfToken = document.head.querySelector('meta[name="csrf-token"]')?.content;
+            setIsProcessing(true);
+            setPaymentError(null);
+
             try {
                 const orderRes = await fetch('/api/cart/order', {
                     method: 'POST',
@@ -150,18 +181,36 @@ function CheckoutFormContent() {
                     },
                     body: JSON.stringify({
                         items: items,
-                        payment_method: 'cod',
+                        payment_method: form.payment_method,
+                        shipping_amount: shippingAmount,
+                        first_name: form.first_name,
+                        last_name: form.last_name,
+                        email: form.email,
+                        phone: form.phone,
+                        address: form.address,
+                        city: form.city,
+                        postal_code: form.postal_code,
                     }),
                 });
                 const orderData = await orderRes.json();
                 if (orderData.success) {
-                    alert(`Order #${orderData.order_id} placed successfully! Pay on delivery.`);
+                    const methodLabels = {
+                        cod: 'Cash on Delivery',
+                        paypal: 'PayPal',
+                        payoneer: 'Payoneer'
+                    };
+                    const label = methodLabels[form.payment_method] || form.payment_method.toUpperCase();
+                    alert(`Order #${orderData.order_id} placed successfully via ${label}!`);
                     dispatch(clearCart());
                 } else {
+                    setPaymentError(orderData.message || 'Failed to place order.');
                     alert(orderData.message || 'Failed to place order.');
                 }
             } catch (err) {
+                setPaymentError('An error occurred while placing your order. Please try again.');
                 alert('An error occurred while placing your order. Please try again.');
+            } finally {
+                setIsProcessing(false);
             }
         }
     };
@@ -226,23 +275,72 @@ function CheckoutFormContent() {
 
                                 <h3 className="text-xl font-bold text-heading mb-4 pb-4 border-b border-permanent/10 mt-8">Payment Method</h3>
                                 <div className="space-y-3 mb-8">
-                                    <label className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${form.payment_method === 'cod' ? 'border-primary bg-primary/5' : 'border-permanent/20 hover:border-permanent/40'}`}>
-                                        <input type="radio" name="payment_method" value="cod" checked={form.payment_method === 'cod'} onChange={handleChange} className="w-5 h-5 text-primary focus:ring-primary border-gray-300" />
-                                        <div className="flex-1">
-                                            <span className="block font-bold text-heading">Cash on Delivery</span>
-                                            <span className="block text-xs text-res mt-1">Pay when you receive your order</span>
+                                    {/* Cash on Delivery */}
+                                    {codEnabled && (
+                                        <label className={`flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${form.payment_method === 'cod' ? 'border-primary bg-primary/5' : 'border-permanent/20 hover:border-permanent/40'}`}>
+                                            <input type="radio" name="payment_method" value="cod" checked={form.payment_method === 'cod'} onChange={handleChange} className="w-5 h-5 text-primary focus:ring-primary border-gray-300 mt-0.5" />
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-2">
+                                                    <RiHandCoinLine className="size-5 text-primary" />
+                                                    <span className="block font-bold text-heading">Cash on Delivery (COD)</span>
+                                                </div>
+                                                <span className="block text-xs text-res mt-1">
+                                                    {paymentSettings.cod_instructions?.value || 'Pay in cash upon delivery of your items.'}
+                                                </span>
+                                            </div>
+                                        </label>
+                                    )}
+
+                                    {/* Credit / Debit Card (Stripe) */}
+                                    {stripeEnabled && (
+                                        <label className={`flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${form.payment_method === 'card' ? 'border-primary bg-primary/5' : 'border-permanent/20 hover:border-permanent/40'}`}>
+                                            <input type="radio" name="payment_method" value="card" checked={form.payment_method === 'card'} onChange={handleChange} className="w-5 h-5 text-primary focus:ring-primary border-gray-300 mt-0.5" />
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-2">
+                                                    <RiBankCardLine className="size-5 text-primary" />
+                                                    <span className="block font-bold text-heading">Credit / Debit Card (Stripe)</span>
+                                                </div>
+                                                <span className="block text-xs text-res mt-1">Pay instantly with Visa, MasterCard, or American Express</span>
+                                            </div>
+                                        </label>
+                                    )}
+
+                                    {/* PayPal */}
+                                    {paypalEnabled && (
+                                        <label className={`flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${form.payment_method === 'paypal' ? 'border-primary bg-primary/5' : 'border-permanent/20 hover:border-permanent/40'}`}>
+                                            <input type="radio" name="payment_method" value="paypal" checked={form.payment_method === 'paypal'} onChange={handleChange} className="w-5 h-5 text-primary focus:ring-primary border-gray-300 mt-0.5" />
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-2">
+                                                    <RiPaypalLine className="size-5 text-[#0070ba]" />
+                                                    <span className="block font-bold text-heading">PayPal</span>
+                                                </div>
+                                                <span className="block text-xs text-res mt-1">Pay securely via PayPal account balance or saved card</span>
+                                            </div>
+                                        </label>
+                                    )}
+
+                                    {/* Payoneer */}
+                                    {payoneerEnabled && (
+                                        <label className={`flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${form.payment_method === 'payoneer' ? 'border-primary bg-primary/5' : 'border-permanent/20 hover:border-permanent/40'}`}>
+                                            <input type="radio" name="payment_method" value="payoneer" checked={form.payment_method === 'payoneer'} onChange={handleChange} className="w-5 h-5 text-primary focus:ring-primary border-gray-300 mt-0.5" />
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-2">
+                                                    <RiGlobalLine className="size-5 text-[#ff4800]" />
+                                                    <span className="block font-bold text-heading">Payoneer</span>
+                                                </div>
+                                                <span className="block text-xs text-res mt-1">Global payment & mass checkout via Payoneer</span>
+                                            </div>
+                                        </label>
+                                    )}
+
+                                    {!codEnabled && !stripeEnabled && !paypalEnabled && !payoneerEnabled && (
+                                        <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 text-sm">
+                                            No payment gateways are currently enabled in the Admin Settings.
                                         </div>
-                                    </label>
-                                    <label className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${form.payment_method === 'card' ? 'border-primary bg-primary/5' : 'border-permanent/20 hover:border-permanent/40'}`}>
-                                        <input type="radio" name="payment_method" value="card" checked={form.payment_method === 'card'} onChange={handleChange} className="w-5 h-5 text-primary focus:ring-primary border-gray-300" />
-                                        <div className="flex-1">
-                                            <span className="block font-bold text-heading">Credit / Debit Card</span>
-                                            <span className="block text-xs text-res mt-1">Secure payment via Stripe</span>
-                                        </div>
-                                    </label>
+                                    )}
                                 </div>
 
-                                {form.payment_method === 'card' && (
+                                {form.payment_method === 'card' && stripeEnabled && (
                                     <div className="mb-8 p-6 bg-gray-50 rounded-xl border border-gray-200">
                                         <label className="block text-sm font-semibold text-heading mb-4">Card Details</label>
                                         <div className="bg-white p-4 rounded-lg border border-gray-300">
@@ -260,9 +358,28 @@ function CheckoutFormContent() {
                                                     },
                                                 },
                                             }} />
-
                                         </div>
                                         {paymentError && <div className="text-red-500 text-sm mt-3">{paymentError}</div>}
+                                    </div>
+                                )}
+
+                                {form.payment_method === 'paypal' && (
+                                    <div className="mb-8 p-5 rounded-xl border border-blue-200 bg-blue-50/60 flex items-start gap-3">
+                                        <RiPaypalLine className="size-6 text-[#0070ba] shrink-0 mt-0.5" />
+                                        <div className="text-xs text-heading">
+                                            <p className="font-semibold text-sm">PayPal Checkout Active</p>
+                                            <p className="text-res mt-1">When clicking "Place Order", your order will be initialized with PayPal secure checkout.</p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {form.payment_method === 'payoneer' && (
+                                    <div className="mb-8 p-5 rounded-xl border border-orange-200 bg-orange-50/60 flex items-start gap-3">
+                                        <RiGlobalLine className="size-6 text-[#ff4800] shrink-0 mt-0.5" />
+                                        <div className="text-xs text-heading">
+                                            <p className="font-semibold text-sm">Payoneer Checkout Active</p>
+                                            <p className="text-res mt-1">Your order will be processed through your Payoneer global account checkout.</p>
+                                        </div>
                                     </div>
                                 )}
 
@@ -352,6 +469,22 @@ function CheckoutFormContent() {
 }
 
 export default function Checkout() {
+    const { setting } = usePage().props;
+
+    // Resolve the Stripe publishable key from settings (secret keys are stripped server-side)
+    const stripeKey =
+        setting?.payment?.stripe_key?.value ||
+        setting?.payment?.stripe_publishable_key?.value ||
+        setting?.stripe?.stripe_key?.value ||
+        import.meta.env.VITE_STRIPE_KEY ||
+        null;
+
+    // loadStripe is safe to call with null — Elements will simply not initialise Stripe
+    const stripePromise = useMemo(
+        () => (stripeKey ? loadStripe(stripeKey) : null),
+        [stripeKey]
+    );
+
     return (
         <Elements stripe={stripePromise}>
             <CheckoutFormContent />

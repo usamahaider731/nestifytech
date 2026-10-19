@@ -7,13 +7,15 @@ import Table from '@/Components/Admin/Table'
 import ImageViwer from '@/Components/Admin/ImageViwer';
 import { usePage } from '@inertiajs/react';
 import { hasPermission } from '@/Utils/helper';
-function Index({ users, userStats, table }) {
+function Index({ users, userStats, table, currentTab = 'all' }) {
   const { auth } = usePage().props;
   const [Users, SetUsers] = React.useState(users.data);
 
   React.useEffect(() => {
     SetUsers(users.data);
   }, [users.data]);
+
+  const activeTab = currentTab || (new URLSearchParams(window.location.search).get('tab') || 'all');
 
   const statCards = [
     {
@@ -22,7 +24,7 @@ function Index({ users, userStats, table }) {
       change: userStats.percent_change,
       icon: <RiUserLine />,
       iconBg: 'bg-blue-500/20 text-blue-500',
-      note: 'Total Users',
+      note: 'Total in view',
     },
     {
       title: 'Active Users',
@@ -38,12 +40,51 @@ function Index({ users, userStats, table }) {
       change: userStats.online_percentage,
       icon: <RiUser2Line />,
       iconBg: 'bg-purple-500/20 text-purple-500',
-      note: 'Last week analytics',
+      note: 'Active in last 5m',
     },
   ];
 
   return (
     <div className='px-5 py-7 flex flex-col gap-7.5'>
+      {/* Tab Navigation: All Users vs Customers vs Employees & Staff */}
+      <div className='flex items-center justify-between flex-wrap gap-4 border-b border-permanent/30 pb-3'>
+        <div className='flex items-center gap-2 bg-accent p-1.5 rounded-xl border border-permanent/20'>
+          <Link
+            href={route('users')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+              activeTab === 'all'
+                ? 'bg-primary text-white shadow-md'
+                : 'text-res hover:text-heading hover:bg-dynamic/30'
+            }`}
+          >
+            <RiUserLine className='size-4' />
+            <span>All Users</span>
+          </Link>
+          <Link
+            href={route('users', { tab: 'customers' })}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+              activeTab === 'customers' || activeTab === 'customer'
+                ? 'bg-primary text-white shadow-md'
+                : 'text-res hover:text-heading hover:bg-dynamic/30'
+            }`}
+          >
+            <RiUser2Line className='size-4' />
+            <span>Customers</span>
+          </Link>
+          <Link
+            href={route('users', { tab: 'team' })}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+              activeTab === 'team' || activeTab === 'staff'
+                ? 'bg-primary text-white shadow-md'
+                : 'text-res hover:text-heading hover:bg-dynamic/30'
+            }`}
+          >
+            <RiUserAddLine className='size-4' />
+            <span>Employees & Staff</span>
+          </Link>
+        </div>
+      </div>
+
       <div className='grid grid-cols-4 flex-wrap w-full gap-5'>
         {statCards.map((card, idx) => (
           <div key={idx} className='p-5 flex col-span-1 justify-between flex-col gap-10 items-start shadow bg-accent rounded-2xl'>

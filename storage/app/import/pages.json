@@ -1,0 +1,319 @@
+{
+    "table": "posts",
+    "data": [
+        {
+            "user_id": 1,
+            "title": "About Us",
+            "sku": "about-us",
+            "description": "<h2>Welcome to NestifyTech</h2><p>NestifyTech is your trusted destination for premium electronics, smart devices, and cutting-edge gadgets. We are passionate about connecting people with technology that enhances their lives.</p><h3>Our Mission</h3><p>Our mission is simple: to offer authentic, high-quality technology products at competitive prices, backed by exceptional customer service. We carefully curate every item in our catalog to ensure it meets our high standards.</p><h3>Why Choose NestifyTech?</h3><ul><li><strong>Genuine Products:</strong> Every product is 100% authentic and sourced from verified manufacturers.</li><li><strong>Expert Support:</strong> Our team of tech experts is available 24/7 to assist you.</li><li><strong>Fast Shipping:</strong> We partner with reliable logistics providers for speedy delivery.</li><li><strong>Easy Returns:</strong> Hassle-free 30-day return policy on all orders.</li></ul><h3>Our Story</h3><p>Founded with a vision to democratize access to premium technology, NestifyTech has grown from a small online store to a trusted marketplace serving thousands of customers. We believe everyone deserves access to great technology.</p>",
+            "status": "publish",
+            "type": "page",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "short_description", "value": "Learn about NestifyTech — your trusted destination for premium electronics, smart devices, and cutting-edge technology." }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "seo_title", "value": "About Us | NestifyTech" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "seo_description", "value": "Discover the story behind NestifyTech — your trusted partner for premium electronics and smart devices." }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "layout_type", "value": "sidebar_right" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "header_style", "value": "hero_gradient" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "footer_widget", "value": "cta_banner" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "footer_cta_title", "value": "Join thousands of satisfied customers who trust NestifyTech for authentic, high-performance electronics and smart devices." }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "footer_cta_btn_text", "value": "Shop Now" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "footer_cta_btn_url", "value": "/shop" }
+                }
+            ]
+        },
+        {
+            "user_id": 1,
+            "title": "Privacy Policy",
+            "sku": "privacy-policy",
+            "description": "<h2>Privacy Policy</h2><p><strong>Last Updated: January 2025</strong></p><p>At NestifyTech, we are committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your personal information when you visit our website or make a purchase.</p><h3>Information We Collect</h3><ul><li><strong>Personal Information:</strong> Name, email address, phone number, and shipping address when you create an account or place an order.</li><li><strong>Payment Information:</strong> We use secure third-party payment processors and do not store your full payment card details.</li><li><strong>Usage Data:</strong> Browser type, IP address, pages visited, and time spent on our site to improve user experience.</li></ul><h3>How We Use Your Information</h3><ul><li>To process and fulfill your orders</li><li>To send order confirmations and shipping updates</li><li>To improve our website and product offerings</li><li>To send promotional emails (with your consent)</li><li>To comply with legal obligations</li></ul><h3>Data Security</h3><p>We implement industry-standard security measures including SSL encryption to protect your data. However, no method of transmission over the Internet is 100% secure.</p><h3>Your Rights</h3><p>You have the right to access, correct, or delete your personal data. Contact us at privacy@nestifytech.com to exercise these rights.</p><h3>Contact Us</h3><p>If you have questions about this Privacy Policy, please contact us at privacy@nestifytech.com.</p>",
+            "status": "publish",
+            "type": "page",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "short_description", "value": "Read our Privacy Policy to understand how NestifyTech collects, uses, and protects your personal information." }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "seo_title", "value": "Privacy Policy | NestifyTech" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "layout_type", "value": "narrow_center" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "sidebar_widgets", "value": "[\"toc\",\"related_pages\",\"contact_card\"]" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "footer_cta_title", "value": "Questions Regarding Your Data & Privacy?" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "footer_cta_btn_text", "value": "Contact Privacy Team" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "footer_cta_btn_url", "value": "/page/contact-us" }
+                }
+            ]
+        },
+        {
+            "user_id": 1,
+            "title": "Terms & Conditions",
+            "sku": "terms-and-conditions",
+            "description": "<h2>Terms & Conditions</h2><p><strong>Last Updated: January 2025</strong></p><p>Please read these Terms and Conditions carefully before using NestifyTech. By accessing our website or placing an order, you agree to be bound by these terms.</p><h3>Use of Website</h3><p>You must be at least 18 years old to use our services. You agree not to use the site for any unlawful purpose or in a way that violates these terms.</p><h3>Orders & Payments</h3><ul><li>All orders are subject to product availability.</li><li>Prices are subject to change without notice.</li><li>Payment must be received in full before orders are processed.</li><li>We reserve the right to cancel any order for any reason.</li></ul><h3>Shipping & Delivery</h3><p>Shipping times are estimates only. NestifyTech is not responsible for delays caused by carriers or customs. Risk of loss passes to you upon delivery.</p><h3>Returns & Refunds</h3><p>We offer a 30-day return policy on most items. Products must be in original condition. Please see our Return Policy for full details.</p><h3>Intellectual Property</h3><p>All content on this website, including images, text, and logos, is the property of NestifyTech and may not be used without permission.</p><h3>Limitation of Liability</h3><p>NestifyTech is not liable for any indirect, incidental, or consequential damages arising from the use of our products or services.</p><h3>Contact</h3><p>For questions about these terms, contact us at legal@nestifytech.com.</p>",
+            "status": "publish",
+            "type": "page",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "short_description", "value": "Please read these terms carefully before using our services." }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "seo_title", "value": "Terms & Conditions | NestifyTech" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "seo_description", "value": "Read the Terms and Conditions for using NestifyTech, including policies on orders, payments, shipping, and returns." }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "layout_type", "value": "narrow_center" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "footer_cta_title", "value": "Need Clarification on Any Terms?" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "footer_cta_btn_text", "value": "Get Support" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "footer_cta_btn_url", "value": "/page/contact-us" }
+                }
+            ]
+        },
+        {
+            "user_id": 1,
+            "title": "Return & Refund Policy",
+            "sku": "return-refund-policy",
+            "description": "<h2>Return & Refund Policy</h2><p><strong>Last Updated: January 2025</strong></p><p>We want you to be completely satisfied with your purchase. If you are not happy with your order, we offer a straightforward 30-day return and refund policy.</p><h3>Eligibility for Returns</h3><ul><li>Items must be returned within 30 days of delivery.</li><li>Products must be in their original, unused condition with all original packaging.</li><li>Items marked as non-returnable are excluded from this policy.</li></ul><h3>How to Return an Item</h3><ol><li>Log in to your account and navigate to your orders.</li><li>Select the item you wish to return and choose a reason.</li><li>Print the pre-paid return label (where applicable).</li><li>Pack the item securely and drop it off at the nearest courier.</li></ol><h3>Refund Process</h3><p>Once we receive and inspect your returned item, we will process your refund within 5–7 business days. Refunds are issued to the original payment method.</p><h3>Damaged or Defective Items</h3><p>If you receive a damaged or defective item, contact us within 48 hours of delivery with photos at support@nestifytech.com. We will arrange a replacement or full refund.</p><h3>Contact Us</h3><p>For questions about returns, email returns@nestifytech.com or call our support line.</p>",
+            "status": "publish",
+            "type": "page",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "short_description", "value": "Our hassle-free 30-day return and refund policy explained." }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "seo_title", "value": "Return & Refund Policy | NestifyTech" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "sidebar_widgets", "value": "[\"toc\",\"contact_card\",\"related_pages\"]" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "footer_cta_title", "value": "Common Questions About Returns & Refunds" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "footer_cta_btn_text", "value": "View FAQs" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "footer_cta_btn_url", "value": "/faq" }
+                }
+            ]
+        },
+        {
+            "user_id": 1,
+            "title": "Shipping Policy",
+            "sku": "shipping-policy",
+            "description": "<h2>Shipping Policy</h2><p><strong>Last Updated: January 2025</strong></p><p>We strive to deliver your orders as quickly and reliably as possible. Here is everything you need to know about our shipping process.</p><h3>Processing Time</h3><p>Orders are typically processed within 1–2 business days after payment confirmation. Orders placed on weekends or public holidays are processed the next business day.</p><h3>Shipping Options</h3><ul><li><strong>Standard Shipping:</strong> 5–7 business days</li><li><strong>Express Shipping:</strong> 2–3 business days</li><li><strong>Same-Day Delivery:</strong> Available in select cities</li></ul><h3>Shipping Costs</h3><p>Shipping costs are calculated at checkout based on your location and chosen shipping method. Orders above a certain threshold may qualify for free shipping — check our promotions page.</p><h3>Order Tracking</h3><p>Once your order ships, you will receive an email with a tracking number. Use this to monitor your shipment's progress.</p><h3>International Shipping</h3><p>We ship to select international destinations. Additional customs duties and taxes may apply and are the responsibility of the customer.</p><h3>Contact Us</h3><p>For shipping inquiries, email shipping@nestifytech.com.</p>",
+            "status": "publish",
+            "type": "page",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "short_description", "value": "Everything you need to know about our delivery and shipping services." }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "seo_title", "value": "Shipping Policy | NestifyTech" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "footer_cta_title", "value": "Delivery Questions & Order Tracking" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "footer_cta_btn_text", "value": "Track My Order" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "footer_cta_btn_url", "value": "/page/contact-us" }
+                }
+            ]
+        },
+        {
+            "user_id": 1,
+            "title": "Contact Us",
+            "sku": "contact-us",
+            "description": "<h2>Get in Touch</h2><p>We love hearing from our customers! Whether you have a question about your order, need technical support, or just want to share feedback — our team is here to help.</p><h3>Customer Support Hours</h3><ul><li><strong>Monday – Friday:</strong> 9:00 AM – 8:00 PM</li><li><strong>Saturday:</strong> 10:00 AM – 6:00 PM</li><li><strong>Sunday:</strong> 12:00 PM – 5:00 PM</li></ul><h3>Contact Channels</h3><ul><li><strong>Email:</strong> support@nestifytech.com</li><li><strong>Phone:</strong> +92 321 808 6139</li><li><strong>Live Chat:</strong> Available on our website during business hours</li><li><strong>WhatsApp:</strong> +92 321 808 6139</li></ul><h3>Visit Us</h3><p>NestifyTech HQ<br>123 Tech Avenue, Digital Park<br>Islamabad, Pakistan</p><h3>Send a Message</h3><p>Fill out the contact form below and our team will get back to you within 24 hours.</p>",
+            "status": "publish",
+            "type": "page",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "short_description", "value": "Get in touch with our support team — we are here to help 24/7." }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "seo_title", "value": "Contact Us | NestifyTech" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "layout_type", "value": "sidebar_right" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "sidebar_widgets", "value": "[\"contact_card\",\"related_pages\",\"newsletter\"]" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "footer_cta_title", "value": "Official Customer Care Center" }
+                }
+            ]
+        },
+        {
+            "user_id": 1,
+            "title": "Cookie Policy",
+            "sku": "cookie-policy",
+            "description": "<h2>Cookie Policy</h2><p><strong>Last Updated: January 2025</strong></p><p>This Cookie Policy explains how NestifyTech uses cookies and similar tracking technologies when you visit our website.</p><h3>What Are Cookies?</h3><p>Cookies are small text files placed on your device when you visit a website. They help the site remember your preferences, login status, and browsing behavior to enhance your experience.</p><h3>Types of Cookies We Use</h3><ul><li><strong>Essential Cookies:</strong> Required for the website to function properly (e.g., shopping cart, login sessions).</li><li><strong>Analytics Cookies:</strong> Help us understand how visitors use our site so we can improve it.</li><li><strong>Marketing Cookies:</strong> Used to deliver relevant advertisements based on your interests.</li><li><strong>Preference Cookies:</strong> Remember your settings like language and currency.</li></ul><h3>Managing Cookies</h3><p>You can control cookies through your browser settings. Most browsers allow you to block or delete cookies. Note that disabling essential cookies may affect website functionality.</p><h3>Third-Party Cookies</h3><p>We may use cookies from third-party services including Google Analytics, Facebook Pixel, and payment processors. These services have their own privacy policies.</p><h3>Updates to This Policy</h3><p>We may update this Cookie Policy periodically. Please check this page for the latest information.</p><h3>Contact Us</h3><p>Questions about our cookie use? Email privacy@nestifytech.com.</p>",
+            "status": "publish",
+            "type": "page",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "short_description", "value": "How we use cookies to enhance your experience on our website." }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "seo_title", "value": "Cookie Policy | NestifyTech" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "container_width", "value": "narrow" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "sidebar_widgets", "value": "[\"toc\",\"related_pages\"]" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "footer_cta_title", "value": "Need Assistance With Cookie Preferences?" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "footer_cta_btn_text", "value": "Contact Us" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "footer_cta_btn_url", "value": "/page/contact-us" }
+                }
+            ]
+        }
+    ]
+}

@@ -10,7 +10,7 @@ const MenuHeader = ({ ContainerType, isScrolled =false }) => {
             <div className={` ${ContainerType === "container" ? "container mx-auto" : "w-full"}  px-5 flex`}>
                 {
                     Menu.map((item, index) => (
-                        <Link href={`${item?.slug ? item?.slug : '#'}`} key={index} className='px-5 py-3.5 text-[13px] font-bold uppercase text-text transition-colors hover:bg-black/10'>
+                        <Link href={`${item?.link ? item?.link : '#'}`} key={index} className='px-5 py-3.5 text-[13px] font-bold uppercase text-text transition-colors hover:bg-black/10'>
                             {item.name}
                         </Link>
                     ))

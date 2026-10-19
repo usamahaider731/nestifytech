@@ -1,42 +1,239 @@
-[
-    {
-        "title": "Nexus Labs",
-        "slug": "nexus-labs",
-        "image": "https:\/\/logo.clearbit.com\/google.com"
-    },
-    {
-        "title": "VoltGear",
-        "slug": "voltgear",
-        "image": "https:\/\/logo.clearbit.com\/tesla.com"
-    },
-    {
-        "title": "Pulse Audio",
-        "slug": "pulse-audio",
-        "image": "https:\/\/logo.clearbit.com\/spotify.com"
-    },
-    {
-        "title": "Orbit Mobile",
-        "slug": "orbit-mobile",
-        "image": "https:\/\/logo.clearbit.com\/apple.com"
-    },
-    {
-        "title": "Zenith Home",
-        "slug": "zenith-home",
-        "image": "https:\/\/logo.clearbit.com\/ikea.com"
-    },
-    {
-        "title": "Apex Tools",
-        "slug": "apex-tools",
-        "image": "https:\/\/logo.clearbit.com\/dewalt.com"
-    },
-    {
-        "title": "ClearView",
-        "slug": "clearview",
-        "image": "https:\/\/logo.clearbit.com\/sony.com"
-    },
-    {
-        "title": "SteelForm",
-        "slug": "steelform",
-        "image": "https:\/\/logo.clearbit.com\/hermanmiller.com"
-    }
-]
+{
+    "table": "taxonomies",
+    "data": [
+        {
+            "related_id": "718",
+            "title": "Samsung",
+            "slug": "samsung",
+            "description": "Global leader in technology, mobile devices and consumer electronics.",
+            "parent_id": 0,
+            "type": "brand",
+            "status": "publish",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                {
+                    "insert_in": "related_table",
+                    "table": "media",
+                    "data": { "filename": "samsung.svg", "name": "Samsung", "parent_id": "{insert_id}", "type": "taxonomy" }
+                }
+            ]
+        },
+        {
+            "related_id": "728",
+            "title": "Adidas",
+            "slug": "adidas",
+            "description": "Iconic sportswear, premium footwear and athletic lifestyle accessories.",
+            "parent_id": 0,
+            "type": "brand",
+            "status": "publish",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                {
+                    "insert_in": "related_table",
+                    "table": "media",
+                    "data": { "filename": "redmi.svg", "name": "Adidas", "parent_id": "{insert_id}", "type": "taxonomy" }
+                }
+            ]
+        },
+        {
+            "related_id": "730",
+            "title": "HP",
+            "slug": "hp",
+            "description": "Leading manufacturer of enterprise laptops, desktops, and computing solutions.",
+            "parent_id": 0,
+            "type": "brand",
+            "status": "publish",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                {
+                    "insert_in": "related_table",
+                    "table": "media",
+                    "data": { "filename": "clearview.svg", "name": "HP", "parent_id": "{insert_id}", "type": "taxonomy" }
+                }
+            ]
+        },
+        {
+            "related_id": "731",
+            "title": "Skechers",
+            "slug": "skechers",
+            "description": "Innovative comfort footwear and athletic sneakers for active lifestyles.",
+            "parent_id": 0,
+            "type": "brand",
+            "status": "publish",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                {
+                    "insert_in": "related_table",
+                    "table": "media",
+                    "data": { "filename": "orbit-mobile.svg", "name": "Skechers", "parent_id": "{insert_id}", "type": "taxonomy" }
+                }
+            ]
+        },
+        {
+            "related_id": "734",
+            "title": "TCL",
+            "slug": "tcl",
+            "description": "Pioneering smart QLED televisions and home entertainment systems.",
+            "parent_id": 0,
+            "type": "brand",
+            "status": "publish",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                {
+                    "insert_in": "related_table",
+                    "table": "media",
+                    "data": { "filename": "vivo.svg", "name": "TCL", "parent_id": "{insert_id}", "type": "taxonomy" }
+                }
+            ]
+        },
+        {
+            "related_id": "701",
+            "title": "Nexus Labs",
+            "slug": "nexus-labs",
+            "description": "Cutting-edge computing and hardware components.",
+            "parent_id": 0,
+            "type": "brand",
+            "status": "publish",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                {
+                    "insert_in": "related_table",
+                    "table": "media",
+                    "data": { "filename": "nexus-labs.svg", "name": "Nexus Labs", "parent_id": "{insert_id}", "type": "taxonomy" }
+                }
+            ]
+        },
+        {
+            "related_id": "702",
+            "title": "VoltGear",
+            "slug": "voltgear",
+            "description": "High-efficiency power supplies and charging solutions.",
+            "parent_id": 0,
+            "type": "brand",
+            "status": "publish",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                {
+                    "insert_in": "related_table",
+                    "table": "media",
+                    "data": { "filename": "voltgear.jpg", "name": "VoltGear", "parent_id": "{insert_id}", "type": "taxonomy" }
+                }
+            ]
+        },
+        {
+            "related_id": "703",
+            "title": "Pulse Audio",
+            "slug": "pulse-audio",
+            "description": "Studio-grade headphones and acoustic equipment.",
+            "parent_id": 0,
+            "type": "brand",
+            "status": "publish",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                {
+                    "insert_in": "related_table",
+                    "table": "media",
+                    "data": { "filename": "pulse-audio.png", "name": "Pulse Audio", "parent_id": "{insert_id}", "type": "taxonomy" }
+                }
+            ]
+        },
+        {
+            "related_id": "704",
+            "title": "Orbit Mobile",
+            "slug": "orbit-mobile",
+            "description": "Next-generation smartphones and wireless peripherals.",
+            "parent_id": 0,
+            "type": "brand",
+            "status": "publish",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                {
+                    "insert_in": "related_table",
+                    "table": "media",
+                    "data": { "filename": "orbit-mobile.svg", "name": "Orbit Mobile", "parent_id": "{insert_id}", "type": "taxonomy" }
+                }
+            ]
+        },
+        {
+            "related_id": "705",
+            "title": "Zenith Home",
+            "slug": "zenith-home",
+            "description": "Smart IoT home devices and automated security.",
+            "parent_id": 0,
+            "type": "brand",
+            "status": "publish",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                {
+                    "insert_in": "related_table",
+                    "table": "media",
+                    "data": { "filename": "zenith-home.png", "name": "Zenith Home", "parent_id": "{insert_id}", "type": "taxonomy" }
+                }
+            ]
+        },
+        {
+            "related_id": "706",
+            "title": "Apex Tools",
+            "slug": "apex-tools",
+            "description": "Precision electronics repair tools and toolkits.",
+            "parent_id": 0,
+            "type": "brand",
+            "status": "publish",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                {
+                    "insert_in": "related_table",
+                    "table": "media",
+                    "data": { "filename": "apex-tools.png", "name": "Apex Tools", "parent_id": "{insert_id}", "type": "taxonomy" }
+                }
+            ]
+        },
+        {
+            "related_id": "707",
+            "title": "ClearView",
+            "slug": "clearview",
+            "description": "High-definition monitors and optical display technology.",
+            "parent_id": 0,
+            "type": "brand",
+            "status": "publish",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                {
+                    "insert_in": "related_table",
+                    "table": "media",
+                    "data": { "filename": "clearview.svg", "name": "ClearView", "parent_id": "{insert_id}", "type": "taxonomy" }
+                }
+            ]
+        },
+        {
+            "related_id": "708",
+            "title": "SteelForm",
+            "slug": "steelform",
+            "description": "Durable aluminum and steel chassis enclosures.",
+            "parent_id": 0,
+            "type": "brand",
+            "status": "publish",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                {
+                    "insert_in": "related_table",
+                    "table": "media",
+                    "data": { "filename": "steelform.jpg", "name": "SteelForm", "parent_id": "{insert_id}", "type": "taxonomy" }
+                }
+            ]
+        }
+    ]
+}

@@ -15,11 +15,19 @@ import {
     RiEyeOffLine,
     RiWhatsappLine,
     RiShieldCheckLine,
+    RiMailLine,
+    RiSendPlaneLine,
+    RiRefreshLine,
+    RiSparklingLine,
+    RiCalendarLine,
+    RiIdCardLine,
+    RiScanLine,
 } from 'react-icons/ri';
 import { useLang } from '@/contexts/LanguageContext';
 import { toast } from 'react-toastify';
 import PhoneInput from '@/Components/Admin/PhoneInput';
 import DropdownSelect from '@/Components/DropdownSelect';
+import CnicScanner from '@/Components/CnicScanner';
 import axios from 'axios';
 
 export default function Settings({ profile, mustVerifyEmail, status }) {
@@ -51,6 +59,8 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
     const profileForm = useForm({
         name: user.name || '',
         email: user.email || '',
+        date_of_birth: meta.date_of_birth || '',
+        cnic: meta.cnic || '',
         phone: meta.phone || '',
         bio: meta.bio || '',
         address: meta.address || '',
@@ -68,6 +78,25 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
         password: '',
         password_confirmation: '',
     });
+
+    // Delete Account Form with OTP support
+    const deleteForm = useForm({
+        password: '',
+        otp: '',
+    });
+
+    // Email OTP states for Delete Account
+    const [deleteOtpSent, setDeleteOtpSent] = useState(false);
+    const [deleteOtpLoading, setDeleteOtpLoading] = useState(false);
+
+    // Email OTP states for Email Change
+    const [emailOtpSent, setEmailOtpSent] = useState(false);
+    const [emailOtpCode, setEmailOtpCode] = useState('');
+    const [emailOtpVerified, setEmailOtpVerified] = useState(false);
+    const [emailOtpLoading, setEmailOtpLoading] = useState(false);
+
+    // CNIC Scanner Modal state
+    const [showCnicScanner, setShowCnicScanner] = useState(false);
 
     // Fetch States on load (stores taxonomy ID)
     useEffect(() => {
@@ -178,11 +207,6 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
         return () => { isMounted = false; };
     }, []);
 
-    // Delete Account Form
-    const deleteForm = useForm({
-        password: '',
-    });
-
     // Send OTP for phone verification
     const handleSendPhoneOtp = async () => {
         const phone = profileForm.data.phone;
@@ -246,9 +270,91 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
         }
     };
 
+    // ── Email OTP: Send verification code for Delete Account ──
+    const handleSendDeleteOtp = async () => {
+        setDeleteOtpLoading(true);
+        try {
+            const res = await axios.post('/api/user/email/send-otp', {
+                action: 'delete_account',
+            });
+            if (res.data?.success) {
+                setDeleteOtpSent(true);
+                toast.success(res.data.message || __('Verification code sent to your email!'));
+            } else {
+                toast.error(res.data?.message || __('Failed to send verification code.'));
+            }
+        } catch (err) {
+            toast.error(err.response?.data?.message || __('Error sending verification code. Please try again.'));
+        } finally {
+            setDeleteOtpLoading(false);
+        }
+    };
+
+    // ── Email OTP: Send verification code when updating email ──
+    const handleSendChangeEmailOtp = async () => {
+        const targetEmail = profileForm.data.email?.trim();
+        if (!targetEmail || targetEmail === user.email) {
+            toast.error(__('Please enter a new email address first.'));
+            return;
+        }
+
+        setEmailOtpLoading(true);
+        try {
+            const res = await axios.post('/api/user/email/send-otp', {
+                action: 'change_email',
+                email: targetEmail,
+            });
+            if (res.data?.success) {
+                setEmailOtpSent(true);
+                setEmailOtpVerified(false);
+                toast.success(res.data.message || __('Verification code sent to your new email!'));
+            } else {
+                toast.error(res.data?.message || __('Failed to send verification code.'));
+            }
+        } catch (err) {
+            toast.error(err.response?.data?.message || __('Error sending verification code.'));
+        } finally {
+            setEmailOtpLoading(false);
+        }
+    };
+
+    // ── Email OTP: Verify code for Email Change ──
+    const handleVerifyChangeEmailOtp = async () => {
+        if (!emailOtpCode || emailOtpCode.trim().length < 6) {
+            toast.error(__('Please enter the 6-digit verification code.'));
+            return;
+        }
+
+        setEmailOtpLoading(true);
+        try {
+            const res = await axios.post('/api/user/email/verify-otp', {
+                action: 'change_email',
+                otp: emailOtpCode.trim(),
+            });
+            if (res.data?.success) {
+                setEmailOtpVerified(true);
+                setEmailOtpSent(false);
+                toast.success(res.data.message || __('Email verified! You can now save your changes.'));
+            } else {
+                toast.error(res.data?.message || __('Invalid verification code.'));
+            }
+        } catch (err) {
+            toast.error(err.response?.data?.message || __('Verification failed. Please try again.'));
+        } finally {
+            setEmailOtpLoading(false);
+        }
+    };
+
     // Handle Profile Form Submit
     const handleProfileSubmit = (e) => {
         e.preventDefault();
+
+        // If email was changed but not yet verified with OTP
+        if (profileForm.data.email && profileForm.data.email !== user.email && !emailOtpVerified) {
+            toast.error(__('Please verify your new email address with the verification code before saving.'));
+            return;
+        }
+
         profileForm.post(route('profile.update'), {
             preserveScroll: true,
             onSuccess: () => {
@@ -297,6 +403,40 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                 toast.error(__('Failed to upload profile picture.'));
             },
         });
+    };
+
+    const [autoGeneratingAvatar, setAutoGeneratingAvatar] = useState(false);
+
+    const handleAutoGenerateAvatar = async () => {
+        setAutoGeneratingAvatar(true);
+        try {
+            const seed = (user.name || user.email || 'user_' + Math.floor(Math.random() * 999999)).toString().trim().replace(/\s+/g, '-');
+            const styles = ['bottts', 'adventurer', 'avataaars', 'fun-emoji', 'thumbs', 'lorelei'];
+            const randomStyle = styles[Math.floor(Math.random() * styles.length)];
+            const avatarUrl = `https://api.dicebear.com/7.x/${randomStyle}/svg?seed=${encodeURIComponent(seed)}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`;
+
+            const res = await fetch(avatarUrl);
+            const blob = await res.blob();
+            const file = new File([blob], `avatar-${seed}.svg`, { type: 'image/svg+xml' });
+
+            const formData = new FormData();
+            formData.append('avatar', file);
+
+            router.post(route('profile.avatar.update'), formData, {
+                preserveScroll: true,
+                onSuccess: () => {
+                    toast.success(__('Avatar auto-generated & saved!'));
+                },
+                onError: () => {
+                    toast.error(__('Failed to save auto-generated avatar.'));
+                },
+            });
+        } catch (err) {
+            console.error('Failed generating avatar', err);
+            toast.error(__('Failed to auto-generate avatar.'));
+        } finally {
+            setAutoGeneratingAvatar(false);
+        }
     };
 
     // Handle Remove Avatar
@@ -440,6 +580,15 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                                         <RiCameraLine size={14} />
                                         {__('Upload Photo')}
                                     </button>
+                                    <button
+                                        type="button"
+                                        onClick={handleAutoGenerateAvatar}
+                                        disabled={autoGeneratingAvatar}
+                                        className="px-3 py-1.5 text-xs font-medium bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 rounded border border-emerald-500/30 transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-xs disabled:opacity-50"
+                                    >
+                                        <RiSparklingLine size={14} className={autoGeneratingAvatar ? 'animate-spin' : ''} />
+                                        {autoGeneratingAvatar ? __('Generating...') : __('Auto-Generate Avatar')}
+                                    </button>
                                     {user.avatar && (
                                         <button
                                             type="button"
@@ -480,18 +629,163 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
 
                                     {/* Email */}
                                     <div>
-                                        <label className="block text-xs font-semibold text-text mb-1">
-                                            {__('Email Address')} <span className="text-rose-500">*</span>
-                                        </label>
-                                        <input
-                                            type="email"
-                                            value={profileForm.data.email}
-                                            onChange={(e) => profileForm.setData('email', e.target.value)}
-                                            required
-                                            className="w-full px-3 py-2 text-xs h-10.5 bg-bg border border-border rounded text-text focus:outline-hidden focus:border-primary transition-colors"
-                                        />
+                                        <div className="flex items-center justify-between mb-1">
+                                            <label className="block text-xs font-semibold text-text">
+                                                {__('Email Address')} <span className="text-rose-500">*</span>
+                                            </label>
+                                            {profileForm.data.email !== user.email && (
+                                                emailOtpVerified ? (
+                                                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded border border-emerald-200">
+                                                        <RiShieldCheckLine size={13} /> {__('Verified')}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-[11px] font-medium text-amber-600 bg-amber-50 dark:bg-amber-950/30 px-2 py-0.5 rounded border border-amber-200">
+                                                        {__('Verification Required')}
+                                                    </span>
+                                                )
+                                            )}
+                                        </div>
+                                        <div className="relative">
+                                            <input
+                                                type="email"
+                                                value={profileForm.data.email}
+                                                onChange={(e) => {
+                                                    profileForm.setData('email', e.target.value);
+                                                    if (e.target.value !== user.email) {
+                                                        setEmailOtpVerified(false);
+                                                    }
+                                                }}
+                                                required
+                                                className="w-full px-3 py-2 text-xs h-10.5 bg-bg border border-border rounded text-text focus:outline-hidden focus:border-primary transition-colors"
+                                            />
+                                        </div>
                                         {profileForm.errors.email && (
                                             <p className="text-[11px] text-rose-500 mt-1">{profileForm.errors.email}</p>
+                                        )}
+
+                                        {/* OTP Verification widget when user changes email */}
+                                        {profileForm.data.email && profileForm.data.email !== user.email && !emailOtpVerified && (
+                                            <div className="mt-2.5 p-3 bg-bg border border-border rounded text-xs space-y-2">
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-text">
+                                                        <RiMailLine size={14} className="text-primary" />
+                                                        {__('Verify new address')}
+                                                    </span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={handleSendChangeEmailOtp}
+                                                        disabled={emailOtpLoading}
+                                                        className="px-2.5 py-1 text-[11px] font-semibold bg-secondary text-white rounded hover:opacity-90 disabled:opacity-50 cursor-pointer shadow-xs transition-opacity inline-flex items-center gap-1"
+                                                    >
+                                                        {emailOtpLoading ? (
+                                                            <>
+                                                                <RiRefreshLine size={12} className="animate-spin" />
+                                                                {__('Sending...')}
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <RiSendPlaneLine size={12} />
+                                                                {emailOtpSent ? __('Resend Code') : __('Send OTP')}
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                </div>
+
+                                                {emailOtpSent && (
+                                                    <div className="space-y-2 pt-2 border-t border-border">
+                                                        <p className="text-[11px] text-res">
+                                                            {__('Enter the 6-digit code sent to')} <strong className="text-text">{profileForm.data.email}</strong>:
+                                                        </p>
+                                                        <div className="flex items-center gap-2">
+                                                            <input
+                                                                type="text"
+                                                                placeholder={__('Enter 6-digit OTP')}
+                                                                value={emailOtpCode}
+                                                                maxLength={6}
+                                                                onChange={(e) => setEmailOtpCode(e.target.value)}
+                                                                className="flex-1 px-3 py-1.5 text-xs bg-bg border border-border rounded text-text font-mono tracking-widest focus:outline-hidden focus:border-primary"
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                onClick={handleVerifyChangeEmailOtp}
+                                                                disabled={emailOtpLoading || !emailOtpCode}
+                                                                className="px-3 py-1.5 text-xs font-semibold bg-emerald-600 text-white rounded hover:bg-emerald-700 disabled:opacity-50 cursor-pointer shadow-xs transition-colors"
+                                                            >
+                                                                {emailOtpLoading ? __('Verifying...') : __('Verify')}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* CNIC Scanner trigger bar */}
+                                    <div className="col-span-2 flex items-center justify-between p-2.5 rounded-lg bg-primary/5 border border-primary/20">
+                                        <div className="flex items-center gap-2">
+                                            <RiIdCardLine size={16} className="text-primary" />
+                                            <div>
+                                                <p className="text-xs font-semibold text-text">{__('Identity Verification & CNIC')}</p>
+                                                <p className="text-[11px] text-muted">{__('Scan your CNIC card to auto-fill CNIC Number and Date of Birth / Age.')}</p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowCnicScanner(true)}
+                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-primary bg-primary/10 hover:bg-primary hover:text-white rounded-md transition-all shrink-0"
+                                        >
+                                            <RiScanLine size={14} />
+                                            {__('Scan CNIC')}
+                                        </button>
+                                    </div>
+
+                                    {/* Date of Birth */}
+                                    <div>
+                                        <label className="block text-xs font-semibold text-text mb-1">
+                                            <span className="inline-flex items-center gap-1">
+                                                <RiCalendarLine size={13} className="text-primary" />
+                                                {__('Date of Birth')}
+                                            </span>
+                                        </label>
+                                        <input
+                                            type="date"
+                                            value={profileForm.data.date_of_birth}
+                                            onChange={(e) => profileForm.setData('date_of_birth', e.target.value)}
+                                            className="w-full px-3 py-2 text-xs h-10.5 bg-bg border border-border rounded text-text focus:outline-hidden focus:border-primary transition-colors"
+                                        />
+                                        {profileForm.errors.date_of_birth && (
+                                            <p className="text-[11px] text-rose-500 mt-1">{profileForm.errors.date_of_birth}</p>
+                                        )}
+                                    </div>
+
+                                    {/* CNIC Number */}
+                                    <div>
+                                        <div className="flex items-center justify-between mb-1">
+                                            <label className="block text-xs font-semibold text-text">
+                                                <span className="inline-flex items-center gap-1">
+                                                    <RiIdCardLine size={13} className="text-primary" />
+                                                    {__('CNIC Number')}
+                                                </span>
+                                            </label>
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowCnicScanner(true)}
+                                                className="text-[11px] font-semibold text-primary hover:underline inline-flex items-center gap-1"
+                                            >
+                                                <RiScanLine size={12} />
+                                                {__('Scan')}
+                                            </button>
+                                        </div>
+                                        <input
+                                            type="text"
+                                            value={profileForm.data.cnic}
+                                            onChange={(e) => profileForm.setData('cnic', e.target.value)}
+                                            placeholder="35202-1234567-1"
+                                            maxLength={15}
+                                            className="w-full px-3 py-2 text-xs h-10.5 bg-bg border border-border rounded text-text focus:outline-hidden focus:border-primary transition-colors font-mono"
+                                        />
+                                        {profileForm.errors.cnic && (
+                                            <p className="text-[11px] text-rose-500 mt-1">{profileForm.errors.cnic}</p>
                                         )}
                                     </div>
 
@@ -881,6 +1175,44 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                                 </div>
                             </label>
 
+                            {/* Chrome Desktop Notifications Card */}
+                            <div className="p-4 bg-primary/5 rounded border border-primary/20 space-y-2">
+                                <div className="flex items-start justify-between gap-3">
+                                    <div>
+                                        <span className="text-xs font-semibold text-text block">
+                                            {__('Chrome Desktop Push Notifications')}
+                                        </span>
+                                        <span className="text-[11px] text-res leading-relaxed block mt-0.5">
+                                            {__('Receive instant native desktop popups when a new product is added or when your order status updates.')}
+                                        </span>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={async () => {
+                                            if (typeof window !== 'undefined' && 'Notification' in window) {
+                                                const res = await Notification.requestPermission();
+                                                if (res === 'granted') {
+                                                    new Notification('NestifyTech Notifications Active', {
+                                                        body: 'You are now set up to receive instant notifications for orders and new products!',
+                                                        icon: '/assets/image/favicon.png',
+                                                    });
+                                                    toast.success(__('Chrome notifications enabled!'));
+                                                } else {
+                                                    toast.info(__('Notification permission was not granted.'));
+                                                }
+                                            } else {
+                                                toast.error(__('Desktop notifications are not supported by this browser.'));
+                                            }
+                                        }}
+                                        className="shrink-0 px-3 py-1.5 text-xs font-semibold bg-primary text-white rounded hover:opacity-90 shadow-xs cursor-pointer transition-opacity"
+                                    >
+                                        {typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted'
+                                            ? __('Active (Send Test)')
+                                            : __('Enable Desktop Alerts')}
+                                    </button>
+                                </div>
+                            </div>
+
                             <div className="pt-2">
                                 <button
                                     type="submit"
@@ -944,12 +1276,12 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
 
                         <form onSubmit={handleDeleteAccount} className="space-y-4">
                             <p className="text-xs text-res leading-relaxed">
-                                {__('Please enter your password to confirm that you wish to permanently delete your account.')}
+                                {__('For your security, please confirm your current password and enter the one-time verification code sent to your email.')}
                             </p>
 
                             <div>
                                 <label className="block text-xs font-semibold text-text mb-1">
-                                    {__('Current Password')}
+                                    {__('Current Password')} <span className="text-rose-500">*</span>
                                 </label>
                                 <input
                                     type="password"
@@ -964,10 +1296,57 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                                 )}
                             </div>
 
+                            {/* Email OTP Verification Section */}
+                            <div className="p-3 bg-bg border border-border rounded text-xs space-y-2">
+                                <div className="flex items-center justify-between gap-2">
+                                    <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-text">
+                                        <RiMailLine size={14} className="text-rose-600" />
+                                        {__('Email Verification Code')} <span className="text-rose-500">*</span>
+                                    </span>
+                                    <button
+                                        type="button"
+                                        onClick={handleSendDeleteOtp}
+                                        disabled={deleteOtpLoading}
+                                        className="px-2.5 py-1 text-[11px] font-semibold bg-secondary text-white rounded hover:opacity-90 disabled:opacity-50 cursor-pointer shadow-xs transition-opacity inline-flex items-center gap-1"
+                                    >
+                                        {deleteOtpLoading ? (
+                                            <>
+                                                <RiRefreshLine size={12} className="animate-spin" />
+                                                {__('Sending...')}
+                                            </>
+                                        ) : (
+                                            <>
+                                                <RiSendPlaneLine size={12} />
+                                                {deleteOtpSent ? __('Resend Code') : __('Send OTP to Email')}
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+
+                                <div className="pt-2 border-t border-border">
+                                    <input
+                                        type="text"
+                                        value={deleteForm.data.otp}
+                                        onChange={(e) => deleteForm.setData('otp', e.target.value)}
+                                        required
+                                        maxLength={6}
+                                        placeholder={__('Enter 6-digit code received on your email')}
+                                        className="w-full px-3 py-2 text-xs bg-bg border border-border rounded text-text font-mono tracking-widest focus:outline-hidden focus:border-rose-500"
+                                    />
+                                    {deleteForm.errors.otp && (
+                                        <p className="text-[11px] text-rose-500 mt-1">{deleteForm.errors.otp}</p>
+                                    )}
+                                </div>
+                            </div>
+
                             <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
                                 <button
                                     type="button"
-                                    onClick={() => setShowDeleteModal(false)}
+                                    onClick={() => {
+                                        setShowDeleteModal(false);
+                                        deleteForm.reset();
+                                        setDeleteOtpSent(false);
+                                    }}
                                     className="px-4 py-2 text-xs font-medium bg-bg hover:bg-border text-text rounded border border-border transition-colors cursor-pointer"
                                 >
                                     {__('Cancel')}
@@ -984,6 +1363,29 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                     </div>
                 </div>
             )}
+
+            {/* CNIC Scanner Modal */}
+            <CnicScanner
+                isOpen={showCnicScanner}
+                onClose={() => setShowCnicScanner(false)}
+                onScanComplete={({ cnic, dob, age }) => {
+                    let updated = false;
+                    if (cnic) {
+                        profileForm.setData('cnic', cnic);
+                        updated = true;
+                    }
+                    if (dob) {
+                        profileForm.setData('date_of_birth', dob);
+                        updated = true;
+                    }
+                    if (updated) {
+                        const parts = [];
+                        if (cnic) parts.push(`CNIC: ${cnic}`);
+                        if (dob) parts.push(`DOB: ${dob}${age !== null ? ` (Age: ${age})` : ''}`);
+                        toast.success(`Scanned successfully: ${parts.join(', ')}`);
+                    }
+                }}
+            />
         </ProfileLayout>
     );
 }

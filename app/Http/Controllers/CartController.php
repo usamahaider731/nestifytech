@@ -83,8 +83,9 @@ class CartController extends Controller
                 }
             }
 
-            // 2. Calculate order totals
-            $total = collect($items)->sum(fn($i) => $i['price'] * $i['qty']);
+            $itemsTotal = collect($items)->sum(fn($i) => (float) $i['price'] * (int) $i['qty']);
+            $shippingAmount = (float) $request->input('shipping_amount', 0);
+            $total = $itemsTotal + $shippingAmount;
 
             // 3. Create the parent order record
             $paymentMethod = $request->input('payment_method', 'cod');
@@ -92,8 +93,26 @@ class CartController extends Controller
             $paymentIntentId = $request->input('payment_intent_id');
             
             // Get user id, checking web guard if default api guard is empty
-            $userId = Auth::id() ?? optional(Auth::guard('web')->user())->id;
+            $firstName = $request->input('first_name', '');
+            $lastName = $request->input('last_name', '');
+            $fullName = trim("{$firstName} {$lastName}") ?: optional(Auth::user())->name;
+            $customerPhone = $request->input('phone', '') ?: (optional(Auth::user())->meta ? optional(Auth::user())->meta->phone : '');
+            $shippingAddress = $request->input('address', '');
+            $shippingCity = $request->input('city', '');
+            $shippingPostal = $request->input('postal_code', '');
+            $customerNotes = [];
+            if ($customerPhone) {
+                $customerNotes[] = "Contact Phone: {$customerPhone}";
+            }
+            if ($shippingPostal) {
+                $customerNotes[] = "Postal Code: {$shippingPostal}";
+            }
+            if ($shippingAmount > 0) {
+                $customerNotes[] = "Shipping: {$shippingAmount}";
+            }
+            $notesString = !empty($customerNotes) ? implode(' | ', $customerNotes) : null;
 
+            $userId = Auth::id();
             $orderId = DB::table('orders')->insertGetId([
                 'product_id'     => $items[0]['productId'],   // primary product (first item)
                 'user_id'        => $userId,
@@ -101,6 +120,9 @@ class CartController extends Controller
                 'price'          => $items[0]['price'],
                 'total_price'    => $total,
                 'status'         => 'pending',
+                'shipping_address' => $shippingAddress,
+                'shipping_city'  => $shippingCity,
+                'customer_notes' => $notesString,
                 'payment_method' => $paymentMethod,
                 'payment_status' => $paymentStatus,
                 'stripe_payment_intent_id' => $paymentIntentId,

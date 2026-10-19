@@ -18,9 +18,9 @@ function AdminLayoutInner({ children, title }) {
             <aside className='w-[260px] min-w-[260px] h-screen sticky top-0 left-0 border-r border-permanent/40 bg-accent z-30 shadow-lg'>
                 <AdminPanel />
             </aside>
-            <div className='flex-1 flex flex-col min-h-screen bg-bg'>
+            <div className='flex-1 min-w-0 flex flex-col min-h-screen bg-bg'>
                 <Header />
-                <main className='px-6 pb-8 flex-1'>
+                <main className='px-6 pb-8 flex-1 min-w-0'>
                     {children}
                 </main>
             </div>

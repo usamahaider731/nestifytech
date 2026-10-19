@@ -490,9 +490,12 @@ function Index({ data, table, type, stats }) {
     formData.append('format', exportFormat);
 
     router.post(route('admin.import'), formData, {
-      onSuccess: () => alert('Import successful'),
-      onError: (err) => alert(err.file || err.table || 'Import failed'),
-      onFinish: () => setImporting(false)
+      onSuccess: () => addToast('Import completed successfully', 'success'),
+      onError: (err) => addToast(err.file || err.table || 'Import failed', 'error'),
+      onFinish: () => {
+        setImporting(false);
+        if (e.target) e.target.value = '';
+      }
     });
   }
 

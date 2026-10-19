@@ -1,0 +1,133 @@
+{
+    "table": "posts",
+    "data": [
+        {
+            "user_id": 1,
+            "title": "Top 10 Flagship Smartphones to Watch in 2026",
+            "sku": "top-10-flagship-smartphones-2026",
+            "description": "<h2>Top 10 Flagship Smartphones to Watch in 2026</h2><p>The smartphone market is more exciting than ever in 2026. From groundbreaking camera systems to unprecedented AI capabilities, these flagship devices are pushing the boundaries of what's possible in your pocket.</p><h3>1. The AI-Powered Revolution</h3><p>This year's flagships are defined by on-device AI processing. From real-time translation to intelligent photography that anticipates your shot before you press the shutter — artificial intelligence is now the core differentiator among premium smartphones.</p><h3>2. Display Technology Breakthroughs</h3><p>Variable refresh rate displays up to 165Hz, under-display cameras with dramatically improved image quality, and foldable form factors that have finally matured into daily-driver worthy devices are all on our list.</p><h3>3. Battery Life: The Final Frontier</h3><p>Solid-state battery technology is beginning to trickle into flagship phones, promising 20-30% more capacity in the same physical space. Combined with more efficient chipsets, all-day battery life is now a minimum expectation rather than a premium feature.</p><h3>4. Camera Systems: Computational vs Hardware</h3><p>The debate between computational photography and pure optical hardware rages on, but 2026's best phones are finding ways to do both — offering periscope zoom up to 10x and sensor sizes that would have been unimaginable five years ago.</p><h3>5. Connectivity and Beyond 5G</h3><p>With satellite connectivity now standard on many flagships, you're never truly out of reach. Wi-Fi 7 brings multi-gigabit speeds that make wired connections feel redundant for most use cases.</p><p>Stay tuned to NestifyTech for our in-depth reviews of each device as they launch throughout the year.</p>",
+            "status": "publish",
+            "type": "blog",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "short_description", "value": "Explore the game-changing smartphones pushing boundaries in battery life, display technology, and AI processing power." }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "blog_category", "value": "{resolve_json:taxonomies.id=tech-trends@slug}" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "seo_title", "value": "Top 10 Flagship Smartphones to Watch in 2026 | NestifyTech Blog" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "seo_keywords", "value": "flagship smartphones, 2026 phones, best smartphones, AI phones" }
+                }
+            ]
+        },
+        {
+            "user_id": 1,
+            "title": "Ultrabooks vs Gaming Laptops: Finding Your Perfect Balance",
+            "sku": "ultrabooks-vs-gaming-laptops-guide",
+            "description": "<h2>Ultrabooks vs Gaming Laptops: Finding Your Perfect Balance</h2><p>Choosing between an ultrabook and a gaming laptop is one of the most common dilemmas for laptop shoppers. Both categories have evolved significantly, and the line between them is blurring — but they still serve fundamentally different purposes.</p><h3>What Makes an Ultrabook?</h3><p>Ultrabooks prioritize portability, battery life, and build quality over raw performance. They typically feature thin-and-light chassis under 1.5kg, 15+ hours of battery life, premium materials like aluminum or carbon fiber, and processors optimized for efficiency rather than maximum throughput.</p><h3>The Gaming Laptop Proposition</h3><p>Gaming laptops, on the other hand, pack discrete GPUs that enable high-frame-rate gaming, video editing, and 3D rendering. Modern gaming laptops have improved significantly in thermal management, but the trade-off between performance and portability remains real.</p><h3>The Hybrid Category</h3><p>In 2026, a new breed of laptops blurs these boundaries. Thin gaming laptops with advanced cooling vapor chambers can deliver solid gaming performance in a 1.8kg form factor — though usually at a premium price.</p><h3>Making the Decision</h3><ul><li><strong>Choose an Ultrabook if:</strong> You travel frequently, work in office environments, prioritize battery life, and your workload is productivity-focused.</li><li><strong>Choose a Gaming Laptop if:</strong> You play AAA games, work with video production, 3D modeling, or need maximum GPU performance.</li></ul><p>Browse our curated selection of both categories at NestifyTech to find your perfect match.</p>",
+            "status": "publish",
+            "type": "blog",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "short_description", "value": "A comprehensive guide to help you choose between ultrabooks and gaming laptops based on your lifestyle and workload." }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "blog_category", "value": "{resolve_json:taxonomies.id=buying-guides@slug}" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "seo_title", "value": "Ultrabooks vs Gaming Laptops: Finding Your Perfect Balance | NestifyTech Blog" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "seo_keywords", "value": "ultrabook, gaming laptop, buying guide, laptop comparison" }
+                }
+            ]
+        },
+        {
+            "user_id": 1,
+            "title": "How Spatial Audio and Lossless Codecs Transform Everyday Listening",
+            "sku": "spatial-audio-lossless-codecs-guide",
+            "description": "<h2>How Spatial Audio and Lossless Codecs Transform Everyday Listening</h2><p>The audio landscape has undergone a quiet revolution. Thanks to spatial audio and lossless streaming codecs, the gap between professional studio monitoring and consumer listening has narrowed dramatically.</p><h3>Understanding Spatial Audio</h3><p>Spatial audio, also known as 3D audio or immersive audio, uses psychoacoustic techniques to create the sensation of sound coming from all around you — including above and below. Dolby Atmos and Sony 360 Reality Audio are the two dominant formats, and they're now supported by major streaming services.</p><h3>Lossless Audio: What It Actually Means</h3><p>Lossless audio formats like FLAC, ALAC, and MQA preserve every bit of data from the original recording. Unlike MP3 or AAC which discard audio data deemed inaudible, lossless formats maintain the complete waveform, resulting in improved clarity, better stereo imaging, and more accurate instrument separation.</p><h3>Hardware Requirements</h3><p>To truly benefit from these technologies, you need compatible hardware: headphones with aptX Lossless or LDAC support, DACs (digital-to-analog converters) with high SNR ratings, and amplifiers capable of driving your headphones properly.</p><h3>Is the Difference Audible?</h3><p>The answer depends on your equipment, your ears, and the recording quality. In blind listening tests, trained listeners can reliably distinguish lossless from high-quality lossy formats on well-recorded material through capable headphones.</p><p>Explore our curated selection of audiophile-grade headphones and DACs at NestifyTech.</p>",
+            "status": "publish",
+            "type": "blog",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "short_description", "value": "High-resolution wireless audio is finally practical. Discover the codecs, hardware drivers, and tuning that make a difference." }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "blog_category", "value": "{resolve_json:taxonomies.id=product-reviews@slug}" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "seo_title", "value": "Spatial Audio & Lossless Codecs: Transform Your Listening Experience | NestifyTech Blog" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "seo_keywords", "value": "spatial audio, lossless audio, Dolby Atmos, FLAC, headphones" }
+                }
+            ]
+        },
+        {
+            "user_id": 1,
+            "title": "Building an Intuitive Smart Home: Where to Begin",
+            "sku": "building-intuitive-smart-home-guide",
+            "description": "<h2>Building an Intuitive Smart Home: Where to Begin</h2><p>The promise of a smart home is compelling: lights that respond to voice commands, thermostats that learn your schedule, security cameras that send alerts to your phone, and appliances that communicate with each other seamlessly. But where do you actually start?</p><h3>Choosing Your Ecosystem</h3><p>The most important decision is which smart home ecosystem to build around. The three major platforms — Amazon Alexa, Google Home, and Apple HomeKit — each have strengths and weaknesses. Matter, the new universal protocol, is gradually making cross-ecosystem compatibility better, but your primary ecosystem still matters.</p><h3>Start with the Fundamentals</h3><p>Smart lighting is the easiest entry point. Smart bulbs or in-wall switches provide immediate, tangible benefits with relatively straightforward installation. Follow this with a smart thermostat — the energy savings alone often justify the investment within the first year.</p><h3>Security and Monitoring</h3><p>Video doorbells and indoor cameras give you visibility into your home from anywhere. Look for cameras with local storage options rather than cloud-only solutions to maintain control over your footage.</p><h3>Automation: Where the Magic Happens</h3><p>True smart home magic happens through automations: scenes that adjust multiple devices simultaneously, routines that trigger based on time or location, and conditions that make devices respond to each other intelligently.</p><h3>Getting Started</h3><p>Browse our smart home collection at NestifyTech, where we've curated devices that work well together and offer genuine quality-of-life improvements.</p>",
+            "status": "publish",
+            "type": "blog",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "short_description", "value": "A beginner's guide to building a smart home ecosystem that actually works for your lifestyle." }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "blog_category", "value": "{resolve_json:taxonomies.id=smart-home@slug}" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "seo_title", "value": "Building an Intuitive Smart Home: Where to Begin | NestifyTech Blog" }
+                },
+                {
+                    "insert_in": "related_table",
+                    "table": "post_meta",
+                    "data": { "post_id": "{insert_id}", "key": "seo_keywords", "value": "smart home, home automation, Alexa, Google Home, HomeKit" }
+                }
+            ]
+        }
+    ]
+}

@@ -20,6 +20,7 @@ import { addToCompare, removeFromCompare, selectIsInCompare } from '@/store/comp
 import { addToWishlist, removeFromWishlist, selectIsInWishlist } from '@/store/wishListSlice';
 import { RiHeart2Fill } from 'react-icons/ri';
 import { recordWishlistActivity } from '@/Utils/recordWishlistActivity';
+import { calculateAdjustedPrice } from '@/Utils/helper';
 
 const ProductCardV2 = ({ className = '', product = {} }) => {
     const { setting, auth } = usePage().props;
@@ -62,7 +63,16 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
 
     const firstPrice = parsePrice(product.meta?.first_price?.value);
     const secondPrice = parsePrice(product.meta?.second_price?.value);
-    const salePrice = firstPrice > secondPrice && secondPrice > 0 ? secondPrice : firstPrice;
+    const baseRaw = (firstPrice > secondPrice && secondPrice > 0 ? secondPrice : firstPrice) || parsePrice(product?.price);
+    const regularRaw = firstPrice || secondPrice || 0;
+
+    const pricing = calculateAdjustedPrice({
+        basePrice: baseRaw,
+        regularPrice: regularRaw,
+        category: categories,
+    });
+
+    const salePrice = pricing.finalPrice;
     const brandTitle = Array.isArray(product.brand) ? product.brand[0]?.title : product.brand?.title;
     const shortDescription = String(product.meta?.short_description?.value ?? '');
 
@@ -86,12 +96,14 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
             setStock(product.meta?.stock?.value ?? 0);
         }
 
-        if (firstPrice > secondPrice && firstPrice > 0) {
+        if (pricing.totalDiscountPercentage > 0) {
+            setDiscount(pricing.totalDiscountPercentage);
+        } else if (firstPrice > secondPrice && firstPrice > 0) {
             setDiscount(((firstPrice - secondPrice) / firstPrice) * 100);
         } else {
             setDiscount(0);
         }
-    }, [product, firstPrice, secondPrice]);
+    }, [product, firstPrice, secondPrice, pricing.totalDiscountPercentage]);
 
 
     return (

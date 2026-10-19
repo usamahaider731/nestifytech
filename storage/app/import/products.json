@@ -1,3 +1,170 @@
 {
-
+    "table": "posts",
+    "data": [
+        {
+            "related_id": "1",
+            "user_id": "{admin_id}",
+            "title": "Samsung Galaxy S25 Ultra (12GB-256GB)",
+            "sku": "NST-82600001",
+            "description": "<p><strong>Product Title:</strong> Samsung Galaxy S25 Ultra (12GB-256GB)</p><p>Unlock ultimate performance with the Samsung Galaxy S25 Ultra. This powerhouse features a 6.8\" Dynamic AMOLED display for vibrant visuals, 12GB RAM and 256GB storage for seamless multitasking, and a quad-camera setup with 108MP primary sensor and 100x zoom.</p><ul><li>6.8-inch Dynamic AMOLED 2X, 120Hz display</li><li>Quad-camera with 108MP primary sensor and 100x zoom</li><li>12GB RAM, 256GB high-speed UFS 4.0 storage</li><li>Long-lasting 5000mAh battery with 45W fast charging</li><li>Integrated S-Pen stylus and titanium frame</li></ul>",
+            "status": "publish",
+            "type": "product",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "first_price", "value": "250000" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "second_price", "value": "200000" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "stock", "value": "7" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "short_description", "value": "<p>Introducing the Samsung Galaxy S25 Ultra, redefining smartphone excellence with 12GB RAM, 256GB storage, and revolutionary camera capabilities.</p>" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "category", "value": "{related_taxonomy_json:720,719}" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "brand", "value": "{related_taxonomy:718}" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "tags", "value": "{related_taxonomy_json:717}" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "address", "value": "Main Park Gulshan-e-Ravi, Lahore, Punjab, Pakistan" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "state", "value": "257" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "city", "value": "506" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "seo_title", "value": "Samsung Galaxy S25 Ultra (12GB-256GB) Price in Pakistan" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "seo_keywords", "value": "premium, samsung, top product, featured, s25 ultra" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "seo_description", "value": "<p>This is samsung premium flagship mobile that provides top-tier performance and photography.</p>" } },
+                { "insert_in": "related_table", "table": "media", "data": { "filename": "1786225579_samsung-galaxy-s25-ultra-12gb-256gb-pakistan-priceoye-h0km1-500x500.webp", "name": "Samsung Galaxy S25 Ultra Featured", "parent_id": "{insert_id}", "type": "post" } },
+                { "insert_in": "related_table", "table": "media", "data": { "filename": "1786225579_6a77a3ab42057_samsung-galaxy-s25-ultra-12gb-256gb-pakistan-priceoye-f5qk5-500x500.webp", "name": "Gallery 1", "parent_id": "{insert_id}", "type": "post_gallery" } },
+                { "insert_in": "related_table", "table": "media", "data": { "filename": "1786225579_6a77a3ab42e39_samsung-galaxy-s25-ultra-12gb-256gb-pakistan-priceoye-h0km1-500x500.webp", "name": "Gallery 2", "parent_id": "{insert_id}", "type": "post_gallery" } },
+                { "insert_in": "related_table", "table": "media", "data": { "filename": "1786225579_6a77a3ab438bb_samsung-galaxy-s25-ultra-12gb-256gb-pakistan-priceoye-kjqq6-500x500.webp", "name": "Gallery 3", "parent_id": "{insert_id}", "type": "post_gallery" } },
+                { "insert_in": "related_table", "table": "media", "data": { "filename": "1786225579_6a77a3ab4424a_samsung-galaxy-s25-ultra-12gb-256gb-pakistan-priceoye-n4y7m-500x500.webp", "name": "Gallery 4", "parent_id": "{insert_id}", "type": "post_gallery" } },
+                { "insert_in": "related_table", "table": "media", "data": { "filename": "1786225579_6a77a3ab44bbf_samsung-galaxy-s25-ultra-12gb-256gb-pakistan-priceoye-sh46r-500x500.webp", "name": "Gallery 5", "parent_id": "{insert_id}", "type": "post_gallery" } }
+            ]
+        },
+        {
+            "related_id": "2",
+            "user_id": "{admin_id}",
+            "title": "Adidas Samba Shoes | Trending Samba (Unisex)",
+            "sku": "NST-1260900001",
+            "description": "<p><strong>Adidas Samba OG Shoes</strong></p><p>Born on the pitch, the Samba is a timeless icon of street style. This version stays true to its heritage with a soft leather upper and comfortable suede overlays.</p><ul><li>Regular fit, lace closure</li><li>Full grain leather upper with gritty suede and gold foil details</li><li>Synthetic leather lining, gum rubber midsole and outsole</li><li>Timeless iconic 3-Stripes branding</li></ul>",
+            "status": "publish",
+            "type": "product",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "first_price", "value": "9999" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "second_price", "value": "4440" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "stock", "value": "17" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "short_description", "value": "<p><strong><em>The iconic Adidas Samba sneakers delivering timeless comfort and street-smart aesthetic.</em></strong></p>" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "category", "value": "{related_taxonomy_json:727}" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "brand", "value": "{related_taxonomy:728}" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "tags", "value": "{related_taxonomy_json:717}" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "seo_title", "value": "Adidas Samba Shoes | Trending Unisex Sneakers" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "seo_keywords", "value": "Adidas, Shoes, Samba, Trending Sneakers" } },
+                { "insert_in": "related_table", "table": "media", "data": { "filename": "1788693515_b94988229a496788ed52e66ecad2589d.jpg_720x720q80.jpg_.webp", "name": "Adidas Samba Featured", "parent_id": "{insert_id}", "type": "post" } },
+                { "insert_in": "related_table", "table": "media", "data": { "filename": "1788693515_6a9d4c0b8d68e_b94988229a496788ed52e66ecad2589d.jpg_720x720q80.jpg_.webp", "name": "Gallery 1", "parent_id": "{insert_id}", "type": "post_gallery" } },
+                { "insert_in": "related_table", "table": "media", "data": { "filename": "1788693515_6a9d4c0b8e758_e020b54556388518baf12b6405918864.jpg_720x720q80.jpg_.webp", "name": "Gallery 2", "parent_id": "{insert_id}", "type": "post_gallery" } },
+                { "insert_in": "related_table", "table": "media", "data": { "filename": "1788693515_6a9d4c0b8fd84_6328a584422c7c140f683b67d61523f8.jpg_720x720q80.jpg_.webp", "name": "Gallery 3", "parent_id": "{insert_id}", "type": "post_gallery" } }
+            ]
+        },
+        {
+            "related_id": "3",
+            "user_id": "{admin_id}",
+            "title": "Skechers - Junior (10 Years - 14 Years)",
+            "sku": "NST-1260900002",
+            "description": "<p>The SKECHERS Retro Graph Slip-In shoes make school mornings and busy days effortless for kids. Built for everyday wear, they give little ones the comfort they want without slowing them down.</p><ul><li>Hands Free Slip-ins® design for easy step-in</li><li>Heel Pillow® keeps foot secure</li><li>Air-Cooled Memory Foam® cushioned insole</li><li>Flexible traction outsole for steady grip</li><li>Machine washable construction</li></ul>",
+            "status": "publish",
+            "type": "product",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "first_price", "value": "19999" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "second_price", "value": "13999" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "stock", "value": "7" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "short_description", "value": "<p>Skechers Retro Graph Slip-In shoes with Air-Cooled Memory Foam for school and active play.</p>" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "category", "value": "{related_taxonomy_json:727}" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "brand", "value": "{related_taxonomy:731}" } },
+                { "insert_in": "related_table", "table": "media", "data": { "filename": "skechers-junior-10-years-14-years.jpg", "name": "Skechers Featured", "parent_id": "{insert_id}", "type": "post" } },
+                { "insert_in": "related_table", "table": "media", "data": { "filename": "skechers-junior-10-years-14-years-1.jpg", "name": "Gallery 1", "parent_id": "{insert_id}", "type": "post_gallery" } },
+                { "insert_in": "related_table", "table": "media", "data": { "filename": "skechers-junior-10-years-14-years-2.jpg", "name": "Gallery 2", "parent_id": "{insert_id}", "type": "post_gallery" } }
+            ]
+        },
+        {
+            "related_id": "4",
+            "user_id": "{admin_id}",
+            "title": "HP EliteBook 840 G7 | Core i5 10th Gen | 8GB RAM | 256GB SSD",
+            "sku": "NST-1260900003",
+            "description": "<p>The HP EliteBook 840 G7 is an enterprise-class ultrabook crafted with an all-metal aluminum chassis. Powered by a 10th Gen Intel Core processor, it combines fast boot times, crisp Bang & Olufsen sound, and a durable design.</p><ul><li>14.0-inch Full HD (1920x1080) IPS anti-glare display</li><li>Intel Core i5 10th Gen processor (1.6 to 4.2 GHz)</li><li>8GB DDR4 RAM, 256GB NVMe SSD</li><li>Bang & Olufsen studio-quality dual speakers</li><li>Wi-Fi 6, Bluetooth 5.0, Thunderbolt 3 ports</li></ul>",
+            "status": "publish",
+            "type": "product",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "first_price", "value": "80000" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "second_price", "value": "80000" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "stock", "value": "3" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "short_description", "value": "<p>Ultra-slim aluminum enterprise laptop with 10th Gen Intel Core i5, 8GB RAM, and 14-inch FHD IPS display.</p>" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "category", "value": "{related_taxonomy_json:721,719}" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "brand", "value": "{related_taxonomy:730}" } },
+                { "insert_in": "related_table", "table": "media", "data": { "filename": "hp-elitebook-840-g7-core-i5-10th-generation-8gb-ram-256gb-ssd-14-inch-fhd-ips-display.webp", "name": "HP EliteBook Featured", "parent_id": "{insert_id}", "type": "post" } },
+                { "insert_in": "related_table", "table": "media", "data": { "filename": "hp-elitebook-840-g7-core-i5-10th-generation-8gb-ram-256gb-ssd-14-inch-fhd-ips-display-1.webp", "name": "Gallery 1", "parent_id": "{insert_id}", "type": "post_gallery" } },
+                { "insert_in": "related_table", "table": "media", "data": { "filename": "hp-elitebook-840-g7-core-i5-10th-generation-8gb-ram-256gb-ssd-14-inch-fhd-ips-display-2.webp", "name": "Gallery 2", "parent_id": "{insert_id}", "type": "post_gallery" } }
+            ]
+        },
+        {
+            "related_id": "5",
+            "user_id": "{admin_id}",
+            "title": "Premium School Bags for boys girls, university, college, laptop and travel",
+            "sku": "NST-1260900004",
+            "description": "<p>Multi-purpose water-resistant travel and laptop backpack designed for school, university, and daily commute.</p><ul><li>High-grade water-repellent oxford fabric</li><li>Dedicated padded sleeve for up to 15.6-inch laptops</li><li>Ergonomic breathable mesh shoulder straps</li><li>Multiple multi-utility zippered compartments</li></ul>",
+            "status": "publish",
+            "type": "product",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "first_price", "value": "6000" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "second_price", "value": "649" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "stock", "value": "25" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "short_description", "value": "<p>Top quality water-resistant backpack with padded laptop compartment and durable zippers.</p>" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "category", "value": "{related_taxonomy_json:727}" } },
+                { "insert_in": "related_table", "table": "media", "data": { "filename": "premium-school-bags-for-boys-girls-university-college-laptop-and-travel-many-more-boy-girl-men.webp", "name": "School Bag Featured", "parent_id": "{insert_id}", "type": "post" } },
+                { "insert_in": "related_table", "table": "media", "data": { "filename": "premium-school-bags-for-boys-girls-university-college-laptop-and-travel-many-more-boy-girl-men-1.webp", "name": "Gallery 1", "parent_id": "{insert_id}", "type": "post_gallery" } },
+                { "insert_in": "related_table", "table": "media", "data": { "filename": "premium-school-bags-for-boys-girls-university-college-laptop-and-travel-many-more-boy-girl-men-2.webp", "name": "Gallery 2", "parent_id": "{insert_id}", "type": "post_gallery" } }
+            ]
+        },
+        {
+            "related_id": "6",
+            "user_id": "{admin_id}",
+            "title": "TCL 50\" S5K QLED TV",
+            "sku": "NST-1260900005",
+            "description": "<p>Immerse yourself in cinematic 4K resolution with the TCL 50-inch S5K QLED Smart Google TV. Featuring quantum dot color technology, HDR 10, Dolby Audio, and Google Assistant voice control.</p><ul><li>50-inch 4K UHD (3840x2160) Quantum Dot QLED panel</li><li>HDR 10 and Micro Dimming for high contrast</li><li>Google TV with Chromecast built-in and Google Assistant</li><li>Dolby Audio cinematic sound system</li><li>Ultra-slim bezel-less metal aesthetics</li></ul>",
+            "status": "publish",
+            "type": "product",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "first_price", "value": "100000" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "second_price", "value": "87999" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "stock", "value": "5" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "short_description", "value": "<p>TCL 50-inch 4K QLED Smart TV with Google Assistant, HDR 10, and Dolby Audio.</p>" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "category", "value": "{related_taxonomy_json:732,719}" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "brand", "value": "{related_taxonomy:734}" } },
+                { "insert_in": "related_table", "table": "media", "data": { "filename": "tcl-50-s5k-qled-tv.webp", "name": "TCL QLED TV Featured", "parent_id": "{insert_id}", "type": "post" } },
+                { "insert_in": "related_table", "table": "media", "data": { "filename": "tcl-50-s5k-qled-tv-1.webp", "name": "Gallery 1", "parent_id": "{insert_id}", "type": "post_gallery" } },
+                { "insert_in": "related_table", "table": "media", "data": { "filename": "tcl-50-s5k-qled-tv-2.webp", "name": "Gallery 2", "parent_id": "{insert_id}", "type": "post_gallery" } }
+            ]
+        },
+        {
+            "related_id": "7",
+            "user_id": "{admin_id}",
+            "title": "Noise-Cancelling Headphones Pro",
+            "sku": "NST-1260900006",
+            "description": "<p>Experience audio perfection with hybrid active noise cancellation. Custom 40mm dynamic drivers deliver punchy bass and crystalline highs with 30-hour battery life.</p><ul><li>Hybrid Active Noise Cancellation with Transparency mode</li><li>40mm custom high-fidelity dynamic drivers</li><li>30 hours playback on single charge with fast USB-C charge</li><li>Ultra-comfortable memory foam ear cushions</li></ul>",
+            "status": "publish",
+            "type": "product",
+            "created_at": "{now}",
+            "updated_at": "{now}",
+            "relation": [
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "first_price", "value": "34999" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "second_price", "value": "28999" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "stock", "value": "40" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "short_description", "value": "<p>Over-ear wireless headphones with hybrid active noise cancellation and 30-hour battery.</p>" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "category", "value": "{related_taxonomy_json:733,719}" } },
+                { "insert_in": "related_table", "table": "post_meta", "data": { "post_id": "{insert_id}", "key": "brand", "value": "{related_taxonomy:703}" } },
+                { "insert_in": "related_table", "table": "media", "data": { "filename": "head-phones.jpg", "name": "Headphones Featured", "parent_id": "{insert_id}", "type": "post" } }
+            ]
+        }
+    ]
 }

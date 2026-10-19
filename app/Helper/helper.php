@@ -166,7 +166,7 @@ function hydrate_posts($result, array $args, bool $attachCategory, bool $attachB
         $result = \App\Models\PostTaxonomy::get_attribute($result, 'taxonomies', '', 'from_meta', 'tags', '');
     }
     if ($attachAddress) {
-        $result = \App\Models\PostTaxonomy::get_attribute($result, 'taxonomies', '', 'from_meta', ['state', 'city'], '');
+        $result = \App\Models\PostTaxonomy::get_attribute($result, 'taxonomies', '', 'from_meta', ['country', 'state', 'city'], '');
     }
 
     if (! empty($args['attributes']) && $result->isNotEmpty()) {
