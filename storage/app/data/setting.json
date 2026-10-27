@@ -87,15 +87,15 @@
             "type": "textarea",
             "value": "123 Tech Street, Silicon Valley, CA"
         },
-        "deliviry": {
-            "label": "Deviliry Package Per Order",
+        "shipping": {
+            "label": "Shipping Price",
             "type": "text",
             "value": "250"
         },
         "delivery_role": {
             "label": "Delivery Boy / Rider Staff Role",
             "type": "dropdown",
-            "value": "2",
+            "value": 2,
             "searchable": false,
             "description": "Select which staff role is treated as Delivery Boy/Rider for order dispatch.",
             "options": {
@@ -124,6 +124,79 @@
             "label": "Dark Logo",
             "type": "image",
             "value": "1791818351_28560d7113ad464752dd19ff0de702a8_dark_logo.png"
+        },
+        "social_media": {
+            "label": "Site Social Media Platforms",
+            "type": "repeater",
+            "value": [
+                {
+                    "platform": "facebook",
+                    "title": "Facebook",
+                    "url": "https://facebook.com/nestifytech",
+                    "icon": "ri-facebook-fill",
+                    "status": "1"
+                },
+                {
+                    "platform": "instagram",
+                    "title": "Instagram",
+                    "url": "https://instagram.com/nestifytech",
+                    "icon": "ri-instagram-line",
+                    "status": "1"
+                },
+                {
+                    "platform": "tiktok",
+                    "title": "TikTok",
+                    "url": "https://tiktok.com/@nestifytech",
+                    "icon": "ri-tiktok-line",
+                    "status": "1"
+                },
+                {
+                    "platform": "twitter",
+                    "title": "X (Twitter)",
+                    "url": "https://x.com/nestifytech",
+                    "icon": "ri-twitter-x-line",
+                    "status": "1"
+                },
+                {
+                    "platform": "youtube",
+                    "title": "YouTube",
+                    "url": "https://youtube.com/@nestifytech",
+                    "icon": "ri-youtube-line",
+                    "status": "1"
+                }
+            ],
+            "fields": [
+                {
+                    "name": "platform",
+                    "label": "Platform Key",
+                    "type": "text",
+                    "placeholder": "e.g. facebook, tiktok, instagram, youtube"
+                },
+                {
+                    "name": "title",
+                    "label": "Platform Title",
+                    "type": "text",
+                    "placeholder": "e.g. Facebook, Instagram"
+                },
+                {
+                    "name": "url",
+                    "label": "Profile / Page URL",
+                    "type": "text",
+                    "placeholder": "https://..."
+                },
+                {
+                    "name": "icon",
+                    "label": "Icon Class",
+                    "type": "text",
+                    "placeholder": "e.g. ri-facebook-fill, ri-instagram-line"
+                },
+                {
+                    "name": "status",
+                    "label": "Active Status (1 = Active, 0 = Inactive)",
+                    "type": "text",
+                    "placeholder": "1"
+                }
+            ]
         }
     },
     "backend-color": {
@@ -589,33 +662,88 @@
                     "active": true,
                     "placement": "product_sidebar",
                     "ad_type": "image",
-                    "link": "\/view\/post\/product\/NT-1326932\/2",
+                    "link": "/view/post/product/NT-1326932/2",
                     "open_new_tab": true,
                     "iframe": null,
                     "html": null,
-                    "image": "1790057432_67a1288f89c3bf186c3d765f7ab8b1ca_Adidas Samba Shoes.jpg"
+                    "image": "1792557147_67a1288f89c3bf186c3d765f7ab8b1ca_Adidas Samba Shoes.jpg"
                 },
                 {
                     "title": "Product Bottom Banner of Sale",
                     "active": true,
                     "placement": "product_bottom",
                     "ad_type": "image",
-                    "link": "http:\/\/nestifytech.localhost\/post\/product\/NT-1326932\/2",
+                    "link": "http://nestifytech.localhost/post/product/NT-1326932/2",
                     "open_new_tab": true,
                     "iframe": null,
                     "html": null,
-                    "image": "1790072874_3e63ceb9692ef57fac81becca83cd2c3_Add a heading (1).png"
+                    "image": "1792560102_3e63ceb9692ef57fac81becca83cd2c3_Add a heading (1).png"
                 },
                 {
                     "title": "Home Bottom Banner",
                     "active": true,
                     "placement": "home_bottom",
                     "ad_type": "image",
-                    "link": "\/view\/post\/product\/NST-1260900004\/6",
+                    "link": "/view/post/product/NST-1260900004/6",
                     "open_new_tab": true,
                     "iframe": null,
                     "html": null,
                     "image": "1791903223_03be58c579881cc455b0a5a1f800d9c0_Your paragraph text.png"
+                },
+                {
+                    "title": "Home - After Categories",
+                    "active": true,
+                    "placement": "home_after_categories",
+                    "ad_type": "image",
+                    "link": "/view/specific/classification/category/20/electronics",
+                    "open_new_tab": true,
+                    "iframe": null,
+                    "html": null,
+                    "image": "1792560102_542f21a71ae157df0761cfc58b211546_Untitled - October 20, 2026 at 22.59.59.png"
+                },
+                {
+                    "title": "Blog Bottom",
+                    "active": true,
+                    "placement": "blog_bottom",
+                    "ad_type": "image",
+                    "link": "/view/post/product/NST-82600001/12",
+                    "open_new_tab": true,
+                    "iframe": null,
+                    "html": null,
+                    "image": "1792583521_9add68b5ed7d47464f4d62218f43511f_Untitled - October 20, 2026 at 22.59.59 (1).png"
+                },
+                {
+                    "title": "Blog -  Sidebar",
+                    "active": true,
+                    "placement": "blog_sidebar",
+                    "ad_type": "image",
+                    "link": "/view/post/product/NT-1326932/2",
+                    "open_new_tab": true,
+                    "iframe": null,
+                    "html": null,
+                    "image": "1792583521_fa7c5d21c64e8d9227624323c9877cdb_Adidas Samba Shoes.jpg"
+                },
+                {
+                    "title": "Single Blog Bottom",
+                    "active": true,
+                    "placement": "single_blog_bottom",
+                    "ad_type": "image",
+                    "link": "/view/specific/classification/category/20/electronics",
+                    "open_new_tab": true,
+                    "iframe": null,
+                    "html": null,
+                    "image": "1792585630_a99354ee1646491865372039c07f4089_Untitled - October 20, 2026 at 22.59.59.png"
+                },
+                {
+                    "title": "Shop - Bottom",
+                    "active": true,
+                    "placement": "shop_bottom",
+                    "ad_type": "image",
+                    "link": null,
+                    "open_new_tab": true,
+                    "iframe": null,
+                    "html": null,
+                    "image": "1792644077_0779b0346a6338fa5b2427d967342d86_Untitled - October 22, 2026 at 09.23.25 (3).png"
                 }
             ],
             "fields": [
@@ -639,16 +767,8 @@
                     "searchable": false,
                     "options": [
                         {
-                            "id": "home_top",
-                            "title": "Home - After Slider"
-                        },
-                        {
                             "id": "home_after_categories",
                             "title": "Home - After Categories"
-                        },
-                        {
-                            "id": "home_after_products",
-                            "title": "Home - After Products"
                         },
                         {
                             "id": "home_bottom",
@@ -661,6 +781,22 @@
                         {
                             "id": "product_bottom",
                             "title": "Product - Bottom"
+                        },
+                        {
+                            "id": "blog_sidebar",
+                            "title": "Blog - Sidebar"
+                        },
+                        {
+                            "id": "blog_bottom",
+                            "title": "Blog - Bottom"
+                        },
+                        {
+                            "id": "shop_bottom",
+                            "title": "Shop - Bottom"
+                        },
+                        {
+                            "id": "single_blog_bottom",
+                            "title": "Single Blog Bottom"
                         }
                     ]
                 },
@@ -675,7 +811,7 @@
                         },
                         {
                             "id": "iframe",
-                            "title": "Iframe \/ Embed"
+                            "title": "Iframe / Embed"
                         },
                         {
                             "id": "html",
@@ -687,7 +823,7 @@
                     "name": "link",
                     "label": "Ad Link",
                     "type": "text",
-                    "placeholder": "https:\/\/example.com"
+                    "placeholder": "https://example.com"
                 },
                 {
                     "name": "open_new_tab",
@@ -704,13 +840,13 @@
                     "name": "iframe",
                     "label": "Iframe URL or Embed Code",
                     "type": "textarea",
-                    "placeholder": "https:\/\/... or <iframe src=\"...\"><\/iframe>"
+                    "placeholder": "https://... or <iframe src=\"...\"></iframe>"
                 },
                 {
                     "name": "html",
                     "label": "HTML Code",
                     "type": "textarea",
-                    "placeholder": "<div>Your ad HTML<\/div>"
+                    "placeholder": "<div>Your ad HTML</div>"
                 }
             ]
         }
@@ -804,7 +940,7 @@
         "stripe_section": {
             "type": "section",
             "label": "Stripe Card Payments",
-            "description": "Accept all major debit\/credit cards securely via Stripe.",
+            "description": "Accept all major debit/credit cards securely via Stripe.",
             "icon": "ri-bank-card-line",
             "toggle_field": "stripe_enabled"
         },
@@ -826,11 +962,11 @@
             },
             "options": {
                 "test": {
-                    "label": "Test \/ Sandbox",
+                    "label": "Test / Sandbox",
                     "value": "test"
                 },
                 "live": {
-                    "label": "Live \/ Production",
+                    "label": "Live / Production",
                     "value": "live"
                 }
             },
@@ -845,7 +981,7 @@
                 "field": "stripe_enabled",
                 "value": true
             },
-            "value": "pk_test_51UJo7aGy3HXmj7sy09u6u7U4h1W9900000000000"
+            "value": "pk_test_51UJo7aGy3HXmj7syMxgPwUGkHesj5DgbXY3zeFQEs0UyUpuRaIA6w2Cxrm2gvnj37GDa0YAWguiiCWH25qoOKsSM0040HXjtZq"
         },
         "stripe_secret_key": {
             "label": "Stripe Secret Key",
@@ -939,11 +1075,11 @@
             },
             "options": {
                 "sandbox": {
-                    "label": "Sandbox \/ Testing",
+                    "label": "Sandbox / Testing",
                     "value": "sandbox"
                 },
                 "live": {
-                    "label": "Live \/ Production",
+                    "label": "Live / Production",
                     "value": "live"
                 }
             },
@@ -1053,11 +1189,11 @@
             },
             "options": {
                 "sandbox": {
-                    "label": "Sandbox \/ Testing",
+                    "label": "Sandbox / Testing",
                     "value": "sandbox"
                 },
                 "live": {
-                    "label": "Live \/ Production",
+                    "label": "Live / Production",
                     "value": "live"
                 }
             },
@@ -1194,15 +1330,15 @@
             "label": "API Endpoint URL",
             "type": "text",
             "style": 2,
-            "placeholder": "https:\/\/graph.facebook.com\/v20.0\/{phone_number_id}\/messages",
+            "placeholder": "https://graph.facebook.com/v20.0/{phone_number_id}/messages",
             "condition": {
                 "field": "whatsapp_enabled",
                 "value": true
             },
-            "value": "https:\/\/wasenderapi.com\/api\/send-message"
+            "value": "https://wasenderapi.com/api/send-message"
         },
         "api_key": {
-            "label": "Meta \/ Facebook Access Token",
+            "label": "Meta / Facebook Access Token",
             "type": "password",
             "style": 2,
             "placeholder": "Enter your Meta System User or User Access Token (EAA...)",
@@ -1224,7 +1360,7 @@
             "value": "1396790376847486"
         },
         "sender_phone": {
-            "label": "WhatsApp Connected Number (Display \/ Support)",
+            "label": "WhatsApp Connected Number (Display / Support)",
             "type": "phone",
             "style": 2,
             "placeholder": "+1234567890",
@@ -1248,7 +1384,7 @@
     "mail": {
         "mail_section": {
             "type": "section",
-            "label": "SMTP \/ Mailtrap Email Configuration",
+            "label": "SMTP / Mailtrap Email Configuration",
             "description": "Configure outgoing transactional and notification emails using Mailtrap sandbox or production SMTP.",
             "icon": "ri-mail-settings-line",
             "toggle_field": "mail_enabled"
@@ -1261,7 +1397,7 @@
             "value": true
         },
         "mail_provider": {
-            "label": "Mail Service \/ Gateway",
+            "label": "Mail Service / Gateway",
             "type": "dropdown",
             "style": 2,
             "searchable": false,
@@ -1271,7 +1407,7 @@
             },
             "options": {
                 "mailtrap": {
-                    "label": "Mailtrap (Testing & Sandbox \/ Production)",
+                    "label": "Mailtrap (Testing & Sandbox / Production)",
                     "value": "mailtrap"
                 },
                 "smtp": {
@@ -1337,7 +1473,7 @@
             "value": "tls"
         },
         "mail_username": {
-            "label": "SMTP Username \/ API User",
+            "label": "SMTP Username / API User",
             "type": "text",
             "style": 2,
             "placeholder": "Enter SMTP Username",
@@ -1348,7 +1484,7 @@
             "value": "72ef4b055c7052"
         },
         "mail_password": {
-            "label": "SMTP Password \/ API Key",
+            "label": "SMTP Password / API Key",
             "type": "password",
             "style": 2,
             "placeholder": "Enter SMTP Password or Token",
@@ -1379,6 +1515,76 @@
                 "value": true
             },
             "value": "NestifyTech"
+        }
+    },
+    "popup": {
+        "sale_popup_enabled": {
+            "label": "Enable Sale / Offer Popup",
+            "type": "checkbox",
+            "value": true,
+            "value_label": "Enable Promotional Sale Popup on Frontend"
+        },
+        "popup_badge_text": {
+            "label": "Top Badge Text",
+            "type": "text",
+            "style": 2,
+            "placeholder": "e.g. Limited Time Mega Sale • Extra 25% Off",
+            "value": "Limited Time Mega Sale • Extra 25% Off"
+        },
+        "popup_title": {
+            "label": "Popup Title",
+            "type": "text",
+            "style": 2,
+            "placeholder": "e.g. Unlock 25% OFF Your Order",
+            "value": "Unlock 25% OFF Your Order"
+        },
+        "popup_highlight_text": {
+            "label": "Highlighted Discount Text",
+            "type": "text",
+            "style": 1,
+            "placeholder": "e.g. 25% OFF",
+            "value": "25% OFF"
+        },
+        "popup_description": {
+            "label": "Popup Subtitle / Description",
+            "type": "textarea",
+            "placeholder": "Enter promo message or discount conditions...",
+            "value": "Upgrade your shopping bag today. Use coupon code at checkout or subscribe to receive our VIP deals directly."
+        },
+        "popup_coupon_code": {
+            "label": "Promo / Coupon / Gift Card Code",
+            "type": "text",
+            "style": 1,
+            "placeholder": "e.g. NESTIFY25 or GC-WELCOME",
+            "value": "NESTIFY25"
+        },
+        "popup_cta_text": {
+            "label": "Claim Button Text",
+            "type": "text",
+            "style": 1,
+            "placeholder": "e.g. Claim 25% Off",
+            "value": "Claim 25% Off"
+        },
+        "popup_shop_url": {
+            "label": "Shop Button Link",
+            "type": "text",
+            "style": 1,
+            "placeholder": "e.g. /shop",
+            "value": "/shop"
+        },
+        "popup_delay_seconds": {
+            "label": "Popup Delay (Seconds)",
+            "type": "number",
+            "style": 1,
+            "placeholder": "3.5",
+            "value": 3.5
+        },
+        "popup_countdown_hours": {
+            "label": "Countdown Timer (Hours)",
+            "type": "number",
+            "style": 1,
+            "placeholder": "24",
+            "value": 24
         }
     }
 }

@@ -10,6 +10,8 @@ import { LanguageProvider } from '@/contexts/LanguageContext';
 import BrandSlider from '@/Components/BrandSlider';
 import CountryDetector from '@/Components/CountryDetector';
 import { ToastContainer } from 'react-toastify';
+import CookieConsent from '@/Components/CookieConsent';
+import PromoPopup from '@/Components/PromoPopup';
 
 export default function FrontendLayout({ children, title }) {
     return (
@@ -38,6 +40,8 @@ export default function FrontendLayout({ children, title }) {
                     <CartDrawer />
                     <WishlistDrawer />
                     <CompareDrawer />
+                    <PromoPopup />
+                    <CookieConsent />
                 </div>
             </CartProvider>
         </LanguageProvider>

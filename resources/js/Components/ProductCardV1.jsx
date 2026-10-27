@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import ImageViwer from './Admin/ImageViwer';
-import { RiEyeLine, RiHeart2Line, RiShoppingBagLine, RiStackLine, RiStarFill, RiStarHalfFill } from 'react-icons/ri';
+import { RiHeart2Line, RiHeart2Fill, RiStackLine, RiStarFill, RiStarHalfFill } from 'react-icons/ri';
 import { usePage, Link } from '@inertiajs/react';
 import { useCart } from '@/contexts/CartContext';
 import { useLang } from '@/contexts/LanguageContext';
@@ -9,12 +9,12 @@ import { FaEye } from 'react-icons/fa';
 import { useSelector, useDispatch } from 'react-redux';
 import { addToCompare, removeFromCompare, selectIsInCompare } from '@/store/compareSlice';
 import { addToWishlist, removeFromWishlist, selectIsInWishlist } from '@/store/wishListSlice';
-import { RiHeart2Fill } from 'react-icons/ri';
 import { recordWishlistActivity } from '@/Utils/recordWishlistActivity';
-import { calculateAdjustedPrice } from '@/Utils/helper';
+import { calculateAdjustedPrice, resolveProductPrices, parseNumericPrice } from '@/Utils/helper';
+import { toast } from 'react-toastify';
 
 const ProductCardV1 = ({ className = '', product = {} }) => {
-    const { setting, auth } = usePage().props;
+    const { setting, auth, activePricingRules = [] } = usePage().props;
     const cardSetting = setting.layout.Product_Card_V1;
     const currency = setting.site.currency.value ?? 'PKR';
     const { addItem } = useCart();
@@ -35,7 +35,13 @@ const ProductCardV1 = ({ className = '', product = {} }) => {
         }
     }
 
+    const isOwner = Boolean(auth?.user?.id && product?.user_id && Number(auth.user.id) === Number(product.user_id));
+
     const wishlistHandle = () => {
+        if (isOwner) {
+            toast(__('You cannot like or wishlist your own product.'));
+            return;
+        }
         if(isWishlist){
             dispatch(removeFromWishlist(product.id));
             if (auth?.user) recordWishlistActivity('wishlist_removed', product.id);
@@ -44,22 +50,21 @@ const ProductCardV1 = ({ className = '', product = {} }) => {
             if (auth?.user) recordWishlistActivity('wishlist_added', product.id);
         }
     }
-    const parsePrice = (priceVal) => {
-        if (typeof priceVal === 'number') return priceVal;
-        if (!priceVal) return 0;
-        const parsed = Number(String(priceVal).replace(/,/g, ''));
-        return Number.isNaN(parsed) ? 0 : parsed;
-    };
 
-    const firstPrice = parsePrice(product.meta?.first_price?.value);
-    const secondPrice = parsePrice(product.meta?.second_price?.value);
-    const baseRaw = (firstPrice > secondPrice && secondPrice > 0 ? secondPrice : firstPrice) || parsePrice(product?.price);
-    const regularRaw = firstPrice || secondPrice || 0;
+    const { firstPrice, secondPrice, basePrice: baseRaw, regularPrice: regularRaw } = resolveProductPrices(product);
+    const userDiscountPercent = parseNumericPrice(auth?.user?.discount || auth?.user?.meta?.discount || 0);
 
     const pricing = calculateAdjustedPrice({
         basePrice: baseRaw,
         regularPrice: regularRaw,
         category: categories,
+        brand: product.brand,
+        collection: product.collection ?? product.meta?.collection,
+        userDiscount: userDiscountPercent,
+        userDiscountType: 'percentage',
+        product,
+        user: auth?.user || null,
+        pricingRules: activePricingRules,
     });
 
     const salePrice = pricing.finalPrice;
@@ -88,12 +93,15 @@ const ProductCardV1 = ({ className = '', product = {} }) => {
         } else {
             setDiscount(0);
         }
-    }, [product, firstPrice, secondPrice, pricing.totalDiscountPercentage]);
+    }, [product.id, product.variations, product.meta, firstPrice, secondPrice, pricing.totalDiscountPercentage]);
 
     const handleAddToCart = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        const cartItem = normalizeProduct(product, currency);
+        const cartItem = normalizeProduct(product, currency, {
+            user: auth?.user || null,
+            pricingRules: activePricingRules,
+        });
         if (cartItem) {
             addItem(cartItem);
         }
@@ -144,15 +152,20 @@ const ProductCardV1 = ({ className = '', product = {} }) => {
                             {categories.map((category) => category?.title).filter(Boolean).join(', ')}
                         </p>
                     )}
-                    {cardSetting.show_product_rating && (
-                        <div className="flex items-center gap-0.5 text-amber-400">
-                            <RiStarFill className="size-3" />
-                            <RiStarFill className="size-3" />
-                            <RiStarFill className="size-3" />
-                            <RiStarFill className="size-3" />
-                            <RiStarHalfFill className="size-3" />
-                        </div>
-                    )}
+                    {cardSetting.show_product_rating && (() => {
+                        const rating = Number(product.rating ?? product.meta?.rating?.value ?? 0);
+                        if (!rating) return null;
+                        const fullStars = Math.floor(rating);
+                        const hasHalf = rating - fullStars >= 0.25 && rating - fullStars < 0.75;
+                        const emptyStars = 5 - fullStars - (hasHalf ? 1 : 0);
+                        return (
+                            <div className="flex items-center gap-0.5 text-amber-400">
+                                {Array.from({ length: fullStars }).map((_, i) => <RiStarFill key={`f${i}`} className="size-3" />)}
+                                {hasHalf && <RiStarHalfFill className="size-3" />}
+                                {Array.from({ length: emptyStars }).map((_, i) => <RiStarFill key={`e${i}`} className="size-3 opacity-20" />)}
+                            </div>
+                        );
+                    })()}
                 </div>
 
                 {productHref ? (
@@ -170,18 +183,18 @@ const ProductCardV1 = ({ className = '', product = {} }) => {
                         <span className="text-sm font-bold font-oswald text-heading">
                             {currency} {salePrice.toLocaleString()}
                         </span>
-                        {firstPrice > secondPrice && secondPrice > 0 && (
+                        {pricing.totalSavings > 0 && regularRaw > salePrice && (
                             <span className="text-xs font-medium text-res font-oswald line-through">
-                                {currency} {firstPrice.toLocaleString()}
+                                {currency} {regularRaw.toLocaleString()}
                             </span>
                         )}
                     </div>
-                    {cardSetting.product_add_to_cart_button && (
+                    {cardSetting.product_add_to_cart_button && productHref && (
                         <Link
                             href={productHref}
                             type="button"
                             className="h-10 w-full flex gap-2 shrink-0 items-center justify-center rounded bg-primary text-heading shadow-sm transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
-                            aria-label={__('Add to Cart')}
+                            aria-label={__('Show Details')}
                         >
                             <FaEye className="size-4" />
                             <span className='text-sm font-semibold font-poppins text-heading'>{__('Show Details')}</span>

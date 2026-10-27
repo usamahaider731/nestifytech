@@ -119,7 +119,7 @@ export default function ProfileLayout({ children, title = 'My Account', currentT
                                         href={item.href}
                                         className={`flex items-center gap-2 px-3 py-2 text-xs font-medium rounded transition-all ${
                                             isActive
-                                                ? 'bg-common text-white shadow-sm'
+                                                ? 'bg-primary text-white shadow-sm'
                                                 : 'text-text hover:bg-bg hover:text-primary'
                                         }`}
                                     >
@@ -184,7 +184,7 @@ export default function ProfileLayout({ children, title = 'My Account', currentT
                             </div>
 
                             {/* Sidebar Menu */}
-                            <div className="bg-bg border border-border rounded overflow-hidden shadow-xs">
+                            <div className="bg-bg border lg:block hidden border-border rounded overflow-hidden shadow-xs">
                                 <div className="px-4 py-3 border-b border-border bg-bg/50">
                                     <span className="text-xs font-semibold uppercase tracking-wider text-res">
                                         {__('Account Navigation')}
@@ -200,7 +200,7 @@ export default function ProfileLayout({ children, title = 'My Account', currentT
                                                 href={item.href}
                                                 className={`flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded transition-all ${
                                                     isActive
-                                                        ? 'bg-common text-white shadow-xs'
+                                                        ? 'bg-primary text-white shadow-xs'
                                                         : 'text-text hover:bg-bg hover:text-primary'
                                                 }`}
                                             >

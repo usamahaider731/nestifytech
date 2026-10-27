@@ -42,6 +42,7 @@ class SettingController extends Controller
             'stripe' => 'setting-read',
             'whatsapp' => 'setting-read',
             'mail' => 'setting-read',
+            'popup' => 'setting-read',
         ];
 
         $permissionKey = strtolower($request->type);

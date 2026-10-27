@@ -4,7 +4,10 @@ import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/Admin/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
+import SocialAuthButtons from '@/Components/Auth/SocialAuthButtons';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { RiLockPasswordLine, RiMailLine, RiLoginCircleLine, RiEyeCloseLine, RiEyeLine, RiEyeOffLine, RiEyeOffFill } from 'react-icons/ri';
+import { useState } from 'react';
 
 export default function Login({ status, canResetPassword }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -12,7 +15,7 @@ export default function Login({ status, canResetPassword }) {
         password: '',
         remember: false,
     });
-
+    const [PasswordType, SetPasswordType] = useState('password')
     const submit = (e) => {
         e.preventDefault();
 
@@ -25,48 +28,79 @@ export default function Login({ status, canResetPassword }) {
         <GuestLayout>
             <Head title="Log in" />
 
+            <div className="mb-6 text-center">
+                <h1 className="text-xl font-bold text-heading">Welcome Back</h1>
+                <p className="text-xs text-res mt-1">Sign in to access your orders, wishlist, and account.</p>
+            </div>
+
             {status && (
-                <div className="mb-4 text-sm font-medium text-green-600">
+                <div className="mb-4 p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-xs font-medium text-emerald-700">
                     {status}
                 </div>
             )}
 
-            <form onSubmit={submit}>
+            <form onSubmit={submit} className="space-y-4">
                 <div>
-                    <InputLabel htmlFor="email" value="Email" />
+                    <InputLabel htmlFor="email" value="Email Address" className="text-xs font-semibold text-text" />
 
-                    <TextInput
-                        id="email"
-                        type="email"
-                        name="email"
-                        value={data.email}
-                        className="mt-1 block w-full"
-                        autoComplete="username"
-                        isFocused={true}
-                        onChange={(e) => setData('email', e.target.value)}
-                    />
+                    <div className="relative mt-1">
+                        <TextInput
+                            id="email"
+                            type="email"
+                            name="email"
+                            value={data.email}
+                            className="block w-full text-xs pl-9 py-2.5 rounded-lg border-border focus:border-primary"
+                            autoComplete="username"
+                            isFocused={true}
+                            onChange={(e) => setData('email', e.target.value)}
+                            placeholder="you@example.com"
+                            required
+                        />
+                        <RiMailLine className="absolute left-3 top-1/2 -translate-y-1/2 text-res size-4" />
+                    </div>
 
-                    <InputError message={errors.email} className="mt-2" />
+                    <InputError message={errors.email} className="mt-1.5" />
                 </div>
 
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
+                <div>
+                    <div className="flex items-center justify-between">
+                        <InputLabel htmlFor="password" value="Password" className="text-xs font-semibold text-text" />
+                        {canResetPassword && (
+                            <Link
+                                href={route('password.request')}
+                                className="text-[11px] font-medium text-primary hover:underline"
+                            >
+                                Forgot password?
+                            </Link>
+                        )}
+                    </div>
 
-                    <TextInput
-                        id="password"
-                        type="password"
-                        name="password"
-                        value={data.password}
-                        className="mt-1 block w-full"
-                        autoComplete="current-password"
-                        onChange={(e) => setData('password', e.target.value)}
-                    />
+                    <div className="relative mt-1">
+                        <TextInput
+                            id="password"
+                            type={PasswordType}
+                            name="password"
+                            value={data.password}
+                            className="block w-full text-xs pl-9 py-2.5 rounded-lg border-border focus:border-primary"
+                            autoComplete="current-password"
+                            onChange={(e) => setData('password', e.target.value)}
+                            placeholder="••••••••"
+                            required
+                        />
+                        <RiLockPasswordLine className="absolute left-3 top-1/2 -translate-y-1/2 text-res size-4" />
+                        {
+                            PasswordType == "password" ?
+                                <RiEyeLine onClick={() => SetPasswordType('text')} className="absolute right-3 top-1/2 -translate-y-1/2 text-res size-4" />
+                                :
+                                <RiEyeOffLine onClick={() => SetPasswordType('password')} className="absolute right-3 top-1/2 -translate-y-1/2 text-res size-4" />
+                        }
+                    </div>
 
-                    <InputError message={errors.password} className="mt-2" />
+                    <InputError message={errors.password} className="mt-1.5" />
                 </div>
 
-                <div className="mt-4 block">
-                    <label className="flex items-center">
+                <div className="flex items-center justify-between pt-1">
+                    <label className="flex items-center cursor-pointer">
                         <Checkbox
                             name="remember"
                             checked={data.remember}
@@ -74,27 +108,32 @@ export default function Login({ status, canResetPassword }) {
                                 setData('remember', e.target.checked)
                             }
                         />
-                        <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
+                        <span className="ms-2 text-xs text-res">
                             Remember me
                         </span>
                     </label>
                 </div>
 
-                <div className="mt-4 flex items-center justify-end">
-                    {canResetPassword && (
-                        <Link
-                            href={route('password.request')}
-                            className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
-                        >
-                            Forgot your password?
-                        </Link>
-                    )}
-
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Log in
-                    </PrimaryButton>
-                </div>
+                <PrimaryButton className="w-full bg-primary hover:bg-secondary justify-center py-2.5 text-xs font-bold rounded-lg shadow-xs" disabled={processing}>
+                    <RiLoginCircleLine size={16} className="mr-1.5" />
+                    Sign in
+                </PrimaryButton>
             </form>
+
+            {/* Social Media Login (Google & Facebook) */}
+            <SocialAuthButtons action="Sign in" />
+
+            <div className="mt-6 pt-4 border-t border-border text-center">
+                <p className="text-xs text-res">
+                    Don't have an account?{' '}
+                    <Link
+                        href={route('register')}
+                        className="font-semibold text-primary hover:underline"
+                    >
+                        Create an account
+                    </Link>
+                </p>
+            </div>
         </GuestLayout>
     );
 }

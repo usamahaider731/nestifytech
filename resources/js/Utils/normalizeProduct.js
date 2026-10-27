@@ -1,9 +1,10 @@
-import { calculateAdjustedPrice } from './helper';
+import { calculateAdjustedPrice, resolveProductPrices, parseNumericPrice } from './helper';
 
 /**
  * Normalize API product payloads for cart and display helpers.
+ * Pass optional pricingContext: { user, pricingRules, couponCode }
  */
-export function normalizeProduct(product, currency = 'PKR') {
+export function normalizeProduct(product, currency = 'PKR', pricingContext = {}) {
     if (!product) {
         return null;
     }
@@ -12,14 +13,22 @@ export function normalizeProduct(product, currency = 'PKR') {
         return product;
     }
 
-    const firstPrice = Number(product.meta?.first_price?.value ?? 0);
-    const secondPrice = Number(product.meta?.second_price?.value ?? firstPrice);
+    const { firstPrice, basePrice, regularPrice } = resolveProductPrices(product);
+    const user = pricingContext.user ?? null;
+    const userDiscount = parseNumericPrice(user?.discount || user?.meta?.discount || pricingContext.userDiscount || 0);
 
-    // Calculate price adjusted by category tax and category discount
     const pricing = calculateAdjustedPrice({
-        basePrice: (firstPrice > secondPrice && secondPrice > 0) ? secondPrice : (firstPrice || product.price || 0),
-        regularPrice: firstPrice || secondPrice || 0,
+        basePrice,
+        regularPrice,
         category: product.category,
+        brand: product.brand,
+        collection: product.collection ?? product.meta?.collection,
+        userDiscount,
+        userDiscountType: 'percentage',
+        product,
+        user,
+        pricingRules: pricingContext.pricingRules ?? [],
+        couponCode: pricingContext.couponCode ?? null,
     });
 
     const finalPrice = pricing.finalPrice;

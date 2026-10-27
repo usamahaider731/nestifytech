@@ -177,12 +177,26 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
             setData(prev => ({ ...prev, [key]: value }));
         }
     };
+
+    const resolveOptionTitle = (fieldName, raw) => {
+        if (raw == null || raw === '') return '';
+        const first = Array.isArray(raw) ? raw[0] : raw;
+        if (first && typeof first === 'object') {
+            return first.title || first.name || first.label || '';
+        }
+        const opts = dropdownOptions[fieldName] || [];
+        const match = opts.find((opt) =>
+            String(opt.id ?? opt.value ?? '') === String(first)
+            || String(opt.title ?? opt.name ?? '') === String(first)
+        );
+        return match?.title || match?.name || match?.label || (typeof first === 'string' && !/^\d+$/.test(first) ? first : '');
+    };
     const fetchDropdownOptions = async (override = {}) => {
         const fetchFields = {};
 
         rows.forEach(section => {
             section.fields.forEach(field => {
-                if (field.type === 'dropdown' && field.options?.model ) {
+                if (field.type === 'dropdown' && field.options?.model) {
                     const hasDependency = field.depends_on;
                     const depVal = hasDependency ? data[hasDependency] : null;
                     const depHasValue = Array.isArray(depVal) ? depVal.length > 0 : Boolean(depVal);
@@ -233,17 +247,17 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
                     endpoint = `/api/menu-locations`;
                 } else if (config.model === 'Attribute') {
                     endpoint = `/api/attribute-options`;
+                } else if (config.model === 'Store') {
+                    endpoint = `/api/store-options`;
                 } else {
                     endpoint = `/api/${config.model.toLowerCase()}-options/${config.type ?? ''}`;
                 }
-
-                // Handle multiple parent values (e.g. city depends on multiple selected states)
                 const dependsOnValue = field?.depends_on ? data[field.depends_on] : null;
                 const parentIds = Array.isArray(dependsOnValue)
                     ? dependsOnValue.map(v => (typeof v === 'object' ? v.id ?? v : v)).filter(Boolean)
                     : dependsOnValue
-                    ? [typeof dependsOnValue === 'object' ? dependsOnValue.id ?? dependsOnValue : dependsOnValue]
-                    : [];
+                        ? [typeof dependsOnValue === 'object' ? dependsOnValue.id ?? dependsOnValue : dependsOnValue]
+                        : [];
 
                 let merged = [];
                 if (parentIds.length > 0) {
@@ -336,6 +350,57 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
         }
     }, [rows]);
 
+    const hasLatLngFields = rows.some((section) =>
+        (section.fields || []).some((f) => ['latitude', 'longitude', 'address_coordinates'].includes(f.name))
+    );
+    const cityGeoReadyRef = React.useRef(false);
+    const prevCityTitleRef = React.useRef('');
+
+    useEffect(() => {
+        if (!hasLatLngFields) return undefined;
+
+        const cityTitle = resolveOptionTitle('city', data.city);
+        if (!cityGeoReadyRef.current) {
+            if (data.city && !cityTitle) return undefined;
+            cityGeoReadyRef.current = true;
+            prevCityTitleRef.current = cityTitle;
+            return undefined;
+        }
+        if (prevCityTitleRef.current === cityTitle) return undefined;
+        prevCityTitleRef.current = cityTitle;
+        if (!cityTitle || cityTitle.length < 2) return undefined;
+
+        const query = [
+            cityTitle,
+            resolveOptionTitle('state', data.state),
+            resolveOptionTitle('country', data.country),
+        ].filter(Boolean).join(', ');
+
+        const controller = new AbortController();
+        const timer = window.setTimeout(() => {
+            axios.get('/api/geocode', {
+                params: { q: query, city: cityTitle, limit: 1 },
+                signal: controller.signal,
+            }).then((response) => {
+                const coords = response.data?.features?.[0]?.geometry?.coordinates;
+                if (!Array.isArray(coords) || coords.length < 2) return;
+                setData((prev) => ({
+                    ...prev,
+                    latitude: coords[1],
+                    longitude: coords[0],
+                    address_coordinates: coords,
+                }));
+            }).catch((error) => {
+                if (error.name === 'CanceledError' || error.code === 'ERR_CANCELED') return;
+            });
+        }, 250);
+
+        return () => {
+            window.clearTimeout(timer);
+            controller.abort();
+        };
+    }, [data.city, dropdownOptions.city, dropdownOptions.state, dropdownOptions.country, hasLatLngFields]);
+
     const groupedSections = {
         main: rows.filter(r => r.style !== 'sidebar' && !r.tab),
         sidebar: rows.filter(r => r.style === 'sidebar'),
@@ -358,24 +423,24 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
         ),
         'Gallery': (
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M4.502 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/>
-                <path d="M14.002 13a2 2 0 0 1-2 2h-10a2 2 0 0 1-2-2V5A2 2 0 0 1 2 3a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2zM14 2H4a1 1 0 0 0-1 1h9.002a2 2 0 0 1 2 2v7A1 1 0 0 0 15 11V3a1 1 0 0 0-1-1zM2.002 4a1 1 0 0 0-1 1v8l2.646-2.354a.5.5 0 0 1 .63-.062l2.66 1.773 3.71-3.71a.5.5 0 0 1 .577-.094l1.777 1.947V5a1 1 0 0 0-1-1h-10z"/>
+                <path d="M4.502 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" />
+                <path d="M14.002 13a2 2 0 0 1-2 2h-10a2 2 0 0 1-2-2V5A2 2 0 0 1 2 3a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2zM14 2H4a1 1 0 0 0-1 1h9.002a2 2 0 0 1 2 2v7A1 1 0 0 0 15 11V3a1 1 0 0 0-1-1zM2.002 4a1 1 0 0 0-1 1v8l2.646-2.354a.5.5 0 0 1 .63-.062l2.66 1.773 3.71-3.71a.5.5 0 0 1 .577-.094l1.777 1.947V5a1 1 0 0 0-1-1h-10z" />
             </svg>
         ),
         'Address': (
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+                <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z" />
             </svg>
         ),
         'Services': (
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M8.932.727c-.246-.48-.962-.48-1.208 0l-5.61 10.938A.68.68 0 0 0 2.73 12.6l4.77-1.363 4.77 1.363a.68.68 0 0 0 .616-.935L8.932.727zM8 10.334l-3.92.934 4.085-7.96 4.085 7.96L8 10.334z"/>
-                <path d="M8 12.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/>
+                <path d="M8.932.727c-.246-.48-.962-.48-1.208 0l-5.61 10.938A.68.68 0 0 0 2.73 12.6l4.77-1.363 4.77 1.363a.68.68 0 0 0 .616-.935L8.932.727zM8 10.334l-3.92.934 4.085-7.96 4.085 7.96L8 10.334z" />
+                <path d="M8 12.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z" />
             </svg>
         ),
         'Layout': (
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h11A1.5 1.5 0 0 1 15 2.5v11a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 13.5v-11zM2.5 2a.5.5 0 0 0-.5.5v11a.5.5 0 0 0 .5.5H6V2H2.5zm4.5 0v12h6.5a.5.5 0 0 0 .5-.5v-11a.5.5 0 0 0-.5-.5H7z"/>
+                <path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h11A1.5 1.5 0 0 1 15 2.5v11a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 13.5v-11zM2.5 2a.5.5 0 0 0-.5.5v11a.5.5 0 0 0 .5.5H6V2H2.5zm4.5 0v12h6.5a.5.5 0 0 0 .5-.5v-11a.5.5 0 0 0-.5-.5H7z" />
             </svg>
         ),
     };
@@ -453,6 +518,51 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
                                         />
                                     ))}
                                 </div>
+
+                                {section.title === 'Price Adjustment' && (
+                                    (() => {
+                                        const buy = parseFloat(String(data.buy_price || 0).replace(/,/g, '')) || 0;
+                                        const regular = parseFloat(String(data.first_price || 0).replace(/,/g, '')) || 0;
+                                        const sale = parseFloat(String(data.second_price || 0).replace(/,/g, '')) || 0;
+                                        const sellingPrice = (sale > 0 && sale < regular) ? sale : regular;
+                                        const profit = sellingPrice - buy;
+                                        const marginPct = sellingPrice > 0 && buy > 0 ? ((profit / sellingPrice) * 100).toFixed(1) : 0;
+                                        const markupPct = buy > 0 ? ((profit / buy) * 100).toFixed(1) : 0;
+
+                                        return (
+                                            <div className="mt-4 p-3.5 rounded-xl bg-bg/80 border border-permanent/30 flex flex-col gap-2.5">
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-[11px] font-bold uppercase tracking-wider text-secondary">
+                                                        Profit &amp; Margin Analysis
+                                                    </span>
+                                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${profit > 0 ? 'bg-emerald-500/15 text-emerald-500' : (profit < 0 ? 'bg-rose-500/15 text-rose-500' : 'bg-secondary/15 text-secondary')
+                                                        }`}>
+                                                        {profit > 0 ? `+${marginPct}% Margin` : (profit < 0 ? 'Loss' : 'Break-even')}
+                                                    </span>
+                                                </div>
+
+                                                <div className="grid grid-cols-2 gap-2 text-xs">
+                                                    <div className="flex flex-col p-2 rounded-lg bg-accent/60 border border-permanent/20">
+                                                        <span className="text-[10px] text-secondary">Est. Unit Profit</span>
+                                                        <span className={`font-bold text-sm ${profit >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                                            {profit >= 0 ? `+` : ''}{profit.toLocaleString()}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex flex-col p-2 rounded-lg bg-accent/60 border border-permanent/20">
+                                                        <span className="text-[10px] text-secondary">Markup on Cost</span>
+                                                        <span className="font-bold text-sm text-heading">
+                                                            {markupPct}%
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <p className="text-[10px] text-secondary/80 italic">
+                                                    * Buy price is strictly confidential and never visible to customers on the storefront.
+                                                </p>
+                                            </div>
+                                        );
+                                    })()
+                                )}
                             </div>
                         ))}
                     </div>

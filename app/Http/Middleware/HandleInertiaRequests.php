@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Support\LanguageHelper;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View;
 use Inertia\Middleware;
 
@@ -68,6 +69,28 @@ class HandleInertiaRequests extends Middleware
                 'type' => 'category',
                 'status' => 'publish',
             ]);
+
+            // Share active discount and tax rules for dynamic pricing (DB only, no model)
+            try {
+                $now = now();
+                $rules = DB::table('promotions_and_tax_rules')
+                    ->where('status', 'active')
+                    ->where(function ($q) use ($now) {
+                        $q->whereNull('start_date')->orWhere('start_date', '<=', $now);
+                    })
+                    ->where(function ($q) use ($now) {
+                        $q->whereNull('end_date')->orWhere('end_date', '>=', $now);
+                    })
+                    ->orderByDesc('priority')
+                    ->get()
+                    ->map(function ($rule) {
+                        $rule->target_ids = $rule->target_ids ? json_decode($rule->target_ids, true) : [];
+                        return $rule;
+                    });
+                $shared['activePricingRules'] = $rules;
+            } catch (\Throwable $e) {
+                $shared['activePricingRules'] = [];
+            }
         }
 
         return $shared;

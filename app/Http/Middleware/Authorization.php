@@ -24,7 +24,7 @@ class Authorization {
         }
 
         if (!$valid) {
-            return response(['error' => true, 'message' => 'Invalid API key'], 200);
+            return response(['error' => true, 'message' => 'Invalid API key'], 401);
         }
         return $next($request);
     }

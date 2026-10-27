@@ -15,10 +15,10 @@ const MainSlider = ({ data }) => {
     const Delay = Number(Setting.layout.Home.banner_slider_duration);
     const DelaySlider = Delay || 5000;
     return (
-        <Slider autoplay={Autoplay} autoplayOptions={{delay: DelaySlider, stopOnInteraction: false}} effect={effect} options={{loop: true, duration: Duration}} showNavigation={Navigation} containerClass={container_type === "container" ? "container mx-auto" : ""}>
+        <Slider autoplay={Autoplay} autoplayOptions={{ delay: DelaySlider, stopOnInteraction: false }} effect={effect} options={{ loop: true, duration: Duration }} showNavigation={Navigation} containerClass={""}>
             {Sliders && Sliders &&
                 Sliders.map((value, idx) => (
-                    <div className="embla__slide" key={idx}>
+                    <div className="embla__slide w-full" key={idx}>
                         <ImageViwer image={value} width="100%" />
                     </div>
                 ))}

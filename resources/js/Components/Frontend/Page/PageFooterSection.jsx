@@ -134,27 +134,25 @@ export default function PageFooterSection({
                             return (
                                 <div
                                     key={faq.id || index}
-                                    className="bg-bg rounded-2xl border border-border/60 overflow-hidden shadow-xs transition-all"
+                                    className="bg-bg rounded-md border border-border/60 overflow-hidden shadow-xs transition-all"
                                 >
                                     <button
                                         type="button"
                                         onClick={() => setOpenFaqIndex(isOpen ? -1 : index)}
-                                        className="w-full flex items-center justify-between p-4 sm:p-5 text-left transition-colors hover:bg-dynamic"
-                                    >
-                                        <span className="text-sm sm:text-base font-bold text-heading pr-4">
+                                        className="w-full flex items-center justify-between p-3 text-left transition-colors hover:bg-common">
+                                        <span className="text-sm sm:text-base font-semibold font-poppins text-heading pr-4">
                                             {faq.title}
                                         </span>
                                         <div
                                             className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${
-                                                isOpen ? 'bg-primary text-white rotate-180' : 'bg-dynamic text-res'
+                                                isOpen ? 'bg-primary text-white rotate-180' : 'bg-white text-res'
                                             }`}
                                         >
                                             <RiArrowDownSLine size={18} />
                                         </div>
                                     </button>
-
                                     {isOpen && (
-                                        <div className="px-4 sm:px-5 pb-5 text-xs sm:text-sm text-res/80 leading-relaxed border-t border-border/40 pt-3">
+                                        <div className="px-4 sm:px-5 pb-5 text-xs sm:text-sm text-text leading-relaxed border-t border-border/40 pt-3">
                                             <div
                                                 dangerouslySetInnerHTML={{
                                                     __html: faq.description || '',

@@ -12,9 +12,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { selectWishlistItems, selectWishlistCount, removeFromWishlist, toggleWishlist, selectIsWishlistOpen } from '@/store/wishListSlice';
 import { IoBagCheckOutline } from 'react-icons/io5';
 import { recordWishlistActivity } from '@/Utils/recordWishlistActivity';
+import { calculateAdjustedPrice, resolveProductPrices, parseNumericPrice } from '@/Utils/helper';
 
 export default function WishlistDrawer() {
-    const { setting, auth } = usePage().props;
+    const { setting, auth, activePricingRules = [] } = usePage().props;
     const currency = setting?.site?.currency?.value ?? 'PKR';
     const isOpen = useSelector(selectIsWishlistOpen);
     const { __ } = useLang();
@@ -22,13 +23,6 @@ export default function WishlistDrawer() {
     const dispatch = useDispatch();
     const items = useSelector(selectWishlistItems);
     const itemCount = useSelector(selectWishlistCount);
-
-    const parsePrice = (priceVal) => {
-        if (typeof priceVal === 'number') return priceVal;
-        if (!priceVal) return 0;
-        const parsed = Number(String(priceVal).replace(/,/g, ''));
-        return Number.isNaN(parsed) ? 0 : parsed;
-    };
 
     return (
         <Transition show={isOpen} as={Fragment}>
@@ -95,9 +89,20 @@ export default function WishlistDrawer() {
                                             ) : (
                                                 <ul className="space-y-4">
                                                     {items.map((item) => {
-                                                        const firstPrice = parsePrice(item.product?.meta?.first_price?.value);
-                                                        const secondPrice = parsePrice(item.product?.meta?.second_price?.value);
-                                                        const salePrice = firstPrice > secondPrice && secondPrice > 0 ? secondPrice : firstPrice;
+                                                        const product = item.product;
+                                                        const { basePrice, regularPrice } = resolveProductPrices(product);
+                                                        const pricing = calculateAdjustedPrice({
+                                                            basePrice,
+                                                            regularPrice,
+                                                            category: product?.category,
+                                                            brand: product?.brand,
+                                                            collection: product?.collection ?? product?.meta?.collection,
+                                                            userDiscount: parseNumericPrice(auth?.user?.discount || auth?.user?.meta?.discount || 0),
+                                                            product,
+                                                            user: auth?.user || null,
+                                                            pricingRules: activePricingRules,
+                                                        });
+                                                        const salePrice = pricing.finalPrice;
 
                                                         return (
                                                         <li

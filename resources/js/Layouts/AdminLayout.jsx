@@ -15,7 +15,7 @@ function AdminLayoutInner({ children, title }) {
     return (
         <div className='flex w-full min-h-screen bg-bg font-primary text-heading antialiased selection:bg-primary selection:text-white'>
             <Head title={documentTitle} />
-            <aside className='w-[260px] min-w-[260px] h-screen sticky top-0 left-0 border-r border-permanent/40 bg-accent z-30 shadow-lg'>
+            <aside className='w-[260px] min-w-[260px] h-full min-h-screen sticky top-0 left-0 border-r border-permanent/40 bg-accent z-30 shadow-lg'>
                 <AdminPanel />
             </aside>
             <div className='flex-1 min-w-0 flex flex-col min-h-screen bg-bg'>

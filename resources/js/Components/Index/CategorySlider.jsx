@@ -23,7 +23,7 @@ const CategorySlider = ({categories}) => {
             </div>
             
             <div className='flex w-full'>
-                <div show={8} options={{ loop: true, align: 'start', dragFree: true }} className='grid grid-cols-8 w-full'>
+                <div show={8} options={{ loop: true, align: 'start', dragFree: true }} className='grid sm:grid-cols-4 grid-cols-2 md:grid-cols-6 lg:grid-cols-8 w-full'>
                     {Categories.length > 0 && Categories.map((cat) => {
                         return (
                             <Link href={route('taxonomy.view', {type: 'category', id: cat.id, slug: cat.slug, time: Date.now()})} key={cat.id} className='flex flex-col embla__slide cursor-pointer items-center group py-4'>

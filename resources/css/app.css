@@ -172,3 +172,21 @@ html {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-primary, #fed700);
 }
+
+/* Browser Autofill Styling (Removes harsh browser default yellow/blue background) */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--bg, #ffffff) inset !important;
+  box-shadow: 0 0 0 1000px var(--bg, #ffffff) inset !important;
+  -webkit-text-fill-color: var(--text, #1e293b) !important;
+  transition: background-color 5000s ease-in-out 0s;
+  caret-color: var(--text, #1e293b);
+}

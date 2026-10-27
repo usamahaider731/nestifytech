@@ -34,7 +34,9 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return Inertia::location('/admin');
+        // NOTE: Plain-text password is intentionally NOT stored in session (security).
+
+        return Inertia::location('/profile');
     }
 
     /**

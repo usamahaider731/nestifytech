@@ -115,7 +115,25 @@ const cartSlice = createSlice({
             state.items = state.items.filter(i => i.productId !== productId);
             saveToLocalStorage(state.items);
         },
-        
+
+        /**
+         * Sync prices returned from the server (POST /api/cart/prices).
+         * payload: { [comboId]: newPrice }  e.g. { "3": 49.99, "5": 129.00 }
+         * Updates each cart item whose price has drifted.
+         */
+        syncPrices(state, { payload: priceMap }) {
+            let changed = false;
+            state.items.forEach(item => {
+                const freshPrice = priceMap[String(item.comboId)];
+                if (freshPrice !== undefined && freshPrice !== null && item.price !== freshPrice) {
+                    item.price = freshPrice;
+                    changed = true;
+                }
+            });
+            if (changed) {
+                saveToLocalStorage(state.items);
+            }
+        },
 
     },
     extraReducers: (builder) => {
@@ -137,7 +155,7 @@ const cartSlice = createSlice({
     },
 });
 
-export const { addToCart, setComboQty, removeFromCart, removeProduct, clearCart } = cartSlice.actions;
+export const { addToCart, setComboQty, removeFromCart, removeProduct, clearCart, syncPrices } = cartSlice.actions;
 
 /** Selectors */
 export const selectCartItems = state => state.cart.items;

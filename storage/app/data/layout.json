@@ -1,58 +1,490 @@
 {
     "layout": {
-        "Footer": [
+        "Home": [
             {
-                "title": "Footer Main Settings",
+                "title": "Gallery Settings",
                 "style": "main",
                 "fields": [
                     {
-                        "title": "Footer Logo",
-                        "type": "dropdown",
-                        "style": 1,
-                        "label": "Footer Logo",
-                        "name": "footer_logo",
-                        "searchable": false,
-                        "value": "dark_logo",
-                        "options": [
-                            {
-                                "id": "dark_logo",
-                                "title": "Logo Dark"
-                            },
-                            {
-                                "id": "light_logo",
-                                "title": "Logo Light"
-                            }
-                        ]
+                        "label": "Main Slider Gallery",
+                        "type": "image",
+                        "name": "main_slider",
+                        "attribute": "required",
+                        "value": [
+                            "1791818482_6039b3ff1a895b03a0d20722190f776c_main_slider0.jpg",
+                            "1791818482_6039b3ff1a895b03a0d20722190f776c_main_slider1.webp",
+                            "1791818482_6039b3ff1a895b03a0d20722190f776c_main_slider2.jpg",
+                            "1791818482_6039b3ff1a895b03a0d20722190f776c_main_slider3.webp",
+                            "1791818482_6039b3ff1a895b03a0d20722190f776c_main_slider4.webp"
+                        ],
+                        "multiple": true
                     },
                     {
-                        "label": "Show Footer Newsletter",
-                        "name": "footer_newslatter",
-                        "style": 1,
+                        "label": "Block Images Gallery",
+                        "type": "image",
+                        "name": "block_images",
+                        "attribute": "required",
+                        "value": [
+                            "1771181066_6039b3ff1a895b03a0d20722190f776c_block_images0.png",
+                            "1771181066_6039b3ff1a895b03a0d20722190f776c_block_images1.png"
+                        ],
+                        "multiple": true
+                    }
+                ]
+            },
+            {
+                "title": "Brand Settings",
+                "style": "main",
+                "fields": [
+                    {
+                        "label": "Home Brand Slider",
+                        "type": "dropdown",
+                        "name": "home_brands",
+                        "title": "Select Brand",
+                        "placeholder": "Select Brand",
+                        "multiple": true,
+                        "value": [
+                            "718",
+                            "720",
+                            "735",
+                            "736",
+                            "738",
+                            "737",
+                            "739",
+                            "722",
+                            "723",
+                            "724",
+                            "725"
+                        ],
+                        "searchable": true,
+                        "options": {
+                            "model": "Taxonomy",
+                            "type": "brand"
+                        }
+                    }
+                ]
+            },
+            {
+                "title": "Home Checkbox's",
+                "style": "main",
+                "fields": [
+                    {
+                        "label": "Main Slider",
                         "type": "checkbox",
+                        "name": "slider_toggle",
+                        "value": true
+                    },
+                    {
+                        "label": "Trending Products",
+                        "type": "checkbox",
+                        "name": "trending_product_toggle",
+                        "value": true
+                    },
+                    {
+                        "label": "Featured Products",
+                        "type": "checkbox",
+                        "name": "featured_product_toggle",
+                        "value": true
+                    },
+                    {
+                        "label": "Latest Products",
+                        "type": "checkbox",
+                        "name": "latest_product_toggle",
+                        "value": true,
+                        "desc": "Discover the latest products"
+                    },
+                    {
+                        "label": "Products For You",
+                        "type": "checkbox",
+                        "name": "products_for_you_toggle",
+                        "value": true,
+                        "desc": "Discover products curated just for you, based on your interests and past purchases."
+                    },
+                    {
+                        "label": "Recently Viewed Products",
+                        "type": "checkbox",
+                        "name": "recently_viewed_toggle",
+                        "value": true,
+                        "desc": "Discover products you've recently viewed."
+                    },
+                    {
+                        "label": "Popular Products",
+                        "type": "checkbox",
+                        "name": "popular_product_toggle",
+                        "value": true
+                    },
+                    {
+                        "label": "Banner Image",
+                        "type": "checkbox",
+                        "name": "banner_image_toggle",
+                        "value": true
+                    },
+                    {
+                        "label": "Block Images",
+                        "type": "checkbox",
+                        "name": "block_images_toggle",
+                        "value": false
+                    },
+                    {
+                        "label": "Categories Products",
+                        "type": "checkbox",
+                        "name": "categories_products_toggle",
+                        "value": true
+                    },
+                    {
+                        "label": "Categories",
+                        "type": "checkbox",
+                        "name": "categories_toggle",
+                        "value": true
+                    },
+                    {
+                        "label": "Brands Slider",
+                        "type": "checkbox",
+                        "name": "brand_slider_toggle",
+                        "value": true
+                    },
+                    {
+                        "label": "Show Blog",
+                        "type": "checkbox",
+                        "name": "blog_toggle",
+                        "value": true
+                    },
+                    {
+                        "label": "Show Shopping Benefits",
+                        "type": "checkbox",
+                        "name": "shopping_benefits_toggle",
                         "value": true
                     }
                 ]
             },
             {
-                "title": "Footer Menu Lists",
+                "title": "Selection's",
+                "style": "sidebar",
+                "fields": [
+                    {
+                        "label": "Home Categories",
+                        "style": 1,
+                        "name": "home_categories",
+                        "type": "dropdown",
+                        "placeholder": "Select Home Categories",
+                        "attribute": "required",
+                        "searchable": true,
+                        "value": [
+                            "720",
+                            "719",
+                            "721",
+                            "727",
+                            "732",
+                            "733",
+                            "26",
+                            "28",
+                            "29",
+                            "30",
+                            "27",
+                            "31",
+                            "32",
+                            "33",
+                            "34",
+                            "20",
+                            "25",
+                            "22",
+                            "24",
+                            "21",
+                            "23"
+                        ],
+                        "multiple": true,
+                        "use_value": false,
+                        "children": true,
+                        "options": {
+                            "model": "Taxonomy",
+                            "type": "category",
+                            "use_value": false
+                        }
+                    },
+                    {
+                        "label": "Products Categories",
+                        "style": 1,
+                        "name": "home_products_categories",
+                        "type": "dropdown",
+                        "placeholder": "Select Products Categories",
+                        "attribute": "required",
+                        "searchable": true,
+                        "value": [
+                            "Earbuds",
+                            "Laptop"
+                        ],
+                        "multiple": true,
+                        "children": true,
+                        "options": {
+                            "model": "Taxonomy",
+                            "type": "category",
+                            "use_value": false
+                        }
+                    }
+                ]
+            },
+            {
+                "title": "Home Image",
+                "style": "sidebar",
+                "fields": [
+                    {
+                        "label": "Banner Image",
+                        "type": "image",
+                        "condition": "banner_image_toggle",
+                        "condition_value": true,
+                        "name": "banner_image",
+                        "attribute": "required",
+                        "value": "1791818482_6039b3ff1a895b03a0d20722190f776c_banner_image.png"
+                    }
+                ]
+            },
+            {
+                "title": "Layout Settings",
                 "style": "main",
                 "fields": [
                     {
-                        "label": "Menu",
+                        "label": "Container Type",
+                        "type": "dropdown",
+                        "name": "container_type",
+                        "style": 2,
+                        "attribute": "required",
+                        "value": "container",
+                        "searchable": false,
+                        "options": [
+                            {
+                                "id": "container",
+                                "title": "Container"
+                            },
+                            {
+                                "id": "full_width",
+                                "title": "Full Width"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Latest Product Card Type",
+                        "type": "dropdown",
+                        "name": "latest_product_card_type",
+                        "attribute": "required",
+                        "value": "v1",
+                        "searchable": false,
+                        "options": [
+                            {
+                                "id": "v1",
+                                "title": "Product Card V1"
+                            },
+                            {
+                                "id": "v2",
+                                "title": "Product Card V2"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Featured Product Card Type",
+                        "type": "dropdown",
+                        "name": "featured_product_card_type",
+                        "attribute": "required",
+                        "value": "v1",
+                        "searchable": false,
+                        "condition": "featured_product_toggle",
+                        "condition_value": true,
+                        "options": [
+                            {
+                                "id": "v1",
+                                "title": "Product Card V1"
+                            },
+                            {
+                                "id": "v2",
+                                "title": "Product Card V2"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Products For You Card Type",
+                        "type": "dropdown",
+                        "name": "products_for_you_card_type",
+                        "attribute": "required",
+                        "value": "v2",
+                        "searchable": false,
+                        "condition": "products_for_you_toggle",
+                        "condition_value": true,
+                        "options": [
+                            {
+                                "id": "v1",
+                                "title": "Product Card V1"
+                            },
+                            {
+                                "id": "v2",
+                                "title": "Product Card V2"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Recently Viewed Products Card Type",
+                        "type": "dropdown",
+                        "name": "products_recently_card_type",
+                        "attribute": "required",
+                        "value": "v2",
+                        "searchable": false,
+                        "condition": "recently_viewed_toggle",
+                        "condition_value": true,
+                        "options": [
+                            {
+                                "id": "v1",
+                                "title": "Product Card V1"
+                            },
+                            {
+                                "id": "v2",
+                                "title": "Product Card V2"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Trending Product Card Type",
+                        "type": "dropdown",
+                        "name": "trending_product_card_type",
+                        "attribute": "required",
+                        "value": "v1",
+                        "condition": "trending_product_toggle",
+                        "condition_value": true,
+                        "searchable": false,
+                        "options": [
+                            {
+                                "id": "v1",
+                                "title": "Product Card V1"
+                            },
+                            {
+                                "id": "v2",
+                                "title": "Product Card V2"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Popular Product Card Type",
+                        "type": "dropdown",
+                        "name": "popular_product_card_type",
+                        "attribute": "required",
+                        "value": "v2",
+                        "searchable": false,
+                        "options": [
+                            {
+                                "id": "v1",
+                                "title": "Product Card V1"
+                            },
+                            {
+                                "id": "v2",
+                                "title": "Product Card V2"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "title": "Banner Slider Settings",
+                "style": "main",
+                "fields": [
+                    {
+                        "label": "Slider Effect",
+                        "type": "dropdown",
+                        "searchable": false,
+                        "name": "banner_slider_effect",
+                        "attribute": "required",
+                        "style": 2,
+                        "value": "slide",
+                        "options": [
+                            {
+                                "id": "slide",
+                                "title": "Slide"
+                            },
+                            {
+                                "id": "fade",
+                                "title": "Fade"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Slider Autoplay",
+                        "type": "dropdown",
+                        "searchable": false,
+                        "name": "banner_slider_autoplay",
+                        "attribute": "required",
+                        "value": "1",
+                        "options": [
+                            {
+                                "id": "0",
+                                "title": "No"
+                            },
+                            {
+                                "id": "1",
+                                "title": "Yes"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Show Slider Navigation",
+                        "type": "dropdown",
+                        "searchable": false,
+                        "name": "banner_slider_navigation",
+                        "value": "1",
+                        "options": [
+                            {
+                                "id": "0",
+                                "title": "No"
+                            },
+                            {
+                                "id": "1",
+                                "title": "Yes"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Slider Duration (in ms)",
+                        "type": "number",
+                        "name": "banner_slider_duration",
+                        "attribute": "required",
+                        "value": "5000"
+                    },
+                    {
+                        "label": "Slider Transition Speed (in ms)",
+                        "type": "number",
+                        "name": "banner_slider_speed",
+                        "attribute": "required",
+                        "value": "25"
+                    }
+                ]
+            },
+            {
+                "title": "Services Settings",
+                "style": "main",
+                "fields": [
+                    {
+                        "label": "Services",
                         "type": "repeater",
-                        "name": "footer_menu_lists",
+                        "name": "services",
                         "value": [
                             {
-                                "title": "Find It Fast",
-                                "menu_location": "services"
+                                "title": "Fast Delivery",
+                                "description": "Experience lightning-fast shipping on all our premium products, delivered straight to your doorstep.",
+                                "service_icon": "1791208334_6039b3ff1a895b03a0d20722190f776c_service_icon.svg",
+                                "service_background_image": "1791208334_6039b3ff1a895b03a0d20722190f776c_service_background_image.jpg"
                             },
                             {
-                                "title": "Customer care",
-                                "menu_location": "useful_links"
+                                "title": "Secure Checkout",
+                                "description": "Shop with confidence using our state-of-the-art encrypted payment gateway for 100% secure transactions.",
+                                "service_icon": "1791208219_6039b3ff1a895b03a0d20722190f776c_service_icon.svg",
+                                "service_background_image": "1791208219_6039b3ff1a895b03a0d20722190f776c_service_background_image.jpg"
                             },
                             {
-                                "title": "Information",
-                                "menu_location": "footer"
+                                "title": "Hassle-Free Returns",
+                                "description": "Not satisfied? Return your products easily within 30 days for a full refund, no questions asked.",
+                                "service_icon": "1791208050_6039b3ff1a895b03a0d20722190f776c_service_icon.svg",
+                                "service_background_image": "1791208050_6039b3ff1a895b03a0d20722190f776c_service_background_image.jpg"
+                            },
+                            {
+                                "title": "24\/7 Support",
+                                "description": "Our dedicated customer service team is always ready to assist you with any inquiries or issues.",
+                                "service_icon": "1791207586_6039b3ff1a895b03a0d20722190f776c_service_icon.svg",
+                                "service_background_image": "1791207865_6039b3ff1a895b03a0d20722190f776c_service_background_image.jpg"
                             }
                         ],
                         "fields": [
@@ -60,18 +492,84 @@
                                 "name": "title",
                                 "label": "Title",
                                 "type": "text",
-                                "placeholder": "Enter list name..."
+                                "style": 2,
+                                "placeholder": "Enter title"
                             },
                             {
-                                "name": "menu_location",
-                                "label": "Select Menu",
-                                "type": "dropdown",
-                                "searchable": false,
-                                "search": false,
-                                "options": {
-                                    "model": "Menu",
-                                    "type": "locations"
-                                }
+                                "name": "description",
+                                "label": "Description",
+                                "type": "textarea",
+                                "placeholder": "Enter Description of service"
+                            },
+                            {
+                                "name": "service_icon",
+                                "label": "Select Icon",
+                                "type": "image",
+                                "style": 2
+                            },
+                            {
+                                "name": "service_background_image",
+                                "label": "Select Background",
+                                "type": "image",
+                                "style": 2
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "title": "Shopping Benefits",
+                "style": "main",
+                "fields": [
+                    {
+                        "label": "Shopping Benefits",
+                        "type": "repeater",
+                        "name": "shopping_benefits",
+                        "value": [
+                            {
+                                "title": "Lightning Fast",
+                                "description": "Get your products delivered in record time with our optimized global shipping network.",
+                                "shopping_benefit_icon": "1792506159_6039b3ff1a895b03a0d20722190f776c_shopping_benefit_icon.svg",
+                                "shopping_benefit_icon_color": "#fed700"
+                            },
+                            {
+                                "title": "Unmatched Performance",
+                                "description": "Every item is rigorously tested to ensure it meets our strict quality and performance standards.",
+                                "shopping_benefit_icon": "1792506463_6039b3ff1a895b03a0d20722190f776c_shopping_benefit_icon.svg",
+                                "shopping_benefit_icon_color": "#7c7c7c"
+                            },
+                            {
+                                "title": "Secure & Protected",
+                                "description": "Shop with confidence knowing your data is encrypted and purchases are fully protected.",
+                                "shopping_benefit_icon": "1792506830_6039b3ff1a895b03a0d20722190f776c_shopping_benefit_icon.svg",
+                                "shopping_benefit_icon_color": "#ff0000"
+                            }
+                        ],
+                        "fields": [
+                            {
+                                "name": "title",
+                                "label": "Title",
+                                "type": "text",
+                                "style": 2,
+                                "placeholder": "Enter title"
+                            },
+                            {
+                                "name": "description",
+                                "label": "Description",
+                                "type": "textarea",
+                                "placeholder": "Enter Description"
+                            },
+                            {
+                                "name": "shopping_benefit_icon",
+                                "label": "Select Icon",
+                                "type": "image",
+                                "style": 2
+                            },
+                            {
+                                "name": "shopping_benefit_icon_color",
+                                "label": "Select Color",
+                                "type": "color",
+                                "style": 2
                             }
                         ]
                     }
@@ -99,7 +597,7 @@
                         "label": "Sticky Header",
                         "type": "checkbox",
                         "name": "sticky_header_toggle",
-                        "value": true
+                        "value": false
                     },
                     {
                         "label": "Show Message Bar",
@@ -235,418 +733,59 @@
                 ]
             }
         ],
-        "Home": [
+        "Footer": [
             {
-                "title": "Gallery Settings",
+                "title": "Footer Main Settings",
                 "style": "main",
                 "fields": [
                     {
-                        "label": "Main Slider Gallery",
-                        "type": "image",
-                        "name": "main_slider",
-                        "attribute": "required",
-                        "value": [
-                            "1791818482_6039b3ff1a895b03a0d20722190f776c_main_slider0.jpg",
-                            "1791818482_6039b3ff1a895b03a0d20722190f776c_main_slider1.webp",
-                            "1791818482_6039b3ff1a895b03a0d20722190f776c_main_slider2.jpg",
-                            "1791818482_6039b3ff1a895b03a0d20722190f776c_main_slider3.webp",
-                            "1791818482_6039b3ff1a895b03a0d20722190f776c_main_slider4.webp"
-                        ],
-                        "multiple": true
-                    },
-                    {
-                        "label": "Block Images Gallery",
-                        "type": "image",
-                        "name": "block_images",
-                        "attribute": "required",
-                        "value": [
-                            "1771181066_6039b3ff1a895b03a0d20722190f776c_block_images0.png",
-                            "1771181066_6039b3ff1a895b03a0d20722190f776c_block_images1.png"
-                        ],
-                        "multiple": true
-                    }
-                ]
-            },
-            {
-                "title": "Brand Settings",
-                "style": "main",
-                "fields": [
-                    {
-                        "label": "Home Brand Slider",
+                        "title": "Footer Logo",
                         "type": "dropdown",
-                        "name": "home_brands",
-                        "title": "Select Brand",
-                        "placeholder": "Select Brand",
-                        "multiple": true,
-                        "value": [
-                            "718",
-                            "720",
-                            "735",
-                            "736",
-                            "738",
-                            "737",
-                            "739",
-                            "722",
-                            "723",
-                            "724",
-                            "725"
-                        ],
-                        "searchable": true,
-                        "options": {
-                            "model": "Taxonomy",
-                            "type": "brand"
-                        }
-                    }
-                ]
-            },
-            {
-                "title": "Home Checkbox's",
-                "style": "main",
-                "fields": [
-                    {
-                        "label": "Show Main Slider",
-                        "type": "checkbox",
-                        "name": "slider_toggle",
-                        "value": true
-                    },
-                    {
-                        "label": "Show Trending Products",
-                        "type": "checkbox",
-                        "name": "trending_product_toggle",
-                        "value": true
-                    },
-                    {
-                        "label": "Show Featured Products",
-                        "type": "checkbox",
-                        "name": "featured_product_toggle",
-                        "value": true
-                    },
-                    {
-                        "label": "Latest Products",
-                        "type": "checkbox",
-                        "name": "latest_product_toggle",
-                        "value": true
-                    },
-                    {
-                        "label": "Show Popular Products",
-                        "type": "checkbox",
-                        "name": "popular_product_toggle",
-                        "value": true
-                    },
-                    {
-                        "label": "Show Banner Image",
-                        "type": "checkbox",
-                        "name": "banner_image_toggle",
-                        "value": true
-                    },
-                    {
-                        "label": "Show Block Images",
-                        "type": "checkbox",
-                        "name": "block_images_toggle",
-                        "value": false
-                    },
-                    {
-                        "label": "Show Categories Products",
-                        "type": "checkbox",
-                        "name": "categories_products_toggle",
-                        "value": true
-                    },
-                    {
-                        "label": "Show Categories",
-                        "type": "checkbox",
-                        "name": "categories_toggle",
-                        "value": true
-                    },
-                    {
-                        "label": "Show Brands Slider",
-                        "type": "checkbox",
-                        "name": "brand_slider_toggle",
-                        "value": true
-                    }
-                ]
-            },
-            {
-                "title": "Selection's",
-                "style": "sidebar",
-                "fields": [
-                    {
-                        "label": "Home Categories",
                         "style": 1,
-                        "name": "home_categories",
-                        "type": "dropdown",
-                        "placeholder": "Select Home Categories",
-                        "attribute": "required",
-                        "searchable": true,
-                        "value": [
-                            "720",
-                            "719",
-                            "721",
-                            "727",
-                            "732",
-                            "733",
-                            "26",
-                            "28",
-                            "29",
-                            "30",
-                            "27",
-                            "31",
-                            "32",
-                            "33",
-                            "34"
-                        ],
-                        "multiple": true,
-                        "use_value": false,
-                        "children": true,
-                        "options": {
-                            "model": "Taxonomy",
-                            "type": "category",
-                            "use_value": false
-                        }
+                        "label": "Footer Logo",
+                        "name": "footer_logo",
+                        "searchable": false,
+                        "value": "dark_logo",
+                        "options": [
+                            {
+                                "id": "dark_logo",
+                                "title": "Logo Dark"
+                            },
+                            {
+                                "id": "light_logo",
+                                "title": "Logo Light"
+                            }
+                        ]
                     },
                     {
-                        "label": "Products Categories",
+                        "label": "Show Footer Newsletter",
+                        "name": "footer_newslatter",
                         "style": 1,
-                        "name": "home_products_categories",
-                        "type": "dropdown",
-                        "placeholder": "Select Products Categories",
-                        "attribute": "required",
-                        "searchable": true,
-                        "value": [
-                            "Earbuds",
-                            "Laptop"
-                        ],
-                        "multiple": true,
-                        "children": true,
-                        "options": {
-                            "model": "Taxonomy",
-                            "type": "category",
-                            "use_value": false
-                        }
+                        "type": "checkbox",
+                        "value": true
                     }
                 ]
             },
             {
-                "title": "Home Image",
-                "style": "sidebar",
-                "fields": [
-                    {
-                        "label": "Banner Image",
-                        "type": "image",
-                        "condition": "banner_image_toggle",
-                        "condition_value": true,
-                        "name": "banner_image",
-                        "attribute": "required",
-                        "value": "1791818482_6039b3ff1a895b03a0d20722190f776c_banner_image.png"
-                    }
-                ]
-            },
-            {
-                "title": "Layout Settings",
+                "title": "Footer Menu Lists",
                 "style": "main",
                 "fields": [
                     {
-                        "label": "Container Type",
-                        "type": "dropdown",
-                        "name": "container_type",
-                        "style": 2,
-                        "attribute": "required",
-                        "value": "container",
-                        "searchable": false,
-                        "options": [
-                            {
-                                "id": "container",
-                                "title": "Container"
-                            },
-                            {
-                                "id": "full_width",
-                                "title": "Full Width"
-                            }
-                        ]
-                    },
-                    {
-                        "label": "Latest Product Card Type",
-                        "type": "dropdown",
-                        "name": "latest_product_card_type",
-                        "attribute": "required",
-                        "value": "v1",
-                        "searchable": false,
-                        "options": [
-                            {
-                                "id": "v1",
-                                "title": "Product Card V1"
-                            },
-                            {
-                                "id": "v2",
-                                "title": "Product Card V2"
-                            }
-                        ]
-                    },
-                    {
-                        "label": "Featured Product Card Type",
-                        "type": "dropdown",
-                        "name": "featured_product_card_type",
-                        "attribute": "required",
-                        "value": "v1",
-                        "searchable": false,
-                        "condition": "featured_product_toggle",
-                        "condition_value": true,
-                        "options": [
-                            {
-                                "id": "v1",
-                                "title": "Product Card V1"
-                            },
-                            {
-                                "id": "v2",
-                                "title": "Product Card V2"
-                            }
-                        ]
-                    },
-                    {
-                        "label": "Trending Product Card Type",
-                        "type": "dropdown",
-                        "name": "trending_product_card_type",
-                        "attribute": "required",
-                        "value": "v1",
-                        "condition": "trending_product_toggle",
-                        "condition_value": true,
-                        "searchable": false,
-                        "options": [
-                            {
-                                "id": "v1",
-                                "title": "Product Card V1"
-                            },
-                            {
-                                "id": "v2",
-                                "title": "Product Card V2"
-                            }
-                        ]
-                    },
-                    {
-                        "label": "Popular Product Card Type",
-                        "type": "dropdown",
-                        "name": "popular_product_card_type",
-                        "attribute": "required",
-                        "value": "v2",
-                        "searchable": false,
-                        "options": [
-                            {
-                                "id": "v1",
-                                "title": "Product Card V1"
-                            },
-                            {
-                                "id": "v2",
-                                "title": "Product Card V2"
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                "title": "Banner Slider Settings",
-                "style": "main",
-                "fields": [
-                    {
-                        "label": "Slider Effect",
-                        "type": "dropdown",
-                        "searchable": false,
-                        "name": "banner_slider_effect",
-                        "attribute": "required",
-                        "style": 2,
-                        "value": "fade",
-                        "options": [
-                            {
-                                "id": "slide",
-                                "title": "Slide"
-                            },
-                            {
-                                "id": "fade",
-                                "title": "Fade"
-                            }
-                        ]
-                    },
-                    {
-                        "label": "Slider Autoplay",
-                        "type": "dropdown",
-                        "searchable": false,
-                        "name": "banner_slider_autoplay",
-                        "attribute": "required",
-                        "value": "1",
-                        "options": [
-                            {
-                                "id": "0",
-                                "title": "No"
-                            },
-                            {
-                                "id": "1",
-                                "title": "Yes"
-                            }
-                        ]
-                    },
-                    {
-                        "label": "Show Slider Navigation",
-                        "type": "dropdown",
-                        "searchable": false,
-                        "name": "banner_slider_navigation",
-                        "value": "1",
-                        "options": [
-                            {
-                                "id": "0",
-                                "title": "No"
-                            },
-                            {
-                                "id": "1",
-                                "title": "Yes"
-                            }
-                        ]
-                    },
-                    {
-                        "label": "Slider Duration (in ms)",
-                        "type": "number",
-                        "name": "banner_slider_duration",
-                        "attribute": "required",
-                        "value": "5000"
-                    },
-                    {
-                        "label": "Slider Transition Speed (in ms)",
-                        "type": "number",
-                        "name": "banner_slider_speed",
-                        "attribute": "required",
-                        "value": "25"
-                    }
-                ]
-            },
-            {
-                "title": "Services Settings",
-                "style": "main",
-                "fields": [
-                    {
-                        "label": "Services",
+                        "label": "Menu",
                         "type": "repeater",
-                        "name": "services",
+                        "name": "footer_menu_lists",
                         "value": [
                             {
-                                "title": "Fast Delivery",
-                                "description": "Experience lightning-fast shipping on all our premium products, delivered straight to your doorstep.",
-                                "service_icon": "1791208334_6039b3ff1a895b03a0d20722190f776c_service_icon.svg",
-                                "service_background_image": "1791208334_6039b3ff1a895b03a0d20722190f776c_service_background_image.jpg"
+                                "title": "Find It Fast",
+                                "menu_location": "services"
                             },
                             {
-                                "title": "Secure Checkout",
-                                "description": "Shop with confidence using our state-of-the-art encrypted payment gateway for 100% secure transactions.",
-                                "service_icon": "1791208219_6039b3ff1a895b03a0d20722190f776c_service_icon.svg",
-                                "service_background_image": "1791208219_6039b3ff1a895b03a0d20722190f776c_service_background_image.jpg"
+                                "title": "Customer care",
+                                "menu_location": "useful_links"
                             },
                             {
-                                "title": "Hassle-Free Returns",
-                                "description": "Not satisfied? Return your products easily within 30 days for a full refund, no questions asked.",
-                                "service_icon": "1791208050_6039b3ff1a895b03a0d20722190f776c_service_icon.svg",
-                                "service_background_image": "1791208050_6039b3ff1a895b03a0d20722190f776c_service_background_image.jpg"
-                            },
-                            {
-                                "title": "24\/7 Support",
-                                "description": "Our dedicated customer service team is always ready to assist you with any inquiries or issues.",
-                                "service_icon": "1791207586_6039b3ff1a895b03a0d20722190f776c_service_icon.svg",
-                                "service_background_image": "1791207865_6039b3ff1a895b03a0d20722190f776c_service_background_image.jpg"
+                                "title": "Information",
+                                "menu_location": "footer"
                             }
                         ],
                         "fields": [
@@ -654,26 +793,18 @@
                                 "name": "title",
                                 "label": "Title",
                                 "type": "text",
-                                "style": 2,
-                                "placeholder": "Enter title"
+                                "placeholder": "Enter list name..."
                             },
                             {
-                                "name": "description",
-                                "label": "Description",
-                                "type": "textarea",
-                                "placeholder": "Enter Description of service"
-                            },
-                            {
-                                "name": "service_icon",
-                                "label": "Select Icon",
-                                "type": "image",
-                                "style": 2
-                            },
-                            {
-                                "name": "service_background_image",
-                                "label": "Select Background",
-                                "type": "image",
-                                "style": 2
+                                "name": "menu_location",
+                                "label": "Select Menu",
+                                "type": "dropdown",
+                                "searchable": false,
+                                "search": false,
+                                "options": {
+                                    "model": "Menu",
+                                    "type": "locations"
+                                }
                             }
                         ]
                     }

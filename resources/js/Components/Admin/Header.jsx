@@ -96,8 +96,8 @@ function Header() {
                                         <span className={`absolute bottom-0 right-0 size-2.5 rounded-full border-2 border-accent ${auth.user.active ? 'bg-green-500' : 'bg-red-500'}`} />
                                     </div>
                                 </Dropdown.Trigger>
-                                <Dropdown.Content align='right' width='60' className='mt-2' contentClasses='!border !border-permanent/40 shadow-2xl overflow-hidden rounded-xl bg-accent p-0 w-60'>
-                                    <div className='px-4 py-3.5 border-b border-permanent/30 bg-dynamic/30'>
+                                <Dropdown.Content align='right' width='80' className='mt-2' contentClasses='!border !border-permanent/40 shadow-2xl overflow-hidden rounded bg-accent p-0 w-70'>
+                                    <div className='px-3.5 py-3.5 border-b border-permanent/30 bg-dynamic/30'>
                                         <div className='flex items-center gap-3'>
                                             {
                                                 auth.user.user_avater && auth.user.user_avater.filename && auth.user.user_avater.filename.trim() !== '' && auth.user.user_avater.filename != undefined ? (
@@ -109,21 +109,23 @@ function Header() {
                                                 )
                                             }
                                             <div className='flex flex-col min-w-0'>
-                                                <span className='text-heading text-sm font-bold truncate leading-snug'>{auth.user.name}</span>
-                                                <span className='inline-block text-[10px] font-semibold text-primary bg-primary/15 px-2 py-0.5 rounded-full uppercase tracking-wider mt-0.5 w-max'>
-                                                    {Array.isArray(auth.user.user_role) ? auth.user.user_role.join(', ') : 'Admin'}
+                                                <span className='text-heading text-sm font-semibold truncate leading-snug'>{auth.user.name}</span>
+                                                <span className='inline-block text-[9px] font-semibold text-primary bg-primary/15 px-2 py-0.5 rounded-full uppercase tracking-wider mt-0.5 w-max'>
+                                                    {Array.isArray(auth.user.user_role) && auth.user.user_role.length > 0 ? auth.user.user_role.join(', ') : 'Customer'}
                                                 </span>
                                             </div>
                                         </div>
                                     </div>
 
                                     <div className='p-2 space-y-1 text-xs font-medium'>
-                                        <Dropdown.Link href={route('delivery.orders.index')} className='flex items-center gap-3 px-3 py-2 rounded-lg transition-colors hover:bg-emerald-500/10 hover:text-emerald-600 text-res'>
-                                            <svg className="size-4 text-emerald-500" fill="currentColor">
-                                                <use href="/assets/icon/remix/remixicon.symbol.svg#ri-e-bike-2-line" />
-                                            </svg>
-                                            <span className="font-semibold text-emerald-600">Delivery Boy Panel</span>
-                                        </Dropdown.Link>
+                                        {(Array.isArray(auth.user.user_role) && (auth.user.user_role.includes('Administrator') || auth.user.user_role.some(r => /delivery|rider/i.test(r)))) && (
+                                            <Dropdown.Link href={route('delivery.orders.index')} className='flex items-center gap-3 px-3 py-2 rounded-lg transition-colors hover:bg-primary/10 hover:text-primary text-res'>
+                                                <svg className="size-4 text-primary" fill="currentColor">
+                                                    <use href="/assets/icon/remix/remixicon.symbol.svg#ri-e-bike-2-line" />
+                                                </svg>
+                                                <span className="font-semibold text-primary">Delivery Boy Panel</span>
+                                            </Dropdown.Link>
+                                        )}
                                         <Dropdown.Link href={route('user.edit', { id: auth.user.id, type: 'user' })} className='flex items-center gap-3 px-3 py-2 rounded-lg transition-colors hover:bg-primary/10 hover:text-primary text-res'>
                                             <RiUser3Line className='text-base text-secondary' />
                                             <span>My Profile</span>

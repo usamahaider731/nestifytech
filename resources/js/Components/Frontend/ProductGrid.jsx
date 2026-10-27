@@ -39,11 +39,11 @@ export default function ProductGrid({
     const [classN, SetClassN] = useState("grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5");
     useEffect(() => {
         if (cardType === 'v2') {
-            SetClassN('grid grid-cols-2 gap-4 md:gap-5');
+            SetClassN('grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5');
         } else if (widthType === 75) {
-            SetClassN('grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 md:gap-5');
+            SetClassN('grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 md:gap-5');
         } else {
-            SetClassN('grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5');
+            SetClassN('grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5');
         }
     }, [widthType, cardType]);
     const titleClass = headingStyle === 'underline'

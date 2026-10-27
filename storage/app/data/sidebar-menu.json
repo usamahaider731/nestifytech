@@ -125,6 +125,16 @@
             },
             "icon": "ri-mail-settings-line",
             "permission": "setting-read"
+          },
+          {
+            "id": "popup-setting",
+            "title": "Popup & Offer Settings",
+            "route": "admin.setting",
+            "params": {
+              "type": "popup"
+            },
+            "icon": "ri-notification-badge-line",
+            "permission": "setting-read"
           }
         ]
       },
@@ -200,6 +210,18 @@
             "title": "Product Reviews",
             "route": "admin.reviews.index",
             "permission": "review-read"
+          },
+          {
+            "id": "inventory-management",
+            "title": "Inventory & Stock",
+            "route": "admin.inventory.index",
+            "permission": "product-read"
+          },
+          {
+            "id": "incoming-stock-management",
+            "title": "Incoming Stock (POs)",
+            "route": "admin.incoming-stock.index",
+            "permission": "product-read"
           }
         ]
       },
@@ -226,6 +248,20 @@
         "icon": "ri-e-bike-2-line",
         "permission": "delivery-read",
         "route": "delivery.orders.index"
+      },
+      {
+        "id": "promotions-tax-rules",
+        "title": "Promotions & Tax",
+        "icon": "ri-percent-line",
+        "permission": "product-read",
+        "route": "admin.promotions.index"
+      },
+      {
+        "id": "gift-cards",
+        "title": "Gift Cards",
+        "icon": "ri-coupon2-line",
+        "permission": "product-read",
+        "route": "admin.gift-cards.index"
       },
       {
         "id": "blog",
@@ -312,6 +348,32 @@
               "type": "faq_category"
             },
             "permission": "faq-create"
+          }
+        ]
+      },
+      {
+        "id": "store-locator",
+        "title": "Store Locator",
+        "icon": "ri-map-pin-2-line",
+        "permission": "post-read",
+        "menu": [
+          {
+            "id": "add-store",
+            "title": "Add Store",
+            "route": "post.create",
+            "params": {
+              "type": "store"
+            },
+            "permission": "post-read"
+          },
+          {
+            "id": "view-stores",
+            "title": "View Stores",
+            "route": "post.index",
+            "params": {
+              "type": "store"
+            },
+            "permission": "post-read"
           }
         ]
       },
@@ -410,6 +472,58 @@
             },
             "title": "Create Tag",
             "permission": "tag-write"
+          }
+        ]
+      },
+      {
+        "id": "collection",
+        "title": "Collections",
+        "icon": "ri-folders-line",
+        "permission": "category-read",
+        "menu": [
+          {
+            "id": "view-collections",
+            "route": "taxonomy.index",
+            "params": {
+              "type": "collection"
+            },
+            "title": "View Collections",
+            "permission": "category-read"
+          },
+          {
+            "id": "create-collection",
+            "route": "taxonomy.create",
+            "params": {
+              "type": "collection"
+            },
+            "title": "Create Collection",
+            "permission": "category-write"
+          }
+        ]
+      },
+      {
+        "id": "supplier",
+        "title": "Suppliers & Vendors",
+        "icon": "ri-store-3-line",
+        "permission": "category-read",
+        "menu": [
+          {
+            "id": "view-suppliers",
+            "route": "taxonomy.index",
+            "params": {
+              "type": "supplier"
+            },
+            "title": "View Suppliers",
+            "permission": "category-read"
+          },
+          {
+            "id": "create-supplier",
+            "route": "taxonomy.create",
+            "params": {
+              "type": "supplier"
+            },
+            "title": "Add Supplier",
+            "permission": "category-write"
           }
         ]
       }

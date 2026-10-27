@@ -31,9 +31,9 @@ const ProductQRCode = ({ product }) => {
                 type="button"
                 onClick={() => setOpen(true)}
                 title={__('Show QR Code')}
-                className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 border-2 border-primary text-primary rounded hover:bg-primary hover:text-white transition-all duration-200"
+                className="flex items-center gap-1.5 text-xs font-semibold px-2 md:px-3 py-1 border md:border-2 border-primary text-primary rounded hover:bg-primary hover:text-white transition-all duration-200"
             >
-                <RiQrCodeLine className="size-4" />
+                <RiQrCodeLine className="size-3 md:size-4" />
                 {__('QR Code')}
             </button>
 

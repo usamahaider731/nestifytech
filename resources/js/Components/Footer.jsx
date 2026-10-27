@@ -9,7 +9,8 @@ import {
 } from 'react-icons/fi';
 import { FaCcVisa, FaCcMastercard, FaCcPaypal, FaCcApplePay, FaFacebookF, FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa';
 import ImageViwer from './Admin/ImageViwer';
-import { RiArrowUpLine, RiArrowUpSLine, RiArrowUpWideLine, RiInstagramFill, RiLinkedinBoxFill, RiPinterestFill, RiTwitterXFill, RiWhatsappFill, RiWhatsappLine, RiYoutubeFill } from 'react-icons/ri';
+import { RiArrowUpLine, RiArrowUpSLine, RiArrowUpWideLine, RiInstagramFill, RiLinkedinBoxFill, RiPinterestFill, RiTwitterXFill, RiWhatsappFill, RiWhatsappLine, RiYoutubeFill, RiGlobalLine } from 'react-icons/ri';
+import { FaTiktok, FaXTwitter, FaYoutube, FaLinkedin, FaGithub, FaSnapchat, FaPinterest, FaDiscord } from 'react-icons/fa6';
 import { useLang } from '@/contexts/LanguageContext';
 import axios from 'axios';
 
@@ -24,39 +25,78 @@ const Footer = () => {
     const [FooterMenuList, SetFooterMenuList] = useState({ name: '', menus: [] });
     const FooterSetting = setting.layout.Footer;
     const FooterMenu = FooterSetting.footer_menu_lists;
-useEffect(() => {
-    if (!FooterMenu || FooterMenu.length === 0) return;
+    useEffect(() => {
+        if (!FooterMenu || FooterMenu.length === 0) return;
 
-    const fetchPromises = FooterMenu.map((menu) =>
-        axios.get(route('menu', { 'location': menu.menu_location }))
-            .then((response) => ({
-                name: menu.title,
-                menus: response.data.map((item) => ({
-                    title: item.name,
-                    url: item.link
+        const fetchPromises = FooterMenu.map((menu) =>
+            axios.get(route('menu', { 'location': menu.menu_location }))
+                .then((response) => ({
+                    name: menu.title,
+                    menus: response.data.map((item) => ({
+                        title: item.name,
+                        url: item.link
+                    }))
                 }))
-            }))
-    );
+        );
 
-    Promise.all(fetchPromises)
-        .then((completedMenus) => {
-            SetFooterMenuList(completedMenus);
-        })
-        .catch((error) => {
-            console.error('Failed to load footer menus:', error);
+        Promise.all(fetchPromises)
+            .then((completedMenus) => {
+                SetFooterMenuList(completedMenus);
+            })
+            .catch((error) => {
+                console.error('Failed to load footer menus:', error);
+            });
+    }, [FooterMenu]);
+    const logo_path = setting.site[FooterSetting.footer_logo]?.value;
+
+    // Platform icon map
+    const platformIcons = {
+        facebook: <FaFacebook size={18} />,
+        instagram: <FaInstagram size={18} />,
+        tiktok: <FaTiktok size={18} />,
+        twitter: <FaXTwitter size={18} />,
+        x: <FaXTwitter size={18} />,
+        youtube: <FaYoutube size={18} />,
+        linkedin: <FaLinkedin size={18} />,
+        github: <FaGithub size={18} />,
+        snapchat: <FaSnapchat size={18} />,
+        pinterest: <FaPinterest size={18} />,
+        discord: <FaDiscord size={18} />,
+        whatsapp: <RiWhatsappLine size={18} />,
+    };
+
+    // Parse dynamic social media from setting.site.social_media
+    const rawSiteSocial = setting?.site?.social_media?.value;
+    let parsedSiteSocial = [];
+    if (Array.isArray(rawSiteSocial)) {
+        parsedSiteSocial = rawSiteSocial;
+    } else if (typeof rawSiteSocial === 'string' && rawSiteSocial.startsWith('[')) {
+        try {
+            parsedSiteSocial = JSON.parse(rawSiteSocial);
+        } catch (e) { }
+    }
+
+    // Filter active social media items
+    const dynamicSocialLinks = parsedSiteSocial
+        .filter((item) => (item.status === undefined || item.status === '1' || item.status === 1 || item.status === true) && item.url)
+        .map((item) => {
+            const key = (item.platform || '').toLowerCase().trim();
+            return {
+                name: item.title || item.platform,
+                href: item.url,
+                icon: platformIcons[key] || (item.icon ? <i className={item.icon} /> : <RiGlobalLine size={18} />),
+            };
         });
-}, [FooterMenu]);
-    console.log(FooterMenuList); 
-    const logo_path = setting.site[FooterSetting.footer_logo].value
-    const socialLinks = [
-        { icon: <FaFacebook />, href: '#', name: 'Facebook', color: "" },
-        { icon: <RiTwitterXFill />, href: '#', name: 'Twitter' },
-        { icon: <RiInstagramFill />, href: '#', name: 'Instagram' },
-        { icon: <RiYoutubeFill />, href: '#', name: 'YouTube' },
-        { icon: <RiWhatsappLine />, href: '#', name: 'WhatsApp' },
-        { icon: <RiPinterestFill />, href: '#', name: 'Pintrest' },
-        { icon: <RiLinkedinBoxFill />, href: '#', name: 'LinkedIn' },
+
+    const fallbackSocialLinks = [
+        { icon: <FaFacebook size={18} />, href: '#', name: 'Facebook' },
+        { icon: <FaXTwitter size={18} />, href: '#', name: 'Twitter' },
+        { icon: <FaInstagram size={18} />, href: '#', name: 'Instagram' },
+        { icon: <FaYoutube size={18} />, href: '#', name: 'YouTube' },
+        { icon: <RiWhatsappLine size={18} />, href: '#', name: 'WhatsApp' },
     ];
+
+    const socialLinks = dynamicSocialLinks.length > 0 ? dynamicSocialLinks : fallbackSocialLinks;
 
     const quickLinks = [
         __('Laptops & Computers'),
@@ -130,8 +170,8 @@ useEffect(() => {
 
             <div className="relative container mx-auto px-6 py-14">
 
-                <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-13">
-                    <div className="space-y-6 lg:col-span-4">
+                <div className="grid gap-10 grid-cols-1 sm:grid-cols-4 lg:grid-cols-13">
+                    <div className="space-y-6 sm:col-span-4 lg:col-span-4">
                         <Link href="/" className="inline-flex items-center gap-3 text-2xl font-black uppercase tracking-tight text-white">
                             <ImageViwer image={logo_path} className='max-w-40' />
                         </Link>
@@ -157,13 +197,16 @@ useEffect(() => {
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-5 pt-2">
+                        <div className="flex items-center flex-wrap gap-3.5 pt-2">
                             {socialLinks.map((social, index) => (
                                 <a
                                     key={index}
                                     href={social.href}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     aria-label={social.name}
-                                    className="flex items-center text-[24px] justify-center  transition-colors text-accent"
+                                    title={social.name}
+                                    className="flex items-center justify-center size-9 rounded-full bg-border/20 text-accent hover:text-white hover:bg-primary transition-all text-base shadow-2xs"
                                 >
                                     {social.icon}
                                 </a>
@@ -173,7 +216,7 @@ useEffect(() => {
 
                     {Array.isArray(FooterMenuList) && FooterMenuList.length > 0 ? (
                         FooterMenuList.map((menu, index) => (
-                            <div key={index} className="lg:col-span-3">
+                            <div key={index} className="lg:col-span-3 sm:col-span-2">
                                 <h4 className="mb-5 inline-block pb-2 text-sm font-bold uppercase text-heading">
                                     {menu.name}
                                 </h4>

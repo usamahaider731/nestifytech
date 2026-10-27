@@ -55,7 +55,7 @@ export default function CartDrawer() {
                                 <Dialog.Panel className="pointer-events-auto w-screen max-w-md">
                                     <div className="flex h-full flex-col bg-white shadow-2xl">
                                         <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
-                                            <Dialog.Title className="flex items-center gap-2 text-lg font-bold text-heading">
+                                            <Dialog.Title className="flex items-center gap-2 text-lg font-semibold font-poppins text-heading">
                                                 <RiShoppingBag3Line className="size-5 text-primary" />
                                                 {__('Your Cart')}
                                                 <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-text">
@@ -65,7 +65,7 @@ export default function CartDrawer() {
                                             <button
                                                 type="button"
                                                 onClick={() => setIsOpen(false)}
-                                                className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 transition-colors"
+                                                className="rounded-lg p-2 text-text cursor-pointer hover:bg-common transition-colors"
                                                 aria-label={__('Close cart')}
                                             >
                                                 <RiCloseLine className="size-5" />
@@ -92,9 +92,9 @@ export default function CartDrawer() {
                                                     {items.map((item) => (
                                                         <li
                                                             key={item.comboId}
-                                                            className="flex gap-3 rounded-xl border border-slate-100 p-3"
+                                                            className="flex gap-3 rounded-xl border border-border p-3"
                                                         >
-                                                            <div className="size-16 shrink-0 rounded-lg bg-slate-50 overflow-hidden flex items-center justify-center">
+                                                            <div className="size-16 shrink-0 rounded-lg bg-white overflow-hidden flex items-center justify-center">
                                                                 {typeof item.image === 'string' ? (
                                                                     <ImageViwer
                                                                         image={item.image}
@@ -110,28 +110,28 @@ export default function CartDrawer() {
                                                             </div>
 
                                                             <div className="flex flex-1 flex-col gap-2 min-w-0">
-                                                                <p className="text-sm font-semibold text-heading line-clamp-2">
+                                                                <p className="text-sm font-semibold font-poppins text-heading line-clamp-2">
                                                                     {item.title}
                                                                     {item.color && <span className="block text-xs text-slate-500">{item.color}</span>}
                                                                 </p>
-                                                                <p className="text-sm font-bold text-primary">
+                                                                <p className="text-sm font-semibold font-poppins text-primary">
                                                                     {currency}{' '}
                                                                     {Number(item.price).toLocaleString()}
                                                                 </p>
 
                                                                 <div className="flex items-center justify-between gap-2">
-                                                                    <div className="inline-flex items-center rounded-lg border border-slate-200">
+                                                                    <div className="inline-flex items-center rounded border border-border">
                                                                         <button
                                                                             type="button"
                                                                             onClick={() =>
                                                                                 dispatch(setComboQty({ comboId: item.comboId, qty: item.qty - 1 }))
                                                                             }
-                                                                            className="p-1.5 text-slate-600 hover:bg-slate-100 rounded-l-lg"
+                                                                            className="p-2.5 text-text hover:bg-common rounded-l"
                                                                             aria-label={__('Decrease quantity')}
                                                                         >
                                                                             <RiSubtractLine className="size-4" />
                                                                         </button>
-                                                                        <span className="min-w-8 text-center text-sm font-semibold">
+                                                                        <span className="min-w-8 text-center text-sm font-medium font-roboto">
                                                                             {item.qty}
                                                                         </span>
                                                                         <button
@@ -139,7 +139,7 @@ export default function CartDrawer() {
                                                                             onClick={() =>
                                                                                 dispatch(setComboQty({ comboId: item.comboId, qty: item.qty + 1 }))
                                                                             }
-                                                                            className="p-1.5 text-slate-600 hover:bg-slate-100 rounded-r-lg"
+                                                                            className="p-2.5 text-text hover:bg-common rounded-r"
                                                                             aria-label={__('Increase quantity')}
                                                                         >
                                                                             <RiAddLine className="size-4" />
@@ -149,7 +149,7 @@ export default function CartDrawer() {
                                                                     <button
                                                                         type="button"
                                                                         onClick={() => dispatch(removeFromCart(item.comboId))}
-                                                                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                                        className="p-1.5 text-red-500 hover:bg-red-50 cursor-pointer rounded-lg transition-colors"
                                                                         aria-label={__('Remove item')}
                                                                     >
                                                                         <RiDeleteBin6Line className="size-4" />
@@ -165,8 +165,8 @@ export default function CartDrawer() {
                                         {items.length > 0 && (
                                             <div className="border-t border-slate-200 px-5 py-4 space-y-4">
                                                 <div className="flex items-center justify-between">
-                                                    <span className="text-sm text-slate-500">{__('Subtotal')}</span>
-                                                    <span className="text-lg font-bold text-heading">
+                                                    <span className="text-sm font-medium text-text">{__('Subtotal')}</span>
+                                                    <span className="text-lg font-semibold font-poppins text-heading">
                                                         {currency} {subtotal.toLocaleString()}
                                                     </span>
                                                 </div>
@@ -174,7 +174,7 @@ export default function CartDrawer() {
                                                 <Link
                                                     href={route('checkout')}
                                                     onClick={() => setIsOpen(false)}
-                                                    className="w-full rounded-xl flex items-center justify-center gap-2 px-3 bg-primary py-3 text-sm font-bold text-text transition-all hover:opacity-90 active:scale-[0.98]"
+                                                    className="w-full rounded flex items-center justify-center gap-2 px-3 bg-primary py-3 text-sm font-semibold font-poppins text-text transition-all hover:opacity-90 active:scale-[0.98]"
                                                 >
                                                     <IoBagCheckOutline className='size-4' />
                                                     {__('Proceed to Checkout')}

@@ -1,6 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import React from 'react';
-import { RiArrowLeftLine, RiArrowRightSLine, RiEye2Line, RiEyeFill, RiEyeLine, RiHeart2Line, RiHeartLine } from 'react-icons/ri';
+import { RiArrowLeftLine, RiArrowRightSLine, RiEye2Line, RiEyeFill, RiEyeLine, RiHeart2Line, RiHeart2Fill, RiHeartLine, RiHeartFill } from 'react-icons/ri';
 import SingleProductSlider from './Slider';
 import ImageViwer from '../Admin/ImageViwer';
 import Variations from './Variations';
@@ -8,35 +8,71 @@ import { stripTags } from '@/Utils/helper';
 import { useLang } from '@/contexts/LanguageContext';
 import { FaEye, FaRegEye } from 'react-icons/fa';
 import ProductQRCode from './ProductQRCode';
+import { useDispatch, useSelector } from 'react-redux';
+import { addToWishlist, removeFromWishlist, selectIsInWishlist } from '@/store/wishListSlice';
+import { recordWishlistActivity } from '@/Utils/recordWishlistActivity';
+import { toast } from 'react-toastify';
 
 const ProductTopSection = ({ product }) => {
+    const { auth } = usePage().props;
     const { __ } = useLang();
-    console.log(product)
+    const dispatch = useDispatch();
+    const isWishlist = useSelector(selectIsInWishlist(product?.id));
+
+    const isOwner = Boolean(auth?.user?.id && product?.user_id && Number(auth.user.id) === Number(product.user_id));
+
+    const handleWishlistToggle = () => {
+        if (!product?.id) return;
+        if (isOwner) {
+            toast.info(__('You cannot like or wishlist your own product.'));
+            return;
+        }
+
+        if (isWishlist) {
+            dispatch(removeFromWishlist(product.id));
+            if (auth?.user) recordWishlistActivity('wishlist_removed', product.id);
+            toast.info(__('Removed from Wishlist'));
+        } else {
+            dispatch(addToWishlist({ productId: product.id, product }));
+            if (auth?.user) recordWishlistActivity('wishlist_added', product.id);
+            toast.success(__('Added to Wishlist'));
+        }
+    };
+
     return (
         <div className='flex flex-col w-full'>
-            <div className='flex justify-between mx-auto w-full'>
-                <div className='flex font-oswald gap-3 items-center'>
-                    <span className='text-dynamic text-sm font-medium'>{__('Home')}</span>
+            <div className='flex flex-wrap-reverse gap-y-3 justify-between mx-auto w-full'>
+                <div className='flex font-oswald gap-2 md:gap-3 items-center'>
+                    <span className='text-dynamic text-xs md:text-sm font-medium'>{__('Home')}</span>
                     <span className=''>
-                        <RiArrowRightSLine className='text-base' />
+                        <RiArrowRightSLine className='md:text-base text-sm' />
                     </span>
-                    <Link href={route('taxonomy.view', {type: "category", id: product.category[0].id, slug: product.category[0].slug, time: new Date().getTime()})} className='bg-bg p-2 text-xs rounded font-oswald font-medium'>
+                    <Link href={route('taxonomy.view', {type: "category", id: product.category[0].id, slug: product.category[0].slug, time: new Date().getTime()})} className='bg-bg p-1.5 md:p-2 text-xs rounded font-oswald font-medium'>
                         {product.category[0].title}
                     </Link>
                     <span className=''>
-                        <RiArrowRightSLine className='text-base' />
+                        <RiArrowRightSLine className='md:text-base text-sm' />
                     </span>
-                    <span className='text-text text-sm font-medium'>
+                    <span className='text-text text-xs md:text-sm font-medium'>
                         {product.title}
                     </span>
                 </div>
-                <div className='flex items-center gap-2'>
-                    <button title='Add to Wish List' className='flex text-primary hover:text-white hover:bg-primary transition-all cursor-pointer size-7.5 rounded items-center justify-center border-2 border-primary'>
-                        <RiHeartLine className='size-4' />
+                <div className='flex items-center gap-1.5 md:gap-2'>
+                    <button
+                        type='button'
+                        onClick={handleWishlistToggle}
+                        title={isWishlist ? __('Remove from Wish List') : __('Add to Wish List')}
+                        className={`flex transition-all cursor-pointer size-6 md:size-7.5 rounded items-center justify-center md:border-2 border ${
+                            isWishlist
+                                ? 'bg-primary text-white border-primary shadow-sm'
+                                : 'text-primary hover:text-white hover:bg-primary border-primary'
+                        }`}
+                    >
+                        {isWishlist ? <RiHeartFill className='md:size-4 size-3 text-white' /> : <RiHeartLine className='size-4' />}
                     </button>
                     {product.meta?.views?.value > 0 && (
-                    <button className='flex text-secondary text-xs font-semibold hover:text-white gap-1.5 hover:bg-secondary transition-all cursor-pointer h-7.5 w-auto px-1.5 rounded items-center justify-center border-2 border-secondary'>
-                        <FaRegEye  className='size-4' />
+                    <button className='flex text-secondary text-xs font-semibold hover:text-white gap-1.5 hover:bg-secondary transition-all cursor-pointer h-6 md:h-7.5 w-auto px-1.5 rounded items-center justify-center border-1 md:border-2 border-secondary'>
+                        <FaRegEye  className='size-3 md:size-4' />
                         <span>
                             {product.meta?.views?.value} Views
                         </span>
@@ -78,6 +114,20 @@ const ProductTopSection = ({ product }) => {
                                             ))
                                         }</div>
                                 </div>
+                                {product?.store && (
+                                    <div className='flex gap-2 items-center'>
+                                        <span className='text-sm text-heading font-semibold'>{__('Store / Branch:')}</span>
+                                        <span className='inline-flex items-center gap-1.5 py-0.5 px-2 rounded-md bg-emerald-500/10 text-emerald-600 text-xs font-semibold'>
+                                            <span>🏪</span>
+                                            <span>{product.store.title}</span>
+                                            {(product.store.city || product.store.state) && (
+                                                <span className='text-emerald-500/70 font-normal'>
+                                                    ({[product.store.city, product.store.state].filter(Boolean).join(', ')})
+                                                </span>
+                                            )}
+                                        </span>
+                                    </div>
+                                )}
                                 {product?.tags && 
                                 <div className='flex gap-2 items-center'>
                                     <span className='text-sm text-heading font-semibold'>{__('Tags:')}</span>

@@ -9,6 +9,7 @@ import {
   RiExternalLinkLine,
   RiCloseLine,
   RiVolumeUpLine,
+  RiNotification2Fill,
 } from 'react-icons/ri';
 import axios from 'axios';
 import {
@@ -18,8 +19,19 @@ import {
   getNotifiedIds,
   markAsNotified,
 } from '@/Utils/notificationHelper';
+import ImageViwer from '../Admin/ImageViwer';
+import { useLang } from '@/contexts/LanguageContext';
 
+const sanitizeUrl = (url) => {
+  try {
+    const parsed = new URL(url, window.location.origin);
+    return ['http:', 'https:'].includes(parsed.protocol) ? url : '#';
+  } catch {
+    return '#';
+  }
+};
 export default function NotificationBell() {
+  const { __ } = useLang();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
@@ -140,11 +152,11 @@ export default function NotificationBell() {
 
       {/* Notifications Dropdown Panel */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-3 w-80 sm:w-96 bg-bg border border-border rounded-lg shadow-2xl z-50 overflow-hidden text-xs text-text transition-all animate-in fade-in zoom-in-95 duration-150">
+        <div className="absolute right-0 top-full mt-3 w-80 sm:w-96 bg-white border border-border rounded shadow-2xl z-50 overflow-hidden text-xs text-text transition-all animate-in fade-in zoom-in-95 duration-150">
           {/* Header */}
-          <div className="p-3.5 border-b border-border flex items-center justify-between bg-bg">
+          <div className="p-3.5 border-b border-border flex items-center justify-between bg-white">
             <div className="flex items-center gap-2">
-              <span className="font-bold text-sm text-text">Notifications</span>
+              <span className="font-semibold font-roboto text-sm text-text">Notifications</span>
               {unreadCount > 0 && (
                 <span className="px-2 py-0.5 text-[10px] font-semibold bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400 rounded-full">
                   {unreadCount} new
@@ -207,17 +219,18 @@ export default function NotificationBell() {
               </div>
             ) : (
               notifications.map((item) => (
-                <a
+                <Link
                   key={item.id}
-                  href={item.url || '#'}
+                  href={sanitizeUrl(item.url)}
                   onClick={() => markAsNotified(item.id)}
                   className="p-3 flex items-start gap-3 hover:bg-border/30 transition-colors block group cursor-pointer"
                 >
                   {/* Icon / Image */}
                   <div className="shrink-0 relative">
                     {item.image && !item.image.includes('placeholder') && !item.image.includes('favicon') ? (
-                      <img
+                      <ImageViwer
                         src={item.image}
+                        image={item.image}
                         alt=""
                         className="size-10 object-cover rounded border border-border"
                       />
@@ -241,7 +254,7 @@ export default function NotificationBell() {
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-1 mb-0.5">
-                      <span className="font-semibold text-xs text-text truncate group-hover:text-primary transition-colors">
+                      <span className="font-medium font-poppins text-xs text-text truncate group-hover:text-primary transition-colors">
                         {item.title}
                       </span>
                       <RiExternalLinkLine
@@ -263,7 +276,7 @@ export default function NotificationBell() {
                       </span>
                     )}
                   </div>
-                </a>
+                </Link>
               ))
             )}
           </div>
@@ -272,10 +285,10 @@ export default function NotificationBell() {
           {notifications.length > 0 && (
             <div className="p-2.5 bg-bg border-t border-border text-center">
               <Link
-                href={route('store')}
+                href={route('shop')}
                 className="text-[11px] font-semibold text-primary hover:underline"
               >
-                Explore New Arrivals in Store &rarr;
+                {__("Explore New Arrivals in Store")} &rarr;
               </Link>
             </div>
           )}

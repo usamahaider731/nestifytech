@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLang } from '@/contexts/LanguageContext';
-import { usePage } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import TextInput from '../TextInput';
 import Dropdown from '../Dropdown';
 import { RiAiGenerateText, RiAppsLine, RiArrowUpDownFill, RiBubbleChartFill, RiDashboardLine, RiExpandUpDownFill, RiFontSize2, RiFunctionLine, RiGlobalLine, RiLayoutTop2Line, RiMenu2Line, RiPaletteLine, RiPriceTag2Line, RiPriceTag3Line, RiSearch2Line, RiSettingsLine, RiShieldUserLine, RiShoppingBag3Line, RiShoppingCart2Line, RiTranslate2, RiTranslateAi } from 'react-icons/ri';
@@ -32,7 +32,7 @@ const HeaderSearch = () => {
     };
 
     const [productKeyword, setProductKeyword] = useState("");
-    const [categoryValue, setcategoryValue] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState(null);
     const [productResults, setProductResults] = useState([]);
     const [productDropdownOpen, setProductDropdownOpen] = useState(false);
     const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
@@ -63,71 +63,141 @@ const HeaderSearch = () => {
         return () => clearTimeout(productSearchTimer.current);
     }, [productKeyword]);
 
+    const handleSearchSubmit = (e) => {
+        if (e) e.preventDefault();
+        setProductDropdownOpen(false);
+        setCategoryDropdownOpen(false);
+
+        const params = {};
+        if (productKeyword.trim()) {
+            params.q = productKeyword.trim();
+        }
+        if (selectedCategory?.id) {
+            params.category = selectedCategory.id;
+        }
+
+        router.get(route('search'), params);
+    };
+
+    const handleSelectResult = (item) => {
+        setProductDropdownOpen(false);
+        if (item.route && item.route !== '#ai-search') {
+            router.get(item.route);
+        } else {
+            setProductKeyword(item.title);
+            router.get(route('search'), { q: item.title });
+        }
+    };
+
     return (
         <>
-            <div className='ltr:mr-18.5 rtl:ml-18.5 z-50 bg-white rounded-full flex items-center min-w-62.5 flex-1'>
-                <Dropdown className="flex-1">
-                    <Dropdown.Trigger className='relative z-50 h-10 ltr:rounded-l-full ltr:rounded-r-none rtl:rounded-r-full rtl:rounded-l-none ltr:border-r-0 rtl:border-l-0 border-2 text-sm text-text !border-primary '>
+            <form onSubmit={handleSearchSubmit} className='lg:ltr:mr-10 lg:rtl:ml-10 z-50 bg-white rounded-full flex items-center min-w-0 flex-1 relative'>
+                <Dropdown className="flex-1 min-w-0">
+                    <Dropdown.Trigger className='relative z-50 h-8 sm:h-9 lg:h-10 ltr:rounded-l-full ltr:rounded-r-none rtl:rounded-r-full rtl:rounded-l-none ltr:border-r-0 rtl:border-l-0 border-2 text-sm text-text !border-primary '>
                         {({ open }) => (
                             <TextInput
                                 value={productKeyword}
                                 onClick={(e) => {
-                                    setProductDropdownOpen(!productDropdownOpen);
+                                    if (productResults.length > 0) {
+                                        setProductDropdownOpen(true);
+                                    }
                                     if (open) {
                                         e.stopPropagation();
                                     }
                                 }}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        handleSearchSubmit(e);
+                                    }
+                                }}
                                 onChange={(e) => setProductKeyword(e.target.value)}
-                                className="min-h-full text-sm font-medium h-full py-2.5 px-7.5 border-0 !shadow-none bg-transparent min-w-full"
+                                className="min-h-full text-[10px] sm:text-xs lg:text-sm font-medium h-full py-1.5 sm:py-2.5 px-3 lg:px-5 border-0 !shadow-none bg-transparent min-w-full"
                                 placeholder={__('Search For Product')}
                             />
                         )}
                     </Dropdown.Trigger>
-                    <Dropdown.Content className='min-w-full bg-white border-border' contentClasses='!border-border !ring-0 rounded-none'>
-                        {productResults.map((item, index) => (
-                            <Dropdown.List key={index} onClick={() => { setProductKeyword(item.title) }} className='flex items-center cursor-pointer gap-3 border-b border-border'>
-                                <span>
-
-                                {IconMap[item.icon] || null}
-                                </span>
-                                <span className="line-clamp-1">
-
-                                {item.title}
-                                </span>
-                            </Dropdown.List>
-                        ))}
-                    </Dropdown.Content>
+                    {productDropdownOpen && productResults.length > 0 && (
+                        <Dropdown.Content className='min-w-full bg-white border-border shadow-lg max-h-80 overflow-y-auto' contentClasses='!border-border !ring-0 rounded-none'>
+                            {productResults.map((item, index) => (
+                                <Dropdown.List
+                                    key={index}
+                                    onClick={() => handleSelectResult(item)}
+                                    className='flex items-center cursor-pointer gap-3 border-b border-border py-2.5 px-4 hover:bg-primary/5 transition-colors'
+                                >
+                                    <span>
+                                        {IconMap[item.icon] || null}
+                                    </span>
+                                    <span className="line-clamp-1 text-xs font-medium text-heading">
+                                        {item.title}
+                                    </span>
+                                </Dropdown.List>
+                            ))}
+                            <div
+                                onClick={handleSearchSubmit}
+                                className="p-2.5 text-center bg-primary/10 hover:bg-primary/20 text-heading text-xs font-bold cursor-pointer transition-colors border-t border-primary/20"
+                            >
+                                {__('View all results for ":query"', { query: productKeyword })} →
+                            </div>
+                        </Dropdown.Content>
+                    )}
                 </Dropdown>
 
-                <Dropdown className="flex-1">
-                    <Dropdown.Trigger className='relative z-50 h-10 rounded-r-none border-r-0 border-l-border border-l border-2 text-sm text-text !border-y-primary '>
+                <Dropdown className="hidden md:block flex-1 min-w-0">
+                    <Dropdown.Trigger className='relative z-50 h-9 lg:h-10 rounded-r-none border-r-0 border-l-border border-l border-2 text-xs lg:text-sm text-text !border-y-primary '>
                         {({ open }) => (
                             <div
-                                value={categoryValue}
                                 onClick={(e) => {
                                     setCategoryDropdownOpen(!categoryDropdownOpen);
-                                    
                                 }}
-                                className="min-h-full font-medium text-text h-full py-2.5 px-7.5 border-0 flex items-center justify-between relative !shadow-none bg-transparent min-w-full"
+                                className="min-h-full  font-medium text-text h-full py-1.5 sm:py-2.5 px-3 lg:px-6 border-0 flex items-center justify-between relative !shadow-none bg-transparent min-w-full cursor-pointer select-none"
                             >
-                                {categoryValue || __('Select Category')}
-                                <RiExpandUpDownFill className={`ml-2 ${categoryDropdownOpen ? 'rotate-180' : ''} transition-transform duration-300`} />
+                                <span className="truncate">
+                                    {selectedCategory?.title || __('Select Category')}
+                                </span>
+                                <RiExpandUpDownFill className={`ml-2 shrink-0 ${categoryDropdownOpen ? 'rotate-180' : ''} transition-transform duration-300`} />
                             </div>
                         )}
                     </Dropdown.Trigger>
-                    <Dropdown.Content className='min-w-full bg-white border-border' contentClasses='!border-border !ring-0 rounded-none'>
-                        {searchCategories.map((item, index) => (
-                            <Dropdown.List key={index} onClick={() => { setcategoryValue(item.title); setCategoryDropdownOpen(false); setProductDropdownOpen(false); }} className='flex items-center cursor-pointer gap-3 border-b border-border'>
-                                {IconMap[item.icon] || null}
-                                {item.title}
+                    {categoryDropdownOpen && (
+                        <Dropdown.Content className='min-w-full bg-white border-border shadow-lg max-h-80 overflow-y-auto' contentClasses='!border-border !ring-0 rounded-none'>
+                            <Dropdown.List
+                                onClick={() => {
+                                    setSelectedCategory(null);
+                                    setCategoryDropdownOpen(false);
+                                }}
+                                className='flex items-center cursor-pointer gap-3 border-b border-border py-2 px-4 hover:bg-primary/10 text-xs font-semibold'
+                            >
+                                <RiAppsLine size={15} className="text-res" />
+                                <span>{__('All Categories')}</span>
                             </Dropdown.List>
-                        ))}
-                    </Dropdown.Content>
+                            {searchCategories.map((item, index) => (
+                                <Dropdown.List
+                                    key={index}
+                                    onClick={() => {
+                                        setSelectedCategory(item);
+                                        setCategoryDropdownOpen(false);
+                                    }}
+                                    className='flex items-center cursor-pointer gap-3 border-b border-border py-2 px-4 hover:bg-primary/10 text-xs font-medium'
+                                >
+                                    {IconMap[item.icon] || null}
+                                    <span>{item.title}</span>
+                                </Dropdown.List>
+                            ))}
+                        </Dropdown.Content>
+                    )}
                 </Dropdown>
-                <button className='bg-primary border cursor-pointer border-primary h-10 flex items-center justify-center ltr:rounded-r-full rtl:rounded-l-full text-white w-12.5 text-md font-semibold'>
+
+                <button
+                    type="submit"
+                    className='bg-primary hover:brightness-95 border cursor-pointer border-primary h-8 sm:h-9 lg:h-10 flex items-center justify-center ltr:rounded-r-full rtl:rounded-l-full text-white w-10 sm:w-12.5 text-md font-semibold transition-all shrink-0'
+                    title={__('Search')}
+                    aria-label={__('Search')}
+                >
                     <RiSearch2Line size={16} />
                 </button>
-            </div>
+            </form>
+
             {showSearchBackdrop && (
                 <div onClick={() => { setProductDropdownOpen(false); setCategoryDropdownOpen(false); }} className='fixed inset-0 z-30 min-h-screen bg-black/10'></div>
             )}
@@ -136,3 +206,4 @@ const HeaderSearch = () => {
 }
 
 export default HeaderSearch;
+

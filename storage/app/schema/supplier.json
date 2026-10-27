@@ -1,0 +1,206 @@
+{
+    "db": {
+        "model": "App\\Models\\Taxonomy",
+        "type": "supplier",
+        "auto_slug": "slug",
+        "validation": {
+            "title": "required|string|max:255",
+            "description": "nullable|string",
+            "status": "required|string"
+        },
+        "schema": [
+            {
+                "name": "title",
+                "type": "string"
+            },
+            {
+                "name": "slug",
+                "type": "string"
+            },
+            {
+                "name": "description",
+                "type": "longText",
+                "nullable": true
+            },
+            {
+                "name": "status",
+                "type": "string",
+                "default": "publish"
+            },
+            {
+                "name": "type",
+                "type": "string",
+                "index": true
+            },
+            {
+                "name": "created_at",
+                "type": "timestamp",
+                "nullable": true
+            },
+            {
+                "name": "updated_at",
+                "type": "timestamp",
+                "nullable": true
+            }
+        ],
+        "main_fields": [
+            "title",
+            "description",
+            "status",
+            "slug"
+        ],
+        "fixed_fields": {
+            "type": "supplier"
+        },
+        "relations": {
+            "image": "single_image"
+        },
+        "meta_fields": "auto",
+        "table": "taxonomies"
+    },
+    "table": {
+        "card": {
+            "image": "image",
+            "title": "title",
+            "content": "description",
+            "top_right": "status",
+            "actions": "action"
+        },
+        "keywords": true,
+        "paginationPerPage": 10,
+        "paginationList": [
+            10,
+            20,
+            50,
+            100
+        ],
+        "table": "taxonomies",
+        "type": "supplier",
+        "bulk": {
+            "table": "taxonomies",
+            "type": "supplier",
+            "route": "bulk.action",
+            "column": "status",
+            "is_meta": false,
+            "options": [
+                {
+                    "label": "Delete",
+                    "value": "delete"
+                },
+                {
+                    "label": "Publish",
+                    "value": "publish"
+                },
+                {
+                    "label": "Draft",
+                    "value": "Draft"
+                }
+            ]
+        },
+        "columns": [
+            {
+                "id": "id",
+                "label": "ID",
+                "column": "id",
+                "width": "5%",
+                "sort": true
+            },
+            {
+                "id": "title",
+                "label": "SUPPLIER / VENDOR",
+                "column": "title",
+                "sort": true,
+                "width": "25%"
+            },
+            {
+                "id": "contact_person",
+                "label": "CONTACT PERSON",
+                "column": "contact_person",
+                "type": "text",
+                "meta": true,
+                "meta_key": "contact_person",
+                "width": "18%"
+            },
+            {
+                "id": "phone",
+                "label": "PHONE / WHATSAPP",
+                "column": "phone",
+                "type": "text",
+                "meta": true,
+                "meta_key": "phone",
+                "width": "18%"
+            },
+            {
+                "id": "status",
+                "label": "STATUS",
+                "column": "status",
+                "width": "14%",
+                "type": "status_dot"
+            },
+            {
+                "id": "action",
+                "label": "ACTION",
+                "column": "action",
+                "width": "20%",
+                "type": "action"
+            }
+        ]
+    },
+    "form": [
+        {
+            "title": "Supplier Information",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Supplier / Company Name",
+                    "type": "text",
+                    "style": 2,
+                    "name": "title",
+                    "placeholder": "e.g. Apex Global Distributors Ltd",
+                    "attribute": "required"
+                },
+                {
+                    "label": "Contact Person",
+                    "type": "text",
+                    "style": 2,
+                    "name": "contact_person",
+                    "placeholder": "Primary account manager / sales rep"
+                },
+                {
+                    "label": "Phone / WhatsApp",
+                    "type": "text",
+                    "style": 2,
+                    "name": "phone",
+                    "placeholder": "+92 300 1234567"
+                },
+                {
+                    "label": "Email Address",
+                    "type": "email",
+                    "style": 2,
+                    "name": "email",
+                    "placeholder": "orders@supplier.com"
+                },
+                {
+                    "label": "Warehouse / Office Address",
+                    "type": "desc",
+                    "style": 2,
+                    "name": "description",
+                    "placeholder": "Address, terms, payment cycle, etc."
+                }
+            ]
+        },
+        {
+            "title": "Supplier Logo / Proof",
+            "style": "sidebar",
+            "fields": [
+                {
+                    "label": "Supplier Logo",
+                    "name": "image",
+                    "type": "image",
+                    "style": 1,
+                    "filename": ""
+                }
+            ]
+        }
+    ]
+}

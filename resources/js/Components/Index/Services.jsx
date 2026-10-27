@@ -16,7 +16,6 @@ const Services = () => {
     const { __ } = useLang();
     const { setting } = usePage().props
     const services = setting.layout.Home.services;
-    console.log(services)
     // const services = [
     //     {
     //         icon: RiTruckLine,

@@ -3,83 +3,81 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useLang } from '@/contexts/LanguageContext';
 import { RiRocketLine, RiSpeedUpLine, RiShieldCheckLine } from 'react-icons/ri';
+import ImageViwer from '../Admin/ImageViwer';
 
 gsap.registerPlugin(ScrollTrigger);
 
-export default function AnimatedScrollSection() {
+export default function AnimatedScrollSection({ data = [] }) {
+    console.log(data)
     const { __, locale } = useLang();
     const sectionRef = useRef(null);
     const titleRef = useRef(null);
     const textRef = useRef(null);
     const cardsRef = useRef([]);
 
-    useEffect(() => {
-        let ctx = gsap.context(() => {
-            // Custom SplitText animation
-            const chars = titleRef.current.querySelectorAll('.char');
-            gsap.from(chars, {
-              yPercent: "random(-200, 200)",
-                    rotation: "random(-20, 20)",
-                    opacity: 0,
-                    stagger: 0.02,
-                    ease: "back.out(1.2)",
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: "top 75%",
-                        end: "top 20%",
-                        scrub: 1
-                    }
-            });
+useEffect(() => {
+    let ctx = gsap.context(() => {
+        const chars = titleRef.current.querySelectorAll('.char');
+        
+        // 1. Title character animation
+        gsap.from(chars, {
+            yPercent: "random(-50, 70)",
+            rotation: "random(-20, 20)",
+            opacity: 0,
+            stagger: 0.02,
+            ease: "back.out(1.2)",
+scrollTrigger: {
+    trigger: sectionRef.current,
+    start: "top 80%",
+    toggleActions: "play none none reverse" // <--- Plays smoothly once when scrolled into view, reverses when scrolled back up
+}
+        });
 
-            // Text effect for description
-            gsap.fromTo(textRef.current,
-                { opacity: 0, filter: "blur(3px)", x: -100 },
-                {
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: "top 95%",
-                        scrub: 1,
-                        toggleActions: "play reverse play reverse",
-                    },
-                    opacity: 1,
-                    filter: "blur(0px)",
-                    x: 0,
-                    duration: 1.4,
-                    ease: "power2.out"
-                }
-            );
-
-            // Animate cards staggering
-            gsap.from(cardsRef.current, {
+        // 2. Text effect for description (removed conflicting toggleActions)
+        gsap.fromTo(textRef.current,
+            { opacity: 0, filter: "blur(3px)", x: -100 },
+            {
                 scrollTrigger: {
                     trigger: sectionRef.current,
-                    start: "top 98%",
+                    start: "top 95%",
                     scrub: 1,
-                    toggleActions: "play reverse play reverse",
                 },
-                x: -40,
-                opacity: 0,
-                duration: 0.5,
-                stagger: 0.2,
+                opacity: 1,
+                filter: "blur(0px)",
+                x: 0,
                 ease: "power2.out"
-            });
+            }
+        );
 
-            // Parallax effect on background elements
-            gsap.to('.bg-shape', {
-                scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: "top bottom",
-                    end: "bottom top",
-                    scrub: 1
-                },
-                y: (i) => -150 * (i + 1),
-                ease: "none"
-            });
+        // 3. Animate cards staggering
+        gsap.from(cardsRef.current, {
+            scrollTrigger: {
+                trigger: sectionRef.current,
+                start: "top 98%",
+                scrub: 1,
+            },
+            x: -40,
+            opacity: 0,
+            stagger: 0.2,
+            ease: "power2.out"
+        });
 
-        }, sectionRef);
+        // 4. Parallax effect on background elements
+        gsap.to('.bg-shape', {
+            scrollTrigger: {
+                trigger: sectionRef.current,
+                start: "top bottom",
+                end: "bottom top",
+                scrub: 1
+            },
+            y: (i) => -150 * (i + 1),
+            ease: "none"
+        });
 
-        return () => ctx.revert();
-    }, []);
+    }, sectionRef);
+
+    return () => ctx.revert();
+}, []);
 
     const addToRefs = (el) => {
         if (el && !cardsRef.current.includes(el)) {
@@ -108,7 +106,7 @@ export default function AnimatedScrollSection() {
 
             <div className="container mx-auto px-5 z-10">
                 <div className="text-center mx-auto mb-20 relative">
-                    <h2 ref={titleRef} className="text-3xl md:text-5xl font-extrabold text-heading tracking-tight font-poppins mb-6">
+                    <h2 ref={titleRef} className="text-3xl md:text-5xl font-bold text-heading tracking-tight font-poppins mb-6">
                         {renderSplitText(__('Experience the Next Generation'))}
                     </h2>
                     <p ref={textRef} className="text-base max-w-3xl mx-auto text-res">
@@ -116,39 +114,20 @@ export default function AnimatedScrollSection() {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {/* Card 1 */}
-                    <div ref={addToRefs} className="bg-white rounded-2xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-border/50 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-shadow duration-300">
-                        <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center text-primary mb-6">
-                            <RiRocketLine size={28} />
-                        </div>
-                        <h3 className="text-xl font-bold text-heading mb-3">{__('Lightning Fast')}</h3>
-                        <p className="text-res leading-relaxed">
-                            {__('Get your products delivered in record time with our optimized global shipping network.')}
-                        </p>
-                    </div>
-
-                    {/* Card 2 */}
-                    <div ref={addToRefs} className="bg-white rounded-2xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-border/50 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-shadow duration-300 md:-translate-y-6">
-                        <div className="w-14 h-14 bg-accent/10 rounded-xl flex items-center justify-center text-accent mb-6">
-                            <RiSpeedUpLine size={28} />
-                        </div>
-                        <h3 className="text-xl font-bold text-heading mb-3">{__('Unmatched Performance')}</h3>
-                        <p className="text-res leading-relaxed">
-                            {__('Every item is rigorously tested to ensure it meets our strict quality and performance standards.')}
-                        </p>
-                    </div>
-
-                    {/* Card 3 */}
-                    <div ref={addToRefs} className="bg-white rounded-2xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-border/50 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-shadow duration-300">
-                        <div className="w-14 h-14 bg-secondary/10 rounded-xl flex items-center justify-center text-secondary mb-6">
-                            <RiShieldCheckLine size={28} />
-                        </div>
-                        <h3 className="text-xl font-bold text-heading mb-3">{__('Secure & Protected')}</h3>
-                        <p className="text-res leading-relaxed">
-                            {__('Shop with confidence knowing your data is encrypted and purchases are fully protected.')}
-                        </p>
-                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {
+                        data.length > 0 && data.map((item, index) => (
+                            <div ref={addToRefs} className="bg-white rounded-2xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-border/50 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-shadow duration-300">
+                                <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-6" style={{ color: item.shopping_benefit_icon_color, backgroundColor: item.shopping_benefit_icon_color / 10 }}>
+                                    <ImageViwer image={item.shopping_benefit_icon} className={`size-7`} />
+                                </div>
+                                <h3 className="text-xl font-bold text-heading mb-3">{__(item.title)}</h3>
+                                <p className="text-res leading-relaxed">
+                                    {__(item.description)}
+                                </p>
+                            </div>
+                        ))
+                    }
                 </div>
             </div>
         </section>

@@ -22,7 +22,11 @@ class StripeController extends Controller
         }
 
         if (empty($secret)) {
-            $secret = env('STRIPE_SECRET') ?: "sk_test_51UJo7aGy3HXmj7syORR6ffyvOnkWk9Bz5N6GyRB2l8idlFqT26URnU0DexfyI8OpveQibkTgftzi2K5KwB0zvfYU005Shd340r";
+            $secret = env('STRIPE_SECRET');
+        }
+
+        if (empty($secret)) {
+            throw new \RuntimeException('Stripe secret key is not configured.');
         }
 
         Stripe::setApiKey($secret);
@@ -68,16 +72,15 @@ class StripeController extends Controller
         if (!$order) {
             return response()->json(['success' => false, 'message' => 'Order not found.'], 404);
         }
-
-        // Only pending orders can be cancelled
+        if ((int) $order->user_id !== (int) \Illuminate\Support\Facades\Auth::id()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized.'], 403);
+        }
         if ($order->status !== 'pending') {
             return response()->json([
                 'success' => false,
                 'message' => "Order cannot be cancelled. Current status: {$order->status}.",
             ], 422);
         }
-
-        // Fetch cancellation fee percentage from settings (e.g. 5%)
         $cancellationFeePercent = 5.0; // default 5%
         $settingFile = storage_path('app/data/setting.json');
         if (file_exists($settingFile)) {
@@ -190,21 +193,80 @@ class StripeController extends Controller
      * Called from the frontend after stripe.confirmCardPayment() succeeds.
      *
      * POST /api/orders/{orderId}/attach-payment
+     *
+     * SECURITY: We never trust the client's claim that payment succeeded.
+     * We retrieve the PaymentIntent directly from Stripe and verify:
+     *   1. It exists and its status is "succeeded".
+     *   2. Its charged amount matches the order total (prevents partial-payment fraud).
+     *   3. The authenticated user owns the order (prevents IDOR).
      */
     public function attachPaymentIntent(Request $request, int $orderId)
     {
         $request->validate([
-            'payment_intent_id' => 'required|string',
+            'payment_intent_id' => 'required|string|regex:/^pi_[A-Za-z0-9]+$/',
         ]);
 
-        $updated = DB::table('orders')->where('id', $orderId)->update([
-            'stripe_payment_intent_id' => $request->payment_intent_id,
-            'payment_status'           => 'paid',
-        ]);
+        // 1. Load order
+        $order = DB::table('orders')->where('id', $orderId)->first();
 
-        if (!$updated) {
+        if (!$order) {
             return response()->json(['success' => false, 'message' => 'Order not found.'], 404);
         }
+
+        // 2. Ownership check — prevent IDOR
+        if ((int) $order->user_id !== (int) \Illuminate\Support\Facades\Auth::id()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized.'], 403);
+        }
+
+        // 3. Guard against double-payment (already marked paid)
+        if ($order->payment_status === 'paid') {
+            return response()->json(['success' => false, 'message' => 'Order is already marked as paid.'], 422);
+        }
+
+        // 4. Verify PaymentIntent with Stripe — NEVER trust the client
+        $this->setApiKey();
+
+        try {
+            $intent = PaymentIntent::retrieve($request->payment_intent_id);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Could not verify payment with Stripe: ' . $e->getMessage(),
+            ], 422);
+        }
+
+        // 5. Confirm the intent actually succeeded
+        if ($intent->status !== 'succeeded') {
+            return response()->json([
+                'success' => false,
+                'message' => "Payment not completed. Stripe status: {$intent->status}.",
+            ], 422);
+        }
+
+        // 6. Confirm the charged amount matches the order total (prevents partial-payment fraud)
+        //    Stripe stores amounts in the smallest currency unit (e.g. cents/paisa).
+        $expectedAmountCents = (int) round((float) $order->total_price * 100);
+        if ($intent->amount !== $expectedAmountCents) {
+            \Illuminate\Support\Facades\Log::warning('Stripe amount mismatch on order payment attach', [
+                'order_id'              => $orderId,
+                'order_total_cents'     => $expectedAmountCents,
+                'intent_amount_cents'   => $intent->amount,
+                'payment_intent_id'     => $intent->id,
+                'user_id'               => $order->user_id,
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Payment amount does not match order total.',
+            ], 422);
+        }
+
+        // 7. All checks passed — mark the order paid
+        DB::table('orders')->where('id', $orderId)->update([
+            'stripe_payment_intent_id' => $intent->id,
+            'payment_status'           => 'paid',
+            'updated_at'               => now(),
+        ]);
 
         return response()->json(['success' => true]);
     }

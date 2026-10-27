@@ -5,6 +5,7 @@ import ImageViwer from '@/Components/Admin/ImageViwer';
 import { RiCalendarLine, RiFolder3Line, RiArrowLeftLine, RiNewspaperLine, RiPriceTag3Line } from 'react-icons/ri';
 import { useLang } from '@/contexts/LanguageContext';
 import ArticalCard from '@/Components/ArticalCard';
+import AdsRender from '@/Components/Frontend/AdsRender';
 
 export default function BlogSingle({ blog, recent_blogs = [], categories = [] }) {
     const { __ } = useLang();
@@ -26,7 +27,7 @@ export default function BlogSingle({ blog, recent_blogs = [], categories = [] })
                 {blog.seo_keywords && <meta name="keywords" content={blog.seo_keywords} />}
             </Head>
 
-            <article className=" min-h-screen text-res font-primary pb-20">
+            <article className=" min-h-screen text-res font-primary pb-5">
                 {/* Back to Blog Navigation Bar */}
                 <div className="bg-bg border-b border-border/40 py-4 px-4 sm:px-6 lg:px-8">
                     <div className="container mx-auto flex items-center justify-between">
@@ -212,6 +213,8 @@ export default function BlogSingle({ blog, recent_blogs = [], categories = [] })
                         </div>
                     )}
                 </div>
+                    <AdsRender placement='single_blog_bottom' type='main' className='w-full mt-10 h-auto' />
+
             </article>
         </FrontendLayout>
     );

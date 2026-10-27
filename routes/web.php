@@ -23,14 +23,15 @@ use Inertia\Inertia;
 use App\Http\Controllers\ReviewController;
 
 Route::controller(FilterController::class)->group(function () {
-    Route::post("bulk/action", "bulk_action")->name("bulk.action");
+    Route::post("bulk/action", "bulk_action")->middleware(['auth', 'verified'])->name("bulk.action");
 });
 Route::controller(FrontendController::class)->group(function () {
     Route::get('/', 'index')->name('index');
     Route::get('/developer', 'developer')->name('developer');
     Route::get('/checkout', 'checkout')->name('checkout');
     Route::get('/compare', 'compare')->name('compare');
-    Route::get('/store','store')->name('store');
+    Route::get('/shop','shop')->name('shop');
+    Route::get('/search', 'searchPage')->name('search');
     Route::get('/view/specific/classification/{type}/{id}/{slug}', 'taxonomyView')->name('taxonomy.view');
     Route::get('/view/post/{type}/{sku}/{id}', 'singleProduct')->name('post');
     Route::get('/blog', 'blogIndex')->name('blog.index');
@@ -38,13 +39,16 @@ Route::controller(FrontendController::class)->group(function () {
     Route::get('/page/{slug}', 'dynamicPage')->name('page.single');
     Route::get('/faqs', 'faqs')->name('faqs');
     Route::get('/faq', 'faqs')->name('faq');
+    Route::get('/store-locator', 'storeLocator')->name('store.locator');
     Route::get('/get_languages', 'get_languages')->name('languages');
     Route::get('/set-language/{prefix}', 'setLanguage')->name('language.set');
 });
-Route::prefix('/developer')->controller(DeveloperController::class)->group(function () {
-    Route::get('/reset', 'reset')->name('developer.reset');
+Route::prefix('/developer')->middleware(['auth', 'verified'])->controller(DeveloperController::class)->group(function () {
+    Route::get('/reset', 'reset')->name('developer.reset')->middleware('permission:developer-write');
 });
-Route::post('/checkout/create-payment-intent', [\App\Http\Controllers\StripeController::class, 'createPaymentIntent'])->name('checkout.payment-intent');
+Route::post('/checkout/create-payment-intent', [\App\Http\Controllers\StripeController::class, 'createPaymentIntent'])
+    ->middleware(['auth', 'throttle:10,1'])
+    ->name('checkout.payment-intent');
 Route::get('/image/{filename}_{height}_{width}.{extension}', [MediaController::class, 'thumbimageUrl'])
     ->where([
         'filename' => '.*',
@@ -60,10 +64,10 @@ Route::get('/api/color-themes', [SettingController::class, 'publicColorThemes'])
 Route::get('/search-pages.json', [SettingController::class, 'searchPages'])->name('search.pages');
 Route::get('/updateData', [SettingController::class, 'updateData'])->name('update');
 
-Route::post('/ai/generate/text', [AiController::class, 'generateText'])->name('ai.generate.text');
-Route::get('prac', function () {
-    return view('prac');
-});
+Route::post('/ai/generate/text', [AiController::class, 'generateText'])
+    ->middleware(['auth', 'throttle:20,1'])
+    ->name('ai.generate.text');
+// Route::get('prac', function () { return view('prac'); }); // Removed: debug route
 Route::prefix('/admin')->middleware(['auth', 'verified'])->group(function () {
     Route::get('/', [DashboardController::class, 'dashboard'])->name('admin.dashboard');
     Route::controller(SettingController::class)->group(function () {
@@ -175,6 +179,21 @@ Route::prefix('/admin')->middleware(['auth', 'verified'])->group(function () {
         Route::post('/{id}/status', 'updateStatus')->name('admin.orders.status')->middleware('permission:order-write');
         Route::delete('/{id}', 'destroy')->name('admin.orders.destroy')->middleware('permission:order-write');
     });
+
+    Route::prefix('/inventory')->controller(\App\Http\Controllers\Admin\InventoryController::class)->middleware('permission:product-read')->group(function () {
+        Route::get('/', 'index')->name('admin.inventory.index');
+        Route::post('/{id}/stock', 'updateStock')->name('admin.inventory.update-stock')->middleware('permission:product-create');
+        Route::post('/variation/{id}/stock', 'updateVariationStock')->name('admin.inventory.update-variation-stock')->middleware('permission:product-create');
+        Route::post('/bulk-update', 'bulkUpdate')->name('admin.inventory.bulk-update')->middleware('permission:product-create');
+    });
+
+    Route::prefix('/incoming-stock')->controller(\App\Http\Controllers\Admin\IncomingStockController::class)->middleware('permission:product-read')->group(function () {
+        Route::get('/', 'index')->name('admin.incoming-stock.index');
+        Route::post('/store', 'store')->name('admin.incoming-stock.store')->middleware('permission:product-create');
+        Route::post('/{id}/receive', 'receiveOrder')->name('admin.incoming-stock.receive')->middleware('permission:product-create');
+        Route::post('/{id}/status', 'updateStatus')->name('admin.incoming-stock.status')->middleware('permission:product-create');
+        Route::delete('/{id}', 'destroy')->name('admin.incoming-stock.destroy')->middleware('permission:product-create');
+    });
     Route::prefix('/delivery')->controller(\App\Http\Controllers\Delivery\DeliveryPortalController::class)->middleware('permission:delivery-read')->group(function () {
         Route::get('/orders', 'index')->name('delivery.orders.index');
         Route::post('/orders/{id}/send-otp', 'sendDeliveryOtp')->name('delivery.orders.send-otp');
@@ -189,13 +208,42 @@ Route::prefix('/admin')->middleware(['auth', 'verified'])->group(function () {
     // Temp image upload (used by VariationsSelector for async uploads)
     Route::post('/upload-image-temp', [MediaController::class, 'uploadTemp'])->name('admin.upload.image.temp');
 
+    // Store Locator: handled by the generic /module/{type} routes above (type=store)
+
     Route::prefix('/import-export')->controller(ImportExportController::class)->group(function () {
         Route::get('/', 'index')->name('admin.import-export.index');
         Route::post('/import', 'import')->name('admin.import');
         Route::post('/import-package', 'importPackage')->name('admin.import-package');
         Route::get('/export', 'export')->name('admin.export');
     });
+
+    // Promotions & Tax Rules
+    Route::prefix('/promotions')->controller(\App\Http\Controllers\Admin\PromotionRuleController::class)->group(function () {
+        Route::get('/', 'index')->name('admin.promotions.index');
+        Route::post('/store', 'store')->name('admin.promotions.store')->middleware('permission:product-create');
+        Route::put('/{id}', 'update')->name('admin.promotions.update')->middleware('permission:product-create');
+        Route::post('/{id}/toggle-status', 'toggleStatus')->name('admin.promotions.toggle')->middleware('permission:product-create');
+        Route::delete('/{id}', 'destroy')->name('admin.promotions.destroy')->middleware('permission:product-create');
+    });
+
+    // Gift Cards
+    Route::prefix('/gift-cards')->controller(\App\Http\Controllers\Admin\GiftCardController::class)->group(function () {
+        Route::get('/', 'index')->name('admin.gift-cards.index');
+        Route::get('/generate-code', 'generateCode')->name('admin.gift-cards.generate-code');
+        Route::post('/store', 'store')->name('admin.gift-cards.store')->middleware('permission:product-create');
+        Route::put('/{id}', 'update')->name('admin.gift-cards.update')->middleware('permission:product-create');
+        Route::delete('/{id}', 'destroy')->name('admin.gift-cards.destroy')->middleware('permission:product-create');
+    });
 });
+
+// Public API: active pricing rules (discount + tax) for frontend pricing engine
+Route::get('/api/pricing-rules', [\App\Http\Controllers\Admin\PromotionRuleController::class, 'activeRules'])
+    ->name('api.pricing-rules');
+
+// Public API: validate gift card code at checkout
+Route::post('/api/gift-card/validate', [\App\Http\Controllers\Admin\GiftCardController::class, 'validateCode'])
+    ->middleware('throttle:20,1')
+    ->name('api.gift-card.validate');
 
 // Customer Profile Routes
 Route::middleware(['auth'])->prefix('/profile')->name('profile.')->controller(ProfileController::class)->group(function () {

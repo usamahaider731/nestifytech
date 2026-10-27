@@ -21,6 +21,39 @@ class SearchController extends Controller
 
         $results = [];
 
+        // Track search keyword for personalized recommendations
+        if ($keyword && strlen($keyword) >= 2) {
+            $sessionSearches = (string) $request->session()->get('recent_searches_session', '');
+            $searchList = array_values(array_filter(array_unique(array_map('trim', explode(',', $sessionSearches)))));
+            if (!in_array($keyword, $searchList, true)) {
+                array_unshift($searchList, $keyword);
+                $request->session()->put('recent_searches_session', implode(',', array_slice($searchList, 0, 10)));
+            }
+
+            if (\Illuminate\Support\Facades\Auth::check()) {
+                $authId = \Illuminate\Support\Facades\Auth::id();
+                $existing = DB::table('user_meta')->where('user_id', $authId)->where('key', 'recent_searches')->first();
+                if ($existing) {
+                    $uList = array_values(array_filter(array_unique(array_map('trim', explode(',', (string) $existing->value)))));
+                    if (!in_array($keyword, $uList, true)) {
+                        array_unshift($uList, $keyword);
+                        DB::table('user_meta')->where('id', $existing->id)->update([
+                            'value' => implode(',', array_slice($uList, 0, 15)),
+                            'updated_at' => now(),
+                        ]);
+                    }
+                } else {
+                    DB::table('user_meta')->insert([
+                        'user_id' => $authId,
+                        'key' => 'recent_searches',
+                        'value' => $keyword,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
+        }
+
         // Filter static pages if keyword is present
         if ($keyword) {
             if (in_array($type, ['all', 'page'], true)) {

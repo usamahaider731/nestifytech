@@ -2,7 +2,7 @@ import { Transition } from '@headlessui/react'
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import Checkbox from './Checkbox'
 import Dropdown from './Dropdown';
-import { RiArrowDownSLine, RiSearchLine, RiArrowUpSLine, RiArrowUpDownLine, RiArrowDownFill, RiArrowDropDownFill, RiArrowDropUpFill } from 'react-icons/ri';
+import { RiArrowDownSLine, RiSearchLine, RiArrowUpSLine, RiArrowUpDownLine, RiArrowDownFill, RiArrowDropDownFill, RiArrowDropUpFill, RiInboxLine } from 'react-icons/ri';
 import PrimaryButton from './PrimaryButton';
 import TextInput from '../TextInput';
 import { router } from '@inertiajs/react';
@@ -238,7 +238,7 @@ function Table({
   };
 
   return (
-    <TableProvider.Provider value={{ SetAllCheck, handleSearch, Search, SetSearch, SetCheck, Values, Check, SetValues, columns, Links, handlePageClick, PerPage, handlePerPageChange, paginationList, handleSort, SortColumn, SortDirection }}>
+    <TableProvider.Provider value={{ SetAllCheck, handleSearch, Search, SetSearch, SetCheck, Values, Check, SetValues, columns, Links, handlePageClick, PerPage, handlePerPageChange, paginationList, handleSort, SortColumn, SortDirection, type }}>
       <div className='flex items-center justify-between w-full'>
         <div className='flex items-center gap-5 w-full justify-between'>
 
@@ -286,9 +286,33 @@ function Table({
         </div>
       </div>
       {viewMode === 'card' ? (
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-5 w-full pt-4'>
-          {children}
-        </div>
+        Values && Values.length === 0 ? (
+          <div className='w-full py-16 px-4 bg-accent/40 rounded-2xl border border-dashed border-permanent/60 flex flex-col items-center justify-center text-center mt-4'>
+            <div className='size-20 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-4 shadow-inner'>
+              <RiInboxLine className='size-10 opacity-80' />
+            </div>
+            <h3 className='text-heading font-semibold text-lg font-roboto'>No {type ? `${type}s` : 'records'} found</h3>
+            <p className='text-res text-sm mt-1 max-w-sm'>
+              {Search ? `No results match your search "${Search}". Try adjusting your query.` : `There are currently no ${type || 'item'} records available in the system.`}
+            </p>
+            {Search && (
+              <button
+                type='button'
+                onClick={() => {
+                  SetSearch('');
+                  if (handleSearch) handleSearch({ target: { value: '' } });
+                }}
+                className='mt-4 px-4 py-2 text-xs font-semibold rounded-lg bg-primary text-white hover:bg-primary/90 transition-all cursor-pointer'
+              >
+                Clear Search
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-5 w-full pt-4'>
+            {children}
+          </div>
+        )
       ) : (
         <table className='w-full table'>
           {children}
@@ -307,9 +331,55 @@ function THead({ children, className }) {
     </thead>
   )
 }
-function TBody({ children }) {
+function TBody({ children, className = 'w-full' }) {
+  const { Values, columns, Search, SetSearch, handleSearch, type } = useContext(TableProvider) || {};
+  const childArray = React.Children.toArray(children).filter(Boolean);
+  const isEmpty = childArray.length === 0 || (Array.isArray(Values) && Values.length === 0);
+  const colSpanCount = (columns && columns.length ? columns.length : 12) + 2;
+
+  if (isEmpty) {
+    return (
+      <tbody className={className}>
+        <tr>
+          <td colSpan={colSpanCount} className='py-16 px-4 text-center bg-accent/20 rounded-xl'>
+            <div className='flex flex-col items-center justify-center max-w-md mx-auto'>
+              <div className='relative mb-4'>
+                <div className='size-20 rounded-2xl bg-gradient-to-br from-primary/15 via-primary/5 to-transparent border border-primary/20 flex items-center justify-center text-primary shadow-sm'>
+                  <RiInboxLine className='size-10 stroke-[1.5]' />
+                </div>
+                <span className='absolute -bottom-1 -right-1 size-6 rounded-full bg-accent border-2 border-bg flex items-center justify-center text-xs'>
+                  📦
+                </span>
+              </div>
+              <h4 className='text-heading font-semibold text-base font-roboto'>
+                No {type ? `${type}s` : 'Data'} Available
+              </h4>
+              <p className='text-res text-xs mt-1.5 leading-relaxed'>
+                {Search
+                  ? `We couldn't find any matches for "${Search}". Check your spelling or try clearing your filters.`
+                  : `There are no records to display at the moment.`}
+              </p>
+              {Search && (
+                <button
+                  type='button'
+                  onClick={() => {
+                    if (SetSearch) SetSearch('');
+                    if (handleSearch) handleSearch({ target: { value: '' } });
+                  }}
+                  className='mt-4 px-4 py-1.5 text-xs font-semibold rounded-md bg-primary text-white hover:bg-primary/90 transition-all cursor-pointer shadow-sm'
+                >
+                  Clear Search Filter
+                </button>
+              )}
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    );
+  }
+
   return (
-    <tbody className='w-full'>
+    <tbody className={className}>
       {children}
     </tbody>
   )

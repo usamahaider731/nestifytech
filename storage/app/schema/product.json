@@ -79,9 +79,7 @@
         "meta_processing": {
             "category": "json_array",
             "brand": "string",
-            "country": "json_array",
-            "state": "json_array",
-            "city": "json_array"
+            "store": "string"
         },
         "table": "posts"
     },
@@ -355,71 +353,45 @@
                         "model": "Taxonomy",
                         "type": "tag"
                     }
+                },
+                {
+                    "label": "Collection",
+                    "name": "collection",
+                    "type": "dropdown",
+                    "multiple": true,
+                    "searchable": true,
+                    "options": {
+                        "model": "Taxonomy",
+                        "type": "collection"
+                    }
+                },
+                {
+                    "label": "Supplier / Vendor",
+                    "name": "supplier",
+                    "type": "dropdown",
+                    "searchable": true,
+                    "options": {
+                        "model": "Taxonomy",
+                        "type": "supplier"
+                    }
                 }
             ]
         },
         {
-            "title": "Address & Country",
+            "title": "Store & Fulfillment",
             "style": "main",
-            "tab": "Address",
+            "tab": "Store",
             "fields": [
                 {
-                    "label": "Country",
-                    "name": "country",
+                    "label": "Store / Branch",
+                    "name": "store",
                     "type": "dropdown",
                     "searchable": true,
-                    "multiple": true,
+                    "placeholder": "Select Store / Branch",
                     "options": {
-                        "model": "Taxonomy",
-                        "type": "country"
+                        "model": "Store",
+                        "type": "store"
                     },
-                    "style": 2
-                },
-                {
-                    "label": "State / Province (Multiple allowed)",
-                    "name": "state",
-                    "type": "dropdown",
-                    "searchable": true,
-                    "multiple": true,
-                    "depends_on": "country",
-                    "options": {
-                        "model": "Taxonomy",
-                        "type": "state"
-                    },
-                    "style": 2
-                },
-                {
-                    "label": "City (Multiple allowed)",
-                    "name": "city",
-                    "type": "dropdown",
-                    "searchable": true,
-                    "multiple": true,
-                    "depends_on": "state",
-                    "options": {
-                        "model": "Taxonomy",
-                        "type": "city"
-                    },
-                    "style": 2
-                },
-                {
-                    "name": "address",
-                    "label": "Street Address / Location",
-                    "type": "dropdown",
-                    "searchable": true,
-                    "options": {
-                        "api": "https://photon.komoot.io",
-                        "endpoint": "/api/?q={query}&limit=5",
-                        "proxy": "/api/geocode",
-                        "location_field": "address_coordinates"
-                    },
-                    "style": 2
-                },
-                {
-                    "name": "address_coordinates",
-                    "label": "Selected Location",
-                    "type": "map",
-                    "source": "address",
-                    "coordinates_field": "address_coordinates",
                     "style": 2
                 }
             ]
@@ -456,6 +428,12 @@
             "title": "Price Adjustment",
             "style": "sidebar",
             "fields": [
+                {
+                    "label": "Cost / Buy Price (Internal)",
+                    "type": "text",
+                    "name": "buy_price",
+                    "placeholder": "Purchase cost from supplier"
+                },
                 {
                     "label": "Regular Price",
                     "type": "text",

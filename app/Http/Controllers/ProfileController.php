@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
@@ -112,7 +113,10 @@ class ProfileController extends Controller
                 'avatar_filename' => $avatarMedia->filename ?? null,
                 'member_since' => $createdAtFormatted,
                 'created_at' => $createdAtIso,
+                // Password is intentionally NOT exposed to the frontend for security.
                 'last_seen_at' => $user->last_seen_at ?? null,
+                'is_social_user' => !empty($metaRows['google_id']) || !empty($metaRows['facebook_id']),
+                'social_provider' => !empty($metaRows['google_id']) ? 'Google' : (!empty($metaRows['facebook_id']) ? 'Facebook' : null),
                 'meta' => [
                     'phone' => $metaRows['phone'] ?? '',
                     'phone_verified' => !empty($metaRows['phone_verified_at']),
@@ -127,6 +131,15 @@ class ProfileController extends Controller
                     'cnic' => $metaRows['cnic'] ?? '',
                     'order_notifications' => ($metaRows['order_notifications'] ?? '1') === '1',
                     'newsletter' => ($metaRows['newsletter'] ?? '1') === '1',
+                    'social_links' => !empty($metaRows['social_links']) ? (function () use ($metaRows) {
+                        $decoded = json_decode($metaRows['social_links'], true);
+                        return is_array($decoded) ? $decoded : [];
+                    })() : [],
+                    'interests' => !empty($metaRows['interests']) ? (function () use ($metaRows) {
+                        $decoded = json_decode($metaRows['interests'], true);
+                        if (is_array($decoded)) return $decoded;
+                        return array_values(array_filter(array_map('trim', explode(',', $metaRows['interests']))));
+                    })() : [],
                 ],
             ],
             'stats' => [
@@ -261,8 +274,8 @@ class ProfileController extends Controller
                 'rating' => (int) $rev->rating,
                 'comment' => $rev->comment,
                 'status' => $rev->status,
-                'likes' => (int) $rev->likes,
-                'reports' => (int) $rev->reports,
+                'likes' => (int) ($rev->likes ?? 0),
+                'reports' => (int) ($rev->reports ?? 0),
                 'created_at' => $rev->created_at ? date('M d, Y', strtotime($rev->created_at)) : 'N/A',
                 'time_ago' => $rev->created_at ? Carbon::parse($rev->created_at)->diffForHumans() : '',
             ];
@@ -413,7 +426,21 @@ class ProfileController extends Controller
             return response()->noContent();
         }
 
-        $productTitle = DB::table('posts')->where('id', $validated['product_id'])->value('title');
+        $product = DB::table('posts')->where('id', $validated['product_id'])->first();
+        if (!$product) {
+            return response()->noContent();
+        }
+
+        // Prevent users from liking / adding their own products to wishlist
+        $currentUserId = Auth::id();
+        if ($currentUserId && (int) $product->user_id === (int) $currentUserId && $validated['action'] === 'wishlist_added') {
+            return response()->json([
+                'success' => false,
+                'message' => __("You cannot like or wishlist your own product."),
+            ], 403);
+        }
+
+        $productTitle = $product->title;
         $added = $validated['action'] === 'wishlist_added';
 
         record_user_activity($validated['action'], [
@@ -434,7 +461,6 @@ class ProfileController extends Controller
     {
         $user = $this->getAuthUser();
         $profile = $this->getUserProfileData($user);
-
         return Inertia::render('Frontend/Profile/Settings', [
             'profile' => $profile,
             'mustVerifyEmail' => false,
@@ -471,6 +497,10 @@ class ProfileController extends Controller
             'cnic' => ['nullable', 'string', 'max:20'],
             'order_notifications' => ['nullable', 'boolean'],
             'newsletter' => ['nullable', 'boolean'],
+            'social_links' => ['nullable', 'array'],
+            'social_links.*.platform' => ['nullable', 'string', 'max:50'],
+            'social_links.*.url' => ['nullable', 'string', 'max:255'],
+            'interests' => ['nullable'],
         ]);
 
         $userData = [
@@ -544,6 +574,22 @@ class ProfileController extends Controller
             'newsletter' => !empty($validated['newsletter']) ? '1' : '0',
         ];
 
+        // Process and save social media accounts
+        if (isset($validated['social_links'])) {
+            $filteredLinks = array_values(array_filter((array) $validated['social_links'], function ($item) {
+                return !empty($item['platform']) && !empty($item['url']);
+            }));
+            $metaFields['social_links'] = json_encode($filteredLinks);
+        }
+
+        // Process and save user interests
+        if (isset($validated['interests'])) {
+            $rawInterests = is_array($validated['interests'])
+                ? $validated['interests']
+                : array_filter(array_map('trim', explode(',', (string) $validated['interests'])));
+            $metaFields['interests'] = json_encode(array_values(array_unique(array_filter($rawInterests))));
+        }
+
         foreach ($metaFields as $key => $val) {
             DB::table('user_meta')->updateOrInsert(
                 ['user_id' => $user->id, 'key' => $key],
@@ -607,19 +653,33 @@ class ProfileController extends Controller
     {
         $user = $this->getAuthUser();
 
-        $validated = $request->validate([
-            'current_password' => ['required', function ($attribute, $value, $fail) use ($user) {
+        $isSocialUser = DB::table('user_meta')
+            ->where('user_id', $user->id)
+            ->whereIn('key', ['google_id', 'facebook_id'])
+            ->exists();
+
+        $rules = [
+            'password' => ['required', Password::defaults(), 'confirmed'],
+        ];
+
+        // If user is not social or explicitly supplied current_password, enforce check
+        if (!$isSocialUser || $request->filled('current_password')) {
+            $rules['current_password'] = ['required', function ($attribute, $value, $fail) use ($user) {
                 if (!Hash::check($value, $user->password)) {
                     $fail(__('The current password is incorrect.'));
                 }
-            }],
-            'password' => ['required', Password::defaults(), 'confirmed'],
-        ]);
+            }];
+        }
+
+        $validated = $request->validate($rules);
 
         DB::table('users')->where('id', $user->id)->update([
             'password' => Hash::make($validated['password']),
             'updated_at' => now(),
         ]);
+
+        // NOTE: Password is stored only as bcrypt hash in users.password — never in user_meta.
+        // NOTE: Plain-text password is intentionally NOT stored in session (security).
 
         return Redirect::back()->with('status', 'password-updated');
     }

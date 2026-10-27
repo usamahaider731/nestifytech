@@ -31,63 +31,338 @@ export function parseNumericPrice(val) {
   return Number.isNaN(parsed) ? 0 : parsed;
 }
 
+/** Normalize role / slug strings for loose matching (admin ↔ Administrator). */
+function normalizeRoleKey(val) {
+  return String(val ?? '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '');
+}
+
+/** Collect numeric IDs from taxonomy objects, meta values, or JSON arrays. */
+function collectNumericIds(...sources) {
+  const ids = [];
+  const push = (val) => {
+    if (val == null || val === '') return;
+    if (Array.isArray(val)) {
+      val.forEach(push);
+      return;
+    }
+    if (typeof val === 'object') {
+      if (val.id != null) ids.push(Number(val.id));
+      if (val.value != null && val.value !== val) push(val.value);
+      return;
+    }
+    if (typeof val === 'number') {
+      if (!Number.isNaN(val)) ids.push(val);
+      return;
+    }
+    const str = String(val).trim();
+    if (!str) return;
+    if ((str.startsWith('[') || str.startsWith('{')) ) {
+      try {
+        push(JSON.parse(str));
+        return;
+      } catch (_) { /* fall through */ }
+    }
+    const num = Number(str);
+    if (!Number.isNaN(num)) ids.push(num);
+  };
+  sources.forEach(push);
+  return [...new Set(ids.filter((id) => id > 0))];
+}
+
+/**
+ * Lowest absolute combo / size price from product variations (admin Price Mod fields).
+ */
+export function getLowestVariationPrice(product) {
+  const variations = product?.variations;
+  if (!Array.isArray(variations) || variations.length === 0) return 0;
+
+  let min = Infinity;
+  for (const variation of variations) {
+    const combinations = Array.isArray(variation?.combinations) ? variation.combinations : [];
+    for (const combo of combinations) {
+      const price = parseNumericPrice(combo?.price);
+      if (price > 0 && price < min) min = price;
+    }
+    const sizes = Array.isArray(variation?.sizes) ? variation.sizes : [];
+    for (const size of sizes) {
+      const price = parseNumericPrice(size?.price);
+      if (price > 0 && price < min) min = price;
+    }
+    if (combinations.length === 0 && sizes.length === 0) {
+      const price = parseNumericPrice(variation?.price);
+      if (price > 0 && price < min) min = price;
+    }
+  }
+  return min === Infinity ? 0 : min;
+}
+
+/**
+ * Resolve display base + regular price from product meta and optional variation prices.
+ * first_price = regular/list, second_price = sale; variation combo.price is absolute SKU price.
+ */
+export function resolveProductPrices(product) {
+  const firstPrice = parseNumericPrice(product?.meta?.first_price?.value ?? product?.first_price);
+  const secondPrice = parseNumericPrice(product?.meta?.second_price?.value ?? product?.second_price);
+  const variationMin = getLowestVariationPrice(product);
+  const metaSale = (firstPrice > secondPrice && secondPrice > 0)
+    ? secondPrice
+    : (firstPrice || parseNumericPrice(product?.price));
+  // Variation combo.price is the absolute SKU price from VariationsSelector
+  const basePrice = variationMin > 0 ? variationMin : metaSale;
+  const regularPrice = Math.max(firstPrice, variationMin, secondPrice, basePrice);
+  return { firstPrice, secondPrice, variationMin, basePrice, regularPrice };
+}
+
 /**
  * Calculates the adjusted final price considering:
- * - base price (sale price if lower than regular price, or combination price)
- * - category discount (if discount_toggle is true / discount active)
- * - user discount (from user/auth or coupon, passed in)
- * - category tax (if tax_toggle is true / tax percentage active)
+ * - Product-level promotions rules (target by product, category, brand, collection, user role/user)
+ * - Legacy: category discount/tax from meta (discount_toggle / tax_toggle)
+ * - User discount (from user/auth or coupon, passed in)
+ * - Tax rules from the promotions system
  *
- * Returns a comprehensive pricing breakdown object.
+ * @param {object} params
+ * @param {number}       params.basePrice
+ * @param {number}       params.regularPrice
+ * @param {object|null}  params.category
+ * @param {object|null}  params.brand          - Hydrated brand taxonomy (ProductCard passes this)
+ * @param {object|null}  params.collection     - Hydrated collection taxonomy / ids
+ * @param {number}       params.userDiscount
+ * @param {string}       params.userDiscountType
+ * @param {number}       params.installmentMonths
+ * @param {object|null}  params.product
+ * @param {object|null}  params.user
+ * @param {Array}        params.pricingRules
+ * @param {string|null}  params.couponCode     - When set, also unlocks rules that require a code
  */
 export function calculateAdjustedPrice({
   basePrice = 0,
   regularPrice = 0,
   category = null,
-  userDiscount = 0, // e.g. 5 for 5%
-  userDiscountType = 'percentage', // 'percentage' | 'fixed'
+  brand = null,
+  collection = null,
+  userDiscount = 0,
+  userDiscountType = 'percentage',
   installmentMonths = 0,
+  product = null,
+  user = null,
+  pricingRules = [],
+  couponCode = null,
 }) {
   const rawBase = parseNumericPrice(basePrice);
   const rawRegular = parseNumericPrice(regularPrice) || rawBase;
+  const nowTs = Date.now();
+  const normalizedCoupon = couponCode ? String(couponCode).trim().toUpperCase() : '';
 
-  // 1. Resolve Category Discount & Tax
-  let categoryDiscountPercent = 0;
-  let categoryTaxPercent = 0;
+  const isRuleActive = (rule) => {
+    if (rule.status && rule.status !== 'active') return false;
+    if (rule.start_date) {
+      const start = new Date(rule.start_date).getTime();
+      if (!isNaN(start) && nowTs < start) return false;
+    }
+    if (rule.end_date) {
+      const end = new Date(rule.end_date).getTime();
+      if (!isNaN(end) && nowTs > end) return false;
+    }
+    const minSpend = parseNumericPrice(rule.min_spend);
+    if (minSpend > 0 && rawBase < minSpend) return false;
+    // Coupon-coded rules only apply when the matching code is provided
+    if (rule.code) {
+      const ruleCode = String(rule.code).trim().toUpperCase();
+      if (!normalizedCoupon || normalizedCoupon !== ruleCode) return false;
+    }
+    return true;
+  };
 
-  // Extract from category object or primary category
-  const catObj = Array.isArray(category) ? category[0] : category;
-  if (catObj) {
-    const meta = catObj.meta || {};
-    const hasDiscountToggle = meta.discount_toggle === '1' || meta.discount_toggle === true || catObj.discount_toggle === '1' || catObj.discount_toggle === true;
-    const hasTaxToggle = meta.tax_toggle === '1' || meta.tax_toggle === true || catObj.tax_toggle === '1' || catObj.tax_toggle === true;
+  const categoriesList = Array.isArray(category)
+    ? category
+    : (category ? [category] : (Array.isArray(product?.category) ? product.category : (product?.category ? [product.category] : [])));
 
-    // Check discount validity by date if discount_date is provided
-    const discountDateStr = meta.discount_date || catObj.discount_date;
-    let isDateValid = true;
-    if (discountDateStr) {
-      try {
-        const d = new Date(discountDateStr);
-        if (!isNaN(d.getTime()) && d.getTime() < Date.now()) {
-          isDateValid = false;
+  const brandIds = collectNumericIds(
+    brand,
+    product?.brand,
+    product?.meta?.brand,
+    product?.meta?.brand_id,
+    product?.brand_id,
+  );
+  const collectionIds = collectNumericIds(
+    collection,
+    product?.collection,
+    product?.meta?.collection,
+    product?.meta?.collection_id,
+    product?.collection_id,
+  );
+
+  const ruleMatchesProduct = (rule) => {
+    const targetType = rule.target_type;
+    const rawTargets = Array.isArray(rule.target_ids) ? rule.target_ids : [];
+    const targetIds = rawTargets.map(Number).filter((n) => !Number.isNaN(n));
+
+    if (targetType === 'all') return true;
+
+    if (targetType === 'product') {
+      if (!product?.id) return false;
+      return targetIds.includes(Number(product.id));
+    }
+
+    if (targetType === 'category') {
+      return categoriesList.some((cat) => targetIds.includes(Number(cat?.id)));
+    }
+
+    if (targetType === 'brand') {
+      if (brandIds.some((id) => targetIds.includes(id))) return true;
+      return categoriesList.some((cat) => cat?.type === 'brand' && targetIds.includes(Number(cat?.id)));
+    }
+
+    if (targetType === 'collection') {
+      if (collectionIds.some((id) => targetIds.includes(id))) return true;
+      return categoriesList.some((cat) => cat?.type === 'collection' && targetIds.includes(Number(cat?.id)));
+    }
+
+    if (targetType === 'user_role') {
+      if (!user) return false;
+      const userRoles = Array.isArray(user?.user_role) ? user.user_role : [];
+      if (userRoles.length === 0 || rawTargets.length === 0) return false;
+      const userKeys = userRoles.map(normalizeRoleKey).filter(Boolean);
+      return rawTargets.some((target) => {
+        const targetKey = normalizeRoleKey(target);
+        if (!targetKey) return false;
+        return userKeys.some(
+          (roleKey) => roleKey === targetKey || roleKey.includes(targetKey) || targetKey.includes(roleKey),
+        );
+      });
+    }
+
+    if (targetType === 'user') {
+      if (!user?.id) return false;
+      return targetIds.includes(Number(user.id));
+    }
+
+    return false;
+  };
+
+  let bestDiscountPercent = 0;
+  let bestDiscountFixed = 0;
+  let bestDiscountRuleTitle = '';
+  let bestDiscountAmount = 0;
+  let bestDiscountPriority = -Infinity;
+  let taxFromRulesPercent = 0;
+  let taxFromRulesFixed = 0;
+  let bestTaxAmount = 0;
+  let bestTaxPriority = -Infinity;
+
+  let legacyCategoryDiscountPercent = 0;
+  let legacyCategoryTaxPercent = 0;
+  let legacyDiscountedCategoryTitle = '';
+
+  if (Array.isArray(pricingRules) && pricingRules.length > 0) {
+    const applicableRules = pricingRules
+      .filter(isRuleActive)
+      .filter(ruleMatchesProduct);
+
+    for (const rule of applicableRules) {
+      const priority = Number(rule.priority) || 0;
+      const rateValue = parseNumericPrice(rule.rate_value);
+
+      if (rule.type === 'discount') {
+        const amount = rule.rate_type === 'fixed'
+          ? rateValue
+          : (rawBase * rateValue) / 100;
+        const betterAmount = amount > bestDiscountAmount;
+        const sameAmountHigherPriority = amount === bestDiscountAmount && priority > bestDiscountPriority;
+        if (betterAmount || sameAmountHigherPriority) {
+          bestDiscountAmount = amount;
+          bestDiscountPriority = priority;
+          bestDiscountRuleTitle = rule.name || '';
+          if (rule.rate_type === 'fixed') {
+            bestDiscountFixed = rateValue;
+            bestDiscountPercent = 0;
+          } else {
+            bestDiscountPercent = rateValue;
+            bestDiscountFixed = 0;
+          }
         }
-      } catch (_) {}
-    }
-
-    if (hasDiscountToggle && isDateValid) {
-      categoryDiscountPercent = parseNumericPrice(meta.discount || catObj.discount || 0);
-    }
-
-    if (hasTaxToggle) {
-      categoryTaxPercent = parseNumericPrice(meta.category_tax || catObj.category_tax || 0);
+      } else if (rule.type === 'tax') {
+        const amount = rule.rate_type === 'fixed'
+          ? rateValue
+          : (rawBase * rateValue) / 100;
+        const betterAmount = amount > bestTaxAmount;
+        const sameAmountHigherPriority = amount === bestTaxAmount && priority > bestTaxPriority;
+        if (betterAmount || sameAmountHigherPriority) {
+          bestTaxAmount = amount;
+          bestTaxPriority = priority;
+          if (rule.rate_type === 'fixed') {
+            taxFromRulesFixed = rateValue;
+            taxFromRulesPercent = 0;
+          } else {
+            taxFromRulesPercent = rateValue;
+            taxFromRulesFixed = 0;
+          }
+        }
+      }
     }
   }
 
-  // 2. Apply Category Discount first on rawBase
-  const categoryDiscountAmount = (rawBase * categoryDiscountPercent) / 100;
-  const priceAfterCategoryDiscount = Math.max(0, rawBase - categoryDiscountAmount);
+  for (const catObj of categoriesList) {
+    if (!catObj || typeof catObj !== 'object') continue;
+    const meta = catObj.meta || {};
+    const hasDiscountToggle =
+      meta.discount_toggle === '1' || meta.discount_toggle === 1 ||
+      meta.discount_toggle === true || meta.discount_toggle === 'true' ||
+      catObj.discount_toggle === '1' || catObj.discount_toggle === 1 ||
+      catObj.discount_toggle === true || catObj.discount_toggle === 'true';
+    const hasTaxToggle =
+      meta.tax_toggle === '1' || meta.tax_toggle === 1 ||
+      meta.tax_toggle === true || meta.tax_toggle === 'true' ||
+      catObj.tax_toggle === '1' || catObj.tax_toggle === 1 ||
+      catObj.tax_toggle === true || catObj.tax_toggle === 'true';
 
-  // 3. Apply User Discount
+    let rawDateVal = meta.discount_date ?? catObj.discount_date;
+    if (typeof rawDateVal === 'string' && (rawDateVal.startsWith('[') || rawDateVal.startsWith('{'))) {
+      try { rawDateVal = JSON.parse(rawDateVal); } catch (_) { /* ignore */ }
+    }
+
+    let isDateValid = true;
+    if (Array.isArray(rawDateVal) && rawDateVal.length >= 2) {
+      const start = new Date(rawDateVal[0]).getTime();
+      const end = new Date(rawDateVal[1]).getTime();
+      if (!isNaN(start) && nowTs < start) isDateValid = false;
+      if (!isNaN(end) && nowTs > end) isDateValid = false;
+    } else if (rawDateVal) {
+      const singleDate = new Date(Array.isArray(rawDateVal) ? rawDateVal[0] : rawDateVal).getTime();
+      if (!isNaN(singleDate) && singleDate < nowTs) isDateValid = false;
+    }
+
+    if (hasDiscountToggle && isDateValid) {
+      const dVal = parseNumericPrice(meta.discount ?? catObj.discount ?? 0);
+      if (dVal > legacyCategoryDiscountPercent) {
+        legacyCategoryDiscountPercent = dVal;
+        legacyDiscountedCategoryTitle = catObj.title || catObj.name || '';
+      }
+    }
+    if (hasTaxToggle) {
+      const tVal = parseNumericPrice(meta.category_tax ?? catObj.category_tax ?? 0);
+      if (tVal > legacyCategoryTaxPercent) legacyCategoryTaxPercent = tVal;
+    }
+  }
+
+  // Prefer promotion-system discount when it yields a real savings; else legacy category %
+  const legacyDiscountAmount = (rawBase * legacyCategoryDiscountPercent) / 100;
+  const usePromotionDiscount = bestDiscountAmount > 0 && bestDiscountAmount >= legacyDiscountAmount;
+  const effectiveDiscountPercent = usePromotionDiscount ? bestDiscountPercent : legacyCategoryDiscountPercent;
+  const effectiveDiscountFixed = usePromotionDiscount ? bestDiscountFixed : 0;
+  const effectiveDiscountTitle = usePromotionDiscount
+    ? bestDiscountRuleTitle
+    : legacyDiscountedCategoryTitle;
+
+  const usePromotionTax = bestTaxAmount > 0 || taxFromRulesFixed > 0 || taxFromRulesPercent > 0;
+  const effectiveTaxPercent = usePromotionTax ? taxFromRulesPercent : legacyCategoryTaxPercent;
+  const effectiveTaxFixed = usePromotionTax ? taxFromRulesFixed : 0;
+
+  const categoryDiscountAmount = (rawBase * effectiveDiscountPercent) / 100;
+  const priceAfterCategoryDiscount = Math.max(0, rawBase - categoryDiscountAmount - effectiveDiscountFixed);
+
   const rawUserDisc = parseNumericPrice(userDiscount);
   let userDiscountAmount = 0;
   if (userDiscountType === 'fixed') {
@@ -95,17 +370,14 @@ export function calculateAdjustedPrice({
   } else {
     userDiscountAmount = (priceAfterCategoryDiscount * rawUserDisc) / 100;
   }
+
   const priceAfterDiscounts = Math.max(0, priceAfterCategoryDiscount - userDiscountAmount);
-
-  // 4. Apply Category Tax
-  const taxAmount = (priceAfterDiscounts * categoryTaxPercent) / 100;
+  const taxAmount = (priceAfterDiscounts * effectiveTaxPercent) / 100 + effectiveTaxFixed;
   const finalPrice = Math.round((priceAfterDiscounts + taxAmount) * 100) / 100;
-
-  // Total discount from regular or base
   const totalSavings = Math.max(0, rawRegular - finalPrice);
-  const totalDiscountPercentage = rawRegular > 0 ? Math.round(((rawRegular - finalPrice) / rawRegular) * 100) : 0;
-
-  // Installment estimation if requested
+  const totalDiscountPercentage = rawRegular > 0
+    ? Math.round(((rawRegular - finalPrice) / rawRegular) * 100)
+    : 0;
   const months = parseNumericPrice(installmentMonths);
   const monthlyInstallment = months > 0 ? Math.round((finalPrice / months) * 100) / 100 : null;
 
@@ -113,11 +385,12 @@ export function calculateAdjustedPrice({
     rawBase,
     rawRegular,
     hasSalePrice: rawRegular > rawBase,
-    categoryDiscountPercent,
-    categoryDiscountAmount: Math.round(categoryDiscountAmount * 100) / 100,
+    categoryDiscountPercent: effectiveDiscountPercent,
+    categoryDiscountAmount: Math.round((categoryDiscountAmount + effectiveDiscountFixed) * 100) / 100,
+    categoryTitle: effectiveDiscountTitle,
     userDiscountPercent: userDiscountType === 'percentage' ? rawUserDisc : 0,
     userDiscountAmount: Math.round(userDiscountAmount * 100) / 100,
-    categoryTaxPercent,
+    categoryTaxPercent: effectiveTaxPercent,
     taxAmount: Math.round(taxAmount * 100) / 100,
     priceAfterDiscounts: Math.round(priceAfterDiscounts * 100) / 100,
     finalPrice,

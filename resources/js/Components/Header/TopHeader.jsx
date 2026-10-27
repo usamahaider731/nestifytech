@@ -13,7 +13,7 @@ const TopHeader = ({ show_language, ContainerType }) => {
     return (
         <div className='w-full border-b border-border bg-bg text-text'>
             <div className={` ${ContainerType === "container" ? "container mx-auto" : ""}  px-5`}>
-                <div className='flex w-full justify-between items-center'>
+                <div className='flex w-full justify-between items-center flex-wrap'>
                     <div className='flex items-center'>
                         {/* <ul className='flex items-center leading-[38px]'>
                             <li className='text-xs px-3 leading-9.5'>
@@ -37,20 +37,20 @@ const TopHeader = ({ show_language, ContainerType }) => {
                                 </Link>
                             </li>
                         </ul> */}
-                        <p className='text-xs font-medium text-res'>
+                        <p className='text-xs leading-9.5 font-medium font-roboto text-res'>
                             {__('Welcome to Worldwide Electronics Store')}
                         </p>
                     </div>
 
-                    <div className='flex items-center'>
-                        <ul className='flex leading-9.5 items-center'>
-                            <li className='px-3.75 text-[13px]'>
-                                <Link className='flex items-center gap-1 font-medium transition-colors hover:text-primary'>
+                    <div className='sm:flex hidden items-center'>
+                        <ul className='flex leading-9.5 items-center font-roboto'>
+                            <li className='lg:px-3.75 pl-0 md:pl-3 px-3 text-[11px] md:text-[13px]'>
+                                <Link href={route('store.locator')} className='flex items-center gap-1 font-medium transition-colors hover:text-primary'>
                                     <BiMap size={13} />
                                     {__('Store Locator')}
                                 </Link>
                             </li>
-                            <li className='px-3.75 text-[13px] h-4 border-l-2 border-l-border flex'>
+                            <li className='lg:px-3.75 px-3 text-[11px] md:text-[13px] h-4 border-l-2 border-l-border flex'>
                                 <Link href={props.auth?.user ? route('profile.orders') : route('login')} className='flex items-center gap-1 font-medium transition-colors hover:text-primary'>
                                     <TbTruckDelivery size={18} />
                                     {__('Track Your Order')}
@@ -58,13 +58,13 @@ const TopHeader = ({ show_language, ContainerType }) => {
                             </li>
                             {
                                 show_language &&
-                                <li className='px-3.75 text-[13px] flex h-4 border-l-2 border-border'>
+                                <li className='lg:px-3.75 px-3 text-[11px] md:text-[13px] flex h-4 border-l-2 border-border'>
                                     <div className='font-medium flex items-center gap-1'>
                                         <LanguageDropdown />
                                     </div>
                                 </li>
                             }
-                            <li className='px-3.75 text-[13px] h-4 flex items-center border-l-2 border-border relative'>
+                            <li className='lg:px-3.75 px-3 text-[11px] md:text-[13px] h-4 flex items-center border-l-2 border-border relative'>
                                 {props.auth.user ? (
                                     <div className="relative group">
                                         <Link

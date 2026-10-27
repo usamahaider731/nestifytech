@@ -54,7 +54,41 @@ class User extends Authenticatable implements MustVerifyEmail
             'image' => 'array'
         ];
     }
-    protected $appends = ['user_role', 'user_avater', 'user_permissions'];
+    protected $appends = ['user_role', 'user_avater', 'user_permissions', 'meta'];
+
+    public function getMetaAttribute()
+    {
+        $meta = \Illuminate\Support\Facades\DB::table('user_meta')
+            ->where('user_id', $this->id)
+            ->pluck('value', 'key')
+            ->toArray();
+
+        // If city is stored as an ID, resolve it to its taxonomy title
+        if (!empty($meta['city']) && is_numeric($meta['city'])) {
+            $cityTitle = \Illuminate\Support\Facades\DB::table('taxonomies')
+                ->where('id', (int) $meta['city'])
+                ->value('title');
+
+            if (!empty($cityTitle)) {
+                $meta['city_id'] = $meta['city'];
+                $meta['city'] = $cityTitle;
+            }
+        }
+
+        // If state is stored as an ID, optionally provide state_id and resolve state title if desired
+        if (!empty($meta['state']) && is_numeric($meta['state'])) {
+            $stateTitle = \Illuminate\Support\Facades\DB::table('taxonomies')
+                ->where('id', (int) $meta['state'])
+                ->value('title');
+
+            if (!empty($stateTitle)) {
+                $meta['state_id'] = $meta['state'];
+                $meta['state_title'] = $stateTitle;
+            }
+        }
+
+        return $meta;
+    }
 
     public static function online()
     {

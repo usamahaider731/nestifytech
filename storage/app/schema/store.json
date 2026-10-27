@@ -1,0 +1,227 @@
+{
+    "db": {
+        "type": "store",
+        "auto_slug": "sku",
+        "validation": {
+            "title": "required|string|max:255",
+            "description": "nullable|string",
+            "status": "nullable|string|max:20"
+        },
+        "schema": [
+            { "name": "user_id", "type": "unsignedBigInteger", "index": true },
+            { "name": "title", "type": "string" },
+            { "name": "sku", "type": "string", "unique": true },
+            { "name": "description", "type": "longText", "nullable": true },
+            { "name": "status", "type": "string", "default": "publish" },
+            { "name": "type", "type": "string", "index": true },
+            { "name": "created_at", "type": "timestamp", "nullable": true },
+            { "name": "updated_at", "type": "timestamp", "nullable": true }
+        ],
+        "main_fields": ["title", "sku", "description", "status", "updated_at", "created_at"],
+        "fixed_fields": {
+            "user_id": "auth_id",
+            "type": "store"
+        },
+        "relations": { "image": "single_image" },
+        "meta_fields": "auto",
+        "features": {
+            "category": false,
+            "brand": false,
+            "attributes": false,
+            "variations": false
+        },
+        "table": "posts"
+    },
+    "table": {
+        "card": {
+            "image": "image",
+            "title": "title",
+            "subtitle": "city",
+            "top_right": "country",
+            "badges": ["status"],
+            "actions": "action"
+        },
+        "keywords": true,
+        "paginationPerPage": 15,
+        "paginationList": [10, 15, 25, 50, 100],
+        "table": "posts",
+        "type": "store",
+        "bulk": {
+            "table": "posts",
+            "type": "store",
+            "route": "bulk.action",
+            "column": "status",
+            "is_meta": false,
+            "options": [
+                { "label": "Delete", "value": "delete" },
+                { "label": "Publish", "value": "publish" },
+                { "label": "Draft", "value": "draft" }
+            ]
+        },
+        "columns": [
+            { "id": "id", "label": "ID", "column": "id", "width": "5%", "sort": true },
+            { "id": "image", "label": "IMAGE", "width": "8%", "column": "image", "type": "image", "key": "filename" },
+            { "id": "title", "label": "STORE NAME", "column": "title", "sort": true, "width": "20%" },
+            { "id": "country", "label": "COUNTRY", "column": "country", "meta": true, "meta_key": "country", "width": "12%" },
+            { "id": "city", "label": "CITY", "column": "city", "meta": true, "meta_key": "city", "width": "12%" },
+            { "id": "address", "label": "ADDRESS", "column": "address", "meta": true, "meta_key": "address", "width": "20%", "type": "description" },
+            { "id": "phone", "label": "PHONE", "column": "phone", "meta": true, "meta_key": "phone", "width": "10%" },
+            { "id": "status", "label": "STATUS", "column": "status", "width": "8%", "type": "status_dot" },
+            { "id": "action", "label": "ACTION", "column": "action", "width": "5%", "type": "action" }
+        ]
+    },
+    "form": [
+        {
+            "title": "Store Information",
+            "style": "main",
+            "fields": [
+                {
+                    "label": "Store Name",
+                    "name": "title",
+                    "type": "text",
+                    "style": 1,
+                    "placeholder": "e.g. NestifyTech – Lahore Main Branch",
+                    "attribute": "required"
+                },
+                {
+                    "label": "Slug / Key",
+                    "name": "sku",
+                    "type": "text",
+                    "style": 2,
+                    "placeholder": "e.g. nestifytech-lahore-main"
+                },
+                {
+                    "label": "Description",
+                    "name": "description",
+                    "type": "textarea",
+                    "style": 2,
+                    "placeholder": "Short description of this store location..."
+                }
+            ]
+        },
+        {
+            "title": "Store Location",
+            "style": "main",
+            "fields": [
+
+                {
+                    "label": "State / Province",
+                    "name": "state",
+                    "type": "dropdown",
+                    "searchable": true,
+                    "options": {
+                        "model": "Taxonomy",
+                        "type": "state"
+                    }
+                },
+                {
+                    "label": "City",
+                    "name": "city",
+                    "type": "dropdown",
+                    "searchable": true,
+                    "depends_on": "state",
+                    "options": {
+                        "model": "Taxonomy",
+                        "type": "city"
+                    }
+                },
+                
+                {
+                    "label": "Street Address / Location",
+                    "name": "address",
+                    "type": "dropdown",
+                    "searchable": true,
+                    "style": 2,
+                    "placeholder": "Search a street or place in the selected city",
+                    "options": {
+                        "api": "https://photon.komoot.io",
+                        "endpoint": "/api/?q={query}&limit=5",
+                        "proxy": "/api/geocode",
+                        "location_field": "address_coordinates",
+                        "lat_field": "latitude",
+                        "lng_field": "longitude",
+                        "city_field": "city"
+                    }
+                },
+                {
+                    "name": "address_coordinates",
+                    "label": "Selected Location",
+                    "type": "map",
+                    "source": "address",
+                    "coordinates_field": "address_coordinates",
+                    "style": 2
+                },
+                {
+                    "label": "Latitude",
+                    "name": "latitude",
+                    "type": "number",
+                    "placeholder": "Filled from city or address"
+                },
+                {
+                    "label": "Longitude",
+                    "name": "longitude",
+                    "type": "number",
+                    "placeholder": "Filled from city or address"
+                }
+            ]
+        },
+        {
+            "title": "Contact Details",
+            "style": "sidebar",
+            "fields": [
+                {
+                    "label": "Phone",
+                    "name": "phone",
+                    "type": "phone",
+                    "placeholder": "+92-300-0000000"
+                },
+                {
+                    "label": "Email",
+                    "name": "email",
+                    "type": "text",
+                    "placeholder": "store@example.com"
+                },
+                {
+                    "label": "Website",
+                    "name": "website",
+                    "type": "text",
+                    "placeholder": "https://example.com"
+                }
+            ]
+        },
+        {
+            "title": "Status & Order",
+            "style": "sidebar",
+            "fields": [
+                {
+                    "label": "Status",
+                    "name": "status",
+                    "type": "dropdown",
+                    "options": [
+                        { "id": "publish", "title": "Published" },
+                        { "id": "draft", "title": "Draft" }
+                    ]
+                },
+                {
+                    "label": "Sort Order",
+                    "name": "sort_order",
+                    "type": "number",
+                    "placeholder": "0"
+                }
+            ]
+        },
+        {
+            "title": "Store Image",
+            "style": "sidebar",
+            "fields": [
+                {
+                    "label": "",
+                    "name": "image",
+                    "type": "image",
+                    "style": 1,
+                    "filename": ""
+                }
+            ]
+        }
+    ]
+}

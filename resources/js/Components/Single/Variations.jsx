@@ -2,14 +2,17 @@ import React, { useState, useEffect, useMemo } from 'react';
 import ImageViwer from '../Admin/ImageViwer';
 import { usePage } from '@inertiajs/react';
 import QuantitySelector from './QuantitySelector';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '../../store/cartSlice';
+import { addToWishlist, removeFromWishlist, selectIsInWishlist } from '@/store/wishListSlice';
+import { recordWishlistActivity } from '@/Utils/recordWishlistActivity';
 import { useLang } from '@/contexts/LanguageContext';
 import { calculateAdjustedPrice, parseNumericPrice } from '@/Utils/helper';
-import { RiPercentLine, RiShieldCheckLine } from 'react-icons/ri';
+import { RiPercentLine, RiShieldCheckLine, RiHeartLine, RiHeartFill } from 'react-icons/ri';
+import { toast } from 'react-toastify';
 
 const Variations = ({ product }) => {
-    const { setting, auth } = usePage().props;
+    const { setting, auth, activePricingRules = [] } = usePage().props;
     const { __ } = useLang();
     const variations = product?.variations || [];
     
@@ -17,9 +20,12 @@ const Variations = ({ product }) => {
     const [selectedCombo, setSelectedCombo] = useState(null);
     const [qty, setQty] = useState(1);
     const dispatch = useDispatch();
+    const isWishlist = useSelector(selectIsInWishlist(product?.id));
 
     const first_price = parseNumericPrice(product.meta?.first_price?.value);
     const second_price = parseNumericPrice(product.meta?.second_price?.value);
+
+    const isOwner = Boolean(auth?.user?.id && product?.user_id && Number(auth.user.id) === Number(product.user_id));
 
     // Reset combination and qty when color changes
     useEffect(() => {
@@ -31,7 +37,7 @@ const Variations = ({ product }) => {
         setQty(1);
     }, [selectedColor]);
 
-    // Compute active base and regular price for current selection
+    // Combo.price from VariationsSelector is the absolute SKU price (not a delta)
     const activeBasePrice = useMemo(() => {
         if (variations.length > 0 && selectedCombo) {
             return parseNumericPrice(selectedCombo.price);
@@ -41,26 +47,31 @@ const Variations = ({ product }) => {
 
     const activeRegularPrice = useMemo(() => {
         if (variations.length > 0 && selectedCombo) {
-            return parseNumericPrice(selectedCombo.price);
+            const comboPrice = parseNumericPrice(selectedCombo.price);
+            return first_price > comboPrice ? first_price : comboPrice;
         }
         return first_price || activeBasePrice;
     }, [variations, selectedCombo, first_price, activeBasePrice]);
 
-    // User discount: if user has a custom discount or vip discount attached
-    const userDiscountPercent = parseNumericPrice(auth?.user?.discount || 0);
+    const userDiscountPercent = parseNumericPrice(auth?.user?.discount || auth?.user?.meta?.discount || 0);
 
-    // Calculate fully adjusted price with category discount, user discount, and tax
     const priceCalculation = useMemo(() => {
         return calculateAdjustedPrice({
             basePrice: activeBasePrice,
             regularPrice: activeRegularPrice,
             category: product?.category,
+            brand: product?.brand,
+            collection: product?.collection ?? product?.meta?.collection,
             userDiscount: userDiscountPercent,
             userDiscountType: 'percentage',
+            product,
+            user: auth?.user || null,
+            pricingRules: activePricingRules,
         });
-    }, [activeBasePrice, activeRegularPrice, product?.category, userDiscountPercent]);
+    }, [activeBasePrice, activeRegularPrice, product, userDiscountPercent, activePricingRules, auth?.user]);
 
     const handleAddToCart = () => {
+        if (isOwner) return;
         if (variations.length > 0 && (!selectedColor || !selectedCombo)) return;
         
         let addQty = qty;
@@ -132,7 +143,7 @@ const Variations = ({ product }) => {
                 <div className='flex items-center gap-2 flex-wrap text-[11px] text-res font-medium mt-0.5'>
                     {priceCalculation.categoryDiscountPercent > 0 && (
                         <span className='bg-primary/10 text-primary px-2 py-0.5 rounded'>
-                            {__('Category Discount:')} -{priceCalculation.categoryDiscountPercent}%
+                            -{priceCalculation.categoryDiscountPercent}% {__('Discount on')} {priceCalculation.categoryTitle || (Array.isArray(product?.category) ? product?.category[0]?.title : product?.category?.title) || __('Category')}
                         </span>
                     )}
                     {priceCalculation.userDiscountPercent > 0 && (
@@ -253,17 +264,50 @@ const Variations = ({ product }) => {
                 </div>
             </div>
             
+            {/* Is Owner Notification */}
+            {isOwner && (
+                <div className='p-3 bg-amber-500/10 border border-amber-500/20 rounded text-amber-700 text-xs font-medium flex items-center gap-2 mt-2'>
+                    <span>⚠️ {__('This is your product. You cannot purchase or add your own product to cart.')}</span>
+                </div>
+            )}
+
             {/* Action Buttons */}
-            <div className='flex gap-3 mt-4'>
-                <button className='flex-1 max-w-44 bg-secondary hover:bg-secondary/80 text-white py-3 rounded-sm font-semibold text-lg transition-colors shadow-sm'>
-                    {__('Buy Now')}
-                </button>
+            <div className='flex items-center gap-3 mt-4'>
                 <button 
+                    type='button'
                     onClick={handleAddToCart}
-                    disabled={availableStock < 1 || (variations.length > 0 && !selectedCombo)}
-                    className='flex-1 max-w-44 bg-primary hover:bg-primary/80 text-white py-3 rounded-sm font-semibold text-lg transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed'
+                    disabled={isOwner || availableStock < 1 || (variations.length > 0 && !selectedCombo)}
+                    className='flex-1 max-w-44 bg-primary hover:bg-primary/80 text-white py-3 rounded-sm font-medium font-poppins text-lg transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer'
                 >
                     {__('Add to Cart')}
+                </button>
+                <button
+                    type='button'
+                    onClick={() => {
+                        if (!product?.id) return;
+                        if (isOwner) {
+                            toast.info(__('You cannot like or wishlist your own product.'));
+                            return;
+                        }
+                        if (isWishlist) {
+                            dispatch(removeFromWishlist(product.id));
+                            if (auth?.user) recordWishlistActivity('wishlist_removed', product.id);
+                            toast.info(__('Removed from Wishlist'));
+                        } else {
+                            dispatch(addToWishlist({ productId: product.id, product }));
+                            if (auth?.user) recordWishlistActivity('wishlist_added', product.id);
+                            toast.success(__('Added to Wishlist'));
+                        }
+                    }}
+                    title={isWishlist ? __('Remove from Wish List') : __('Add to Wish List')}
+                    className={`flex items-center justify-center gap-2 px-5 py-4 rounded-sm font-semibold text-sm transition-all border cursor-pointer ${
+                        isWishlist
+                            ? 'bg-primary text-white border-primary shadow-sm hover:bg-primary/90'
+                            : 'bg-white text-primary border-primary/30 hover:border-primary hover:bg-primary/5'
+                    }`}
+                >
+                    {isWishlist ? <RiHeartFill className='size-5 text-white' /> : <RiHeartLine className='size-5' />}
+                    <span>{isWishlist ? __('Wishlisted') : __('Wishlist')}</span>
                 </button>
             </div>
         </div>

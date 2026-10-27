@@ -6,8 +6,9 @@ import { Head, Link, router, usePage } from '@inertiajs/react'
 import ImageViwer from '@/Components/Admin/ImageViwer';
 import { RiFilter3Line, RiGridFill, RiListUnordered } from 'react-icons/ri';
 import { useLang } from '@/contexts/LanguageContext';
+import AdsRender from '@/Components/Frontend/AdsRender'
 
-export default function Store({ category, products, filters = {}, filterOptions = {} }) {
+export default function Shop({ category, products, filters = {}, filterOptions = {} }) {
   const { setting } = usePage().props;
   const { __ } = useLang();
   const [Settings] = useState(setting?.layout?.Single_Category);
@@ -29,7 +30,7 @@ export default function Store({ category, products, filters = {}, filterOptions 
 
   return (
     <div className="mx-auto w-full max-w-[1600px] bg-bg">
-      <Head title={cat?.title ? `${cat.title} - Store` : __('Store')} />
+      <Head title={cat?.title ? `${cat.title} - Shop` : __('Shop')} />
 
       <div className="relative mb-10 bg-bg flex min-h-[280px] flex-col items-center gap-8 overflow-hidden rounded border border-border p-8 text-center shadow-sm md:min-h-[360px] md:flex-row md:p-12 lg:text-left">
         <ImageViwer image={Settings?.banner_image} className="absolute inset-0 z-0 size-full object-cover" />
@@ -53,10 +54,10 @@ export default function Store({ category, products, filters = {}, filterOptions 
           <div className="mb-3 flex items-center justify-center gap-2 text-sm font-semibold capitalize font-oswald tracking-wider text-permanent lg:justify-start">
             <Link href="/" className="hover:underline">{__('Home')}</Link>
             <span>/</span>
-            <span>{__('Store')}</span>
+            <span>{__('Shop')}</span>
           </div>
           <h1 className="mb-4 text-4xl font-bold font-poppins text-common md:text-5xl">
-            {cat?.title ?? __('Store')}
+            {cat?.title ?? __('Shop')}
           </h1>
           {cat?.description ? (
             <div dangerouslySetInnerHTML={{ __html: cat.description }} className="mx-auto max-w-3xl text-base leading-relaxed text-permanent font-roboto lg:mx-0"></div>
@@ -160,11 +161,12 @@ export default function Store({ category, products, filters = {}, filterOptions 
           )}
         </div>
       </div>
+      <AdsRender placement='shop_bottom' type='main' className='w-full' />
     </div>
   )
 }
 
-Store.layout = (view) => {
+Shop.layout = (view) => {
   return (
     <FrontendLayout>
       {view}

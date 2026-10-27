@@ -30,6 +30,9 @@ function DropdownSelect({
     const apiProxy = apiConfig?.proxy || (
         apiBaseUrl?.includes('photon.komoot.io') ? '/api/geocode' : null
     );
+    const cityHint = (apiConfig?.city || '').toString().trim();
+    const stateHint = (apiConfig?.state || '').toString().trim();
+    const countryHint = (apiConfig?.country || '').toString().trim();
 
     // Sync local value with incoming value ONLY when the prop value changes
     useEffect(() => {
@@ -86,15 +89,23 @@ function DropdownSelect({
         const timer = window.setTimeout(async () => {
             setRemoteLoading(true);
             try {
+                const query = localValue.trim();
                 const endpoint = apiEndpoint.replace(
                     '{query}',
-                    encodeURIComponent(localValue.trim())
+                    encodeURIComponent(query)
                 );
                 const requestUrl = apiProxy
-                    ? `${apiProxy}?q=${encodeURIComponent(localValue.trim())}&limit=5`
+                    ? apiProxy
                     : `${apiBaseUrl}${endpoint}`;
                 const response = await axios.get(requestUrl, {
                     signal: controller.signal,
+                    params: apiProxy ? {
+                        q: query,
+                        limit: 5,
+                        ...(cityHint ? { city: cityHint } : {}),
+                        ...(stateHint ? { state: stateHint } : {}),
+                        ...(countryHint ? { country: countryHint } : {}),
+                    } : undefined,
                 });
                 const features = Array.isArray(response.data?.features)
                     ? response.data.features
@@ -129,7 +140,7 @@ function DropdownSelect({
             window.clearTimeout(timer);
             controller.abort();
         };
-    }, [apiBaseUrl, apiEndpoint, apiProxy, isApiSearch, localValue]);
+    }, [apiBaseUrl, apiEndpoint, apiProxy, isApiSearch, isOpen, localValue, cityHint, stateHint, countryHint]);
 
     const handleInput = (e) => {
         const val = e.target.value;

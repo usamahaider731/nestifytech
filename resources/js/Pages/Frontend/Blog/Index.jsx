@@ -5,6 +5,7 @@ import ImageViwer from '@/Components/Admin/ImageViwer';
 import { RiSearchLine, RiCalendarLine, RiFolder3Line, RiArrowRightLine, RiNewspaperLine, RiArrowRightSLine } from 'react-icons/ri';
 import { useLang } from '@/contexts/LanguageContext';
 import ArticalCard from '@/Components/ArticalCard';
+import AdsRender from '@/Components/Frontend/AdsRender';
 
 export default function BlogIndex({ blogs, recent_blogs = [], categories = [], filters = {} }) {
     const { __ } = useLang();
@@ -75,10 +76,10 @@ export default function BlogIndex({ blogs, recent_blogs = [], categories = [], f
                             ) : (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {blogList.map((blog) => {
-                                      
+
 
                                         return (
-                                           <ArticalCard blog={blog} />
+                                            <ArticalCard blog={blog} />
                                         );
                                     })}
                                 </div>
@@ -93,19 +94,19 @@ export default function BlogIndex({ blogs, recent_blogs = [], categories = [], f
                                             disabled={!link.url}
                                             onClick={() => link.url && router.get(link.url, {}, { preserveState: true })}
                                             dangerouslySetInnerHTML={{ __html: link.label }}
-                                            className={`px-4 py-2 text-sm rounded-lg border transition-all ${
-                                                link.active
-                                                    ? 'bg-primary text-white border-primary font-bold'
-                                                    : 'bg-accent/40 text-res border-border hover:border-primary/50'
-                                            } ${!link.url ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+                                            className={`px-4 py-2 text-sm rounded-lg border transition-all ${link.active
+                                                ? 'bg-primary text-white border-primary font-bold'
+                                                : 'bg-accent/40 text-res border-border hover:border-primary/50'
+                                                } ${!link.url ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
                                         />
                                     ))}
                                 </div>
                             )}
+                            <AdsRender type='main' placement='blog_bottom' className='w-full h-auto mt-10 max-h-150' />
                         </div>
 
                         {/* Sidebar */}
-                        <div className="lg:col-span-1 space-y-8">
+                        <div className="lg:col-span-1 sticky top-0 right-0 h-fit space-y-8">
                             {/* Categories Widget */}
                             {categories.length > 0 && (
                                 <div className="bg-bg rounded p-6 border border-border/60 shadow-sm">
@@ -118,11 +119,10 @@ export default function BlogIndex({ blogs, recent_blogs = [], categories = [], f
                                             <button
                                                 key={cat.id}
                                                 onClick={() => handleCategorySelect(cat.id)}
-                                                className={`text-left text-sm py-2 px-3 rounded transition-all flex items-center justify-between ${
-                                                    String(filters.category) === String(cat.id)
-                                                        ? 'bg-primary text-white font-semibold'
-                                                        : 'hover:bg-bg text-res'
-                                                }`}
+                                                className={`text-left text-sm py-2 px-3 rounded transition-all flex items-center justify-between ${String(filters.category) === String(cat.id)
+                                                    ? 'bg-primary text-white font-semibold'
+                                                    : 'hover:bg-bg text-res'
+                                                    }`}
                                             >
                                                 <span>{cat.title}</span>
                                                 <RiArrowRightSLine size={16} />
@@ -166,6 +166,8 @@ export default function BlogIndex({ blogs, recent_blogs = [], categories = [], f
                                     </div>
                                 </div>
                             )}
+                            <AdsRender type='sidebar' placement='blog_sidebar' className='w-full h-auto mt-10 max-h-150' />
+
                         </div>
                     </div>
                 </div>

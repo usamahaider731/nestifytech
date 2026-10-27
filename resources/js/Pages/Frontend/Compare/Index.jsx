@@ -7,20 +7,14 @@ import { useLang } from '@/contexts/LanguageContext';
 import { usePage } from '@inertiajs/react';
 import { RiDeleteBin6Line, RiStackLine, RiCloseLine } from 'react-icons/ri';
 import ImageViwer from '@/Components/Admin/ImageViwer';
+import { calculateAdjustedPrice, resolveProductPrices, parseNumericPrice } from '@/Utils/helper';
 
 export default function ComparePage() {
-    const { setting } = usePage().props;
+    const { setting, auth, activePricingRules = [] } = usePage().props;
     const currency = setting?.site?.currency?.value ?? 'PKR';
     const { __ } = useLang();
     const dispatch = useDispatch();
     const items = useSelector(selectCompareItems);
-
-    const parsePrice = (priceVal) => {
-        if (typeof priceVal === 'number') return priceVal;
-        if (!priceVal) return 0;
-        const parsed = Number(String(priceVal).replace(/,/g, ''));
-        return Number.isNaN(parsed) ? 0 : parsed;
-    };
 
     // Collect all unique attribute keys across compared products
     const allAttributeKeys = [...new Set(
@@ -100,14 +94,25 @@ export default function ComparePage() {
                                 <tr className="border-b border-border even:bg-common/40">
                                     <td className="p-4 text-sm font-medium text-res">{__('Price')}</td>
                                     {items.map(item => {
-                                        const firstPrice = parsePrice(item.product?.meta?.first_price?.value);
-                                        const secondPrice = parsePrice(item.product?.meta?.second_price?.value);
-                                        const salePrice = firstPrice > secondPrice && secondPrice > 0 ? secondPrice : firstPrice;
+                                        const product = item.product;
+                                        const { basePrice, regularPrice } = resolveProductPrices(product);
+                                        const pricing = calculateAdjustedPrice({
+                                            basePrice,
+                                            regularPrice,
+                                            category: product?.category,
+                                            brand: product?.brand,
+                                            collection: product?.collection ?? product?.meta?.collection,
+                                            userDiscount: parseNumericPrice(auth?.user?.discount || auth?.user?.meta?.discount || 0),
+                                            product,
+                                            user: auth?.user || null,
+                                            pricingRules: activePricingRules,
+                                        });
+                                        const salePrice = pricing.finalPrice;
                                         return (
                                             <td key={item.productId} className="p-4 text-center">
                                                 <span className="font-bold font-oswald text-heading">{currency} {salePrice.toLocaleString()}</span>
-                                                {firstPrice > secondPrice && secondPrice > 0 && (
-                                                    <span className="ml-2 text-xs text-res line-through font-oswald">{currency} {firstPrice.toLocaleString()}</span>
+                                                {pricing.totalSavings > 0 && regularPrice > salePrice && (
+                                                    <span className="ml-2 text-xs text-res line-through font-oswald">{currency} {regularPrice.toLocaleString()}</span>
                                                 )}
                                             </td>
                                         );

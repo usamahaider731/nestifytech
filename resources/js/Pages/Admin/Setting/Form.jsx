@@ -452,7 +452,18 @@ function Form({ Data = [], name = '', link = '', type = '', colorPalettes = {} }
         // Fetch each dynamic option
         for (const [key, optionsConfig] of Object.entries(optionsToFetch)) {
             try {
-                const endpoint = optionsConfig.model === 'Menu' ? `/api/menu-locations` : `/api/taxonomy-options/${optionsConfig.type}`;
+                // Determine the correct API endpoint based on the model type
+                let endpoint;
+                const modelName = (optionsConfig.model || '').split('\\').pop().toLowerCase();
+                if (modelName === 'menu') {
+                    endpoint = `/api/menu-locations`;
+                } else if (modelName === 'roles' || optionsConfig.type === 'role') {
+                    endpoint = `/api/roles-options`;
+                } else if (optionsConfig.type === 'attribute') {
+                    endpoint = `/api/attribute-options`;
+                } else {
+                    endpoint = `/api/taxonomy-options/${optionsConfig.type}`;
+                }
                 const response = await axios.get(
                     endpoint,
                     {

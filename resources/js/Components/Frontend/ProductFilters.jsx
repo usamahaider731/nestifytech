@@ -35,6 +35,9 @@ function toQuery(next, bounds = {}) {
     if (next.in_stock) {
         params.in_stock = 1;
     }
+    if (next.q) {
+        params.q = next.q;
+    }
     if (next.sort && next.sort !== 'latest') {
         params.sort = next.sort;
     }
@@ -51,8 +54,8 @@ export default function ProductFilters({
 }) {
     const { __ } = useLang();
     const price = options?.price ?? { min: 0, max: 100000 };
-    const categoryKey = options?.categoryKey ?? (options?.isStore ? 'category' : 'subcategory');
-    const categoriesTitle = options?.categoriesTitle ?? (options?.isStore ? __('Categories') : __('Subcategories'));
+    const categoryKey = options?.categoryKey ?? (options?.isShop ? 'category' : 'subcategory');
+    const categoriesTitle = options?.categoriesTitle ?? (options?.isShop ? __('Categories') : __('Subcategories'));
 
     const [local, setLocal] = useState({
         min_price: filters?.min_price ?? price.min,

@@ -41,6 +41,10 @@ const SingleProduct = ({ product, latest_product, related_products = [], popular
 
     const pageRef = useRef(null);
     const locationName = [
+        product?.store?.address,
+        product?.store?.city,
+        product?.store?.state,
+        product?.store?.country,
         product?.meta?.address?.value,
         ...(Array.isArray(product?.city) ? product.city.map(c => c?.title) : [product?.city?.title]),
         ...(Array.isArray(product?.state) ? product.state.map(s => s?.title) : [product?.state?.title]),
@@ -95,11 +99,32 @@ const SingleProduct = ({ product, latest_product, related_products = [], popular
                                     <div className='flex flex-col gap-2 flex-1'>
                                         <h2 className='text-sm font-semibold text-primary'>{__('Location & Coverage')}</h2>
 
+                                        {/* Assigned Store */}
+                                        {product?.store && (
+                                            <div className='flex flex-col gap-1 p-2 rounded bg-emerald-500/10 border border-emerald-500/20'>
+                                                <span className='text-[11px] font-bold text-emerald-700 uppercase tracking-wide flex items-center gap-1'>
+                                                    <span>🏪</span> {__('Fulfilled by Store / Branch')}
+                                                </span>
+                                                <span className='text-xs font-semibold text-heading'>{product.store.title}</span>
+                                                {product.store.address && (
+                                                    <span className='text-[11px] text-res leading-tight'>📍 {product.store.address}</span>
+                                                )}
+                                                {(product.store.city || product.store.state) && (
+                                                    <span className='text-[11px] text-res leading-tight'>
+                                                        {[product.store.city, product.store.state, product.store.country].filter(Boolean).join(', ')}
+                                                    </span>
+                                                )}
+                                                {product.store.phone && (
+                                                    <span className='text-[11px] text-primary leading-tight font-medium'>📞 {product.store.phone}</span>
+                                                )}
+                                            </div>
+                                        )}
+
                                         {/* Countries */}
                                         {(() => {
                                             const countries = Array.isArray(product.country)
                                                 ? product.country
-                                                : product.country ? [product.country] : [];
+                                                : product.country ? [product.country] : (product.store?.country ? [{ title: product.store.country }] : []);
                                             return countries.length > 0 && (
                                                 <div className='flex flex-col gap-1'>
                                                     <span className='text-[11px] font-semibold text-res uppercase tracking-wide'>{__('Country')}</span>
@@ -118,7 +143,7 @@ const SingleProduct = ({ product, latest_product, related_products = [], popular
                                         {(() => {
                                             const states = Array.isArray(product.state)
                                                 ? product.state
-                                                : product.state ? [product.state] : [];
+                                                : product.state ? [product.state] : (product.store?.state ? [{ title: product.store.state }] : []);
                                             return states.length > 0 && (
                                                 <div className='flex flex-col gap-1'>
                                                     <span className='text-[11px] font-semibold text-res uppercase tracking-wide'>{__('State / Province')}</span>
@@ -137,7 +162,7 @@ const SingleProduct = ({ product, latest_product, related_products = [], popular
                                         {(() => {
                                             const cities = Array.isArray(product.city)
                                                 ? product.city
-                                                : product.city ? [product.city] : [];
+                                                : product.city ? [product.city] : (product.store?.city ? [{ title: product.store.city }] : []);
                                             return cities.length > 0 ? (
                                                 <div className='flex flex-col gap-1'>
                                                     <span className='text-[11px] font-semibold text-res uppercase tracking-wide'>{__('Cities')}</span>
@@ -155,9 +180,9 @@ const SingleProduct = ({ product, latest_product, related_products = [], popular
                                         })()}
 
                                         {/* Street address if any */}
-                                        {product.meta?.address?.value && (
+                                        {(product.meta?.address?.value || product.store?.address) && (
                                             <p className='text-[11px] text-res mt-1 leading-relaxed'>
-                                                📍 {product.meta.address.value}
+                                                📍 {product.meta?.address?.value || product.store?.address}
                                             </p>
                                         )}
                                     </div>

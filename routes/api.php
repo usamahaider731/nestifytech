@@ -172,6 +172,30 @@ Route::get('/attribute-options', function () {
         })
     );
 });
+Route::get('/store-options', function (\Illuminate\Http\Request $request) {
+    $cityFilter = $request->input('parent'); 
+    $query = \Illuminate\Support\Facades\DB::table('posts')
+        ->where('type', 'store')
+        ->where('status', 'publish')
+        ->select('posts.id', 'posts.title');
+
+    if ($cityFilter) {
+        $query->join('post_meta as pm_city', function ($join) use ($cityFilter) {
+            $join->on('pm_city.post_id', '=', 'posts.id')
+                 ->where('pm_city.key', 'city')
+                 ->where(function ($q) use ($cityFilter) {
+                     $q->whereRaw('LOWER(pm_city.value) LIKE ?', ['%' . strtolower($cityFilter) . '%']);
+                 });
+        });
+    }
+
+    $stores = $query->orderBy('posts.title')->get();
+
+    return response()->json(
+        $stores->map(fn($s) => ['id' => $s->id, 'title' => $s->title])
+    );
+});
+
 Route::middleware('web')->get('/auth', [ApiController::class, 'authCheck'])->name('api.auth');
 Route::get('/hello', function () {
     return response()->json(
@@ -192,7 +216,7 @@ Route::get('/get_menu', [ApiController::class, 'menu'])->name('menu');
 
 Route::get('/language/{lang}', [ApiController::class, 'get_language'])->name('language.get');
 
-Route::post('/add-lang-key', [ApiController::class, 'addLangKey'])->name('language.add_key');
+Route::middleware(['web', 'auth'])->post('/add-lang-key', [ApiController::class, 'addLangKey'])->name('language.add_key');
 Route::get('/image/{filename}', [ApiController::class, 'image'])->name('image');
 Route::get('/get_taxonomies', [ApiController::class, 'get_taxonomies'])->name('api.get_taxonomies');
 Route::get('/get_posts', [ApiController::class, 'get_posts'])->name('api.get_posts');
@@ -210,12 +234,15 @@ Route::middleware('web')->post('/reviews/{id}/report', [\App\Http\Controllers\Re
 
 // Cart & Orders
 Route::middleware('web')->group(function () {
-    Route::post('/cart/order', [\App\Http\Controllers\CartController::class, 'placeOrder'])->name('api.cart.order');
+    Route::post('/cart/order', [\App\Http\Controllers\CartController::class, 'placeOrder'])->middleware('throttle:10,1')->name('api.cart.order');
     Route::get('/cart/stock', [\App\Http\Controllers\CartController::class, 'checkStock'])->name('api.cart.stock');
+    Route::post('/cart/prices', [\App\Http\Controllers\CartController::class, 'checkPrices'])->middleware('throttle:30,1')->name('api.cart.prices');
 
-    // Order cancellation & refund
-    Route::post('/orders/{orderId}/cancel', [\App\Http\Controllers\StripeController::class, 'cancelOrder'])->name('api.orders.cancel');
-    Route::post('/orders/{orderId}/attach-payment', [\App\Http\Controllers\StripeController::class, 'attachPaymentIntent'])->name('api.orders.attach-payment');
+    // Order cancellation & refund (must be authenticated)
+    Route::middleware('auth')->group(function () {
+        Route::post('/orders/{orderId}/cancel', [\App\Http\Controllers\StripeController::class, 'cancelOrder'])->name('api.orders.cancel');
+        Route::post('/orders/{orderId}/attach-payment', [\App\Http\Controllers\StripeController::class, 'attachPaymentIntent'])->name('api.orders.attach-payment');
+    });
 
     // Auto-detected country saving
     Route::post('/user/save-country', [\App\Http\Controllers\ProfileController::class, 'saveCountry'])->name('api.user.save-country');

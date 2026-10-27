@@ -40,12 +40,16 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'roles' => [],
         ]);
+
+        // NOTE: Password is stored only as bcrypt hash in users.password — never in user_meta.
 
         event(new Registered($user));
 
         Auth::login($user);
+        // NOTE: Plain-text password is intentionally NOT stored in session (security).
 
-        return Inertia::location(config('app.frontend_url') . '/admin');
+        return Inertia::location(config('app.frontend_url') . '/profile');
     }
 }

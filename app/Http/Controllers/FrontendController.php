@@ -111,6 +111,124 @@ class FrontendController extends Controller
             'latest' => true,
         ]));
 
+        // ----------------------------------------------------
+        // "For You" Recommendation Algorithm & Recently Viewed
+        // ----------------------------------------------------
+        $forYouProducts = [];
+        $matchedInterests = [];
+        $recentlyViewedProducts = [];
+
+        $userId = Auth::id();
+        $userMeta = [];
+        if ($userId) {
+            $userMeta = DB::table('user_meta')->where('user_id', $userId)->pluck('value', 'key')->toArray();
+        }
+
+        // 1. Fetch Recently Viewed Products
+        $viewedIdsRaw = $userMeta['viewed_products'] ?? session('viewed_products_session', '');
+        $viewedIds = array_values(array_filter(array_unique(explode(',', (string) $viewedIdsRaw))));
+        if (!empty($viewedIds)) {
+            $recentlyViewedProducts = get_posts($this->productQuery([
+                'ids' => array_slice($viewedIds, 0, 10),
+                'limit' => 10,
+            ]));
+        }
+
+        // 2. Derive User Interests from:
+        //   a) Explicit tags/interests chosen by user ('interests')
+        //   b) Keywords from user searches (searched products/categories)
+        //   c) Categories & tags from recently opened/viewed products
+        $interestsPool = [];
+
+        // a) Explicit tags & interests from profile settings
+        if (!empty($userMeta['interests'])) {
+            $decoded = json_decode($userMeta['interests'], true);
+            if (is_array($decoded)) {
+                $interestsPool = array_merge($interestsPool, $decoded);
+            }
+        }
+
+        // b) Search keywords (e.g. searching 'bags', 'shoes', etc.)
+        $searchTermsRaw = $userMeta['recent_searches'] ?? session('recent_searches_session', '');
+        if (!empty($searchTermsRaw)) {
+            $searches = array_filter(array_map('trim', explode(',', (string) $searchTermsRaw)));
+            foreach ($searches as $term) {
+                if (strlen($term) >= 2) {
+                    $interestsPool[] = $term;
+                }
+            }
+        }
+
+        // c) Categories and tags from opened/viewed products
+        if (!empty($recentlyViewedProducts)) {
+            foreach ($recentlyViewedProducts as $vProd) {
+                if (!empty($vProd->category)) {
+                    foreach ($vProd->category as $c) {
+                        $catTitle = is_object($c) ? ($c->title ?? '') : (string) $c;
+                        if (!empty($catTitle)) {
+                            $interestsPool[] = $catTitle;
+                        }
+                    }
+                }
+                if (!empty($vProd->tags)) {
+                    foreach ($vProd->tags as $t) {
+                        $tagTitle = is_object($t) ? ($t->title ?? '') : (string) $t;
+                        if (!empty($tagTitle)) {
+                            $interestsPool[] = $tagTitle;
+                        }
+                    }
+                }
+            }
+        }
+
+        $interestsPool = array_values(array_unique(array_filter(array_map('trim', $interestsPool))));
+        $matchedInterests = array_slice($interestsPool, 0, 6);
+
+        // Run Recommendation Query
+        if (!empty($interestsPool)) {
+            // Find categories matching interests
+            $matchingCategoryIds = DB::table('taxonomies')
+                ->where('type', 'category')
+                ->where(function ($q) use ($interestsPool) {
+                    foreach ($interestsPool as $int) {
+                        $q->orWhere('title', 'like', '%' . $int . '%');
+                    }
+                })
+                ->pluck('id')
+                ->toArray();
+
+            $forYouQuery = [
+                'limit' => 10,
+                'popular' => true,
+            ];
+
+            if (!empty($matchingCategoryIds)) {
+                $forYouQuery['category_id'] = $matchingCategoryIds;
+            } else {
+                // Keyword search for first interest (e.g. "bags", "shoes")
+                $forYouQuery['keyword'] = $interestsPool[0];
+            }
+
+            // Exclude already viewed products to keep recommendations fresh
+            if (!empty($viewedIds)) {
+                $forYouQuery['exclude_ids'] = array_slice($viewedIds, 0, 5);
+            }
+
+            $forYouProducts = get_posts($this->productQuery($forYouQuery));
+        }
+
+        // Fallback: If no custom interests or not enough recommendations, show top trending & rated
+        if (empty($forYouProducts) || count($forYouProducts) < 3) {
+            $forYouProducts = get_posts($this->productQuery([
+                'limit' => 10,
+                'trending' => true,
+            ]));
+        }
+
+        $data['for_you_products'] = $forYouProducts;
+        $data['matched_interests'] = $matchedInterests;
+        $data['recently_viewed_products'] = $recentlyViewedProducts;
+
         $blockImages = $index_settings['block_images'] ?? [];
         $heroImage = is_array($blockImages) && count($blockImages) > 0 ? $blockImages[0] : null;
 
@@ -141,7 +259,7 @@ class FrontendController extends Controller
     public function developer() {
         
         }
-    public function store(Request $request)
+    public function shop(Request $request)
     {
         $validated = $request->validate([
             'min_price' => ['nullable', 'numeric', 'min:0'],
@@ -214,11 +332,11 @@ class FrontendController extends Controller
             'title' => $brand->title,
         ])->values();
 
-        return Inertia::render('Frontend/Store/Index', [
+        return Inertia::render('Frontend/Shop/Index', [
             'products' => $products,
             'filters' => $applied,
             'filterOptions' => [
-                'isStore' => true,
+                'isShop' => true,
                 'categoryKey' => 'category',
                 'categoriesTitle' => 'Categories',
                 'brands' => $filterBrands,
@@ -227,6 +345,138 @@ class FrontendController extends Controller
             ],
         ]);
     }
+
+    public function searchPage(Request $request)
+    {
+        $validated = $request->validate([
+            'q' => ['nullable', 'string', 'max:255'],
+            'keyword' => ['nullable', 'string', 'max:255'],
+            'min_price' => ['nullable', 'numeric', 'min:0'],
+            'max_price' => ['nullable', 'numeric', 'min:0'],
+            'brands' => ['nullable', 'string'],
+            'category' => ['nullable', 'string'],
+            'in_stock' => ['nullable'],
+            'sort' => ['nullable', 'in:latest,price_asc,price_desc,popular'],
+            'page' => ['nullable', 'integer', 'min:1'],
+        ]);
+
+        $searchQuery = trim((string) ($validated['q'] ?? ($validated['keyword'] ?? '')));
+
+        // Track search query in session and user_meta for recommendation algorithm
+        if ($searchQuery && strlen($searchQuery) >= 2) {
+            $sessionSearches = (string) $request->session()->get('recent_searches_session', '');
+            $searchList = array_values(array_filter(array_unique(array_map('trim', explode(',', $sessionSearches)))));
+            if (!in_array($searchQuery, $searchList, true)) {
+                array_unshift($searchList, $searchQuery);
+                $request->session()->put('recent_searches_session', implode(',', array_slice($searchList, 0, 10)));
+            }
+
+            if (Auth::check()) {
+                $authId = Auth::id();
+                $existing = DB::table('user_meta')->where('user_id', $authId)->where('key', 'recent_searches')->first();
+                if ($existing) {
+                    $uList = array_values(array_filter(array_unique(array_map('trim', explode(',', (string) $existing->value)))));
+                    if (!in_array($searchQuery, $uList, true)) {
+                        array_unshift($uList, $searchQuery);
+                        DB::table('user_meta')->where('id', $existing->id)->update([
+                            'value' => implode(',', array_slice($uList, 0, 15)),
+                            'updated_at' => now(),
+                        ]);
+                    }
+                } else {
+                    DB::table('user_meta')->insert([
+                        'user_id' => $authId,
+                        'key' => 'recent_searches',
+                        'value' => $searchQuery,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
+        }
+
+        $brandIds = helper_ids($validated['brands'] ?? []);
+        $categoryIds = helper_ids($validated['category'] ?? []);
+        $priceBounds = catalog_price_bounds();
+        $applied = [
+            'q' => $searchQuery,
+            'min_price' => $validated['min_price'] ?? null,
+            'max_price' => $validated['max_price'] ?? null,
+            'brands' => $brandIds,
+            'category' => $categoryIds,
+            'in_stock' => filter_var($validated['in_stock'] ?? false, FILTER_VALIDATE_BOOLEAN),
+            'sort' => $validated['sort'] ?? 'latest',
+        ];
+
+        $productArgs = [
+            'limit' => 20,
+            'paginate' => true,
+            'sort' => $applied['sort'],
+            'min_price' => $applied['min_price'],
+            'max_price' => $applied['max_price'],
+            'in_stock' => $applied['in_stock'],
+        ];
+
+        if ($searchQuery !== '') {
+            $productArgs['keyword'] = $searchQuery;
+        }
+
+        if ($categoryIds !== []) {
+            $selectedCategories = \App\Models\PostTaxonomy::whereIn('id', $categoryIds)->get();
+            $expandedCategoryIds = $categoryIds;
+            foreach ($selectedCategories as $catItem) {
+                $childIds = DB::table('taxonomies')->where('parent_id', $catItem->id)->pluck('id')->all();
+                if (!empty($childIds)) {
+                    $expandedCategoryIds = array_merge($expandedCategoryIds, $childIds);
+                }
+            }
+            $productArgs['category_id'] = array_values(array_unique($expandedCategoryIds));
+        }
+
+        if ($brandIds !== []) {
+            $productArgs['brand_id'] = $brandIds;
+        }
+
+        $products = get_posts($this->productQuery($productArgs));
+
+        $categories = get_taxonomy([
+            'type' => 'category',
+            'status' => 'publish',
+            'limit' => -1,
+        ]);
+        $brands = get_taxonomy([
+            'type' => 'brand',
+            'status' => 'publish',
+            'limit' => -1,
+        ]);
+
+        $filterCategories = collect($categories)->map(fn($cat) => [
+            'id' => $cat->id,
+            'title' => $cat->title,
+            'slug' => $cat->slug ?? null,
+            'parent_id' => $cat->parent_id ?? 0,
+        ])->values();
+
+        $filterBrands = collect($brands)->map(fn($brand) => [
+            'id' => $brand->id,
+            'title' => $brand->title,
+        ])->values();
+
+        return Inertia::render('Frontend/Search/Index', [
+            'query' => $searchQuery,
+            'products' => $products,
+            'filters' => $applied,
+            'filterOptions' => [
+                'isSearch' => true,
+                'categoryKey' => 'category',
+                'categoriesTitle' => 'Categories',
+                'brands' => $filterBrands,
+                'categories' => $filterCategories,
+                'price' => $priceBounds,
+            ],
+        ]);
+    }
+
     public function taxonomyView(Request $request)
     {
         $validated = $request->validate([
@@ -352,6 +602,35 @@ class FrontendController extends Controller
             'exclude_id' => $product->id,
         ]));
 
+        // Eagerly resolve assigned store if available
+        $storeMeta = null;
+        if (isset($product->meta)) {
+            if ($product->meta instanceof \Illuminate\Support\Collection) {
+                $storeMeta = $product->meta->get('store') ?? $product->meta->firstWhere('key', 'store');
+            } elseif (is_array($product->meta)) {
+                $storeMeta = $product->meta['store'] ?? null;
+            } else {
+                $storeMeta = $product->meta->store ?? null;
+            }
+        }
+        $storeId = is_object($storeMeta) ? ($storeMeta->value ?? null) : (is_array($storeMeta) ? ($storeMeta['value'] ?? null) : $storeMeta);
+
+        if ($storeId) {
+            $storePost = DB::table('posts')->where('id', $storeId)->first();
+            if ($storePost) {
+                $storeMetas = DB::table('post_meta')->where('post_id', $storeId)->pluck('value', 'key')->toArray();
+                $product->store = [
+                    'id' => $storePost->id,
+                    'title' => $storePost->title,
+                    'address' => $storeMetas['address'] ?? null,
+                    'city' => $storeMetas['city'] ?? null,
+                    'state' => $storeMetas['state'] ?? null,
+                    'country' => $storeMetas['country'] ?? null,
+                    'phone' => $storeMetas['phone'] ?? null,
+                ];
+            }
+        }
+
         $this->recordProductView($request, (int) $product->id, (string) $product->title);
 
         return Inertia::render('Frontend/Single/Index', [
@@ -364,6 +643,14 @@ class FrontendController extends Controller
 
     private function recordProductView(Request $request, int $productId, string $productTitle): void
     {
+        // Also track in session for both guest & logged in users
+        $sessionViewed = (string) $request->session()->get('viewed_products_session', '');
+        $sessionList = array_values(array_filter(array_unique(explode(',', $sessionViewed))));
+        if (!in_array((string) $productId, $sessionList, true)) {
+            array_unshift($sessionList, (string) $productId);
+            $request->session()->put('viewed_products_session', implode(',', array_slice($sessionList, 0, 15)));
+        }
+
         $userId = Auth::id();
         if ($userId) {
             $viewedIds = [];
@@ -618,6 +905,59 @@ class FrontendController extends Controller
             'faqs'         => $faqs ?? [],
         ]);
     }
+
+    public function storeLocator(Request $request)
+    {
+        // Stores are stored in the posts table with type = 'store'
+        $rawStores = DB::table('posts')
+            ->where('type', 'store')
+            ->where('status', 'publish')
+            ->orderBy('id', 'asc')
+            ->get();
+
+        // Attach meta for each store
+        $stores = $rawStores->map(function ($store) {
+            $meta = DB::table('post_meta')
+                ->where('post_id', $store->id)
+                ->get()
+                ->keyBy('key');
+
+            $getMeta = fn($key) => $meta->get($key)?->value ?? null;
+
+            // Resolve image from media table
+            $media = DB::table('media')
+                ->where('parent_id', $store->id)
+                ->where('type', 'store')
+                ->first();
+
+            return [
+                'id'          => $store->id,
+                'name'        => $store->title,
+                'description' => $store->description,
+                'country'     => $getMeta('country'),
+                'city'        => $getMeta('city'),
+                'state'       => $getMeta('state'),
+                'address'     => $getMeta('address'),
+                'phone'       => $getMeta('phone'),
+                'email'       => $getMeta('email'),
+                'website'     => $getMeta('website'),
+                'latitude'    => $getMeta('latitude') ? (float) $getMeta('latitude') : null,
+                'longitude'   => $getMeta('longitude') ? (float) $getMeta('longitude') : null,
+                'sort_order'  => (int) ($getMeta('sort_order') ?? 0),
+                'image'       => $media ? '/storage/uploads/image/' . $media->filename : null,
+            ];
+        })->sortBy('sort_order')->values();
+
+        // Unique countries for filter tab
+        $countries = $stores->pluck('country')->filter()->unique()->sort()->values();
+
+        return Inertia::render('Frontend/StoreLocator/Index', [
+            'stores'    => $stores,
+            'countries' => $countries,
+        ]);
+    }
+
+
 
     public function faqs(Request $request)
     {

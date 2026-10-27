@@ -11,7 +11,7 @@ import { selectCartCount, selectCartTotal } from '@/store/cartSlice';
 import { selectWishlistCount, toggleWishlist } from '@/store/wishListSlice';
 import { selectCompareCount, toggleCompare } from '@/store/compareSlice';
 
-const MainNav = ({ ContainerType, isScrolled = false }) => {
+const MainNav = ({ ContainerType, isScrolled = false, onOpenSidebar }) => {
     const { setting, auth } = usePage().props;
     const { setIsOpen } = useCart();
     const { __ } = useLang();
@@ -49,35 +49,43 @@ const MainNav = ({ ContainerType, isScrolled = false }) => {
                 }`}
         >
             <div className={`${ContainerType === 'container' ? 'container mx-auto' : ''} px-5 relative`}>
-                <div className={`flex flex-1 items-center gap-5 lg:gap-10 transition-all duration-300 ${isScrolled ? 'py-2.5' : 'py-5 lg:py-7'
+                <div className={`flex flex-1 items-center gap-1.5 sm:gap-5 lg:gap-10 transition-all duration-300 ${isScrolled ? 'py-2.5' : 'py-5 lg:py-7'
                     }`}>
 
                     {/* Logo */}
                     <div className="logo shrink-0">
                         <Link href="/">
                             <ImageViwer
-                                className={`transition-all max-h-12 duration-300 ${isScrolled ? 'max-w-48' : 'max-w-56'}`}
+                                className={`transition-all max-h-7 sm:max-h-9 lg:max-h-12 duration-300 ${isScrolled ? 'max-w-40 sm:max-w-44 lg:max-w-48' : 'max-w-32 sm:max-w-40 lg:max-w-44'}`}
                                 image={logo_path}
                                 alt={setting?.site_name}
                             />
                         </Link>
                     </div>
 
-                    <RiMenuLine size={21} className="mr-1 cursor-pointer text-text transition-colors hover:text-primary lg:mr-4" />
+                    {/* Hamburger — mobile only */}
+
 
                     {/* Search — always shown */}
                     <HeaderSearch />
-
+                    <button
+                        type="button"
+                        onClick={onOpenSidebar}
+                        className="md:hidden flex items-center justify-center cursor-pointer text-text transition-colors hover:text-primary"
+                        aria-label="Open menu"
+                    >
+                        <RiMenuLine size={21} />
+                    </button>
                     {/* Action icons */}
-                    <div className="flex gap-4 text-text lg:gap-6">
-                        {/* Wishlist */}
+                    <div className="flex gap-3  text-text sm:gap-4 lg:gap-6">
+                        {/* Wishlist — hidden on xs, shown sm+ */}
                         <button
                             type="button"
                             onClick={() => dispatch(toggleWishlist(true))}
-                            className="relative flex cursor-pointer items-center text-text transition hover:text-primary"
+                            className="relative hidden md:flex cursor-pointer items-center text-text transition hover:text-primary"
                             aria-label={__('Open Wishlist')}
                         >
-                            <RiHeartLine size={20} />
+                            <RiHeartLine className='lg:size-5 size-4.5' />
                             {wishlistCount > 0 && (
                                 <span className="absolute -right-1.5 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-center text-[10px] font-semibold text-white">
                                     {wishlistCount}
@@ -85,14 +93,14 @@ const MainNav = ({ ContainerType, isScrolled = false }) => {
                             )}
                         </button>
 
-                        {/* Compare */}
+                        {/* Compare — hidden on xs, shown sm+ */}
                         <button
                             type="button"
                             onClick={() => dispatch(toggleCompare(true))}
-                            className="relative flex cursor-pointer items-center text-text transition hover:text-primary"
+                            className="relative hidden md:flex cursor-pointer items-center text-text transition hover:text-primary"
                             aria-label={__('Open Compare')}
                         >
-                            <RiRepeat2Line size={20} />
+                            <RiRepeat2Line className='lg:size-5 size-4.5' />
                             {compareCount > 0 && (
                                 <span className="absolute -right-1.5 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-info px-1 text-center text-[10px] font-semibold text-text">
                                     {compareCount}
@@ -100,19 +108,21 @@ const MainNav = ({ ContainerType, isScrolled = false }) => {
                             )}
                         </button>
 
-                        {/* Notifications Bell */}
-                        <NotificationBell />
+                        {/* Notifications Bell — hidden on xs, shown sm+ */}
+                        <div className="hidden sm:flex items-center">
+                            <NotificationBell />
+                        </div>
 
                         {/* Account / Profile */}
                         {auth?.user ? (
-                            <div className="relative group flex items-center">
+                            <div className="relative group hidden md:flex items-center">
                                 <Link
                                     href={route('profile.index')}
                                     className="flex cursor-pointer items-center text-text transition hover:text-primary"
                                     aria-label={__('My Account')}
                                     title={auth.user.name || __('My Account')}
                                 >
-                                    <RiUserLine size={20} />
+                                    <RiUserLine className='lg:size-5 size-4' />
                                 </Link>
                                 <div className="absolute right-0 top-full pt-2 hidden group-hover:block z-50 min-w-44">
                                     <div className="bg-bg border border-border rounded shadow-lg py-1.5 text-xs text-text">
@@ -159,11 +169,11 @@ const MainNav = ({ ContainerType, isScrolled = false }) => {
                         ) : (
                             <Link
                                 href={route('login')}
-                                className="flex cursor-pointer items-center text-text transition hover:text-primary"
+                                className="md:flex hidden cursor-pointer items-center text-text transition hover:text-primary"
                                 aria-label={__('Sign In')}
                                 title={__('Sign In')}
                             >
-                                <RiUser3Line size={20} />
+                                <RiUser3Line className='lg:size-5 size-4' />
                             </Link>
                         )}
 
@@ -171,20 +181,20 @@ const MainNav = ({ ContainerType, isScrolled = false }) => {
                         <button
                             type="button"
                             onClick={() => setIsOpen(true)}
-                            className="flex gap-3 items-center text-left"
+                            className="md:flex hidden gap-3 items-center text-left"
                             aria-label={__('Open cart')}
                         >
                             <div className="relative flex items-center">
-                                <RiShoppingBag3Line size={20} />
+                                <RiShoppingBag3Line className='lg:size-5 size-4' />
                                 {itemCount > 0 && (
                                     <span className="absolute -right-1.5 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-info px-1 text-center text-[10px] font-semibold text-text">
                                         {itemCount}
                                     </span>
                                 )}
                             </div>
-                            {/* Show subtotal only in non-sticky mode */}
-                            <div className="flex flex-col">
-                                <span className="text-md font-semibold">
+                            {/* Show subtotal — hide text on xs */}
+                            <div className="hidden md:flex flex-col">
+                                <span className="md:text-md text-sm font-medium md:font-semibold lg:font-semibold">
                                     {currency} {subtotal.toLocaleString()}
                                 </span>
                             </div>

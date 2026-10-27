@@ -449,7 +449,7 @@ const VariationsSelector = ({ value = [], onChange = () => { } }) => {
                                                 <div className="w-full md:w-auto flex gap-4 border-t border-white/5 md:border-none pt-4 md:pt-0">
                                                     <div className="space-y-1.5 flex-1">
                                                         <label className="text-[10px] uppercase font-black text-res opacity-80 flex items-center gap-1.5 ml-1">
-                                                            <RiPriceTagLine className="text-primary" /> Price Mod
+                                                            <RiPriceTagLine className="text-primary" /> Price
                                                         </label>
                                                         <input
                                                             type="number"

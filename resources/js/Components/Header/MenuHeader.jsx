@@ -6,11 +6,11 @@ const MenuHeader = ({ ContainerType, isScrolled =false }) => {
     const menuLocation = props.setting.layout.Header.header_menu;
     const Menu = (props.setting.menu || []).filter((item) => !menuLocation || item.location === menuLocation);
     return (
-        <div className={`w-full  shadow-sm ${isScrolled ? 'bg-white' : 'bg-primary'}`}>
+        <div className={`w-full font-poppins hidden md:flex shadow-sm ${isScrolled ? 'bg-white' : 'bg-primary'}`}>
             <div className={` ${ContainerType === "container" ? "container mx-auto" : "w-full"}  px-5 flex`}>
                 {
                     Menu.map((item, index) => (
-                        <Link href={`${item?.link ? item?.link : '#'}`} key={index} className='px-5 py-3.5 text-[13px] font-bold uppercase text-text transition-colors hover:bg-black/10'>
+                        <Link href={`${item?.link ? item?.link : '#'}`} key={index} className='px-5 py-3.5 text-[14px] font-semibold font-poppins text-text transition-colors hover:bg-black/10'>
                             {item.name}
                         </Link>
                     ))

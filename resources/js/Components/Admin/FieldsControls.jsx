@@ -48,6 +48,34 @@ const FieldControls = ({
         }
         return [];
     };
+
+    const resolveOptionTitle = (fieldName, raw) => {
+        if (raw == null || raw === '') return '';
+        const first = Array.isArray(raw) ? raw[0] : raw;
+        if (first && typeof first === 'object') {
+            return first.title || first.name || first.label || '';
+        }
+        const opts = dropdownOptions?.[fieldName] || [];
+        const match = opts.find((opt) =>
+            String(opt.id ?? opt.value ?? '') === String(first)
+            || String(opt.title ?? opt.name ?? '') === String(first)
+        );
+        return match?.title || match?.name || match?.label || (typeof first === 'string' && !/^\d+$/.test(first) ? first : '');
+    };
+
+    const applyCoordinates = (coords, fieldOptions = {}) => {
+        if (fieldOptions.location_field) {
+            updateField(fieldOptions.location_field, coords || '');
+        }
+        if (Array.isArray(coords) && coords.length >= 2) {
+            const [lng, lat] = coords;
+            if (fieldOptions.lng_field) updateField(fieldOptions.lng_field, lng);
+            if (fieldOptions.lat_field) updateField(fieldOptions.lat_field, lat);
+        } else if (!coords) {
+            if (fieldOptions.lng_field) updateField(fieldOptions.lng_field, '');
+            if (fieldOptions.lat_field) updateField(fieldOptions.lat_field, '');
+        }
+    };
     let fieldClass = '';
     if (field.condition) {
         fieldClass = 'hidden';
@@ -272,12 +300,11 @@ const FieldControls = ({
                         api: field.options.api,
                         endpoint: field.options.endpoint,
                         proxy: field.options.proxy,
+                        city: resolveOptionTitle(field.options.city_field || 'city', data[field.options.city_field || 'city']),
+                        state: resolveOptionTitle('state', data.state),
+                        country: resolveOptionTitle('country', data.country),
                     } : null}
-                    onLocationChange={(coordinates) => {
-                        if (field.options?.location_field) {
-                            updateField(field.options.location_field, coordinates || '');
-                        }
-                    }}
+                    onLocationChange={(coordinates) => applyCoordinates(coordinates, field.options || {})}
                     onChange={(val) => updateField(field.name, val)}
                     isLoading={loadingStates[field.name]}
                 />

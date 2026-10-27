@@ -180,16 +180,16 @@ export default function Orders({ profile, orders = [], current_status = 'all' })
                                     key={tab.id}
                                     type="button"
                                     onClick={() => setStatusFilter(tab.id)}
-                                    className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded transition-colors whitespace-nowrap cursor-pointer ${isActive
-                                            ? 'bg-common text-white shadow-xs font-semibold'
-                                            : 'bg-bg text-res hover:text-text hover:bg-border'
+                                    className={`flex items-center gap-2 group px-3 py-1.5 text-xs font-medium rounded transition-colors whitespace-nowrap cursor-pointer ${isActive
+                                        ? 'bg-secondary text-white shadow-xs font-semibold'
+                                        : 'bg-bg text-res hover:text-text hover:bg-secondary'
                                         }`}
                                 >
                                     <span>{tab.label}</span>
                                     <span
                                         className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${isActive
-                                                ? 'bg-white/20 text-white'
-                                                : 'bg-border text-res'
+                                            ? 'bg-white/20 text-white'
+                                            : 'bg-border text-res group-hover:bg-white'
                                             }`}
                                     >
                                         {tab.count}
@@ -216,7 +216,7 @@ export default function Orders({ profile, orders = [], current_status = 'all' })
                         </p>
                         <Link
                             href={route('index')}
-                            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold bg-common text-white rounded hover:opacity-90 transition-opacity"
+                            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold bg-secondary text-white rounded hover:opacity-90 transition-opacity"
                         >
                             <RiShoppingBag3Line size={14} />
                             {__('Explore Products')}
@@ -399,8 +399,8 @@ export default function Orders({ profile, orders = [], current_status = 'all' })
                                     </div>
                                     <div className="space-y-1">
                                         <div className={`size-6 mx-auto rounded-full flex items-center justify-center text-[10px] font-bold ${['processing', 'shipped', 'delivered', 'completed'].includes((activeModalOrder.status || '').toLowerCase())
-                                                ? 'bg-emerald-500 text-white'
-                                                : 'bg-border text-res'
+                                            ? 'bg-emerald-500 text-white'
+                                            : 'bg-border text-res'
                                             }`}>
                                             {['processing', 'shipped', 'delivered', 'completed'].includes((activeModalOrder.status || '').toLowerCase()) ? '✓' : '•'}
                                         </div>
@@ -409,8 +409,8 @@ export default function Orders({ profile, orders = [], current_status = 'all' })
                                     </div>
                                     <div className="space-y-1">
                                         <div className={`size-6 mx-auto rounded-full flex items-center justify-center text-[10px] font-bold ${['shipped', 'delivered', 'completed'].includes((activeModalOrder.status || '').toLowerCase())
-                                                ? 'bg-emerald-500 text-white'
-                                                : (activeModalOrder.status || '').toLowerCase() === 'processing'
+                                            ? 'bg-emerald-500 text-white'
+                                            : (activeModalOrder.status || '').toLowerCase() === 'processing'
                                                 ? 'bg-amber-400 text-white'
                                                 : 'bg-border text-res'
                                             }`}>
@@ -421,8 +421,8 @@ export default function Orders({ profile, orders = [], current_status = 'all' })
                                     </div>
                                     <div className="space-y-1">
                                         <div className={`size-6 mx-auto rounded-full flex items-center justify-center text-[10px] font-bold ${['delivered', 'completed'].includes((activeModalOrder.status || '').toLowerCase())
-                                                ? 'bg-emerald-500 text-white'
-                                                : 'bg-border text-res'
+                                            ? 'bg-emerald-500 text-white'
+                                            : 'bg-border text-res'
                                             }`}>
                                             ★
                                         </div>

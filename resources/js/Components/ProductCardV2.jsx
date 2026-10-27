@@ -20,10 +20,10 @@ import { addToCompare, removeFromCompare, selectIsInCompare } from '@/store/comp
 import { addToWishlist, removeFromWishlist, selectIsInWishlist } from '@/store/wishListSlice';
 import { RiHeart2Fill } from 'react-icons/ri';
 import { recordWishlistActivity } from '@/Utils/recordWishlistActivity';
-import { calculateAdjustedPrice } from '@/Utils/helper';
+import { calculateAdjustedPrice, resolveProductPrices, parseNumericPrice } from '@/Utils/helper';
 
 const ProductCardV2 = ({ className = '', product = {} }) => {
-    const { setting, auth } = usePage().props;
+    const { setting, auth, activePricingRules = [] } = usePage().props;
     const cardSetting = setting.layout.Product_Card_V2;
     const currency = setting.site.currency.value ?? 'PKR';
     const { __ } = useLang();
@@ -40,7 +40,13 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
         }
     }
 
+    const isOwner = Boolean(auth?.user?.id && product?.user_id && Number(auth.user.id) === Number(product.user_id));
+
     const wishlistHandle = () => {
+        if (isOwner) {
+            alert(__('You cannot like or wishlist your own product.'));
+            return;
+        }
         if(isWishlist){
             dispatch(removeFromWishlist(product.id));
             if (auth?.user) recordWishlistActivity('wishlist_removed', product.id);
@@ -54,22 +60,20 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
     const [stock, setStock] = useState(0);
     const [discount, setDiscount] = useState(0);
 
-    const parsePrice = (priceVal) => {
-        if (typeof priceVal === 'number') return priceVal;
-        if (!priceVal) return 0;
-        const parsed = Number(String(priceVal).replace(/,/g, ''));
-        return Number.isNaN(parsed) ? 0 : parsed;
-    };
-
-    const firstPrice = parsePrice(product.meta?.first_price?.value);
-    const secondPrice = parsePrice(product.meta?.second_price?.value);
-    const baseRaw = (firstPrice > secondPrice && secondPrice > 0 ? secondPrice : firstPrice) || parsePrice(product?.price);
-    const regularRaw = firstPrice || secondPrice || 0;
+    const { firstPrice, secondPrice, basePrice: baseRaw, regularPrice: regularRaw } = resolveProductPrices(product);
+    const userDiscountPercent = parseNumericPrice(auth?.user?.discount || auth?.user?.meta?.discount || 0);
 
     const pricing = calculateAdjustedPrice({
         basePrice: baseRaw,
         regularPrice: regularRaw,
         category: categories,
+        brand: product.brand,
+        collection: product.collection ?? product.meta?.collection,
+        userDiscount: userDiscountPercent,
+        userDiscountType: 'percentage',
+        product,
+        user: auth?.user || null,
+        pricingRules: activePricingRules,
     });
 
     const salePrice = pricing.finalPrice;
@@ -108,7 +112,7 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
 
     return (
         <article className={`group flex flex-col overflow-hidden rounded h-40 border border-border bg-white shadow-sm transition duration-300 hover:border-primary/40 hover:shadow-xl sm:flex-row ${className}`}>
-            <div className="relative shrink-0 overflow-hidden bg-white sm:w-32 p-3 lg:w-40">
+            <div className="relative shrink-0 overflow-hidden bg-white p-3 w-40">
 
                 {productHref ? (
                     <Link href={productHref} className="block size-full">
@@ -178,9 +182,9 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
                         <span className="text-sm font-bold font-oswald text-heading">
                             {currency} {salePrice.toLocaleString()}
                         </span>
-                        {firstPrice > secondPrice && secondPrice > 0 && (
+                        {pricing.totalSavings > 0 && regularRaw > salePrice && (
                             <span className="text-xs font-medium text-res font-oswald line-through">
-                                {currency} {firstPrice.toLocaleString()}
+                                {currency} {regularRaw.toLocaleString()}
                             </span>
                         )}
 
@@ -211,7 +215,7 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
                             className={`inline-flex items-center justify-center gap-2 rounded border border-border px-2.5 py-2 text-xs font-semibold transition hover:border-primary hover:bg-primary hover:text-white ${isCompare ? 'bg-primary text-white border-primary' : 'bg-white text-heading'}`}
                         >
                             <RiRepeat2Line className="size-4" />
-                            {__('Add To Comapre')}
+                            {__('Add To Compare')}
                         </button>
                     )}
 

@@ -21,7 +21,7 @@ const LanguageDropdown = () => {
                         <Dropdown.List
                             onClick={() => setLanguage(language)}
                             key={language.prefix}
-                            className='flex items-center cursor-pointer gap-2 hover:bg-gray-100'
+                            className='flex items-center text-xs cursor-pointer gap-2 hover:bg-gray-100'
                         >
                             <ImageViwer className='size-4' image={language.image} />
                             {language.name}

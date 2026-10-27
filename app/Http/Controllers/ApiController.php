@@ -35,9 +35,22 @@ class ApiController extends Controller
         $validated = $request->validate([
             'q' => ['required', 'string', 'min:3', 'max:200'],
             'limit' => ['nullable', 'integer', 'min:1', 'max:10'],
+            'city' => ['nullable', 'string', 'max:120'],
+            'state' => ['nullable', 'string', 'max:120'],
+            'country' => ['nullable', 'string', 'max:120'],
         ]);
 
         $q = $validated['q'];
+        $placeParts = array_filter([
+            $validated['city'] ?? null,
+            $validated['state'] ?? null,
+            $validated['country'] ?? null,
+        ]);
+        $cityHint = $validated['city'] ?? '';
+        $alreadyHasCity = $cityHint !== '' && str_contains(mb_strtolower($q), mb_strtolower($cityHint));
+        if ($placeParts !== [] && ! $alreadyHasCity) {
+            $q = $q.', '.implode(', ', $placeParts);
+        }
         $limit = $validated['limit'] ?? 5;
 
         try {

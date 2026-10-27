@@ -9,7 +9,7 @@ import {
 } from '@/store/wishListSlice';
 import { useLang } from '@/contexts/LanguageContext';
 import { recordWishlistActivity } from '@/Utils/recordWishlistActivity';
-import ProductCardV2 from '@/Components/ProductCardV2';
+
 import {
     RiHeart3Line,
     RiShoppingBag3Line,
@@ -84,8 +84,8 @@ export default function Wishlist({ profile, recommended_products = [] }) {
                             {__('You haven\'t added any items to your wishlist yet. Explore our product collections and tap the heart icon on items you love!')}
                         </p>
                         <Link
-                            href={route('index')}
-                            className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold bg-common text-white rounded hover:opacity-90 shadow-xs transition-opacity"
+                            href={route('shop')}
+                            className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold bg-secondary text-white rounded hover:opacity-90 shadow-xs transition-opacity"
                         >
                             <RiShoppingBag3Line size={14} />
                             {__('Explore Products')}
@@ -197,14 +197,14 @@ export default function Wishlist({ profile, recommended_products = [] }) {
                                 </div>
                             </div>
                             <Link
-                                href={route('store')}
+                                href={route('shop')}
                                 className="text-xs font-medium text-primary hover:underline flex items-center gap-1"
                             >
                                 {__('View All')} <RiArrowRightLine size={14} />
                             </Link>
                         </div>
 
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div className="grid  sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                             {recommended_products.map((prod) => (
                                 <ProductCardV1 key={prod.id} product={prod} />
                             ))}

@@ -22,7 +22,28 @@ import {
     RiCalendarLine,
     RiIdCardLine,
     RiScanLine,
+    RiShareLine,
+    RiAddLine,
+    RiExternalLinkLine,
+    RiGlobalLine,
+    RiHeartLine,
+    RiFireLine,
+    RiPriceTag3Line,
 } from 'react-icons/ri';
+import {
+    FaFacebook,
+    FaInstagram,
+    FaTiktok,
+    FaTwitter,
+    FaXTwitter,
+    FaYoutube,
+    FaLinkedin,
+    FaGithub,
+    FaSnapchat,
+    FaPinterest,
+    FaReddit,
+    FaDiscord,
+} from 'react-icons/fa6';
 import { useLang } from '@/contexts/LanguageContext';
 import { toast } from 'react-toastify';
 import PhoneInput from '@/Components/Admin/PhoneInput';
@@ -40,7 +61,7 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
     const [loadingStates, setLoadingStates] = useState(false);
     const [loadingCities, setLoadingCities] = useState(false);
 
-    const [activeSection, setActiveSection] = useState('profile'); // 'profile' | 'password' | 'notifications' | 'danger'
+    const [activeSection, setActiveSection] = useState('profile'); // 'profile' | 'social' | 'password' | 'notifications' | 'danger'
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -54,6 +75,40 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
     const [whatsappLink, setWhatsappLink] = useState('');
 
     const avatarInputRef = useRef(null);
+
+    // Available social platform definitions with colors and icons
+    const availablePlatforms = [
+        { key: 'facebook', label: 'Facebook', icon: FaFacebook, placeholder: 'https://facebook.com/username', color: '#1877F2' },
+        { key: 'instagram', label: 'Instagram', icon: FaInstagram, placeholder: 'https://instagram.com/username', color: '#E4405F' },
+        { key: 'tiktok', label: 'TikTok', icon: FaTiktok, placeholder: 'https://tiktok.com/@username', color: '#000000' },
+        { key: 'twitter', label: 'X (Twitter)', icon: FaXTwitter, placeholder: 'https://x.com/username', color: '#0f1419' },
+        { key: 'youtube', label: 'YouTube', icon: FaYoutube, placeholder: 'https://youtube.com/@channel', color: '#FF0000' },
+        { key: 'linkedin', label: 'LinkedIn', icon: FaLinkedin, placeholder: 'https://linkedin.com/in/username', color: '#0A66C2' },
+        { key: 'github', label: 'GitHub', icon: FaGithub, placeholder: 'https://github.com/username', color: '#24292e' },
+        { key: 'snapchat', label: 'Snapchat', icon: FaSnapchat, placeholder: 'https://snapchat.com/add/username', color: '#FFFC00' },
+        { key: 'pinterest', label: 'Pinterest', icon: FaPinterest, placeholder: 'https://pinterest.com/username', color: '#BD081C' },
+        { key: 'discord', label: 'Discord', icon: FaDiscord, placeholder: 'https://discord.gg/invite-code', color: '#5865F2' },
+    ];
+
+    // Initial social links parsed from user meta
+    const initialSocialLinks = Array.isArray(meta.social_links) && meta.social_links.length > 0
+        ? meta.social_links
+        : [
+            { platform: 'facebook', url: '' },
+            { platform: 'instagram', url: '' },
+        ];
+
+    // Initial interests parsed from user meta
+    const initialInterests = Array.isArray(meta.interests)
+        ? meta.interests
+        : (typeof meta.interests === 'string' && meta.interests ? meta.interests.split(',').map(s => s.trim()).filter(Boolean) : []);
+
+    // Suggested popular shopping interests / tags
+    const suggestedInterests = [
+        'Bags', 'Backpacks', 'Laptops', 'Gaming', 'Smartphones', 'Audio & Headphones', 'Cameras',
+        'Smart Watches', 'Accessories', 'Shoes', 'Tablets', 'PC Components', 'Monitors',
+        'Keyboards & Mice', 'TV & Home Cinema', 'Gadgets', 'Drones', 'Networking'
+    ];
 
     // Profile Information Form
     const profileForm = useForm({
@@ -70,11 +125,13 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
         postal_code: meta.postal_code || '',
         order_notifications: meta.order_notifications ?? true,
         newsletter: meta.newsletter ?? true,
+        social_links: initialSocialLinks,
+        interests: initialInterests,
     });
 
     // Password Update Form
     const passwordForm = useForm({
-        current_password: '',
+        current_password: user?.password,
         password: '',
         password_confirmation: '',
     });
@@ -344,6 +401,59 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
             setEmailOtpLoading(false);
         }
     };
+    // Dynamic Social Links Handlers
+    const handleAddSocialLink = () => {
+        const currentLinks = profileForm.data.social_links || [];
+        // Find first platform not yet added, default to tiktok, instagram or facebook
+        const usedPlatforms = currentLinks.map(l => l.platform);
+        const nextPlatform = availablePlatforms.find(p => !usedPlatforms.includes(p.key))?.key || 'instagram';
+
+        profileForm.setData('social_links', [
+            ...currentLinks,
+            { platform: nextPlatform, url: '' }
+        ]);
+    };
+
+    const handleUpdateSocialLink = (index, field, value) => {
+        const currentLinks = [...(profileForm.data.social_links || [])];
+        if (currentLinks[index]) {
+            currentLinks[index] = {
+                ...currentLinks[index],
+                [field]: value,
+            };
+            profileForm.setData('social_links', currentLinks);
+        }
+    };
+
+    const handleRemoveSocialLink = (index) => {
+        const currentLinks = (profileForm.data.social_links || []).filter((_, i) => i !== index);
+        profileForm.setData('social_links', currentLinks);
+    };
+
+    // Toggle interest selection
+    const handleToggleInterest = (interestName) => {
+        const current = profileForm.data.interests || [];
+        const exists = current.some(i => i.toLowerCase() === interestName.toLowerCase());
+        let updated;
+        if (exists) {
+            updated = current.filter(i => i.toLowerCase() !== interestName.toLowerCase());
+        } else {
+            updated = [...current, interestName];
+        }
+        profileForm.setData('interests', updated);
+    };
+
+    const [customInterestInput, setCustomInterestInput] = useState('');
+    const handleAddCustomInterest = (e) => {
+        e.preventDefault();
+        const trimmed = customInterestInput.trim();
+        if (!trimmed) return;
+        const current = profileForm.data.interests || [];
+        if (!current.some(i => i.toLowerCase() === trimmed.toLowerCase())) {
+            profileForm.setData('interests', [...current, trimmed]);
+        }
+        setCustomInterestInput('');
+    };
 
     // Handle Profile Form Submit
     const handleProfileSubmit = (e) => {
@@ -466,7 +576,6 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
     };
 
     const avatarSrc = user.avatar || '/assets/image/profile-avatar.webp';
-
     return (
         <ProfileLayout title={__('Settings')} currentTab="settings" profile={profile}>
             <div className="space-y-6">
@@ -495,6 +604,18 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                         >
                             <RiUserLine size={14} />
                             <span>{__('Profile & Address')}</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => setActiveSection('social')}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors whitespace-nowrap cursor-pointer ${activeSection === 'social'
+                                ? 'bg-secondary text-white shadow-xs font-semibold'
+                                : 'bg-bg text-res hover:text-text hover:bg-border'
+                                }`}
+                        >
+                            <RiShareLine size={14} />
+                            <span>{__('Social Media')}</span>
                         </button>
 
                         <button
@@ -609,9 +730,9 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                                 <h3 className="text-xs font-semibold uppercase tracking-wider text-res mb-3">
                                     {__('Basic Contact Details')}
                                 </h3>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {/* Name */}
-                                    <div className=''>
+                                    <div className='col-span-1'>
                                         <label className="block text-xs font-semibold text-text mb-1">
                                             {__('Full Name')} <span className="text-rose-500">*</span>
                                         </label>
@@ -628,7 +749,7 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                                     </div>
 
                                     {/* Email */}
-                                    <div>
+                                    <div className='col-span-1'>
                                         <div className="flex items-center justify-between mb-1">
                                             <label className="block text-xs font-semibold text-text">
                                                 {__('Email Address')} <span className="text-rose-500">*</span>
@@ -721,7 +842,7 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                                     </div>
 
                                     {/* CNIC Scanner trigger bar */}
-                                    <div className="col-span-2 flex items-center justify-between p-2.5 rounded-lg bg-primary/5 border border-primary/20">
+                                    <div className="md:col-span-2 col-span-1 flex items-center justify-between p-2.5 rounded-lg bg-primary/5 border border-primary/20">
                                         <div className="flex items-center gap-2">
                                             <RiIdCardLine size={16} className="text-primary" />
                                             <div>
@@ -740,7 +861,7 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                                     </div>
 
                                     {/* Date of Birth */}
-                                    <div>
+                                    <div className=' col-span-1'>
                                         <label className="block text-xs font-semibold text-text mb-1">
                                             <span className="inline-flex items-center gap-1">
                                                 <RiCalendarLine size={13} className="text-primary" />
@@ -759,7 +880,7 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                                     </div>
 
                                     {/* CNIC Number */}
-                                    <div>
+                                    <div className=' col-span-1'>
                                         <div className="flex items-center justify-between mb-1">
                                             <label className="block text-xs font-semibold text-text">
                                                 <span className="inline-flex items-center gap-1">
@@ -790,7 +911,7 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                                     </div>
 
                                     {/* Phone */}
-                                    <div className="space-y-2 col-span-2">
+                                    <div className="space-y-2 col-span-1 md:col-span-2">
                                         <div className="flex items-center justify-between">
                                             <label className="block text-xs font-semibold text-text">
                                                 {__('Phone Number')}
@@ -809,7 +930,7 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                                         {/* Verified — locked display with Change Number option */}
                                         {phoneVerified && !changingNumber ? (
                                             <div className="flex items-center gap-2">
-                                                <div className="flex-1 flex items-center gap-2 px-3 py-2 text-xs bg-bg border border-emerald-300 rounded text-text">
+                                                <div className="flex-1 flex items-center gap-2 px-3 py-2.75 text-xs bg-bg border border-emerald-300 rounded text-text">
                                                     <RiShieldCheckLine size={14} className="text-emerald-600 shrink-0" />
                                                     <span className="font-mono tracking-wide">{profileForm.data.phone}</span>
                                                 </div>
@@ -905,7 +1026,7 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                                     </div>
 
                                     {/* Bio */}
-                                    <div className='col-span-2'>
+                                    <div className='md:col-span-2 col-span-1'>
                                         <label className="block text-xs font-semibold text-text mb-1">
                                             {__('Bio / About')}
                                         </label>
@@ -1030,6 +1151,233 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                     </div>
                 )}
 
+                {/* ── SECTION: Social Media Accounts (Dynamic) ── */}
+                {activeSection === 'social' && (
+                    <div className="bg-bg border border-border rounded p-6 shadow-xs space-y-6">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-border pb-4">
+                            <div>
+                                <h2 className="text-sm font-bold text-text mb-1 flex items-center gap-2">
+                                    <RiShareLine className="text-secondary" size={18} />
+                                    <span>{__('Social Media Profiles')}</span>
+                                </h2>
+                                <p className="text-xs text-res">
+                                    {__('Add and manage your social media accounts like Facebook, TikTok, Instagram, YouTube, X, and more.')}
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={handleAddSocialLink}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-primary hover:opacity-90 text-white rounded transition-opacity cursor-pointer shadow-xs self-start sm:self-auto"
+                            >
+                                <RiAddLine size={15} />
+                                <span>{__('Add Social Account')}</span>
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleProfileSubmit} className="space-y-4">
+                            {(!profileForm.data.social_links || profileForm.data.social_links.length === 0) ? (
+                                <div className="text-center py-10 border-2 border-dashed border-border rounded-lg p-6">
+                                    <div className="size-12 mx-auto mb-3 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                                        <RiShareLine size={24} />
+                                    </div>
+                                    <h3 className="text-xs font-bold text-text mb-1">
+                                        {__('No Social Accounts Added Yet')}
+                                    </h3>
+                                    <p className="text-xs text-res max-w-sm mx-auto mb-4">
+                                        {__('Connect your social handles so clients and followers can easily discover and connect with your profiles.')}
+                                    </p>
+                                    <button
+                                        type="button"
+                                        onClick={handleAddSocialLink}
+                                        className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold bg-secondary hover:opacity-90 text-white rounded transition-opacity cursor-pointer"
+                                    >
+                                        <RiAddLine size={15} />
+                                        <span>{__('Add First Social Account')}</span>
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {profileForm.data.social_links.map((link, idx) => {
+                                        const currentPlatformConfig = availablePlatforms.find(p => p.key === link.platform) || {
+                                            label: link.platform,
+                                            icon: RiGlobalLine,
+                                            placeholder: 'https://...',
+                                            color: '#64748b'
+                                        };
+                                        const PlatformIcon = currentPlatformConfig.icon || RiGlobalLine;
+
+                                        return (
+                                            <div
+                                                key={idx}
+                                                className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-3 bg-bg border border-border rounded hover:border-secondary/50 transition-colors shadow-2xs"
+                                            >
+                                                {/* Platform Selector */}
+                                                <div className="w-full sm:w-48 shrink-0">
+                                                    <div className="relative">
+                                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: currentPlatformConfig.color }}>
+                                                            <PlatformIcon size={16} />
+                                                        </div>
+                                                        <select
+                                                            value={link.platform}
+                                                            onChange={(e) => handleUpdateSocialLink(idx, 'platform', e.target.value)}
+                                                            className="w-full pl-9 pr-7 py-2 h-10 text-xs bg-bg border border-border rounded text-text font-medium focus:outline-hidden focus:border-primary transition-colors cursor-pointer"
+                                                        >
+                                                            {availablePlatforms.map((plat) => (
+                                                                <option key={plat.key} value={plat.key}>
+                                                                    {plat.label}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                {/* Profile URL Input */}
+                                                <div className="flex-1 relative">
+                                                    <input
+                                                        type="url"
+                                                        value={link.url || ''}
+                                                        onChange={(e) => handleUpdateSocialLink(idx, 'url', e.target.value)}
+                                                        placeholder={currentPlatformConfig.placeholder}
+                                                        className="w-full px-3 py-2 pr-9 h-10 text-xs bg-bg border border-border rounded text-text focus:outline-hidden focus:border-primary transition-colors"
+                                                    />
+                                                    {link.url && (
+                                                        <a
+                                                            href={link.url.startsWith('http') ? link.url : `https://${link.url}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-res hover:text-primary cursor-pointer transition-colors"
+                                                            title={__('Open link')}
+                                                        >
+                                                            <RiExternalLinkLine size={14} />
+                                                        </a>
+                                                    )}
+                                                </div>
+
+                                                {/* Delete Row Button */}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleRemoveSocialLink(idx)}
+                                                    className="size-10 shrink-0 inline-flex items-center justify-center rounded border border-border hover:border-rose-300 hover:bg-rose-50 text-res hover:text-rose-600 transition-colors cursor-pointer"
+                                                    title={__('Remove social link')}
+                                                >
+                                                    <RiDeleteBinLine size={16} />
+                                                </button>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+
+                            {/* User Interests / For You preferences */}
+                            <div className="pt-6 border-t border-border space-y-3">
+                                <div>
+                                    <h3 className="text-xs font-bold text-text flex items-center gap-2">
+                                        <RiHeartLine className="text-rose-500" size={16} />
+                                        <span>{__('Your Shopping & Tech Interests ("For You" Algorithm)')}</span>
+                                    </h3>
+                                    <p className="text-[11px] text-res mt-0.5">
+                                        {__('Select or add your interests to customize the "For You" personalized recommendations and feed on the home page.')}
+                                    </p>
+                                </div>
+
+                                {/* Suggested Interest Pills */}
+                                <div className="flex flex-wrap gap-2 pt-1">
+                                    {suggestedInterests.map((interest, i) => {
+                                        const isSelected = (profileForm.data.interests || []).some(
+                                            item => item.toLowerCase() === interest.toLowerCase()
+                                        );
+                                        return (
+                                            <button
+                                                key={i}
+                                                type="button"
+                                                onClick={() => handleToggleInterest(interest)}
+                                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full border transition-all cursor-pointer ${isSelected
+                                                    ? 'bg-primary text-slate-900 border-primary font-bold shadow-xs'
+                                                    : 'bg-bg text-text border-border hover:border-primary/50'
+                                                    }`}
+                                            >
+                                                <RiPriceTag3Line size={12} className={isSelected ? 'text-slate-900' : 'text-res'} />
+                                                <span>{interest}</span>
+                                                {isSelected && <RiCheckLine size={13} className="text-slate-900 font-bold" />}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+
+                                {/* Custom Interest Input */}
+                                <div className="flex items-center gap-2 max-w-md pt-2">
+                                    <input
+                                        type="text"
+                                        value={customInterestInput}
+                                        onChange={(e) => setCustomInterestInput(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                handleAddCustomInterest(e);
+                                            }
+                                        }}
+                                        placeholder={__('Add custom interest (e.g. Mechanical Keyboards, Smart Home)...')}
+                                        className="flex-1 px-3 py-2 text-xs h-9 bg-bg border border-border rounded text-text focus:outline-hidden focus:border-primary transition-colors"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={handleAddCustomInterest}
+                                        className="px-3.5 py-2 text-xs font-semibold bg-secondary hover:opacity-90 text-white rounded transition-opacity cursor-pointer shrink-0 h-9"
+                                    >
+                                        <RiAddLine size={15} />
+                                    </button>
+                                </div>
+
+                                {/* Selected custom interests outside suggested */}
+                                {(profileForm.data.interests || []).filter(
+                                    int => !suggestedInterests.some(s => s.toLowerCase() === int.toLowerCase())
+                                ).length > 0 && (
+                                        <div className="flex flex-wrap gap-1.5 pt-2">
+                                            <span className="text-[11px] text-res self-center mr-1">{__('Custom:')}</span>
+                                            {(profileForm.data.interests || [])
+                                                .filter(int => !suggestedInterests.some(s => s.toLowerCase() === int.toLowerCase()))
+                                                .map((customInt, idx) => (
+                                                    <span
+                                                        key={idx}
+                                                        className="inline-flex items-center gap-1 px-2.5 py-1 text-xs rounded-full bg-secondary/10 text-secondary border border-secondary/20"
+                                                    >
+                                                        {customInt}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleToggleInterest(customInt)}
+                                                            className="hover:text-rose-600 cursor-pointer ml-1"
+                                                        >
+                                                            <RiCloseLine size={13} />
+                                                        </button>
+                                                    </span>
+                                                ))}
+                                        </div>
+                                    )}
+                            </div>
+
+                            <div className="pt-4 border-t border-border flex items-center justify-between gap-3">
+                                <button
+                                    type="button"
+                                    onClick={handleAddSocialLink}
+                                    className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium border border-border hover:bg-border/40 rounded text-text transition-colors cursor-pointer"
+                                >
+                                    <RiAddLine size={15} />
+                                    <span>{__('Add Platform')}</span>
+                                </button>
+
+                                <button
+                                    type="submit"
+                                    disabled={profileForm.processing}
+                                    className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold bg-secondary hover:opacity-90 text-white rounded shadow-xs transition-opacity cursor-pointer disabled:opacity-50"
+                                >
+                                    <RiSaveLine size={15} />
+                                    <span>{profileForm.processing ? __('Saving...') : __('Save Social & Interests')}</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                )}
+
                 {/* ── SECTION 2: Security & Password ── */}
                 {activeSection === 'password' && (
                     <div className="bg-bg border border-border rounded p-6 shadow-xs space-y-6">
@@ -1042,32 +1390,55 @@ export default function Settings({ profile, mustVerifyEmail, status }) {
                             </p>
                         </div>
 
-                        <form onSubmit={handlePasswordSubmit} className="space-y-4 max-w-lg">
-                            {/* Current Password */}
-                            <div>
-                                <label className="block text-xs font-semibold text-text mb-1">
-                                    {__('Current Password')} <span className="text-rose-500">*</span>
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type={showCurrentPassword ? 'text' : 'password'}
-                                        value={passwordForm.data.current_password}
-                                        onChange={(e) => passwordForm.setData('current_password', e.target.value)}
-                                        required
-                                        className="w-full px-3 h-10.5 py-2 pr-10 text-xs bg-bg border border-border rounded text-text focus:outline-hidden focus:border-primary transition-colors"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-res hover:text-text cursor-pointer"
-                                    >
-                                        {showCurrentPassword ? <RiEyeOffLine size={16} /> : <RiEyeLine size={16} />}
-                                    </button>
+                        {user.is_social_user && (
+                            <div className="p-3.5 rounded-lg bg-primary/10 border border-primary/20 flex items-start gap-3">
+                                <RiShieldCheckLine className="text-primary mt-0.5 shrink-0" size={18} />
+                                <div className="text-xs text-text">
+                                    <p className="font-semibold text-primary">
+                                        {__('Signed in via')} {user.social_provider || 'Social Account'}
+                                    </p>
+                                    <p className="text-res text-[11px] mt-0.5 leading-relaxed">
+                                        {__('Your account is authenticated via your social provider. You can set a custom password below at any time without needing an existing current password.')}
+                                    </p>
                                 </div>
-                                {passwordForm.errors.current_password && (
-                                    <p className="text-[11px] text-rose-500 mt-1">{passwordForm.errors.current_password}</p>
-                                )}
                             </div>
+                        )}
+
+                        <form onSubmit={handlePasswordSubmit} className="space-y-4 max-w-lg">
+                            {/* Current Password (optional for social users, required for standard users) */}
+                            {!user.is_social_user ? (
+                                <div>
+                                    <div className="flex items-center justify-between mb-1">
+                                        <label className="block text-xs font-semibold text-text">
+                                            {__('Current Password')} <span className="text-rose-500">*</span>
+                                        </label>
+                                        <span className="text-[11px] text-res font-medium">
+                                            {__('Encrypted for security')}
+                                        </span>
+                                    </div>
+                                    <div className="relative">
+                                        <input
+                                            type={showCurrentPassword ? 'text' : 'password'}
+                                            value={passwordForm.data.current_password}
+                                            onChange={(e) => passwordForm.setData('current_password', e.target.value)}
+                                            required
+                                            placeholder={__('Enter your current password')}
+                                            className="w-full px-3 h-10.5 py-2 pr-10 text-xs bg-bg border border-border rounded text-text focus:outline-hidden focus:border-primary transition-colors"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-res hover:text-text cursor-pointer"
+                                            title={showCurrentPassword ? __('Hide current password') : __('Show current password')}
+                                        >
+                                            {showCurrentPassword ? <RiEyeOffLine size={16} /> : <RiEyeLine size={16} />}
+                                        </button>
+                                    </div>
+                                    {passwordForm.errors.current_password && (
+                                        <p className="text-[11px] text-rose-500 mt-1">{passwordForm.errors.current_password}</p>
+                                    )}
+                                </div>
+                            ) : null}
 
                             {/* New Password */}
                             <div>
