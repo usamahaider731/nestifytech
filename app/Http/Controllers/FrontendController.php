@@ -633,13 +633,44 @@ class FrontendController extends Controller
             $storePost = DB::table('posts')->where('id', $storeId)->first();
             if ($storePost) {
                 $storeMetas = DB::table('post_meta')->where('post_id', $storeId)->pluck('value', 'key')->toArray();
+
+                $resolveTaxonomyTitle = function ($rawVal) {
+                    if (empty($rawVal)) {
+                        return null;
+                    }
+                    // Handle JSON array/string or scalar ID
+                    $decoded = is_string($rawVal) && (str_starts_with($rawVal, '[') || str_starts_with($rawVal, '{'))
+                        ? json_decode($rawVal, true)
+                        : $rawVal;
+
+                    if (is_array($decoded)) {
+                        $titles = [];
+                        foreach ($decoded as $id) {
+                            if (!empty($id)) {
+                                $tax = is_numeric($id)
+                                    ? get_taxonomy(['id' => (int) $id, 'single' => true])
+                                    : null;
+                                $titles[] = $tax?->title ?: $id;
+                            }
+                        }
+                        return !empty($titles) ? implode(', ', $titles) : null;
+                    }
+
+                    if (is_numeric($decoded)) {
+                        $tax = get_taxonomy(['id' => (int) $decoded, 'single' => true]);
+                        return $tax?->title ?: $decoded;
+                    }
+
+                    return $decoded;
+                };
+
                 $product->store = [
                     'id' => $storePost->id,
                     'title' => $storePost->title,
                     'address' => $storeMetas['address'] ?? null,
-                    'city' => $storeMetas['city'] ?? null,
-                    'state' => $storeMetas['state'] ?? null,
-                    'country' => $storeMetas['country'] ?? null,
+                    'city' => $resolveTaxonomyTitle($storeMetas['city'] ?? null),
+                    'state' => $resolveTaxonomyTitle($storeMetas['state'] ?? null),
+                    'country' => $resolveTaxonomyTitle($storeMetas['country'] ?? null),
                     'phone' => $storeMetas['phone'] ?? null,
                 ];
             }

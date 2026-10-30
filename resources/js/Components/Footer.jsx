@@ -180,7 +180,7 @@ const Footer = () => {
                                     <span>{nlMessage}</span>
                                 </div>
                             ) : (
-                                <form onSubmit={handleNewsletterSubmit} className="flex overflow-hidden rounded-full bg-white">
+                                <form onSubmit={handleNewsletterSubmit} className="flex w-fit overflow-hidden rounded-full bg-white">
                                     <input
                                         type="email"
                                         value={nlEmail}

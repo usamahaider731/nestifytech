@@ -111,8 +111,8 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
 
 
     return (
-        <article className={`group flex flex-col overflow-hidden rounded h-40 border border-border bg-white shadow-sm transition duration-300 hover:border-primary/40 hover:shadow-xl sm:flex-row ${className}`}>
-            <div className="relative shrink-0 overflow-hidden bg-white p-3 w-40">
+        <article className={`group flex flex-col overflow-hidden rounded sm:h-40 border border-border bg-white shadow-sm transition duration-300 hover:border-primary/40 hover:shadow-xl sm:flex-row ${className}`}>
+            <div className="relative shrink-0 overflow-hidden bg-white p-3 m-2 shadow sm:shadow-none sm:w-40 max-h-40 sm:h-auto">
 
                 {productHref ? (
                     <Link href={productHref} className="block size-full">

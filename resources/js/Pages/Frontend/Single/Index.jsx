@@ -4,7 +4,7 @@ import FrontendLayout from '@/Layouts/FrontendLayout';
 import { usePage } from '@inertiajs/react';
 import ProductTopSection from '@/Components/Single/ProductTopSection';
 import SingleProductTabs from '@/Components/Single/Index';
-import { RiInformationLine, RiInstagramLine, RiMapPin2Fill, RiShare2Line, RiShareLine, RiTwitterXLine, RiWhatsappLine, RiShieldCheckLine, RiExchangeFundsLine, RiBankCardLine } from 'react-icons/ri';
+import { RiInformationLine, RiInstagramLine, RiMapPin2Fill, RiShare2Line, RiShareLine, RiTwitterXLine, RiWhatsappLine, RiShieldCheckLine, RiExchangeFundsLine, RiBankCardLine, RiMap2Line, RiMapPinLine } from 'react-icons/ri';
 import { useLang } from '@/contexts/LanguageContext';
 import ProductGrid from '@/Components/Frontend/ProductGrid';
 import { FaFacebookF, FaRegCopy } from 'react-icons/fa';
@@ -12,6 +12,7 @@ import { toast } from 'react-toastify';
 import LatestProductSide from '@/Components/Frontend/LatestProductSide';
 import SidebarAds from '@/Components/Single/SidebarAds';
 import BottomAds from '@/Components/Single/BottomAds';
+import { BiMapPin } from 'react-icons/bi';
 const SingleProduct = ({ product, latest_product, related_products = [], popular_products = [] }) => {
     const setting = usePage().props.setting.layout.Single
     const { __ } = useLang();
@@ -74,8 +75,8 @@ const SingleProduct = ({ product, latest_product, related_products = [], popular
                 </div>
             </div>
             <div className='w-full bg-bg'>
-                <div className={`${setting.width_layout == "container" ? 'container mx-auto' : ''} p-5 gap-10 flex flex-col relative md:flex-row`}>
-                    <div className='md:w-3/4 flex flex-col gap-5'>
+                <div className={`${setting.width_layout == "container" ? 'container mx-auto' : ''} p-5 gap-10 flex flex-col relative lg:flex-row`}>
+                    <div className='lg:w-3/4 flex flex-col gap-5'>
                         <SingleProductTabs product={product} />
                         {setting.address &&
                             <div className='w-full'>
@@ -89,7 +90,7 @@ const SingleProduct = ({ product, latest_product, related_products = [], popular
                             </div>
                         }
                     </div>
-                    <div className='flex-1 sticky top-20 h-fit right-0 flex flex-col gap-4'>
+                    <div className='flex-1 sticky top-20 h-fit right-0 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4'>
                         {/* Location & Country Availability */}
                         {setting.address && (
                             <div className='w-full bg-white p-4 shadow-xs rounded border border-border/50'>
@@ -101,13 +102,13 @@ const SingleProduct = ({ product, latest_product, related_products = [], popular
 
                                         {/* Assigned Store */}
                                         {product?.store && (
-                                            <div className='flex flex-col gap-1 p-2 rounded bg-emerald-500/10 border border-emerald-500/20'>
-                                                <span className='text-[11px] font-bold text-emerald-700 uppercase tracking-wide flex items-center gap-1'>
-                                                    <span>🏪</span> {__('Fulfilled by Store / Branch')}
+                                            <div className='flex flex-col gap-1 p-2 rounded bg-bg border border-border'>
+                                                <span className='text-[11px] font-bold text-primary uppercase tracking-wide flex items-center gap-1'>
+                                                    {__('Fulfilled by Store / Branch')}
                                                 </span>
                                                 <span className='text-xs font-semibold text-heading'>{product.store.title}</span>
                                                 {product.store.address && (
-                                                    <span className='text-[11px] text-res leading-tight'>📍 {product.store.address}</span>
+                                                    <span className='text-[11px] gap-2 text-res leading-tight flex items-start'><RiMapPinLine size={16} className='text-secondary shrink-0' /> {product.store.address}</span>
                                                 )}
                                                 {(product.store.city || product.store.state) && (
                                                     <span className='text-[11px] text-res leading-tight'>
@@ -279,9 +280,9 @@ const SingleProduct = ({ product, latest_product, related_products = [], popular
                 </div>
 
             </div>
-            <div className='w-full py-5 bg-white relative z-20'>
-                <div className={`${setting.width_layout == "container" ? 'container mx-auto' : 'w-full'} p-5 flex gap-10`}>
-                    <div className='flex w-3/4 flex-col gap-5'>
+            <div className='w-full py-5 bg-white flex-col md:flex-row relative z-20'>
+                <div className={`${setting.width_layout == "container" ? 'container mx-auto' : 'w-full'} p-5 flex flex-col md:flex-row gap-5 lg:gap-10`}>
+                    <div className='flex w-full lg:w-3/4 md:w-2/3 flex-col gap-5'>
                         <div className='w-full'>
 
                             {setting.similar && related_products?.length > 0 && (
@@ -311,7 +312,7 @@ const SingleProduct = ({ product, latest_product, related_products = [], popular
                             <BottomAds />
                         </div>
                     </div>
-                    <div className='flex-1 h-full sticky top-0'>
+                    <div className='md:flex-1 flex-auto h-full sticky top-0'>
                         <SidebarAds />
                     </div>
                 </div>
