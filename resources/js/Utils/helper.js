@@ -150,6 +150,7 @@ export function calculateAdjustedPrice({
   pricingRules = [],
   couponCode = null,
 }) {
+  
   const rawBase = parseNumericPrice(basePrice);
   const rawRegular = parseNumericPrice(regularPrice) || rawBase;
   const nowTs = Date.now();

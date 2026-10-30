@@ -187,6 +187,52 @@
                 "width": "10%"
             },
             {
+                "id": "collection",
+                "column": "collection",
+                "label": "COLLECTION",
+                "type": "badage",
+                "field": "collection",
+                "meta": true,
+                "meta_key": "collection",
+                "value_table": "taxonomies",
+                "is_array": true,
+                "meta_value_type": "json",
+                "value_condition": {
+                    "pass_value_of_key": "id",
+                    "return_key": "title"
+                }
+            },
+            {
+                "id": "tags",
+                "column": "tags",
+                "label": "TAGS",
+                "type": "badage",
+                "field": "tags",
+                "meta": true,
+                "meta_key": "tags",
+                "value_table": "taxonomies",
+                "is_array": true,
+                "meta_value_type": "json",
+                "value_condition": {
+                    "pass_value_of_key": "id",
+                    "return_key": "title"
+                }
+            },
+            {
+                "id": "supplier",
+                "column": "supplier",
+                "label": "SUPPLIER",
+                "type": "badage",
+                "field": "supplier",
+                "meta": true,
+                "meta_key": "supplier",
+                "value_table": "taxonomies",
+                "value_condition": {
+                    "pass_value_of_key": "id",
+                    "return_key": "title"
+                }
+            },
+            {
                 "id": "status",
                 "label": "STATUS",
                 "column": "status",
@@ -449,6 +495,114 @@
                     "type": "number",
                     "name": "stock"
                 }
+            ]
+        }
+    ],
+    "show": [
+        {
+            "title": "Basic Information",
+            "style": "main",
+            "fields": [
+                { "name": "title", "label": "Product Title", "type": "text" },
+                { "name": "sku", "label": "SKU / Model", "type": "text" },
+                { "name": "status", "label": "Status", "type": "status" },
+                { "name": "short_description", "label": "Short Description", "type": "desc" },
+                { "name": "description", "label": "Full Description", "type": "desc" }
+            ]
+        },
+        {
+            "title": "Pricing & Stock",
+            "style": "main",
+            "fields": [
+                { "name": "first_price", "label": "Regular Price", "type": "text" },
+                { "name": "second_price", "label": "Sale Price", "type": "text" },
+                { "name": "buy_price", "label": "Cost / Buy Price", "type": "text" },
+                { "name": "stock", "label": "Stock Quantity", "type": "number" }
+            ]
+        },
+        {
+            "title": "Taxonomies & Classification",
+            "style": "sidebar",
+            "fields": [
+                {
+                    "name": "category",
+                    "label": "Categories",
+                    "type": "dropdown",
+                    "multiple": true,
+                    "options": { "model": "Taxonomy", "type": "category" }
+                },
+                {
+                    "name": "brand",
+                    "label": "Brand",
+                    "type": "dropdown",
+                    "options": { "model": "Taxonomy", "type": "brand" }
+                },
+                {
+                    "name": "collection",
+                    "label": "Collections",
+                    "type": "dropdown",
+                    "multiple": true,
+                    "options": { "model": "Taxonomy", "type": "collection" }
+                },
+                {
+                    "name": "tags",
+                    "label": "Tags",
+                    "type": "dropdown",
+                    "multiple": true,
+                    "options": { "model": "Taxonomy", "type": "tag" }
+                },
+                {
+                    "name": "supplier",
+                    "label": "Supplier / Vendor",
+                    "type": "dropdown",
+                    "options": { "model": "Taxonomy", "type": "supplier" }
+                },
+                {
+                    "name": "store",
+                    "label": "Store / Branch",
+                    "type": "dropdown",
+                    "options": { "model": "Store", "type": "store" }
+                }
+            ]
+        },
+        {
+            "title": "Media & Gallery",
+            "style": "main",
+            "fields": [
+                { "name": "image", "label": "Featured Image", "type": "image" },
+                { "name": "gallery", "label": "Gallery Images", "type": "gallery" }
+            ]
+        },
+        {
+            "title": "Technical Attributes",
+            "style": "main",
+            "fields": [
+                { "name": "attributes", "label": "Technical Attributes", "type": "attributes" }
+            ]
+        },
+        {
+            "title": "Product Variations",
+            "style": "main",
+            "fields": [
+                { "name": "variations", "label": "Variations", "type": "variations" }
+            ]
+        },
+        {
+            "title": "Policies & Services",
+            "style": "sidebar",
+            "fields": [
+                { "name": "warranty", "label": "Warranty Period", "type": "text" },
+                { "name": "exchange", "label": "Exchange / Return Policy", "type": "text" },
+                { "name": "installment", "label": "Installment Plan", "type": "text" }
+            ]
+        },
+        {
+            "title": "SEO Information",
+            "style": "main",
+            "fields": [
+                { "name": "seo_title", "label": "SEO Title", "type": "text" },
+                { "name": "seo_keywords", "label": "SEO Keywords", "type": "text" },
+                { "name": "seo_description", "label": "SEO Description", "type": "desc" }
             ]
         }
     ]

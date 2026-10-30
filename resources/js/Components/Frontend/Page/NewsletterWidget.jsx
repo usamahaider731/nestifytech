@@ -1,24 +1,46 @@
 import React, { useState } from 'react';
-import { RiMailSendLine, RiCheckLine } from 'react-icons/ri';
+import { RiMailSendLine, RiCheckLine, RiAlertLine } from 'react-icons/ri';
 import { useLang } from '@/contexts/LanguageContext';
+import axios from 'axios';
 
-export default function NewsletterWidget({ className = '' }) {
+export default function NewsletterWidget({ className = '', source = 'sidebar' }) {
     const { __ } = useLang();
-    const [email, setEmail] = useState('');
-    const [subscribed, setSubscribed] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [email, setEmail]     = useState('');
+    const [state, setState]      = useState('idle'); // idle | loading | success | error | already
+    const [message, setMessage]  = useState('');
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (!email || !email.includes('@')) return;
 
-        setLoading(true);
-        setTimeout(() => {
-            setLoading(false);
-            setSubscribed(true);
-            setEmail('');
-        }, 600);
+        setState('loading');
+        setMessage('');
+
+        try {
+            const response = await axios.post(route('newsletter.subscribe'), {
+                email,
+                source,
+            });
+
+            const data = response.data;
+            if (data.success) {
+                setState(data.already ? 'already' : 'success');
+                setMessage(data.message);
+                setEmail('');
+            } else {
+                setState('error');
+                setMessage(data.message || __('Something went wrong. Please try again.'));
+            }
+        } catch (err) {
+            const msg = err?.response?.data?.message
+                || err?.response?.data?.errors?.email?.[0]
+                || __('Something went wrong. Please try again.');
+            setState('error');
+            setMessage(msg);
+        }
     };
+
+    const isSuccess = state === 'success' || state === 'already';
 
     return (
         <div className={`bg-bg rounded border border-border/60 p-5 shadow-sm transition-all hover:shadow-md ${className}`}>
@@ -38,32 +60,42 @@ export default function NewsletterWidget({ className = '' }) {
                 {__('Get notified about new policies, product arrivals, and exclusive announcements.')}
             </p>
 
-            {subscribed ? (
+            {isSuccess ? (
                 <div className="flex items-center gap-2 p-3 rounded-xl bg-green-500/10 border border-green-500/20 text-green-600 text-xs font-semibold">
                     <RiCheckLine size={18} className="shrink-0" />
-                    <span>{__('Thank you for subscribing!')}</span>
+                    <span>{message || __('Thank you for subscribing!')}</span>
                 </div>
             ) : (
-                <form onSubmit={handleSubmit} className="space-y-2">
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder={__('Enter your email address...')}
-                        required
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-dynamic text-xs text-heading placeholder:text-res/50 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
-                    />
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full py-2.5 px-4 rounded-xl bg-primary text-white text-xs font-bold uppercase tracking-wider hover:bg-primary/90 transition-all disabled:opacity-60 shadow-sm"
-                    >
-                        {loading ? __('Subscribing...') : __('Subscribe Now')}
-                    </button>
-                    <p className="text-[10px] text-res/60 text-center">
-                        {__('We respect your privacy. Unsubscribe at any time.')}
-                    </p>
-                </form>
+                <>
+                    {state === 'error' && message && (
+                        <div className="mb-3 flex items-start gap-2 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 text-xs">
+                            <RiAlertLine size={16} className="shrink-0 mt-0.5" />
+                            <span>{message}</span>
+                        </div>
+                    )}
+                    <form onSubmit={handleSubmit} className="space-y-2">
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder={__('Enter your email address...')}
+                            required
+                            style={{ backgroundColor: 'white' }}
+                            autoComplete="off"
+                            className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-white text-xs text-heading placeholder:text-res/50 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+                        />
+                        <button
+                            type="submit"
+                            disabled={state === 'loading'}
+                            className="w-full py-2.5 px-4 rounded-xl bg-primary text-white text-xs font-bold uppercase tracking-wider hover:bg-primary/90 transition-all disabled:opacity-60 shadow-sm"
+                        >
+                            {state === 'loading' ? __('Subscribing...') : __('Subscribe Now')}
+                        </button>
+                        <p className="text-[10px] text-res/60 text-center">
+                            {__('We respect your privacy. Unsubscribe at any time.')}
+                        </p>
+                    </form>
+                </>
             )}
         </div>
     );

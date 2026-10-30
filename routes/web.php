@@ -16,6 +16,8 @@ use App\Http\Controllers\TaxonomyController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\ImportExportController;
 use App\Http\Controllers\DeveloperController;
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\NewsletterController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
@@ -43,9 +45,9 @@ Route::controller(FrontendController::class)->group(function () {
     Route::get('/get_languages', 'get_languages')->name('languages');
     Route::get('/set-language/{prefix}', 'setLanguage')->name('language.set');
 });
-Route::prefix('/developer')->middleware(['auth', 'verified'])->controller(DeveloperController::class)->group(function () {
-    Route::get('/reset', 'reset')->name('developer.reset')->middleware('permission:developer-write');
-});
+// Route::prefix('/developer')->middleware(['auth', 'verified'])->controller(DeveloperController::class)->group(function () {
+//     Route::get('/reset', 'reset')->name('developer.reset')->middleware('permission:developer-write');
+// });
 Route::post('/checkout/create-payment-intent', [\App\Http\Controllers\StripeController::class, 'createPaymentIntent'])
     ->middleware(['auth', 'throttle:10,1'])
     ->name('checkout.payment-intent');
@@ -92,6 +94,7 @@ Route::prefix('/admin')->middleware(['auth', 'verified'])->group(function () {
         Route::get('/', 'index')->name('module.index');
         Route::get('/create', 'create')->name('module.create');
         Route::get('/edit/{id}', 'edit')->name('module.edit');
+        Route::get('/show/{id}', 'show')->name('module.show');
         Route::post('/submit/{id?}', 'submit')->name('module.submit');
         Route::get('/{id?}', 'index')->name('module.index.with_id');
         Route::post('/{id}/destroy', 'destroy')->name('module.delete');
@@ -234,7 +237,33 @@ Route::prefix('/admin')->middleware(['auth', 'verified'])->group(function () {
         Route::put('/{id}', 'update')->name('admin.gift-cards.update')->middleware('permission:product-create');
         Route::delete('/{id}', 'destroy')->name('admin.gift-cards.destroy')->middleware('permission:product-create');
     });
+
+    // Admin Contact Inquiries & Configuration
+    Route::prefix('/contact-inquiries')->controller(ContactController::class)->group(function () {
+        Route::get('/', 'adminIndex')->name('admin.contact.index');
+        Route::post('/settings', 'adminUpdateSettings')->name('admin.contact.settings');
+        Route::put('/{id}', 'adminUpdate')->name('admin.contact.update');
+        Route::delete('/{id}', 'adminDestroy')->name('admin.contact.destroy');
+    });
+
+    // Admin Newsletter Subscribers
+    Route::prefix('/newsletter')->controller(NewsletterController::class)->group(function () {
+        Route::get('/', 'adminIndex')->name('admin.newsletter.index');
+        Route::get('/export', 'adminExport')->name('admin.newsletter.export');
+        Route::delete('/{id}', 'adminDestroy')->name('admin.newsletter.destroy');
+    });
 });
+
+// Public Contact Form Submission
+Route::post('/contact/submit', [ContactController::class, 'submit'])
+    ->name('contact.submit');
+
+// Public Newsletter Routes
+Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])
+    ->middleware('throttle:10,1')
+    ->name('newsletter.subscribe');
+Route::get('/newsletter/unsubscribe/{token}', [NewsletterController::class, 'unsubscribe'])
+    ->name('newsletter.unsubscribe');
 
 // Public API: active pricing rules (discount + tax) for frontend pricing engine
 Route::get('/api/pricing-rules', [\App\Http\Controllers\Admin\PromotionRuleController::class, 'activeRules'])

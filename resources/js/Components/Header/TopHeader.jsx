@@ -2,6 +2,7 @@ import { Link, usePage } from '@inertiajs/react';
 import React from 'react';
 import { TbTruckDelivery } from 'react-icons/tb';
 import LanguageDropdown from './LanguageDropdown';
+import CitySelectorDropdown from './CitySelectorDropdown';
 import { BiMap } from "react-icons/bi";
 import { RiUser3Line, RiUserLine } from 'react-icons/ri';
 import { useLang } from '@/contexts/LanguageContext';
@@ -44,7 +45,10 @@ const TopHeader = ({ show_language, ContainerType }) => {
 
                     <div className='sm:flex hidden items-center'>
                         <ul className='flex leading-9.5 items-center font-roboto'>
-                            <li className='lg:px-3.75 pl-0 md:pl-3 px-3 text-[11px] md:text-[13px]'>
+                            <li className='lg:px-3.75 pl-0 md:pl-3 px-3 text-[11px] md:text-[13px] flex items-center'>
+                                <CitySelectorDropdown />
+                            </li>
+                            <li className='lg:px-3.75 px-3 text-[11px] md:text-[13px] h-4 border-l-2 border-l-border flex'>
                                 <Link href={route('store.locator')} className='flex items-center gap-1 font-medium transition-colors hover:text-primary'>
                                     <BiMap size={13} />
                                     {__('Store Locator')}

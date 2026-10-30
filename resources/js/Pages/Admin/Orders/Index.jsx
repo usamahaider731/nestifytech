@@ -170,12 +170,15 @@ function OrderProcessModal({ order, deliveryBoys = [], onClose, onUpdated, curre
     const [saving, setSaving] = useState(false)
     const [generatingTracking, setGeneratingTracking] = useState(false)
 
-    // WhatsApp Delivery OTP state
+    // WhatsApp / Email Delivery OTP state
     const [sendingOtp, setSendingOtp] = useState(false)
     const [otpCode, setOtpCode] = useState('')
     const [verifyingOtp, setVerifyingOtp] = useState(false)
     const [customPhone, setCustomPhone] = useState('')
+    const [customEmail, setCustomEmail] = useState('')
     const [showPhoneInput, setShowPhoneInput] = useState(false)
+    const [showEmailInput, setShowEmailInput] = useState(false)
+    const [activeOtpChannel, setActiveOtpChannel] = useState(null) // 'whatsapp' | 'email'
 
     // Office Settlement state
     const [generatingSettlementOtp, setGeneratingSettlementOtp] = useState(false)
@@ -219,31 +222,42 @@ function OrderProcessModal({ order, deliveryBoys = [], onClose, onUpdated, curre
         }
     }
 
-    // 2. Send Customer WhatsApp OTP for Delivery Confirmation
-    const handleSendDeliveryOtp = async () => {
+    // 2. Send Customer OTP for Delivery Confirmation (WhatsApp or Email)
+    const handleSendDeliveryOtp = async (channel = 'whatsapp') => {
         setSendingOtp(true)
+        setActiveOtpChannel(channel)
         try {
-            const payload = {}
-            if (customPhone.trim()) {
-                payload.phone = customPhone.trim()
-            }
+            const payload = { channel }
+            if (channel === 'whatsapp' && customPhone.trim()) payload.phone = customPhone.trim()
+            if (channel === 'email' && customEmail.trim()) payload.email = customEmail.trim()
+
             const res = await axios.post(route('admin.orders.send-delivery-otp', { id: order.id }), payload)
             if (res.data?.success) {
                 if (res.data.api_sent) {
-                    pushToast(res.data.message || 'WhatsApp OTP sent to customer!', 'success')
+                    pushToast(res.data.message || `OTP sent via ${channel}!`, 'success')
                     setShowPhoneInput(false)
+                    setShowEmailInput(false)
                 } else {
-                    pushToast(res.data.message || 'WhatsApp delivery failed.', 'error')
+                    pushToast(res.data.message || `${channel === 'email' ? 'Email' : 'WhatsApp'} delivery failed.`, 'error')
                 }
             } else if (res.data?.needs_phone) {
                 setShowPhoneInput(true)
+                setShowEmailInput(false)
+                pushToast(res.data.message, 'error')
+            } else if (res.data?.needs_email) {
+                setShowEmailInput(true)
+                setShowPhoneInput(false)
                 pushToast(res.data.message, 'error')
             } else {
-                pushToast(res.data?.message || 'Failed to send WhatsApp OTP.', 'error')
+                pushToast(res.data?.message || 'Failed to send OTP.', 'error')
             }
         } catch (err) {
             if (err.response?.data?.needs_phone) {
                 setShowPhoneInput(true)
+                setShowEmailInput(false)
+            } else if (err.response?.data?.needs_email) {
+                setShowEmailInput(true)
+                setShowPhoneInput(false)
             }
             pushToast(err.response?.data?.message || 'Error sending delivery OTP.', 'error')
         } finally {
@@ -463,15 +477,32 @@ function OrderProcessModal({ order, deliveryBoys = [], onClose, onUpdated, curre
                                     <RiCheckLine size={12} /> Verified & Delivered
                                 </span>
                             ) : (
-                                <button
-                                    type="button"
-                                    onClick={handleSendDeliveryOtp}
-                                    disabled={sendingOtp}
-                                    className="px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-all cursor-pointer inline-flex items-center gap-1 shadow-xs disabled:opacity-50"
-                                >
-                                    {sendingOtp ? <RiLoader4Line className="animate-spin size-3.5" /> : <RiMailLine size={12} />}
-                                    {sendingOtp ? 'Sending...' : 'Send OTP via WhatsApp'}
-                                </button>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => handleSendDeliveryOtp('whatsapp')}
+                                        disabled={sendingOtp}
+                                        className="px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-all cursor-pointer inline-flex items-center gap-1 shadow-xs disabled:opacity-50"
+                                        title="Send OTP via WhatsApp"
+                                    >
+                                        {sendingOtp && activeOtpChannel === 'whatsapp'
+                                            ? <RiLoader4Line className="animate-spin size-3.5" />
+                                            : <RiWhatsappLine size={12} />}
+                                        {sendingOtp && activeOtpChannel === 'whatsapp' ? 'Sending...' : 'WhatsApp'}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleSendDeliveryOtp('email')}
+                                        disabled={sendingOtp}
+                                        className="px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-sky-600 hover:bg-sky-700 text-white transition-all cursor-pointer inline-flex items-center gap-1 shadow-xs disabled:opacity-50"
+                                        title="Send OTP via Email"
+                                    >
+                                        {sendingOtp && activeOtpChannel === 'email'
+                                            ? <RiLoader4Line className="animate-spin size-3.5" />
+                                            : <RiMailLine size={12} />}
+                                        {sendingOtp && activeOtpChannel === 'email' ? 'Sending...' : 'Email'}
+                                    </button>
+                                </div>
                             )}
                         </div>
 
@@ -499,10 +530,10 @@ function OrderProcessModal({ order, deliveryBoys = [], onClose, onUpdated, curre
                         </div>
 
                         <p className="text-[11px] text-res">
-                            Sends an OTP to customer's WhatsApp, or you can copy the message template / open the chat directly. When the rider reaches the customer and collects payment, the customer shares this OTP to complete the order.
+                            Send a 6-digit OTP to the customer via <strong>WhatsApp</strong> or <strong>Email</strong> — use Email as a fallback if the WhatsApp sender key has expired. The customer shares this code with the rider upon inspecting their package.
                         </p>
 
-                        {/* Optional Phone input if customer phone is missing */}
+                        {/* Phone fallback input for WhatsApp */}
                         {showPhoneInput && !isCompleted && (
                             <div className="flex items-center gap-2 pt-1">
                                 <input
@@ -514,11 +545,32 @@ function OrderProcessModal({ order, deliveryBoys = [], onClose, onUpdated, curre
                                 />
                                 <button
                                     type="button"
-                                    onClick={handleSendDeliveryOtp}
+                                    onClick={() => handleSendDeliveryOtp('whatsapp')}
                                     disabled={sendingOtp || !customPhone.trim()}
                                     className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-all cursor-pointer inline-flex items-center gap-1"
                                 >
-                                    Send
+                                    <RiWhatsappLine size={12} /> Send
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Email fallback input */}
+                        {showEmailInput && !isCompleted && (
+                            <div className="flex items-center gap-2 pt-1">
+                                <input
+                                    type="email"
+                                    value={customEmail}
+                                    onChange={(e) => setCustomEmail(e.target.value)}
+                                    placeholder="Enter customer email address"
+                                    className="flex-1 px-3 py-1.5 text-xs bg-bg border border-permanent/30 rounded-lg text-heading focus:outline-hidden focus:border-sky-500 font-mono"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => handleSendDeliveryOtp('email')}
+                                    disabled={sendingOtp || !customEmail.trim()}
+                                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-sky-600 hover:bg-sky-700 text-white transition-all cursor-pointer inline-flex items-center gap-1"
+                                >
+                                    <RiMailLine size={12} /> Send
                                 </button>
                             </div>
                         )}

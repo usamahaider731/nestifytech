@@ -297,6 +297,36 @@ export default function MobileSidebar({ isOpen, onClose }) {
 
                                             {/* Store & Tracking Utilities */}
                                             <div className="py-3 flex flex-col gap-1">
+                                                {props.shopCities?.length > 0 && (
+                                                    <div className="px-3 py-2 bg-primary/5 rounded-lg border border-primary/10 mb-1">
+                                                        <div className="text-[10px] font-bold uppercase tracking-wider text-primary mb-1.5 flex items-center gap-1">
+                                                            <RiMapPin2Line size={13} />
+                                                            {__('Shop by City')}
+                                                        </div>
+                                                        <div className="flex flex-wrap gap-1.5">
+                                                            <Link
+                                                                href={route('shop')}
+                                                                onClick={onClose}
+                                                                className="text-[11px] px-2 py-0.5 rounded-full bg-white border border-border text-heading hover:border-primary hover:text-primary transition-colors"
+                                                            >
+                                                                {__('All')}
+                                                            </Link>
+                                                            {props.shopCities.map((city) => (
+                                                                <Link
+                                                                    key={city.id}
+                                                                    href={route('shop', { city: city.id })}
+                                                                    onClick={onClose}
+                                                                    className="text-[11px] px-2 py-0.5 rounded-full bg-white border border-border text-heading hover:border-primary hover:text-primary transition-colors flex items-center gap-1"
+                                                                >
+                                                                    <span>{city.title}</span>
+                                                                    {city.product_count !== undefined && (
+                                                                        <span className="text-[9px] text-res">({city.product_count})</span>
+                                                                    )}
+                                                                </Link>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
                                                 <Link
                                                     href={route('store.locator')}
                                                     onClick={onClose}

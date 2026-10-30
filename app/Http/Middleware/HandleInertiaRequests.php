@@ -70,6 +70,12 @@ class HandleInertiaRequests extends Middleware
                 'status' => 'publish',
             ]);
 
+            try {
+                $shared['shopCities'] = get_shop_cities();
+            } catch (\Throwable $e) {
+                $shared['shopCities'] = [];
+            }
+
             // Share active discount and tax rules for dynamic pricing (DB only, no model)
             try {
                 $now = now();

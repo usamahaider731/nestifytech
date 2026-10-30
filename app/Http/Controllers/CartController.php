@@ -18,19 +18,37 @@ class CartController extends Controller
      */
     private function resolveServerPrice(array $item): ?float
     {
-        // 1. Variation (combo) price takes priority
+        // Load the product with all meta/variation data so the rule accessor works
+        $products = get_posts($this->productQuery([
+            'limit' => 1,
+            'id'    => $item['productId'],
+        ]));
+
+        $product = $products[0] ?? null;
+
+        // ── 1. Variation price (combo-specific) ───────────────────────────────
         if (!empty($item['colorId'])) {
             $variation = DB::table('post_variations')->where('id', $item['comboId'])->first();
             if ($variation) {
-                // Try variation-specific price columns
                 $price = $variation->price ?? $variation->sale_price ?? null;
                 if ($price !== null && (float) $price > 0) {
+                    // Still apply promotion/tax rules on top of the variation price
+                    // by temporarily substituting it as the base — or just return raw
+                    // variation price (rules are product-level, not combo-level).
                     return (float) $price;
                 }
             }
         }
 
-        // 2. Fallback: product meta (second_price / sale_price → first_price / price)
+        // ── 2. Apply promotion & tax rules via model accessor ────────────────
+        if ($product) {
+            $priceAfterRule = $product->real_price_after_rule;
+            if ($priceAfterRule !== null && $priceAfterRule > 0) {
+                return (float) $priceAfterRule;
+            }
+        }
+
+        // ── 3. Fallback: raw meta prices (no active rules matched) ────────────
         $metas = DB::table('post_meta')
             ->where('post_id', $item['productId'])
             ->whereIn('key', ['second_price', 'first_price', 'sale_price', 'price'])
@@ -42,28 +60,23 @@ class CartController extends Controller
             return $num > 0 ? $num : null;
         };
 
-        // If second_price is set, that is the active sale price
-        $secondPrice = $cleanPrice($metas['second_price'] ?? null);
-        $firstPrice  = $cleanPrice($metas['first_price'] ?? null);
-        $salePrice   = $cleanPrice($metas['sale_price'] ?? null);
-        $regularPrice = $cleanPrice($metas['price'] ?? null);
+        $secondPrice  = $cleanPrice($metas['second_price'] ?? null);
+        $firstPrice   = $cleanPrice($metas['first_price']  ?? null);
+        $salePrice    = $cleanPrice($metas['sale_price']   ?? null);
+        $regularPrice = $cleanPrice($metas['price']        ?? null);
 
         if ($secondPrice !== null && $firstPrice !== null && $firstPrice > $secondPrice && $secondPrice > 0) {
             return $secondPrice;
         }
-
         if ($secondPrice !== null && $secondPrice > 0) {
             return $secondPrice;
         }
-
         if ($firstPrice !== null) {
             return $firstPrice;
         }
-
         if ($salePrice !== null) {
             return $salePrice;
         }
-
         if ($regularPrice !== null) {
             return $regularPrice;
         }
@@ -448,7 +461,6 @@ class CartController extends Controller
                 'message'  => 'Order placed successfully.',
                 'order_id' => $orderId,
             ]);
-
         } catch (\Throwable $e) {
             DB::rollBack();
             report($e);
@@ -482,7 +494,21 @@ class CartController extends Controller
 
         return response()->json($rows);
     }
-
+    private function productQuery(array $extra = []): array
+    {
+        return array_merge([
+            'type' => 'product',
+            'image' => true,
+            'meta' => true,
+            'category' => true,
+            'brand' => true,
+            'tags' => true,
+            'gallery' => true,
+            'parent' => true,
+            'variation' => true,
+            'address' => true,
+        ], $extra);
+    }
     /**
      * Return live server-side prices for a list of cart items.
      * The frontend calls this on checkout mount to detect stale localStorage prices.
@@ -493,16 +519,19 @@ class CartController extends Controller
      */
     public function checkPrices(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'items'             => 'required|array|min:1|max:100',
             'items.*.comboId'   => 'required|integer',
             'items.*.productId' => 'required|integer',
             'items.*.colorId'   => 'nullable|integer',
         ]);
+        $items = $request->items;
+
 
         $result = [];
 
         foreach ($request->input('items') as $item) {
+
             $price = $this->resolveServerPrice($item);
             $result[(string) $item['comboId']] = $price;
         }

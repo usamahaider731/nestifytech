@@ -233,6 +233,13 @@
         "route": "admin.orders.index"
       },
       {
+        "id": "contact-inquiries",
+        "title": "Contact Inquiries",
+        "icon": "ri-mail-unread-line",
+        "permission": "setting-read",
+        "route": "admin.contact.index"
+      },
+      {
         "id": "customers",
         "title": "Customers",
         "icon": "ri-user-heart-line",
@@ -522,10 +529,23 @@
             "params": {
               "type": "supplier"
             },
-            "title": "Add Supplier",
-            "permission": "category-write"
+            "title": "Add Supplier",          "permission": "category-write"
           }
         ]
+      },
+      {
+        "id": "contact-inquiries",
+        "title": "Contact Inquiries",
+        "icon": "ri-mail-open-line",
+        "permission": "post-read",
+        "route": "admin.contact.index"
+      },
+      {
+        "id": "newsletter",
+        "title": "Newsletter",
+        "icon": "ri-mail-send-line",
+        "permission": "post-read",
+        "route": "admin.newsletter.index"
       }
     ]
   },

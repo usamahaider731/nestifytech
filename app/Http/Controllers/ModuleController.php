@@ -63,6 +63,228 @@ class ModuleController extends Controller
     }
 
 
+    public function show(Request $request, $type, $id)
+    {
+        $this->checkPermission($type, 'read');
+
+        $dbConfig    = $this->loadModuleConfig($type, 'DB');
+        $tableConfig = $this->loadModuleConfig($type, 'Table');
+        $formConfig  = $this->loadModuleConfig($type, 'Form');
+        $showConfig  = $this->loadModuleConfig($type, 'Show');
+        $table       = $dbConfig['table'] ?? Str::plural($type);
+
+        $record = DB::table($table)->where('id', $id)->first();
+        if (!$record) abort(404);
+
+        // Attach meta rows
+        $metaTable = $dbConfig['meta_table'] ?? (Str::singular($table) . '_meta');
+        if (Schema::hasTable($metaTable)) {
+            $metaKey      = $dbConfig['meta_key'] ?? (Str::singular($table) . '_id');
+            $record->meta = DB::table($metaTable)->where($metaKey, $id)->get();
+        }
+
+        $detail = $this->transformForEdit($record, $type, $dbConfig);
+
+        // Resolve relational IDs (e.g. category, collection, brand, tags, store, parent_id) to titles
+        $detail = $this->resolveRelationsForShow($detail, $formConfig, $tableConfig, $showConfig);
+
+        return Inertia::render('Admin/Module/Show', [
+            'record'      => $detail,
+            'type'        => $type,
+            'id'          => (int) $id,
+            'showSchema'  => $showConfig[$type] ?? $showConfig ?? null,
+            'formSchema'  => $formConfig[$type] ?? $formConfig ?? [],
+            'tableSchema' => $tableConfig ?? [],
+        ]);
+    }
+
+    /**
+     * Resolve related entity IDs (taxonomies, parent categories, collections, etc.)
+     * into readable objects with titles, matching schema definitions.
+     */
+    private function resolveRelationsForShow($detail, $formConfig, $tableConfig, $showConfig = null)
+    {
+        $rawForm = $formConfig[$detail['type'] ?? ''] ?? $formConfig ?? [];
+        $rawShow = $showConfig[$detail['type'] ?? ''] ?? $showConfig ?? [];
+        $allFields = [];
+
+        // Collect fields from show schema sections if available
+        if (is_array($rawShow) && isset($rawShow['sections'])) {
+            $sections = $rawShow['sections'];
+        } elseif (is_array($rawShow) && !empty($rawShow) && isset($rawShow[0]['fields'])) {
+            $sections = $rawShow;
+        } else {
+            $sections = [];
+        }
+
+        foreach ($sections as $section) {
+            if (isset($section['fields']) && is_array($section['fields'])) {
+                foreach ($section['fields'] as $f) {
+                    if (isset($f['name'])) {
+                        $allFields[$f['name']] = $f;
+                    }
+                }
+            }
+        }
+
+        // Also collect fields from form schema sections
+        if (is_array($rawForm)) {
+            foreach ($rawForm as $section) {
+                if (isset($section['fields']) && is_array($section['fields'])) {
+                    foreach ($section['fields'] as $f) {
+                        if (isset($f['name']) && !isset($allFields[$f['name']])) {
+                            $allFields[$f['name']] = $f;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Also collect fields from table schema columns (value_table & value_condition)
+        $columns = $tableConfig['columns'] ?? [];
+        $tableCols = [];
+        if (is_array($columns)) {
+            foreach ($columns as $col) {
+                $colKey = $col['column'] ?? ($col['id'] ?? null);
+                if ($colKey) {
+                    $tableCols[$colKey] = $col;
+                }
+                if (isset($col['field'])) {
+                    $tableCols[$col['field']] = $col;
+                }
+            }
+        }
+
+        foreach ($detail as $key => $val) {
+            if ($val === null || $val === '' || $val === []) continue;
+
+            $formField = $allFields[$key] ?? null;
+            $tableCol  = $tableCols[$key] ?? null;
+
+            // 1. Check form field options from schema (dropdown with model e.g. Taxonomy, Store, User, Role)
+            if ($formField && isset($formField['options']['model'])) {
+                $optsModel = $formField['options']['model'];
+                $optsType  = $formField['options']['type'] ?? null;
+
+                $detail[$key] = $this->fetchResolvedEntities($val, $optsModel, $optsType);
+                continue;
+            }
+
+            // 2. Check table columns with value_table and value_condition from schema
+            if ($tableCol && isset($tableCol['value_table']) && isset($tableCol['value_condition'])) {
+                $vTable     = $tableCol['value_table'];
+                $condition  = $tableCol['value_condition'];
+                $passKey    = $condition['pass_value_of_key'] ?? 'id';
+                $returnKey  = $condition['return_key'] ?? 'title';
+
+                $detail[$key] = $this->fetchByValueTable($val, $vTable, $passKey, $returnKey);
+                continue;
+            }
+        }
+
+        return $detail;
+    }
+
+    /**
+     * Fetch entity titles from model/type specifications
+     */
+    private function fetchResolvedEntities($val, $model, $type = null)
+    {
+        $ids = is_array($val) ? $val : [$val];
+        // Flatten if items are objects like [{id: 1}]
+        $cleanIds = [];
+        foreach ($ids as $item) {
+            if (is_array($item) && isset($item['id'])) {
+                $cleanIds[] = $item['id'];
+            } elseif (is_object($item) && isset($item->id)) {
+                $cleanIds[] = $item->id;
+            } elseif (is_numeric($item)) {
+                $cleanIds[] = (int) $item;
+            } elseif (is_string($item) && is_numeric(trim($item))) {
+                $cleanIds[] = (int) trim($item);
+            }
+        }
+
+        if (empty($cleanIds)) {
+            return $val;
+        }
+
+        $table = match (strtolower($model)) {
+            'taxonomy' => 'taxonomies',
+            'store'    => 'stores',
+            'user'     => 'users',
+            'post'     => 'posts',
+            'product'  => 'posts',
+            default    => Str::plural(strtolower($model)),
+        };
+
+        if (!Schema::hasTable($table)) {
+            return $val;
+        }
+
+        $query = DB::table($table)->whereIn('id', $cleanIds);
+        if ($type && Schema::hasColumn($table, 'type')) {
+            $query->where('type', $type);
+        }
+
+        $hasName  = Schema::hasColumn($table, 'name');
+        $hasTitle = Schema::hasColumn($table, 'title');
+        $titleCol = $hasTitle ? 'title' : ($hasName ? 'name' : 'id');
+
+        $selectCols = ['id', $titleCol];
+        if (Schema::hasColumn($table, 'slug')) $selectCols[] = 'slug';
+
+        $records = $query->get($selectCols);
+        if ($records->isEmpty()) {
+            return $val;
+        }
+
+        $mapped = $records->map(function ($r) use ($titleCol) {
+            return [
+                'id'    => $r->id,
+                'title' => $r->{$titleCol} ?? ("#" . $r->id),
+                'name'  => $r->{$titleCol} ?? ("#" . $r->id),
+            ];
+        })->values()->all();
+
+        return is_array($val) ? $mapped : ($mapped[0] ?? $val);
+    }
+
+    /**
+     * Fetch titles using schema value_table and conditions
+     */
+    private function fetchByValueTable($val, $table, $passKey = 'id', $returnKey = 'title')
+    {
+        if (!Schema::hasTable($table)) return $val;
+
+        $ids = is_array($val) ? $val : [$val];
+        $cleanIds = [];
+        foreach ($ids as $item) {
+            if (is_array($item) && isset($item[$passKey])) {
+                $cleanIds[] = $item[$passKey];
+            } elseif (is_object($item) && isset($item->{$passKey})) {
+                $cleanIds[] = $item->{$passKey};
+            } elseif (!is_null($item) && $item !== '') {
+                $cleanIds[] = $item;
+            }
+        }
+
+        if (empty($cleanIds)) return $val;
+
+        $rows = DB::table($table)->whereIn($passKey, $cleanIds)->get([$passKey, $returnKey]);
+        if ($rows->isEmpty()) return $val;
+
+        $mapped = $rows->map(function ($r) use ($passKey, $returnKey) {
+            return [
+                'id'    => $r->{$passKey},
+                'title' => $r->{$returnKey} ?? ("#" . $r->{$passKey}),
+                'name'  => $r->{$returnKey} ?? ("#" . $r->{$passKey}),
+            ];
+        })->values()->all();
+
+        return is_array($val) ? $mapped : ($mapped[0] ?? $val);
+    }
+
     /**
      * Restrict review lists to top-level entries by default and to a parent review when provided.
      */

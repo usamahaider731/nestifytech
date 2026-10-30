@@ -261,5 +261,47 @@
                 }
             ]
         }
+    ],
+    "show": [
+        {
+            "title": "Profile Information",
+            "style": "main",
+            "fields": [
+                { "name": "name", "label": "Full Name", "type": "text" },
+                { "name": "email", "label": "Email Address", "type": "text" },
+                { "name": "phone", "label": "Phone Number", "type": "text" },
+                { "name": "cnic", "label": "CNIC", "type": "text" },
+                { "name": "date_of_birth", "label": "Date of Birth", "type": "text" },
+                { "name": "active", "label": "Account Status", "type": "status" },
+                { "name": "bio", "label": "Bio / About", "type": "desc" }
+            ]
+        },
+        {
+            "title": "Location & Roles",
+            "style": "sidebar",
+            "fields": [
+                {
+                    "name": "roles",
+                    "label": "Assigned Roles",
+                    "type": "dropdown",
+                    "multiple": true,
+                    "options": { "model": "Roles", "type": "role" }
+                },
+                {
+                    "name": "state",
+                    "label": "State / Province",
+                    "type": "dropdown",
+                    "options": { "model": "Taxonomy", "type": "state" }
+                },
+                {
+                    "name": "city",
+                    "label": "City",
+                    "type": "dropdown",
+                    "options": { "model": "Taxonomy", "type": "city" }
+                },
+                { "name": "address", "label": "Street Address", "type": "text" },
+                { "name": "image", "label": "Avatar / Image", "type": "image" }
+            ]
+        }
     ]
 }

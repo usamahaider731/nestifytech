@@ -25,7 +25,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'api/cart/order',
             'admin/module/*/submit*',
             'admin/taxonomy/*/submit*',
-            'admin/post/*/submit*'
+            'admin/post/*/submit*',
+            'newsletter/subscribe',
+            'newsletter/unsubscribe/*',
+            'contact/submit'
         ]);
         $middleware->alias([
             'permission' => \App\Http\Middleware\CheckPermission::class,

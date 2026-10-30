@@ -90,9 +90,40 @@ export default function Shop({ category, products, filters = {}, filterOptions =
                 <RiFilter3Line className="size-4" />
                 {__('Filters')}
               </button>
-              <h2 className="text-lg font-bold text-secondary">
-                {__('Products')} <span className="text-sm font-medium text-res">({productCount})</span>
+              <h2 className="text-lg font-bold text-secondary flex items-center gap-2">
+                <span>{__('Products')}</span>
+                <span className="text-sm font-medium text-res">({productCount})</span>
               </h2>
+
+              {filters.city && filters.city.length > 0 && (
+                <div className="hidden sm:flex items-center gap-1.5 pl-2 border-l border-border">
+                  <span className="text-xs text-res">{__('City:')}</span>
+                  {filterOptions.cities
+                    ?.filter((c) => filters.city.map(String).includes(String(c.id)))
+                    .map((c) => (
+                      <span
+                        key={c.id}
+                        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary"
+                      >
+                        📍 {c.title}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const nextCities = filters.city.filter((id) => String(id) !== String(c.id));
+                            router.get(window.location.pathname, toQuery({ ...filters, city: nextCities }, filterOptions.price), {
+                              preserveState: true,
+                              preserveScroll: true,
+                            });
+                          }}
+                          className="hover:text-red-500 ml-0.5 text-xs font-bold leading-none"
+                          title={__('Remove city filter')}
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-3">
               <CatalogSort value={filters.sort} onChange={applySort} />

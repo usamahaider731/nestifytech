@@ -157,15 +157,27 @@ class DashboardController extends Controller
       'type' => 'product',
       'in_stock' => true,
       'price' => true,
+      'meta' => true,
       'limit' => -1
     ]);
 
     $productsInventoryByMonth = [];
+    $totalCatalogBuyPrice = 0.0;
     foreach ($products as $product) {
       $pDate = !empty($product->created_at) ? $product->created_at : date('Y-m-d');
       $y = (int) date('Y', strtotime($pDate));
       $m = (int) date('n', strtotime($pDate));
-      $productsInventoryByMonth[$y][$m] = ($productsInventoryByMonth[$y][$m] ?? 0.0) + (float) ($product->price ?? 0);
+
+      // Calculate total inventory cost adjusting by real stock & variations stock
+      $productTotalCost = (float) ($product->total_buy_price ?? 0);
+      if ($productTotalCost <= 0) {
+        $unitCost = (float) ($product->buy_price ?? 0);
+        $stockUnits = (int) ($product->stock ?? 0);
+        $productTotalCost = $unitCost * ($stockUnits > 0 ? $stockUnits : 1);
+      }
+
+      $totalCatalogBuyPrice += $productTotalCost;
+      $productsInventoryByMonth[$y][$m] = ($productsInventoryByMonth[$y][$m] ?? 0.0) + $productTotalCost;
     }
 
     // ─── Monthly Revenue for Selected Year (from orders.order_date) ─
@@ -186,18 +198,21 @@ class DashboardController extends Controller
     $totalYearlyExpenses = 0.0;
 
     for ($m = 1; $m <= 12; $m++) {
-      $monthName = $reportMonths[$m - 1];
       $earn = isset($monthlyRevenueRaw[$m]) ? (float) $monthlyRevenueRaw[$m] : 0.0;
-      
-      // Expenses = New product inventory value added this month + Orders total_price
-      $invVal = (float) ($productsInventoryByMonth[$selectedYear][$m] ?? 0.0);
-      $monthExpense = $invVal + $earn;
+
+      // Expenses = Actual Buy Cost of inventory added/stocked
+      $monthExpense = (float) ($productsInventoryByMonth[$selectedYear][$m] ?? 0.0);
 
       $reportEarnings[] = round($earn);
       $reportExpenses[] = round($monthExpense);
 
       $totalYearlyRevenue += $earn;
       $totalYearlyExpenses += $monthExpense;
+    }
+
+    // If total inventory for the selected year is distributed or catalog total exists:
+    if ($totalYearlyExpenses <= 0 && $selectedYear === $currentRealYear && $totalCatalogBuyPrice > 0) {
+      $totalYearlyExpenses = $totalCatalogBuyPrice;
     }
 
     // ─── Current Month vs Previous Month Comparisons ───────────────
@@ -247,9 +262,9 @@ class DashboardController extends Controller
       ->sum('total_price');
     $revenueGrowth = self::calculateGrowth($currentMonthRevenue, $prevMonthRevenue);
 
-    // 5. Expenses
-    $currentMonthExpenses = ($productsInventoryByMonth[$currentRealYear][$currentMonth] ?? 0) + $currentMonthRevenue;
-    $prevMonthExpenses = ($productsInventoryByMonth[$prevMonthYear][$prevMonth] ?? 0) + $prevMonthRevenue;
+    // 5. Expenses (Buy Cost only)
+    $currentMonthExpenses = (float) ($productsInventoryByMonth[$currentRealYear][$currentMonth] ?? 0);
+    $prevMonthExpenses = (float) ($productsInventoryByMonth[$prevMonthYear][$prevMonth] ?? 0);
     $expensesGrowth = self::calculateGrowth($currentMonthExpenses, $prevMonthExpenses);
 
     // ─── Top 4 Statistics Cards ────────────────────────────────────
@@ -326,7 +341,7 @@ class DashboardController extends Controller
         ->sum('total_price') ?? 0);
 
       $mInv = (float) ($productsInventoryByMonth[$yN][$mN] ?? 0);
-      $mExp = $mInv + $mRev;
+      $mExp = $mInv;
 
       // Realistic retail profit margin on volume
       $profitSparklineData[] = round($mRev * 0.35);
@@ -365,12 +380,39 @@ class DashboardController extends Controller
 
     $popularProducts = $sortedProducts->map(function ($p) use ($metas, $salesAgg) {
       $pMeta = $metas->get($p->id, collect());
-      
-      $price =  $p->price;
+      $metaMap = [];
+      foreach ($pMeta as $m) {
+        $metaMap[$m->key] = $m->value;
+      }
+
+      $firstPrice = isset($metaMap['first_price']) && $metaMap['first_price'] !== ''
+        ? (float) str_replace(',', '', (string) $metaMap['first_price'])
+        : null;
+
+      $secondPrice = isset($metaMap['second_price']) && $metaMap['second_price'] !== ''
+        ? (float) str_replace(',', '', (string) $metaMap['second_price'])
+        : null;
+
+      $buyPrice = isset($metaMap['buy_price']) && $metaMap['buy_price'] !== ''
+        ? (float) str_replace(',', '', (string) $metaMap['buy_price'])
+        : (float) ($p->buy_price ?? 0);
+      $sellingPrice = (float) ($p->price ?? 0);
+      if ($sellingPrice <= 0) {
+        if ($secondPrice !== null && $secondPrice > 0 && ($firstPrice === null || $secondPrice < $firstPrice)) {
+          $sellingPrice = $secondPrice;
+        } elseif ($firstPrice !== null && $firstPrice > 0) {
+          $sellingPrice = $firstPrice;
+        }
+      }
+
       $stock = $p->stock;
-      $catId = $pMeta->where('key', 'category')->first()?->value;
-      $image = $pMeta->where('key', 'thumbnail')->first()?->value ??
-        $pMeta->where('key', 'image')->first()?->value ?? null;
+      $totalBuyCost = (float) ($p->total_buy_price ?? 0);
+      if ($totalBuyCost <= 0) {
+        $totalBuyCost = $buyPrice * (is_numeric($stock) && (int) $stock > 0 ? (int) $stock : 1);
+      }
+
+      $catId = $metaMap['category'] ?? null;
+      $image = $metaMap['thumbnail'] ?? $metaMap['image'] ?? null;
       $catName = 'General';
       if ($catId) {
         $decoded = json_decode($catId, true);
@@ -385,7 +427,11 @@ class DashboardController extends Controller
         'title' => $p->title,
         'sku' => $p->sku,
         'category' => $catName,
-        'price' => $price,
+        'price' => $sellingPrice,
+        'buy_price' => $buyPrice,
+        'total_buy_price' => $totalBuyCost,
+        'first_price' => $firstPrice,
+        'second_price' => $secondPrice,
         'stock' => is_numeric($stock) ? (int) $stock : 10,
         'sales_count' => (int) ($salesAgg[$p->id] ?? 0),
         'status' => $p->status ?? 'publish',
@@ -393,7 +439,7 @@ class DashboardController extends Controller
         'created_at' => $p->created_at ? date('d M Y', strtotime($p->created_at)) : 'Recent',
       ];
     })->values();
-
+    // exit;
     // ─── Recent Orders / Transactions ──────────────────────────────
     $recentOrders = DB::table('orders')
       ->leftJoin('users', 'orders.user_id', '=', 'users.id')

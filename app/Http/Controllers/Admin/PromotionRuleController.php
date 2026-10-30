@@ -62,9 +62,9 @@ class PromotionRuleController extends Controller
         $users       = DB::table('users')->select('id', 'name', 'email')->orderBy('name')->limit(200)->get();
 
         // Use role titles as ids so they match auth.user.user_role (title strings)
-        $dbRoles = DB::table('roles')->select('title')->orderBy('title')->get();
+        $dbRoles = DB::table('roles')->select('title','id')->orderBy('title')->get();
         $availableRoles = $dbRoles->map(fn ($role) => [
-            'id' => $role->title,
+            'id' => $role->id,
             'title' => $role->title,
         ])->values()->all();
 

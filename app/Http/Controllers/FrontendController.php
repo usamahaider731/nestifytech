@@ -15,6 +15,7 @@ class FrontendController extends Controller
 
     function __construct()
     {
+        
         parent::__construct();
 
         $this->settings = view()->shared('setting');
@@ -95,6 +96,7 @@ class FrontendController extends Controller
                 'limit' => 10,
                 'latest' => true,
             ]));
+            
         }
         $data['popluar_products'] = get_posts($this->productQuery([
             'limit' => 10,
@@ -242,6 +244,9 @@ class FrontendController extends Controller
             'image' => $heroImage ?? '/assets/image/mobiles.webp',
         ];
 
+        // Available active cities for "Shop by City"
+        $data['shop_cities'] = get_shop_cities();
+
         return Inertia::render('Frontend/Index/Index', [
             'data' => $data,
         ]);
@@ -266,18 +271,21 @@ class FrontendController extends Controller
             'max_price' => ['nullable', 'numeric', 'min:0'],
             'brands' => ['nullable', 'string'],
             'category' => ['nullable', 'string'],
+            'city' => ['nullable', 'string'],
             'in_stock' => ['nullable'],
             'sort' => ['nullable', 'in:latest,price_asc,price_desc,popular'],
             'page' => ['nullable', 'integer', 'min:1'],
         ]);
         $brandIds = helper_ids($validated['brands'] ?? []);
         $categoryIds = helper_ids($validated['category'] ?? []);
+        $cityIds = helper_ids($validated['city'] ?? []);
         $priceBounds = catalog_price_bounds();
         $applied = [
             'min_price' => $validated['min_price'] ?? null,
             'max_price' => $validated['max_price'] ?? null,
             'brands' => $brandIds,
             'category' => $categoryIds,
+            'city' => $cityIds,
             'in_stock' => filter_var($validated['in_stock'] ?? false, FILTER_VALIDATE_BOOLEAN),
             'sort' => $validated['sort'] ?? 'latest',
         ];
@@ -290,6 +298,10 @@ class FrontendController extends Controller
             'max_price' => $applied['max_price'],
             'in_stock' => $applied['in_stock'],
         ]);
+
+        if ($cityIds !== []) {
+            $query['city_id'] = $cityIds;
+        }
 
         if ($categoryIds !== []) {
             // Expand any selected parent categories to include their children IDs
@@ -319,6 +331,7 @@ class FrontendController extends Controller
             'status' => 'publish',
             'limit' => -1,
         ]);
+        $shopCities = get_shop_cities();
 
         $filterCategories = collect($categories)->map(fn($cat) => [
             'id' => $cat->id,
@@ -341,6 +354,7 @@ class FrontendController extends Controller
                 'categoriesTitle' => 'Categories',
                 'brands' => $filterBrands,
                 'categories' => $filterCategories,
+                'cities' => $shopCities,
                 'price' => $priceBounds,
             ],
         ]);

@@ -116,7 +116,107 @@ function apply_post_meta_id_filter($query, string $metaKey, array $ids): void
             });
     });
 }
+function apply_product_city_filter($query, array $cityIds): void
+{
+    if (empty($cityIds)) {
+        return;
+    }
 
+    $query->where(function ($q) use ($cityIds) {
+        apply_post_meta_id_filter($q, 'city', $cityIds);
+
+        $q->orWhereExists(function ($sub) use ($cityIds) {
+            $sub->select(DB::raw(1))
+                ->from('post_meta as pm_store')
+                ->join('post_meta as pm_store_city', function ($j) {
+                    $j->on('pm_store_city.post_id', '=', 'pm_store.value')
+                        ->where('pm_store_city.key', 'city');
+                })
+                ->whereColumn('pm_store.post_id', 'posts.id')
+                ->where('pm_store.key', 'store')
+                ->where(function ($inner) use ($cityIds) {
+                    foreach ($cityIds as $id) {
+                        $sid = (string) $id;
+                        $inner->orWhere('pm_store_city.value', 'like', '%"' . $sid . '"%')
+                            ->orWhere('pm_store_city.value', '[' . $sid . ']')
+                            ->orWhere('pm_store_city.value', '[' . $sid . ',%')
+                            ->orWhere('pm_store_city.value', '%,' . $sid . ']')
+                            ->orWhere('pm_store_city.value', '%,' . $sid . ',%')
+                            ->orWhere('pm_store_city.value', $sid);
+                    }
+                });
+        });
+    });
+}
+
+function get_shop_cities(): \Illuminate\Support\Collection
+{
+    // Retrieve all active cities from products directly, from stores linked to products, or all stores
+    $directCityValues = DB::table('post_meta')
+        ->where('post_meta.key', 'city')
+        ->join('posts', 'posts.id', '=', 'post_meta.post_id')
+        ->where('posts.type', 'product')
+        ->where('posts.status', 'publish')
+        ->pluck('post_meta.value');
+
+    $storeCityValues = DB::table('post_meta as pm_store')
+        ->join('posts', 'posts.id', '=', 'pm_store.post_id')
+        ->where('posts.type', 'product')
+        ->where('posts.status', 'publish')
+        ->where('pm_store.key', 'store')
+        ->join('post_meta as pm_sc', function ($j) {
+            $j->on('pm_sc.post_id', '=', 'pm_store.value')
+                ->where('pm_sc.key', 'city');
+        })
+        ->pluck('pm_sc.value');
+
+    $standaloneStoreCities = DB::table('post_meta')
+        ->where('key', 'city')
+        ->join('posts', 'posts.id', '=', 'post_meta.post_id')
+        ->where('posts.type', 'store')
+        ->where('posts.status', 'publish')
+        ->pluck('post_meta.value');
+
+    $allRaw = $directCityValues->concat($storeCityValues)->concat($standaloneStoreCities);
+    $cityIds = [];
+
+    foreach ($allRaw as $val) {
+        if (is_numeric($val)) {
+            $cityIds[] = (int) $val;
+        } elseif (is_string($val)) {
+            $decoded = json_decode($val, true);
+            if (is_array($decoded)) {
+                foreach ($decoded as $d) {
+                    if (is_numeric($d)) {
+                        $cityIds[] = (int) $d;
+                    }
+                }
+            }
+        }
+    }
+
+    $cityIds = array_values(array_unique(array_filter($cityIds)));
+
+    if (empty($cityIds)) {
+        // Fallback: top known active cities
+        $cityIds = [535, 673, 363, 588, 463];
+    }
+
+    $cities = DB::table('taxonomies')
+        ->where('type', 'city')
+        ->whereIn('id', $cityIds)
+        ->get(['id', 'title', 'slug']);
+
+    // Calculate product count for each city
+    return $cities->map(function ($city) {
+        $cQuery = \App\Models\PostTaxonomy::forTable('posts')
+            ->where('posts.type', 'product')
+            ->where('posts.status', 'publish');
+        apply_product_city_filter($cQuery, [$city->id]);
+        $city->product_count = $cQuery->count();
+        return $city;
+    })->values();
+}
 function catalog_sale_price_sql(string $postIdColumn = 'posts.id'): string
 {
     return "CAST(REPLACE(COALESCE(
@@ -398,6 +498,7 @@ function get_posts(array $args = [])
     if (! empty($args['sku'])) {
         $posts->where('posts.sku', $args['sku']);
     }
+
     if (! empty($args['slug'])) {
         $posts->where('posts.slug', $args['slug']);
     }
@@ -444,6 +545,7 @@ function get_posts(array $args = [])
     $categoryIds = helper_ids($args['category_id'] ?? ($args['category_ids'] ?? []));
     $brandIds = helper_ids($args['brand_id'] ?? ($args['brand_ids'] ?? []));
     $tagIds = helper_ids($args['tag_id'] ?? ($args['tag_ids'] ?? ($args['tags_id'] ?? [])));
+    $cityIds = helper_ids($args['city_id'] ?? ($args['city_ids'] ?? ($args['city'] ?? [])));
     if ($categoryIds === [] && isset($args['blog_category'])) {
         $categoryIds = helper_ids($args['blog_category']);
     }
@@ -472,6 +574,9 @@ function get_posts(array $args = [])
     }
     if ($tagIds !== []) {
         apply_post_meta_id_filter($posts, 'tags', $tagIds);
+    }
+    if ($cityIds !== []) {
+        apply_product_city_filter($posts, $cityIds);
     }
 
     $priceSql = catalog_sale_price_sql();
@@ -531,7 +636,10 @@ function get_posts(array $args = [])
     if (! empty($args['parent'])) {
         $posts->with('parent');
     }
-
+    // if (!empty($args['price_after_rule'])) {
+    //     $posts->with('getRealPriceAfterRuleAttribute') ;
+        
+    // }
     $attachCategory = ! empty($args['category']) || $categoryIds !== [];
     $attachBrand = ! empty($args['brand']) || $brandIds !== [];
     $attachTags = ! empty($args['tags']) || $tagIds !== [];
@@ -553,7 +661,6 @@ function get_posts(array $args = [])
     if (! empty($args['single'])) {
         return $result->first();
     }
-
     return $result;
 }
 

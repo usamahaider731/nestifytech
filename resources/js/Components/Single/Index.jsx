@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { RiFlagFill, RiFlagLine, RiMessage3Line, RiSendPlaneFill, RiStarFill, RiStarLine, RiThumbUpFill, RiThumbUpLine, RiUserLine } from 'react-icons/ri';
 import Textarea from '../Textarea';

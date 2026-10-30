@@ -1515,6 +1515,21 @@
                 "value": true
             },
             "value": "NestifyTech"
+        },
+        "contact_recipient_email": {
+            "label": "Contact Form Recipient Email (Admin Inbox)",
+            "type": "text",
+            "style": 2,
+            "placeholder": "support@nestifytech.com",
+            "description": "Email address where inquiries submitted from the Contact Us form are delivered.",
+            "value": "support@nestifytech.com"
+        },
+        "contact_autoreply_enabled": {
+            "label": "Send Confirmation Email to Customer",
+            "type": "checkbox",
+            "style": 1,
+            "value_label": "Enable automatic receipt acknowledgment email to client",
+            "value": true
         }
     },
     "popup": {

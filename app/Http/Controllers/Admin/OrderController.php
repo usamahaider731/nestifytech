@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Carbon\Carbon;
 use App\Mail\OfficeSettlementOtpMail;
+use App\Mail\DeliveryOtpMail;
 
 class OrderController extends Controller
 {
@@ -219,7 +220,8 @@ class OrderController extends Controller
     }
 
     /**
-     * Send Customer WhatsApp OTP for delivery confirmation / completion.
+     * Send Customer OTP for delivery confirmation via WhatsApp or Email.
+     * channel: 'whatsapp' (default) | 'email'
      */
     public function sendDeliveryOtp(Request $request, int $id)
     {
@@ -228,6 +230,75 @@ class OrderController extends Controller
             return response()->json(['success' => false, 'message' => 'Order not found.'], 404);
         }
 
+        $channel = $request->input('channel', 'whatsapp'); // 'whatsapp' or 'email'
+
+        // Generate 6-digit numeric OTP
+        $otp = (string) random_int(100000, 999999);
+        $expiresAt = now()->addMinutes(30);
+
+        DB::table('orders')->where('id', $id)->update([
+            'delivery_otp'            => $otp,
+            'delivery_otp_expires_at' => $expiresAt,
+            'updated_at'              => now(),
+        ]);
+
+        // Load settings for currency
+        $currency = 'PKR';
+        $settingFile = storage_path('app/data/setting.json');
+        if (file_exists($settingFile)) {
+            $settings = json_decode(file_get_contents($settingFile), true) ?: [];
+            $currency = $settings['site']['currency']['value'] ?? $currency;
+        }
+
+        /* ── EMAIL CHANNEL ── */
+        if ($channel === 'email') {
+            // Resolve customer email
+            $customerEmail = null;
+            if ($order->user_id) {
+                $user = DB::table('users')->where('id', $order->user_id)->first();
+                $customerEmail = $user ? $user->email : null;
+            }
+
+            // Try extracting from customer notes as fallback
+            if (empty($customerEmail) && !empty($order->customer_notes) && preg_match('/Contact Email:\s*([\w.+@\-]+)/', $order->customer_notes, $matches)) {
+                $customerEmail = trim($matches[1]);
+            }
+
+            // Allow admin to pass email explicitly
+            if (empty($customerEmail)) {
+                $customerEmail = $request->input('email');
+            }
+
+            if (empty($customerEmail)) {
+                return response()->json([
+                    'success'     => false,
+                    'needs_email' => true,
+                    'message'     => 'Customer email not found. Please provide the customer email to send OTP.',
+                ], 422);
+            }
+
+            $emailSent = false;
+            $emailError = null;
+            try {
+                Mail::to($customerEmail)->send(new DeliveryOtpMail($order, $otp, $currency, 30));
+                $emailSent = true;
+            } catch (\Throwable $e) {
+                $emailError = $e->getMessage();
+                Log::error("Failed to send delivery OTP email to {$customerEmail}: " . $emailError);
+            }
+
+            return response()->json([
+                'success'    => true,
+                'channel'    => 'email',
+                'api_sent'   => $emailSent,
+                'api_error'  => $emailError,
+                'message'    => $emailSent
+                    ? "Delivery OTP sent to customer's email ({$customerEmail})!"
+                    : "Email delivery failed" . ($emailError ? " ({$emailError})" : "") . ". Please check SMTP settings or use WhatsApp.",
+            ]);
+        }
+
+        /* ── WHATSAPP CHANNEL (default) ── */
         // Get customer phone number from user_meta or notes
         $phone = null;
         if ($order->user_id) {
@@ -240,42 +311,30 @@ class OrderController extends Controller
         }
 
         if (empty($phone)) {
-            $requestPhone = $request->input('phone');
-            if ($requestPhone) {
-                $phone = $requestPhone;
-            }
+            $phone = $request->input('phone');
         }
 
         if (empty($phone)) {
             return response()->json([
-                'success' => false,
+                'success'    => false,
+                'channel'    => 'whatsapp',
                 'needs_phone' => true,
-                'message' => 'Customer phone number not found. Please specify customer phone number to send WhatsApp OTP.',
+                'message'    => 'Customer phone number not found. Please enter the WhatsApp number to send OTP.',
             ], 422);
         }
 
-        // Generate 6-digit numeric OTP
-        $otp = (string) random_int(100000, 999999);
-        $expiresAt = now()->addMinutes(30);
-
-        DB::table('orders')->where('id', $id)->update([
-            'delivery_otp'            => $otp,
-            'delivery_otp_expires_at' => $expiresAt,
-            'updated_at'              => now(),
-        ]);
-
-        // Dispatch via WhatsApp (Facebook Graph API / configured provider)
         $dispatchResult = $this->dispatchWhatsAppOtpWithDetails($phone, $otp, $order->id, (float) $order->total_price);
-        $waSent = $dispatchResult['success'] ?? false;
+        $waSent  = $dispatchResult['success'] ?? false;
         $apiError = $dispatchResult['error'] ?? null;
 
         return response()->json([
-            'success' => true,
-            'message' => $waSent
-                ? "Delivery confirmation OTP sent to customer's WhatsApp ({$phone})!"
-                : "WhatsApp delivery failed" . ($apiError ? " ({$apiError})" : "") . ". Please check customer WhatsApp or re-send.",
+            'success'   => true,
+            'channel'   => 'whatsapp',
             'api_sent'  => $waSent,
             'api_error' => $apiError,
+            'message'   => $waSent
+                ? "Delivery OTP sent to customer's WhatsApp ({$phone})!"
+                : "WhatsApp delivery failed" . ($apiError ? " ({$apiError})" : "") . ". Try Email OTP instead.",
         ]);
     }
 

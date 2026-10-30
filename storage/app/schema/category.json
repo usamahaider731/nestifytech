@@ -215,5 +215,33 @@
                 }
             ]
         }
+    ],
+    "show": [
+        {
+            "title": "Category Details",
+            "style": "main",
+            "fields": [
+                { "name": "title", "label": "Title", "type": "text" },
+                { "name": "slug", "label": "Slug", "type": "text" },
+                { "name": "status", "label": "Status", "type": "status" },
+                { "name": "description", "label": "Description", "type": "desc" }
+            ]
+        },
+        {
+            "title": "Hierarchy & Media",
+            "style": "sidebar",
+            "fields": [
+                {
+                    "name": "parent_id",
+                    "label": "Parent Category",
+                    "type": "dropdown",
+                    "options": {
+                        "model": "Taxonomy",
+                        "type": "category"
+                    }
+                },
+                { "name": "image", "label": "Category Image", "type": "image" }
+            ]
+        }
     ]
 }

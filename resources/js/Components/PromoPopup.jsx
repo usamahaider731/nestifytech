@@ -103,11 +103,22 @@ export default function PromoPopup() {
         }
     };
 
-    const handleSubscribe = (e) => {
+    const handleSubscribe = async (e) => {
         e.preventDefault();
         if (!email || !email.includes('@')) return;
         setSubscribed(true);
         handleCopy();
+
+        try {
+            if (typeof route === 'function') {
+                await axios.post(route('newsletter.subscribe'), { email, source: 'promo_popup' });
+            } else {
+                await axios.post('/newsletter/subscribe', { email, source: 'promo_popup' });
+            }
+        } catch (err) {
+            console.error('Newsletter subscribe error:', err);
+        }
+
         // Auto-dismiss shortly after success
         setTimeout(() => {
             handleClose(48);

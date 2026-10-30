@@ -117,11 +117,10 @@ const ProductTopSection = ({ product }) => {
                                 {product?.store && (
                                     <div className='flex gap-2 items-center'>
                                         <span className='text-sm text-heading font-semibold'>{__('Store / Branch:')}</span>
-                                        <span className='inline-flex items-center gap-1.5 py-0.5 px-2 rounded-md bg-emerald-500/10 text-emerald-600 text-xs font-semibold'>
-                                            <span>🏪</span>
+                                        <span className='inline-flex items-center gap-1.5 py-0.5 px-2 rounded-md bg-bg text-primary text-xs font-semibold font-roboto'>
                                             <span>{product.store.title}</span>
                                             {(product.store.city || product.store.state) && (
-                                                <span className='text-emerald-500/70 font-normal'>
+                                                <span className='text-primary/70 font-normal'>
                                                     ({[product.store.city, product.store.state].filter(Boolean).join(', ')})
                                                 </span>
                                             )}

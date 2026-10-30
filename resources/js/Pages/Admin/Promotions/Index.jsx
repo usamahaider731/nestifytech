@@ -88,7 +88,6 @@ export default function PromotionsIndex({
   const products    = availableTargets?.products    || []
   const users       = availableTargets?.users       || []
   const roles       = availableTargets?.roles       || []
-
   const targetOptions = useMemo(() => {
     switch (form.target_type) {
       case 'category':   return categories.map(i => ({ id: i.id, label: i.title }))

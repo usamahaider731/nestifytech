@@ -17,6 +17,7 @@ import RecentlyViewedProducts from '@/Components/Index/RecentlyViewedProducts';
 import BrandSlider from '@/Components/BrandSlider';
 import Services from '@/Components/Index/Services';
 import LatestBlogs from '@/Components/Index/LatestBlogs';
+import ShopByCitySection from '@/Components/Index/ShopByCitySection';
 
 function Index({ data }) {
     const { setting } = usePage().props;
@@ -52,6 +53,9 @@ function Index({ data }) {
                     <div className="mt-8 lg:mt-14">
                         <CategorySlider categories={data.categories} />
                     </div>
+                )}
+                {data.shop_cities && data.shop_cities.length > 0 && (
+                    <ShopByCitySection cities={data.shop_cities} />
                 )}
             </div>
             <div className='w-full'>

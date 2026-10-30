@@ -4,6 +4,7 @@ import FrontendLayout from '@/Layouts/FrontendLayout';
 import ImageViwer from '@/Components/Admin/ImageViwer';
 import PageSidebar from '@/Components/Frontend/Page/PageSidebar';
 import PageFooterSection from '@/Components/Frontend/Page/PageFooterSection';
+import DynamicContactForm from '@/Components/Frontend/Contact/DynamicContactForm';
 import {
     RiArrowLeftLine,
     RiFileTextLine,
@@ -81,6 +82,12 @@ export default function PageSingle({
     const footerCtaDesc = getMeta(page, 'footer_cta_desc') || '';
     const footerCtaBtnText = getMeta(page, 'footer_cta_btn_text') || '';
     const footerCtaBtnUrl = getMeta(page, 'footer_cta_btn_url') || '';
+    const isContactPage = useMemo(() => {
+        const slug = (page.sku || '').toLowerCase();
+        const title = (page.title || '').toLowerCase();
+        return slug === 'contact-us' || slug === 'contact' || title.includes('contact');
+    }, [page.sku, page.title]);
+
     const containerClass = {
         narrow: 'max-w-4xl mx-auto px-4 sm:px-6 lg:px-8',
         container: 'max-w-6xl mx-auto px-4 sm:px-6 lg:px-8',
@@ -261,13 +268,17 @@ export default function PageSingle({
                     {/* Layout Variant 1: Sidebar Right */}
                     {layoutType === 'sidebar_right' && (
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
-                            <main className="lg:col-span-8 min-w-0">
+                            <main className="lg:col-span-8 min-w-0 space-y-8">
                                 <div className="bg-bg rounded-2xl p-6 sm:p-10 border border-border/60 shadow-xs">
                                     <div
                                         className="prose prose-lg dark:prose-invert max-w-none text-res leading-relaxed space-y-4 prose-headings:text-heading prose-headings:font-oswald prose-h2:text-2xl prose-h2:font-extrabold prose-h2:border-b prose-h2:border-border/40 prose-h2:pb-2 prose-h2:mt-8 prose-h3:text-lg prose-h3:font-bold prose-h3:mt-6 prose-p:text-res/90 prose-p:leading-relaxed prose-li:text-res/90 prose-strong:text-heading"
                                         dangerouslySetInnerHTML={{ __html: processedContent }}
                                     />
                                 </div>
+
+                                {isContactPage && (
+                                    <DynamicContactForm />
+                                )}
                             </main>
 
                             <div className="lg:col-span-4 min-w-0">
@@ -301,38 +312,50 @@ export default function PageSingle({
                                 />
                             </div>
 
-                            <main className="lg:col-span-8 order-1 lg:order-2 min-w-0">
+                            <main className="lg:col-span-8 order-1 lg:order-2 min-w-0 space-y-8">
                                 <div className="bg-bg rounded p-6 sm:p-10 border border-border/60 shadow-xs">
                                     <div
                                         className="prose prose-lg dark:prose-invert max-w-none text-res leading-relaxed space-y-4 prose-headings:text-heading prose-headings:font-oswald prose-h2:text-2xl prose-h2:font-extrabold prose-h2:border-b prose-h2:border-border/40 prose-h2:pb-2 prose-h2:mt-8 prose-h3:text-lg prose-h3:font-bold prose-h3:mt-6 prose-p:text-res/90 prose-p:leading-relaxed prose-li:text-res/90 prose-strong:text-heading"
                                         dangerouslySetInnerHTML={{ __html: processedContent }}
                                     />
                                 </div>
+
+                                {isContactPage && (
+                                    <DynamicContactForm />
+                                )}
                             </main>
                         </div>
                     )}
 
                     {/* Layout Variant 3: Narrow Centered (No sidebar) */}
                     {layoutType === 'narrow_center' && (
-                        <div className="max-w-4xl mx-auto">
+                        <div className="max-w-4xl mx-auto space-y-8">
                             <div className="bg-bg rounded-2xl p-6 sm:p-12 border border-border/60 shadow-xs">
                                 <div
                                     className="prose prose-lg dark:prose-invert max-w-none text-res leading-relaxed space-y-4 prose-headings:text-heading prose-headings:font-oswald prose-h2:text-2xl prose-h2:font-extrabold prose-h2:border-b prose-h2:border-border/40 prose-h2:pb-2 prose-h2:mt-8 prose-h3:text-lg prose-h3:font-bold prose-h3:mt-6 prose-p:text-res/90 prose-p:leading-relaxed prose-li:text-res/90 prose-strong:text-heading"
                                     dangerouslySetInnerHTML={{ __html: processedContent }}
                                 />
                             </div>
+
+                            {isContactPage && (
+                                <DynamicContactForm />
+                            )}
                         </div>
                     )}
 
                     {/* Layout Variant 4: Full Width (No sidebar) */}
                     {layoutType === 'full_width' && (
-                        <div className="w-full">
+                        <div className="w-full space-y-8">
                             <div className="bg-bg rounded-2xl p-6 sm:p-12 border border-border/60 shadow-xs">
                                 <div
                                     className="prose prose-lg dark:prose-invert max-w-none text-res leading-relaxed space-y-4 prose-headings:text-heading prose-headings:font-oswald prose-h2:text-2xl prose-h2:font-extrabold prose-h2:border-b prose-h2:border-border/40 prose-h2:pb-2 prose-h2:mt-8 prose-h3:text-lg prose-h3:font-bold prose-h3:mt-6 prose-p:text-res/90 prose-p:leading-relaxed prose-li:text-res/90 prose-strong:text-heading"
                                     dangerouslySetInnerHTML={{ __html: processedContent }}
                                 />
                             </div>
+
+                            {isContactPage && (
+                                <DynamicContactForm />
+                            )}
                         </div>
                     )}
 

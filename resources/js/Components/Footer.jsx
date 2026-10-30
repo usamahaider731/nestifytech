@@ -49,7 +49,31 @@ const Footer = () => {
     }, [FooterMenu]);
     const logo_path = setting.site[FooterSetting.footer_logo]?.value;
 
-    // Platform icon map
+    // Newsletter subscription state
+    const [nlEmail, setNlEmail]     = useState('');
+    const [nlState, setNlState]      = useState('idle'); // idle | loading | success | error
+    const [nlMessage, setNlMessage]  = useState('');
+
+    const handleNewsletterSubmit = async (e) => {
+        e.preventDefault();
+        if (!nlEmail) return;
+        setNlState('loading');
+        setNlMessage('');
+        try {
+            const res = await axios.post(route('newsletter.subscribe'), { email: nlEmail, source: 'footer' });
+            setNlState('success');
+            setNlMessage(res.data.message || 'Thank you for subscribing!');
+            setNlEmail('');
+        } catch (err) {
+            const msg = err?.response?.data?.message
+                || err?.response?.data?.errors?.email?.[0]
+                || 'Something went wrong. Please try again.';
+            setNlState('error');
+            setNlMessage(msg);
+        }
+    };
+
+
     const platformIcons = {
         facebook: <FaFacebook size={18} />,
         instagram: <FaInstagram size={18} />,
@@ -150,20 +174,33 @@ const Footer = () => {
                             </span>
                         </div>
 
-                        <form onSubmit={(e) => e.preventDefault()} className="flex overflow-hidden rounded-full bg-white">
-                            <input
-                                type="email"
-                                placeholder={__('Enter your email address')}
-                                className="w-80 bg-transparent border-none outline-none ring-0 px-5 h-10.5 text-base text-text placeholder:text-text/70 focus:outline-none"
-                                required
-                            />
-                            <button
-                                type="submit"
-                                className="flex text-white items-center bg-dynamic gap-2 whitespace-nowrap px-6 h-10.5 text-xs font-extrabold uppercase tracking-[0.15em] text-slate-900 transition-colors cursor-pointer"
-                            >
-                                {auth.user ? __('Subscribe') : __('Sign up')} <FiSend />
-                            </button>
-                        </form>
+                        {nlState === 'success' ? (
+                                <div className="flex items-center gap-3 h-10.5 px-5 bg-green-500/20 border border-green-500/40 rounded-full text-green-300 text-sm font-semibold">
+                                    <FiCheckCircle size={16} />
+                                    <span>{nlMessage}</span>
+                                </div>
+                            ) : (
+                                <form onSubmit={handleNewsletterSubmit} className="flex overflow-hidden rounded-full bg-white">
+                                    <input
+                                        type="email"
+                                        value={nlEmail}
+                                        onChange={(e) => setNlEmail(e.target.value)}
+                                        placeholder={nlState === 'error' ? (nlMessage || __('Enter your email address')) : __('Enter your email address')}
+                                        className={`w-80 bg-transparent border-none outline-none ring-0 px-5 h-10.5 text-base placeholder:text-text/70 focus:outline-none ${
+                                            nlState === 'error' ? 'text-rose-600 placeholder:text-rose-400' : 'text-text'
+                                        }`}
+                                        required
+                                    />
+                                    <button
+                                        type="submit"
+                                        disabled={nlState === 'loading'}
+                                        className="flex text-white items-center bg-dynamic gap-2 whitespace-nowrap px-6 h-10.5 text-xs font-extrabold uppercase tracking-[0.15em] text-slate-900 transition-colors cursor-pointer disabled:opacity-70"
+                                    >
+                                        {nlState === 'loading' ? __('Subscribing...') : (auth.user ? __('Subscribe') : __('Sign up'))}
+                                        <FiSend />
+                                    </button>
+                                </form>
+                            )}
                     </div>
                 </div>
             </div>
@@ -249,7 +286,7 @@ const Footer = () => {
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link href="/page/contact" className="transition-colors duration-200 hover:text-primary">
+                                        <Link href="/page/contact-us" className="transition-colors duration-200 hover:text-primary">
                                             {__('Customer Service')}
                                         </Link>
                                     </li>

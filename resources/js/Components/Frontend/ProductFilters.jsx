@@ -32,6 +32,9 @@ function toQuery(next, bounds = {}) {
     if (next.subcategory?.length) {
         params.subcategory = next.subcategory.join(',');
     }
+    if (next.city?.length) {
+        params.city = next.city.join(',');
+    }
     if (next.in_stock) {
         params.in_stock = 1;
     }
@@ -63,6 +66,7 @@ export default function ProductFilters({
         brands: filters?.brands ?? [],
         category: filters?.category ?? [],
         subcategory: filters?.subcategory ?? [],
+        city: filters?.city ?? [],
         in_stock: Boolean(filters?.in_stock),
         sort: filters?.sort ?? 'latest',
     });
@@ -74,6 +78,7 @@ export default function ProductFilters({
             brands: filters?.brands ?? [],
             category: filters?.category ?? [],
             subcategory: filters?.subcategory ?? [],
+            city: filters?.city ?? [],
             in_stock: Boolean(filters?.in_stock),
             sort: filters?.sort ?? 'latest',
         });
@@ -84,6 +89,7 @@ export default function ProductFilters({
         if (filters?.brands?.length) count += filters.brands.length;
         if (filters?.category?.length) count += filters.category.length;
         if (filters?.subcategory?.length) count += filters.subcategory.length;
+        if (filters?.city?.length) count += filters.city.length;
         if (filters?.in_stock) count += 1;
         if (filters?.min_price != null || filters?.max_price != null) count += 1;
         if (filters?.sort && filters.sort !== 'latest') count += 1;
@@ -125,6 +131,7 @@ export default function ProductFilters({
             brands: [],
             category: [],
             subcategory: [],
+            city: [],
             in_stock: false,
             sort: 'latest',
         };
@@ -235,6 +242,38 @@ export default function ProductFilters({
                                 <span className="line-clamp-1">{brand.title}</span>
                             </label>
                         ))}
+                    </div>
+                </section>
+            )}
+
+            {options?.cities?.length > 0 && (
+                <section className="flex flex-col gap-3">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-res">{__('Shop by City')}</h3>
+                        <span className="text-[10px] text-primary font-semibold">{__('Store Locations')}</span>
+                    </div>
+                    <div className="flex max-h-56 flex-col gap-2 overflow-y-auto pr-1">
+                        {options.cities.map((city) => {
+                            const isChecked = (local.city ?? []).map(String).includes(String(city.id));
+                            return (
+                                <label key={city.id} className="flex cursor-pointer items-center justify-between text-sm text-heading hover:text-primary transition-colors">
+                                    <div className="flex items-center gap-2 min-w-0">
+                                        <input
+                                            type="checkbox"
+                                            checked={isChecked}
+                                            onChange={() => toggleId('city', city.id)}
+                                            className="size-4 rounded border-border text-primary focus:ring-primary"
+                                        />
+                                        <span className="line-clamp-1">{city.title}</span>
+                                    </div>
+                                    {city.product_count !== undefined && (
+                                        <span className="text-[10px] font-medium text-res px-1.5 py-0.5 rounded-full bg-slate-100">
+                                            {city.product_count}
+                                        </span>
+                                    )}
+                                </label>
+                            );
+                        })}
                     </div>
                 </section>
             )}

@@ -249,6 +249,9 @@ function Index({ data, table, type, stats }) {
             <TbDotsVertical className='cursor-pointer size-4.25' />
           </ActionDropdown.Trigger>
           <ActionDropdown.Context className='flex flex-col gap-0.75 shadow-[2px_2px_3px_2px] shadow-secondary'>
+            <ActionDropdown.Link href={route('module.show', { type, id: row.id })}>
+              View Details
+            </ActionDropdown.Link>
             {canWrite && (
               <ActionDropdown.Link href={route(baseRoutes.edit, { type, id: row.id })}>
                 Edit

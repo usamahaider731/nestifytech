@@ -151,7 +151,7 @@ function CheckoutFormContent() {
         }));
         axios.post('/api/cart/prices', { items: payload })
             .then(res => {
-                const priceMap = res.data; // { "comboId": newPrice }
+                const priceMap = res.data; 
                 const changed = [];
                 items.forEach(item => {
                     const freshPrice = priceMap[String(item.comboId)];

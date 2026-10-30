@@ -456,64 +456,98 @@ function Dashboard({ data, ecommerce }) {
                   <th className='px-2.5 py-3.5'>Product</th>
                   <th className='px-2.5 py-3.5'>Category</th>
                   <th className='px-2.5 py-3.5'>Stock</th>
-                  <th className='px-2.5 py-3.5'>Price</th>
+                  <th className='px-2.5 py-3.5'>Buy Cost</th>
+                  <th className='px-2.5 py-3.5'>Sale Price</th>
                   <th className='px-2.5 py-3.5 text-right'>Status</th>
                 </tr>
               </thead>
               <tbody className='divide-y divide-permanent/10 w-full overflow-x-auto'>
                 {popularProducts.length === 0 ? (
                   <tr>
-                    <td colSpan='5' className='px-4 py-8 text-center text-secondary italic'>
+                    <td colSpan='6' className='px-4 py-8 text-center text-secondary italic'>
                       No products found. Start adding products to populate analytics!
                     </td>
                   </tr>
                 ) : (
-                  popularProducts.map((prod, idx) => (
-                    <tr key={idx} className='hover:bg-dynamic/40 transition-colors'>
-                      <td className='px-2.5 py-3 font-semibold text-heading'>
-                        <div className='flex items-center gap-3'>
-                          {prod.image ? (
-                            <img src={prod.image} alt={prod.title} className='size-8 rounded-lg object-cover shrink-0' />
-                          ) : (
-                            <div className='size-8 rounded-lg bg-primary/15 text-primary flex items-center justify-center shrink-0 font-bold'>
-                              {prod.title ? prod.title.charAt(0).toUpperCase() : 'P'}
+                  popularProducts.map((prod, idx) => {
+                    const buyPrice = Number(prod.buy_price || 0)
+                    const salePrice = Number(prod.price || prod.second_price || prod.first_price || 0)
+                    const firstPrice = Number(prod.first_price || 0)
+                    const secondPrice = Number(prod.second_price || 0)
+                    const hasDiscount = firstPrice > 0 && secondPrice > 0 && secondPrice < firstPrice
+
+                    return (
+                      <tr key={idx} className='hover:bg-dynamic/40 transition-colors'>
+                        <td className='px-2.5 py-3 font-semibold text-heading'>
+                          <div className='flex items-center gap-3'>
+                            {prod.image ? (
+                              <img src={prod.image} alt={prod.title} className='size-8 rounded-lg object-cover shrink-0' />
+                            ) : (
+                              <div className='size-8 rounded-lg bg-primary/15 text-primary flex items-center justify-center shrink-0 font-bold'>
+                                {prod.title ? prod.title.charAt(0).toUpperCase() : 'P'}
+                              </div>
+                            )}
+                            <div className='flex flex-col max-w-[150px] truncate'>
+                              <span className='truncate font-bold text-heading hover:text-primary transition-colors'>
+                                {prod.title}
+                              </span>
+                              <div className='flex items-center gap-1.5'>
+                                <span className='text-[10px] text-secondary font-mono'>{prod.sku || 'NST-ITEM'}</span>
+                                {prod.sales_count > 0 && (
+                                  <span className='text-[9px] font-bold text-primary bg-primary/10 px-1 rounded'>
+                                    {prod.sales_count} sold
+                                  </span>
+                                )}
+                              </div>
                             </div>
-                          )}
-                          <div className='flex flex-col max-w-[150px] truncate'>
-                            <span className='truncate font-bold text-heading hover:text-primary transition-colors'>
-                              {prod.title}
-                            </span>
-                            <div className='flex items-center gap-1.5'>
-                              <span className='text-[10px] text-secondary font-mono'>{prod.sku || 'NST-ITEM'}</span>
-                              {prod.sales_count > 0 && (
-                                <span className='text-[9px] font-bold text-primary bg-primary/10 px-1 rounded'>
-                                  {prod.sales_count} sold
+                          </div>
+                        </td>
+                        <td className='px-2.5 py-3 items-center'>
+                          <span className='px-2.5 py-1 flex rounded-full text-[8px] font-semibold bg-bg/80 w-fit text-secondary border text-center items-center justify-center border-permanent/20'>
+                            {prod.category}
+                          </span>
+                        </td>
+                        <td className='px-2.5 py-3'>
+                          <span className={`px-2 py-1 items-center justify-center rounded-full flex text-[9px] font-semibold ${prod.stock > 0 ? 'bg-green-500/15 text-green-400' : 'bg-red-500/15 text-red-400'}`}>
+                            {prod.stock > 0 ? `${prod.stock} in stock` : 'Out of stock'}
+                          </span>
+                        </td>
+                        <td className='px-2.5 py-3 font-mono text-secondary'>
+                          {buyPrice > 0 ? (
+                            <div className='flex flex-col'>
+                              <span className='text-xs font-semibold text-heading/85'>
+                                {currency} {buyPrice.toLocaleString()}
+                              </span>
+                              {prod.total_buy_price && Number(prod.total_buy_price) !== buyPrice && (
+                                <span className='text-[10px] text-secondary'>
+                                  Total: {currency} {Number(prod.total_buy_price).toLocaleString()}
                                 </span>
                               )}
                             </div>
+                          ) : (
+                            <span className='text-secondary/50 italic text-[11px]'>--</span>
+                          )}
+                        </td>
+                        <td className='px-2.5 py-3'>
+                          <div className='flex flex-col'>
+                            <span className='font-bold text-heading text-xs'>
+                              {currency} {salePrice ? salePrice.toLocaleString() : '0.00'}
+                            </span>
+                            {hasDiscount && (
+                              <span className='text-[10px] text-secondary line-through'>
+                                {currency} {firstPrice.toLocaleString()}
+                              </span>
+                            )}
                           </div>
-                        </div>
-                      </td>
-                      <td className='px-2.5 py-3 items-center'>
-                        <span className='px-2.5 py-1 flex rounded-full text-[8px] font-semibold bg-bg/80 w-fit text-secondary border text-center items-center justify-center border-permanent/20'>
-                          {prod.category}
-                        </span>
-                      </td>
-                      <td className='px-2.5 py-3'>
-                        <span className={`px-2 py-1 items-center justify-center rounded-full flex text-[9px] font-semibold ${prod.stock > 0 ? 'bg-green-500/15 text-green-400' : 'bg-red-500/15 text-red-400'}`}>
-                          {prod.stock > 0 ? `${prod.stock} in stock` : 'Out of stock'}
-                        </span>
-                      </td>
-                      <td className='px-2.5 py-3 font-semibold text-heading'>
-                        {currency} {prod.price ? prod.price.toLocaleString() : '0.00'}
-                      </td>
-                      <td className='px-2.5 py-3 text-right'>
-                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${prod.status === 'publish' ? 'bg-green-500/15 text-green-400' : 'bg-orange-500/15 text-orange-400'}`}>
-                          {prod.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))
+                        </td>
+                        <td className='px-2.5 py-3 text-right'>
+                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${prod.status === 'publish' ? 'bg-green-500/15 text-green-400' : 'bg-orange-500/15 text-orange-400'}`}>
+                            {prod.status}
+                          </span>
+                        </td>
+                      </tr>
+                    )
+                  })
                 )}
               </tbody>
             </table>
