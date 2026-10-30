@@ -35,8 +35,12 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         // NOTE: Plain-text password is intentionally NOT stored in session (security).
+        $user = Auth::user();
+        if ($user && ($user->role === 'admin' || $user->role === 'superadmin')) {
+            return redirect()->intended(route('admin.dashboard'));
+        }
 
-        return Inertia::location('/profile');
+        return redirect()->intended(route('profile.index'));
     }
 
     /**
@@ -55,6 +59,6 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return Inertia::location('/');
+        return redirect('/');
     }
 }
