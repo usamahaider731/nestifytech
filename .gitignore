@@ -30,6 +30,8 @@
 !/storage/app/schema/**
 !/storage/app/import/
 !/storage/app/import/**
+!/storage/app/public/
+!/storage/app/public/**
 
 # =========================
 # Cache / Logs

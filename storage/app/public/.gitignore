@@ -1,2 +1,10 @@
 *
 !.gitignore
+!uploads/
+!uploads/**
+!*.jpg
+!*.jpeg
+!*.png
+!*.webp
+!*.gif
+!*.svg
