@@ -38,32 +38,58 @@ const SingleProductSlider = ({ product }) => {
         mainApi.scrollTo(index);
     };
 
+    // Compute responsive slides count based on number of gallery images
+    const totalSlides = Gallery?.length || 0;
+    const thumbSlidesToShow = Math.min(Math.max(totalSlides, 1), 6);
+
     return (
         <div className='flex w-full flex-col'>
-            <div className='relative w-full rounded-2xl h-110'>
-                <Slider setApi={setMainApi} containerClass='w-full h-full' show={1} autoplayOptions={{ delay: 3000, pause: 'hover' }} showNavigation={true}>
+            {/* Main Image Slider */}
+            <div className='relative w-full rounded-2xl h-80 sm:h-96 md:h-110 bg-white border border-border/60 overflow-hidden'>
+                <Slider setApi={setMainApi} containerClass='w-full h-full' show={1} autoplayOptions={{ delay: 3000, pause: 'hover' }} showNavigation={totalSlides > 1}>
                     {Gallery && Gallery.map((slide, index) => {
-                        const name = (slide.name ?? slide.filename.split('.').at(0))
-                        slide.name = name
+                        const name = (slide.name ?? slide?.filename?.split('.').at(0));
+                        slide.name = name;
                         return (
-                            <div key={slide?.id || index} className='flex embla__slide w-full h-full items-center justify-center overflow-hidden rounded-2xl'>
-                                <ImageViwer image={slide} width='600' height='600' className='max-w-full max-h-9/10 object-cover transition-transform duration-500 hover:scale-110' />
+                            <div key={slide?.id || index} className='flex embla__slide w-full h-full items-center justify-center overflow-hidden rounded-2xl p-4'>
+                                <ImageViwer image={slide} width='600' height='600' className='max-w-full max-h-full object-contain transition-transform duration-500 hover:scale-105' />
                             </div>
-                        )
+                        );
                     })}
                 </Slider>
             </div>
-            <div className='w-full mt-2'>
-                <Slider setApi={setThumbApi} show={Gallery.length + 5} options={{ loop: true, dragFree: true, align: 'start', slidesToScroll: 'visible', gap: 20 }} showNavigation={false} autoplayOptions={{ delay: 3000, pause: 'hover' }} >
-                    {Gallery && Gallery.map((slide, index) => {
-                        return (
-                            <div key={slide?.id || index} onClick={() => onThumbClick(index)} className={`flex embla__slide rounded-lg overflow-hidden cursor-pointer justify-center w-full transition-all ${index === selectedIndex ? 'ring-2 ring-primary' : 'opacity-60 hover:opacity-100'}`}>
-                                <ImageViwer image={slide?.filename || slide} className='w-full h-24 object-cover' />
+
+            {/* Thumbnail Slider */}
+            {totalSlides > 1 && (
+                <div className='w-full mt-3 px-1'>
+                    <Slider
+                        setApi={setThumbApi}
+                        show={thumbSlidesToShow}
+                        options={{
+                            loop: totalSlides > thumbSlidesToShow,
+                            dragFree: true,
+                            align: 'start',
+                            slidesToScroll: 1,
+                            gap: 10,
+                        }}
+                        showNavigation={totalSlides > thumbSlidesToShow}
+                    >
+                        {Gallery.map((slide, index) => (
+                            <div
+                                key={slide?.id || index}
+                                onClick={() => onThumbClick(index)}
+                                className={`flex embla__slide rounded-lg overflow-hidden cursor-pointer justify-center border-2 transition-all p-1 bg-white aspect-square ${
+                                    index === selectedIndex
+                                        ? 'border-primary ring-2 ring-primary/30 opacity-100 shadow-sm'
+                                        : 'border-border/60 opacity-60 hover:opacity-100 hover:border-primary/50'
+                                }`}
+                            >
+                                <ImageViwer image={slide?.filename || slide} className='w-full h-full object-contain' />
                             </div>
-                        )
-                    })}
-                </Slider>
-            </div>
+                        ))}
+                    </Slider>
+                </div>
+            )}
         </div>
     );
 }

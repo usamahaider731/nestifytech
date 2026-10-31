@@ -17,7 +17,7 @@
 .embla__slide {
   position: relative;
   min-width: 0; /* Important for flex items */
-  flex: 0 0 calc(100% / var(--slides-to-show, 1));
+  flex: 0 0 calc((100% - (var(--slides-to-show, 1) - 1) * var(--slide-gap, 0px)) / var(--slides-to-show, 1));
 }
 
 .embla__prev,

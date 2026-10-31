@@ -33,9 +33,9 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
     const isWishlist = useSelector(selectIsInWishlist(product.id));
 
     const compareHandle = () => {
-        if(isCompare){
+        if (isCompare) {
             dispatch(removeFromCompare(product.id));
-        }else{
+        } else {
             dispatch(addToCompare({ productId: product.id, product }));
         }
     }
@@ -47,10 +47,10 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
             alert(__('You cannot like or wishlist your own product.'));
             return;
         }
-        if(isWishlist){
+        if (isWishlist) {
             dispatch(removeFromWishlist(product.id));
             if (auth?.user) recordWishlistActivity('wishlist_removed', product.id);
-        }else{
+        } else {
             dispatch(addToWishlist({ productId: product.id, product }));
             if (auth?.user) recordWishlistActivity('wishlist_added', product.id);
         }
@@ -112,7 +112,7 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
 
     return (
         <article className={`group flex flex-col overflow-hidden rounded sm:h-40 border border-border bg-white shadow-sm transition duration-300 hover:border-primary/40 hover:shadow-xl sm:flex-row ${className}`}>
-            <div className="relative shrink-0 overflow-hidden bg-white p-3 m-2 shadow sm:shadow-none sm:w-40 max-h-40 sm:h-auto">
+            <div className="relative shrink-0 overflow-hidden bg-white sm:p-3 m-2 sm:m-0 shadow sm:shadow-none sm:w-40 ">
 
                 {productHref ? (
                     <Link href={productHref} className="block size-full">
@@ -197,12 +197,12 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
                     </div>
                 )}
 
-                <div className="flex flex-wrap mt-auto items-center gap-1.5">
+                <div className="flex flex-wrap mt-auto items-center gap-1.25 sm:gap-1.5">
 
                     {cardSetting.show_product_view_button && productHref && (
                         <Link
                             href={productHref}
-                            className="inline-flex items-center justify-center gap-2 rounded border border-border px-3 py-2 text-xs font-semibold text-heading transition hover:border-primary hover:bg-primary"
+                            className="inline-flex items-center justify-center gap-1.75 sm:gap-2 rounded border border-border px-2.75 sm:px-3 py-2 text-xs font-semibold text-heading transition hover:border-primary hover:bg-primary"
                         >
                             {__('View Details')}
                             <FaEye className="size-3" />
@@ -212,9 +212,9 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
                         <button
                             type='button'
                             onClick={compareHandle}
-                            className={`inline-flex items-center justify-center gap-2 rounded border border-border px-2.5 py-2 text-xs font-semibold transition hover:border-primary hover:bg-primary hover:text-white ${isCompare ? 'bg-primary text-white border-primary' : 'bg-white text-heading'}`}
+                            className={`inline-flex items-center justify-center gap-1.75 sm:gap-2 rounded border border-border px-2.75 sm:px-3 py-2 text-xs font-semibold transition hover:border-primary hover:bg-primary hover:text-white ${isCompare ? 'bg-primary text-white border-primary' : 'bg-white text-heading'}`}
                         >
-                            <RiRepeat2Line className="size-4" />
+                            <RiRepeat2Line className="sm:size-4 size-3" />
                             {__('Add To Compare')}
                         </button>
                     )}

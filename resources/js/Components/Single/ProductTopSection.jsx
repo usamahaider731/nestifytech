@@ -82,7 +82,7 @@ const ProductTopSection = ({ product }) => {
                 </div>
 
             </div>
-            <div className='flex w-full mt-10 relative gap-10'>
+            <div className='flex flex-col md:flex-row w-full mt-10 relative gap-10'>
                 <div className='flex flex-col flex-1'>
                     <SingleProductSlider product={product} />
                 </div>
@@ -92,7 +92,7 @@ const ProductTopSection = ({ product }) => {
                             <h1 className='text-primary font-semibold font-poppins text-2xl'>
                                 {product.title}
                             </h1>
-                            <div className='flex flex-col gap-2 font-roboto'>
+                            <div className='flex flex-col sm:gap-2 gap-4 font-roboto'>
                                 <div className='flex gap-4 items-start flex-col'>
                                     {product?.brand && Object.keys(product.brand).length !== 0 && 
                                     <div className='flex flex-col items-start'>
@@ -103,7 +103,7 @@ const ProductTopSection = ({ product }) => {
                                         <span className='text-text font-semibold text-lg'>{product.sku}</span>
                                     </div>
                                 </div>
-                                <div className='flex gap-2 items-center'>
+                                <div className='flex flex-col sm:flex-row gap-2 items-start sm:items-center'>
                                     <span className='text-sm text-heading font-semibold'>{__('Category:')}</span>
                                     <div className='flex gap-2'>
                                         {
@@ -115,7 +115,7 @@ const ProductTopSection = ({ product }) => {
                                         }</div>
                                 </div>
                                 {product?.store && (
-                                    <div className='flex gap-2 items-center'>
+                                    <div className='flex gap-2 sm:flex-row flex-col sm:items-center'>
                                         <span className='text-sm text-heading font-semibold'>{__('Store / Branch:')}</span>
                                         <span className='inline-flex items-center gap-1.5 py-0.5 px-2 rounded-md bg-bg text-primary text-xs font-semibold font-roboto'>
                                             <span>{product.store.title}</span>

@@ -39,8 +39,16 @@ const Slider = ({ children, containerClass = "", options = { loop: true, align: 
         }
     }, [emblaApi, setApi]);
 
+    const gapValue = options?.gap ? `${options.gap}px` : '0px';
+
     return (
-        <div className="embla relative" style={{ '--slides-to-show': show }}>
+        <div 
+            className="embla relative" 
+            style={{ 
+                '--slides-to-show': show,
+                '--slide-gap': gapValue,
+            }}
+        >
             <div className="embla__viewport" ref={emblaRef}>
                 <div className={`embla__container ${containerClass}`} style={{ gap: options?.gap ? `${options.gap}px` : undefined }}>
                     {children}
