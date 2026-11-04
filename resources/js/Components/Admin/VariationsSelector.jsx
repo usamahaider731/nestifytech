@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { RiAddLine, RiSubtractLine, RiImageAddLine, RiPriceTagLine, RiStackLine, RiHashtag, RiLoader4Line, RiPaletteLine, RiMenuAddLine } from 'react-icons/ri';
+import { RiAddLine, RiSubtractLine, RiImageAddLine, RiPriceTagLine, RiStackLine, RiHashtag, RiLoader4Line, RiPaletteLine, RiMenuAddLine, RiWallet3Line, RiPercentLine } from 'react-icons/ri';
 import axios from 'axios';
 
 const parseIfString = (val) => {
@@ -31,6 +31,9 @@ const migrateValue = (val) => {
                 combinations: v.sizes.map(s => ({
                     id: s.id || Date.now() + Math.random(),
                     price: s.price || '',
+                    buy_price: s.buy_price || '',
+                    first_price: s.first_price || s.price || '',
+                    second_price: s.second_price || '',
                     stock: s.stock || '',
                     attributes: [{ id: Date.now() + Math.random(), key: 'Size', value: s.size || '' }]
                 }))
@@ -43,6 +46,9 @@ const migrateValue = (val) => {
             combinations: [{
                 id: Date.now() + Math.random(),
                 price: v.price || '',
+                buy_price: v.buy_price || '',
+                first_price: v.first_price || v.price || '',
+                second_price: v.second_price || '',
                 stock: v.stock || '',
                 attributes: v.size?.length > 0
                     ? v.size.map(s => ({ id: Date.now() + Math.random(), key: s.key, value: s.value }))
@@ -52,7 +58,17 @@ const migrateValue = (val) => {
     });
 };
 
-const VariationsSelector = ({ value = [], onChange = () => { } }) => {
+const emptyCombo = (productPrices = {}) => ({
+    id: Date.now() + Math.random(),
+    buy_price: productPrices.buy_price ?? '',
+    first_price: productPrices.first_price ?? '',
+    second_price: productPrices.second_price ?? '',
+    price: productPrices.second_price || productPrices.first_price || '',
+    stock: '',
+    attributes: [{ id: Date.now() + Math.random(), key: '', value: '' }]
+});
+
+const VariationsSelector = ({ value = [], onChange = () => { }, productPrices = {} }) => {
     const [variations, setVariations] = useState(migrateValue(value));
     const [uploadState, setUploadState] = useState({});
     const userEdited = useRef(false);
@@ -87,12 +103,7 @@ const VariationsSelector = ({ value = [], onChange = () => { } }) => {
             image: null,
             imagePreview: null,
             shared_attributes: [],
-            combinations: [{
-                id: Date.now() + Math.random(),
-                price: '',
-                stock: '',
-                attributes: [{ id: Date.now() + Math.random(), key: '', value: '' }]
-            }],
+            combinations: [emptyCombo(productPrices)],
         };
         const updated = [...variations, newVariation];
         userEdited.current = true;
@@ -173,12 +184,7 @@ const VariationsSelector = ({ value = [], onChange = () => { } }) => {
 
             ...v,
 
-            combinations: [...parseIfString(v.combinations), {
-                id: Date.now() + Math.random(),
-                price: '',
-                stock: '',
-                attributes: [{ id: Date.now() + Math.random(), key: '', value: '' }]
-            }]
+            combinations: [...parseIfString(v.combinations), emptyCombo(productPrices)]
         } : v);
         userEdited.current = true;
  
@@ -446,20 +452,44 @@ const VariationsSelector = ({ value = [], onChange = () => { } }) => {
                                                     </button>
                                                 </div>
 
-                                                <div className="w-full md:w-auto flex gap-4 border-t border-white/5 md:border-none pt-4 md:pt-0">
-                                                    <div className="space-y-1.5 flex-1">
+                                                <div className="w-full grid grid-cols-2 lg:grid-cols-4 gap-4 border-t border-white/5 md:border-none pt-4 md:pt-0">
+                                                    <div className="space-y-1.5">
                                                         <label className="text-[10px] uppercase font-black text-res opacity-80 flex items-center gap-1.5 ml-1">
-                                                            <RiPriceTagLine className="text-primary" /> Price
+                                                            <RiWallet3Line className="text-primary" /> Cost
                                                         </label>
                                                         <input
                                                             type="number"
-                                                            value={combo.price}
-                                                            placeholder="0.00"
-                                                            onChange={(e) => updateCombination(v.id, combo.id, 'price', e.target.value)}
+                                                            value={combo.buy_price ?? ''}
+                                                            placeholder={productPrices.buy_price || '0.00'}
+                                                            onChange={(e) => updateCombination(v.id, combo.id, 'buy_price', e.target.value)}
                                                             className="w-full min-w-[80px] bg-transparent border-b border-secondary px-2 py-1 text-sm text-heading focus:border-primary transition-all outline-none"
                                                         />
                                                     </div>
-                                                    <div className="space-y-1.5 flex-1">
+                                                    <div className="space-y-1.5">
+                                                        <label className="text-[10px] uppercase font-black text-res opacity-80 flex items-center gap-1.5 ml-1">
+                                                            <RiPriceTagLine className="text-primary" /> Regular
+                                                        </label>
+                                                        <input
+                                                            type="number"
+                                                            value={combo.first_price ?? combo.price ?? ''}
+                                                            placeholder={productPrices.first_price || '0.00'}
+                                                            onChange={(e) => updateCombination(v.id, combo.id, 'first_price', e.target.value)}
+                                                            className="w-full min-w-[80px] bg-transparent border-b border-secondary px-2 py-1 text-sm text-heading focus:border-primary transition-all outline-none"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-1.5">
+                                                        <label className="text-[10px] uppercase font-black text-res opacity-80 flex items-center gap-1.5 ml-1">
+                                                            <RiPercentLine className="text-primary" /> Sale
+                                                        </label>
+                                                        <input
+                                                            type="number"
+                                                            value={combo.second_price ?? ''}
+                                                            placeholder={productPrices.second_price || '0.00'}
+                                                            onChange={(e) => updateCombination(v.id, combo.id, 'second_price', e.target.value)}
+                                                            className="w-full min-w-[80px] bg-transparent border-b border-secondary px-2 py-1 text-sm text-heading focus:border-primary transition-all outline-none"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-1.5">
                                                         <label className="text-[10px] uppercase font-black text-res opacity-80 flex items-center gap-1.5 ml-1">
                                                             <RiStackLine className="text-primary" /> Stock
                                                         </label>

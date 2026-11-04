@@ -18,6 +18,68 @@ class ModuleController extends Controller
     use ModuleHandler;
 
 
+    /**
+     * Hook triggered after saving any module entry.
+     */
+    protected function afterSaveHook(Request $request, $record, string $type, bool $isEdit)
+    {
+        // When a Store is created/updated, link the selected manager_id to user_meta
+        if ($type === 'store') {
+            $managerId = $request->input('manager_id');
+            // If it came as an array/object, extract clean id
+            if (is_array($managerId) && isset($managerId['id'])) {
+                $managerId = $managerId['id'];
+            }
+
+            // If editing, clear previous assignment for this store in case the manager changed
+            if ($isEdit) {
+                DB::table('user_meta')
+                    ->whereIn('key', ['store_id', 'assigned_store'])
+                    ->where('value', (string) $record->id)
+                    ->when(!empty($managerId), function ($q) use ($managerId) {
+                        $q->where('user_id', '!=', $managerId);
+                    })
+                    ->delete();
+            }
+
+            if (!empty($managerId)) {
+                // Update the user's meta with store_id
+                DB::table('user_meta')->updateOrInsert(
+                    ['user_id' => $managerId, 'key' => 'store_id'],
+                    ['value' => (string) $record->id]
+                );
+                DB::table('user_meta')->updateOrInsert(
+                    ['user_id' => $managerId, 'key' => 'assigned_store'],
+                    ['value' => (string) $record->id]
+                );
+            }
+        }
+
+        // When a User is created/updated, keep assigned_store in sync with store_id
+        if ($type === 'user' || $type === 'users') {
+            $storeId = $request->input('store_id');
+            if (is_array($storeId) && isset($storeId['id'])) {
+                $storeId = $storeId['id'];
+            }
+            if (!empty($storeId)) {
+                DB::table('user_meta')->updateOrInsert(
+                    ['user_id' => $record->id, 'key' => 'assigned_store'],
+                    ['value' => (string) $storeId]
+                );
+                DB::table('user_meta')->updateOrInsert(
+                    ['user_id' => $record->id, 'key' => 'store_id'],
+                    ['value' => (string) $storeId]
+                );
+            } else if ($isEdit && $request->has('store_id')) {
+                // If explicitly cleared
+                DB::table('user_meta')
+                    ->where('user_id', $record->id)
+                    ->whereIn('key', ['store_id', 'assigned_store', 'store'])
+                    ->delete();
+            }
+        }
+    }
+
     private function checkPermission(string $type, string $action)
     {
         $user = auth()->user();
@@ -339,6 +401,7 @@ class ModuleController extends Controller
                 if ($category) {
                     $metaTable = $dbConfig['meta_table'] ?? (Str::singular($tableName) . '_meta');
                     $metaKey = $dbConfig['meta_key'] ?? (Str::singular($tableName) . '_id');
+
                     $filterKey = ($type === 'blog' || isset($dbConfig['features']['blog_category'])) ? 'blog_category' : 'category';
                     $query->join($metaTable, "{$tableName}.id", '=', "{$metaTable}.{$metaKey}")
                         ->where("{$metaTable}.key", $filterKey)
@@ -349,6 +412,26 @@ class ModuleController extends Controller
 
             // Customer vs Staff/Team filtering for users module
             if ($type === 'users' || $type === 'user') {
+                $currentUser = auth()->user();
+                if ($currentUser) {
+                    $userRoles = is_string($currentUser->roles) ? json_decode($currentUser->roles, true) : (array) $currentUser->roles;
+                    $isGlobalAdmin = !empty($userRoles) && DB::table('roles')->whereIn('id', $userRoles)->where('title', 'Administrator')->exists();
+                    if (!$isGlobalAdmin) {
+                        $adminStoreId = DB::table('user_meta')->where('user_id', $currentUser->id)->whereIn('key', ['store_id', 'assigned_store', 'store'])->value('value');
+                        if (!empty($adminStoreId)) {
+                            // Only users assigned to this same store
+                            $scopedUserIds = DB::table('user_meta')
+                                ->whereIn('key', ['store_id', 'assigned_store', 'store'])
+                                ->where('value', (string) $adminStoreId)
+                                ->pluck('user_id')
+                                ->push($currentUser->id)
+                                ->unique()
+                                ->toArray();
+                            $query->whereIn("{$tableName}.id", $scopedUserIds);
+                        }
+                    }
+                }
+
                 $tab = $request->query('tab');
                 if ($tab === 'customers' || $tab === 'customer') {
                     $query->where(function ($q) {
@@ -369,8 +452,21 @@ class ModuleController extends Controller
         }
 
         if (!$query) {
-            if ($type === 'roles') {
+            if ($type === 'roles' || $type === 'role') {
                 $query = DB::table('roles');
+
+                // If user is store employee, only show store-scoped roles
+                $currentUser = auth()->user();
+                if ($currentUser) {
+                    $uRoles = is_string($currentUser->roles) ? json_decode($currentUser->roles, true) : (array) $currentUser->roles;
+                    $isGlobalAdmin = !empty($uRoles) && DB::table('roles')->whereIn('id', $uRoles)->where('title', 'Administrator')->exists();
+                    if (!$isGlobalAdmin) {
+                        $isStoreStaff = !empty($uRoles) && DB::table('roles')->whereIn('id', $uRoles)->where('scope', 'store')->exists();
+                        if ($isStoreStaff) {
+                            $query->where('scope', 'store');
+                        }
+                    }
+                }
             } else {
                 $query = DB::table('taxonomies')->where('type', $type);
                 if ($type === 'category' && !$request->search) {
@@ -508,6 +604,50 @@ class ModuleController extends Controller
         if (!$record)
             abort(404);
 
+        // Store Admin user scoping protection
+        if ($type === 'user' || $type === 'users') {
+            $currentUser = auth()->user();
+            if ($currentUser) {
+                $userRoles = is_string($currentUser->roles) ? json_decode($currentUser->roles, true) : (array) $currentUser->roles;
+                $isGlobalAdmin = !empty($userRoles) && DB::table('roles')->whereIn('id', $userRoles)->where('title', 'Administrator')->exists();
+                if (!$isGlobalAdmin) {
+                    // Check if target user has any platform role or administrator role
+                    $targetUserRoles = is_string($record->roles ?? null) ? json_decode($record->roles, true) : (array) ($record->roles ?? []);
+                    if (!empty($targetUserRoles)) {
+                        $targetHasPlatformRole = DB::table('roles')->whereIn('id', $targetUserRoles)->where(function ($q) {
+                            $q->where('scope', 'platform')->orWhere('title', 'Administrator');
+                        })->exists();
+                        if ($targetHasPlatformRole) {
+                            abort(403, 'Unauthorized: Store employees cannot edit site/platform employees.');
+                        }
+                    }
+
+                    $adminStoreId = DB::table('user_meta')->where('user_id', $currentUser->id)->whereIn('key', ['store_id', 'assigned_store', 'store'])->value('value');
+                    if (!empty($adminStoreId)) {
+                        $targetStoreId = DB::table('user_meta')->where('user_id', $id)->whereIn('key', ['store_id', 'assigned_store', 'store'])->value('value');
+                        if ((string) $adminStoreId !== (string) $targetStoreId && (int)$currentUser->id !== (int)$id) {
+                            abort(403, 'Unauthorized: You can only manage users assigned to your store.');
+                        }
+                    }
+                }
+            }
+        }
+
+        // Store employee role scoping protection
+        if ($type === 'role' || $type === 'roles') {
+            $currentUser = auth()->user();
+            if ($currentUser) {
+                $userRoles = is_string($currentUser->roles) ? json_decode($currentUser->roles, true) : (array) $currentUser->roles;
+                $isGlobalAdmin = !empty($userRoles) && DB::table('roles')->whereIn('id', $userRoles)->where('title', 'Administrator')->exists();
+                if (!$isGlobalAdmin) {
+                    $isStoreStaff = !empty($userRoles) && DB::table('roles')->whereIn('id', $userRoles)->where('scope', 'store')->exists();
+                    if ($isStoreStaff && ($record->scope === 'platform' || $record->title === 'Administrator')) {
+                        abort(403, 'Unauthorized: Store employees cannot edit site/platform roles.');
+                    }
+                }
+            }
+        }
+
         // Fetch meta if table exists
         $metaTable = $dbConfig['meta_table'] ?? (\Illuminate\Support\Str::singular($table) . '_meta');
         if (Schema::hasTable($metaTable)) {
@@ -547,6 +687,61 @@ class ModuleController extends Controller
             $type = $id;
             $id = $temp;
         }
+        // Pre-check for submission authorization
+        $currentUser = auth()->user();
+        if ($currentUser) {
+            $userRoles = is_string($currentUser->roles) ? json_decode($currentUser->roles, true) : (array) $currentUser->roles;
+            $isGlobalAdmin = !empty($userRoles) && DB::table('roles')->whereIn('id', $userRoles)->where('title', 'Administrator')->exists();
+
+            if (!$isGlobalAdmin) {
+                // If editing or creating a user
+                if ($type === 'user' || $type === 'users') {
+                    if ($id) {
+                        $targetUser = DB::table('users')->where('id', $id)->first();
+                        $targetRoles = is_string($targetUser->roles ?? null) ? json_decode($targetUser->roles, true) : (array) ($targetUser->roles ?? []);
+                        if (!empty($targetRoles)) {
+                            $targetHasPlatformRole = DB::table('roles')->whereIn('id', $targetRoles)->where(function ($q) {
+                                $q->where('scope', 'platform')->orWhere('title', 'Administrator');
+                            })->exists();
+                            if ($targetHasPlatformRole) {
+                                abort(403, 'Unauthorized: Store employees cannot modify site/platform employees.');
+                            }
+                        }
+                    }
+
+                    // Store employees cannot assign platform roles to any user
+                    $submittedRoles = $request->input('roles');
+                    if (!empty($submittedRoles)) {
+                        $roleIdsToCheck = is_array($submittedRoles) ? $submittedRoles : [$submittedRoles];
+                        // If objects with id
+                        $roleIdsToCheck = array_map(fn($r) => is_array($r) ? ($r['id'] ?? null) : (is_object($r) ? ($r->id ?? null) : $r), $roleIdsToCheck);
+                        $roleIdsToCheck = array_filter($roleIdsToCheck);
+
+                        $hasPlatformAssigned = DB::table('roles')->whereIn('id', $roleIdsToCheck)->where(function ($q) {
+                            $q->where('scope', 'platform')->orWhere('title', 'Administrator');
+                        })->exists();
+
+                        if ($hasPlatformAssigned) {
+                            abort(403, 'Unauthorized: Store employees cannot assign site/platform roles.');
+                        }
+                    }
+                }
+
+                // If editing or creating a role
+                if ($type === 'role' || $type === 'roles') {
+                    if ($id) {
+                        $targetRole = DB::table('roles')->where('id', $id)->first();
+                        if ($targetRole && ($targetRole->scope === 'platform' || $targetRole->title === 'Administrator')) {
+                            abort(403, 'Unauthorized: Store employees cannot modify site/platform roles.');
+                        }
+                    }
+                    if ($request->input('scope') === 'platform') {
+                        abort(403, 'Unauthorized: Store employees cannot create or modify platform-scoped roles.');
+                    }
+                }
+            }
+        }
+
         $response = $this->handleSubmission($request, $type, $id);
 
         if (($request->ajax() || $request->wantsJson()) && !$request->hasHeader('X-Inertia')) {
@@ -585,6 +780,48 @@ class ModuleController extends Controller
             $this->checkPermission($type, 'delete');
             $dbConfig = $this->loadModuleConfig($type, 'DB');
             $table = $dbConfig['table'] ?? Str::plural($type);
+
+            if ($type === 'user' || $type === 'users') {
+                $currentUser = auth()->user();
+                if ($currentUser) {
+                    $userRoles = is_string($currentUser->roles) ? json_decode($currentUser->roles, true) : (array) $currentUser->roles;
+                    $isGlobalAdmin = !empty($userRoles) && DB::table('roles')->whereIn('id', $userRoles)->where('title', 'Administrator')->exists();
+                    if (!$isGlobalAdmin) {
+                        $targetUser = DB::table('users')->where('id', $id)->first();
+                        $targetRoles = is_string($targetUser->roles ?? null) ? json_decode($targetUser->roles, true) : (array) ($targetUser->roles ?? []);
+                        if (!empty($targetRoles)) {
+                            $targetHasPlatformRole = DB::table('roles')->whereIn('id', $targetRoles)->where(function ($q) {
+                                $q->where('scope', 'platform')->orWhere('title', 'Administrator');
+                            })->exists();
+                            if ($targetHasPlatformRole) {
+                                return response()->json(['success' => false, 'message' => 'Unauthorized: Store employees cannot delete site/platform employees.'], 403);
+                            }
+                        }
+
+                        $adminStoreId = DB::table('user_meta')->where('user_id', $currentUser->id)->whereIn('key', ['store_id', 'assigned_store', 'store'])->value('value');
+                        if (!empty($adminStoreId)) {
+                            $targetStoreId = DB::table('user_meta')->where('user_id', $id)->whereIn('key', ['store_id', 'assigned_store', 'store'])->value('value');
+                            if ((string) $adminStoreId !== (string) $targetStoreId) {
+                                return response()->json(['success' => false, 'message' => 'Unauthorized: Cannot delete user from another store.'], 403);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if ($type === 'role' || $type === 'roles') {
+                $currentUser = auth()->user();
+                if ($currentUser) {
+                    $userRoles = is_string($currentUser->roles) ? json_decode($currentUser->roles, true) : (array) $currentUser->roles;
+                    $isGlobalAdmin = !empty($userRoles) && DB::table('roles')->whereIn('id', $userRoles)->where('title', 'Administrator')->exists();
+                    if (!$isGlobalAdmin) {
+                        $targetRole = DB::table('roles')->where('id', $id)->first();
+                        if ($targetRole && ($targetRole->scope === 'platform' || $targetRole->title === 'Administrator')) {
+                            return response()->json(['success' => false, 'message' => 'Unauthorized: Store employees cannot delete site/platform roles.'], 403);
+                        }
+                    }
+                }
+            }
 
             DB::table($table)->where('id', $id)->delete();
 
@@ -947,16 +1184,20 @@ class ModuleController extends Controller
                         return null;
                     })->filter()->values()->all();
                     
+                    $sellingPrice = variation_selling_price($child);
                     $combinations[] = [
                         'id' => $child->id,
-                        'price' => $child->price,
+                        'price' => $sellingPrice,
+                        'buy_price' => $child->buy_price ?? null,
+                        'first_price' => $child->first_price ?? null,
+                        'second_price' => $child->second_price ?? null,
                         'stock' => $child->stock,
                         'attributes' => $comboAttributes
                     ];
                     
                     $totalStock += (int) $child->stock;
-                    if ($minPrice === 0 || ($child->price > 0 && $child->price < $minPrice)) {
-                        $minPrice = $child->price;
+                    if ($minPrice === 0 || ($sellingPrice > 0 && $sellingPrice < $minPrice)) {
+                        $minPrice = $sellingPrice;
                     }
                 }
                 

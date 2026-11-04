@@ -4,12 +4,16 @@ import SvgViewer from '@/Components/Admin/SvgViewer'
 import Checkbox from '@/Components/Admin/Checkbox'
 import Table from '@/Components/Admin/Table'
 import AdminLayout from '@/Layouts/AdminLayout'
-import { Link } from '@inertiajs/react'
+import { Link, usePage } from '@inertiajs/react'
+import { hasPermission } from '@/Utils/helper'
+import { RiLockLine } from 'react-icons/ri'
 import React, { useState, useEffect } from 'react'
 import { RiDeleteBin6Line, RiFile3Fill, RiFileEditLine } from 'react-icons/ri'
 import { TbDotsVertical } from 'react-icons/tb'
 
 function Index({ products, table }) {
+    const { auth } = usePage().props
+    const canWrite = hasPermission(auth?.user, 'product-write')
     const [Product, SetProduct] = useState(products.data || products);
     const Column = table?.columns || [];
     useEffect(() => {

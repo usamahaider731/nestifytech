@@ -83,10 +83,10 @@ function MenuItem({ item, depth = 0, onEdit, onRemove, allItems, onReorder }) {
 
     return (
         <div className={depth > 0 ? 'ml-8 mt-2' : 'mt-2'}
-             draggable
-             onDragStart={handleDragStart}
-             onDragOver={handleDragOver}
-             onDrop={handleDrop}
+            draggable
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
         >
             <div
                 className={`
@@ -232,7 +232,7 @@ function Menu({ menu, menu_options }) {
     const [categories, setCategories] = useState([]);
     const [brands, setBrands] = useState([]);
     const [products, setProducts] = useState([]);
-    
+
     // Checked state for bulk addition
     const [checkedCategories, setCheckedCategories] = useState([]);
     const [checkedBrands, setCheckedBrands] = useState([]);
@@ -241,9 +241,9 @@ function Menu({ menu, menu_options }) {
 
     useEffect(() => {
         // Fetch taxonomies and products
-        axios.get('/api/get_taxonomies?type=category').then(res => setCategories(res.data)).catch(() => {});
-        axios.get('/api/get_taxonomies?type=brand').then(res => setBrands(res.data)).catch(() => {});
-        axios.get('/api/get_posts?type=product').then(res => setProducts(res.data)).catch(() => {});
+        axios.get('/api/get_taxonomies?type=category').then(res => setCategories(res.data)).catch(() => { });
+        axios.get('/api/get_taxonomies?type=brand').then(res => setBrands(res.data)).catch(() => { });
+        axios.get('/api/get_posts?type=product').then(res => setProducts(res.data)).catch(() => { });
     }, []);
 
     // Helper to toggle bulk selections
@@ -255,11 +255,11 @@ function Menu({ menu, menu_options }) {
         if (checkedIds.length === 0) return;
         setAddingBulk(true);
         const r = toast.loading(`Adding ${type}s…`);
-        
+
         try {
             const selectedItems = items.filter(i => checkedIds.includes(i.id));
             let newMenus = [];
-            
+
             // We sequentially post them to reuse the same endpoint
             for (const item of selectedItems) {
                 const fd = new FormData();
@@ -267,13 +267,13 @@ function Menu({ menu, menu_options }) {
                 fd.append('link', makeLink(item));
                 fd.append('parent', 0);
                 fd.append('location', activeLocation);
-                
+
                 const res = await axios.post(route('menu.submit'), fd, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
                 newMenus.push(res.data);
             }
-            
+
             setAllMenus(prev => [...prev, ...newMenus]);
             setCheckedIds([]); // clear selection
             toast.dismiss(r);
@@ -313,7 +313,7 @@ function Menu({ menu, menu_options }) {
         }
 
         const itemsToDelete = allMenus.filter(m => m.location === activeLocation && (!m.parent_id || m.parent_id == 0));
-        
+
         if (itemsToDelete.length > 0) {
             const r = toast.loading('Deleting location items…');
             try {
@@ -361,23 +361,23 @@ function Menu({ menu, menu_options }) {
 
         const newMenus = [...allMenus];
         newMenus.splice(sourceIndex, 1);
-        
+
         const newTargetIndex = newMenus.findIndex(i => i.id === targetId);
-        newMenus.splice(newTargetIndex, 0, {...sourceItem, parent_id: targetItem.parent_id});
-        
+        newMenus.splice(newTargetIndex, 0, { ...sourceItem, parent_id: targetItem.parent_id });
+
         const siblings = newMenus.filter(i => i.parent_id === targetItem.parent_id);
         siblings.forEach((sib, index) => {
             sib.sort_order = index;
             const idx = newMenus.findIndex(i => i.id === sib.id);
-            if(idx > -1) newMenus[idx].sort_order = index;
+            if (idx > -1) newMenus[idx].sort_order = index;
         });
 
         setAllMenus(newMenus);
         try {
-            await axios.post(route('menu.reorder'), { 
+            await axios.post(route('menu.reorder'), {
                 items: siblings.map(s => ({ id: s.id, sort_order: s.sort_order }))
             });
-        } catch(err) {
+        } catch (err) {
             toast.error('Failed to save order');
         }
     };
@@ -484,17 +484,17 @@ function Menu({ menu, menu_options }) {
                     <AccordionPanel title="Categories" icon={<RiMenuLine size={15} />} defaultOpen={false}>
                         <div className="max-h-48 overflow-y-auto mb-3 flex flex-col gap-1.5 p-1">
                             {categories.length === 0 ? <span className="text-xs text-res opacity-60">No categories found.</span> :
-                             categories.map(cat => (
-                                <label key={cat.id} className="flex items-center gap-2 text-sm text-heading cursor-pointer">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={checkedCategories.includes(cat.id)}
-                                        onChange={() => toggleCheck(cat.id, checkedCategories, setCheckedCategories)}
-                                        className="rounded border-secondary/30 text-primary focus:ring-primary bg-bg"
-                                    />
-                                    {cat.title}
-                                </label>
-                            ))}
+                                categories.map(cat => (
+                                    <label key={cat.id} className="flex items-center gap-2 text-sm text-heading cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={checkedCategories.includes(cat.id)}
+                                            onChange={() => toggleCheck(cat.id, checkedCategories, setCheckedCategories)}
+                                            className="rounded border-secondary/30 text-primary focus:ring-primary bg-bg"
+                                        />
+                                        {cat.title}
+                                    </label>
+                                ))}
                         </div>
                         <button
                             type="button"
@@ -510,17 +510,17 @@ function Menu({ menu, menu_options }) {
                     <AccordionPanel title="Brands" icon={<RiMenuLine size={15} />} defaultOpen={false}>
                         <div className="max-h-48 overflow-y-auto mb-3 flex flex-col gap-1.5 p-1">
                             {brands.length === 0 ? <span className="text-xs text-res opacity-60">No brands found.</span> :
-                             brands.map(brand => (
-                                <label key={brand.id} className="flex items-center gap-2 text-sm text-heading cursor-pointer">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={checkedBrands.includes(brand.id)}
-                                        onChange={() => toggleCheck(brand.id, checkedBrands, setCheckedBrands)}
-                                        className="rounded border-secondary/30 text-primary focus:ring-primary bg-bg"
-                                    />
-                                    {brand.title}
-                                </label>
-                            ))}
+                                brands.map(brand => (
+                                    <label key={brand.id} className="flex items-center gap-2 text-sm text-heading cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={checkedBrands.includes(brand.id)}
+                                            onChange={() => toggleCheck(brand.id, checkedBrands, setCheckedBrands)}
+                                            className="rounded border-secondary/30 text-primary focus:ring-primary bg-bg"
+                                        />
+                                        {brand.title}
+                                    </label>
+                                ))}
                         </div>
                         <button
                             type="button"
@@ -536,17 +536,17 @@ function Menu({ menu, menu_options }) {
                     <AccordionPanel title="Products" icon={<RiMenuLine size={15} />} defaultOpen={false}>
                         <div className="max-h-48 overflow-y-auto mb-3 flex flex-col gap-1.5 p-1">
                             {products.length === 0 ? <span className="text-xs text-res opacity-60">No products found.</span> :
-                             products.map(prod => (
-                                <label key={prod.id} className="flex items-center gap-2 text-sm text-heading cursor-pointer">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={checkedProducts.includes(prod.id)}
-                                        onChange={() => toggleCheck(prod.id, checkedProducts, setCheckedProducts)}
-                                        className="rounded border-secondary/30 text-primary focus:ring-primary bg-bg"
-                                    />
-                                    <span className="truncate">{prod.title}</span>
-                                </label>
-                            ))}
+                                products.map(prod => (
+                                    <label key={prod.id} className="flex items-center gap-2 text-sm text-heading cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={checkedProducts.includes(prod.id)}
+                                            onChange={() => toggleCheck(prod.id, checkedProducts, setCheckedProducts)}
+                                            className="rounded border-secondary/30 text-primary focus:ring-primary bg-bg"
+                                        />
+                                        <span className="truncate">{prod.title}</span>
+                                    </label>
+                                ))}
                         </div>
                         <button
                             type="button"

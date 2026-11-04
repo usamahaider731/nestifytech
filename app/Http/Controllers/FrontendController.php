@@ -566,7 +566,7 @@ class FrontendController extends Controller
             'title' => $child->title,
             'slug' => $child->slug ?? null,
         ])->values();
-        return Inertia::render('Frontend/Category/Index', [
+        return Inertia::render('Frontend/Taxonomy/Index', [
             'category' => $taxonomy,
             'products' => $products,
             'filters' => $applied,
@@ -999,6 +999,96 @@ class FrontendController extends Controller
         return Inertia::render('Frontend/StoreLocator/Index', [
             'stores'    => $stores,
             'countries' => $countries,
+        ]);
+    }
+
+    /**
+     * Render the Live Order Tracking page with interactive Leaflet map.
+     */
+    public function trackOrder(Request $request, $trackingNumber = null)
+    {
+        $code = $trackingNumber ?: $request->input('number') ?: $request->input('tracking_number');
+
+        $initialOrder = null;
+        $riderLocation = null;
+
+        if (!empty($code)) {
+            $order = DB::table('orders')
+                ->leftJoin('users as riders', 'orders.delivery_boy_id', '=', 'riders.id')
+                ->where('orders.tracking_number', $code)
+                ->orWhere('orders.id', $code)
+                ->select([
+                    'orders.*',
+                    'riders.name as rider_name',
+                    'riders.email as rider_email',
+                ])
+                ->first();
+
+            if ($order) {
+                // Attach order items
+                $items = DB::table('order_items')->where('order_id', $order->id)->get();
+                $productIds = $items->pluck('product_id')->unique();
+                $products = DB::table('posts')->whereIn('id', $productIds)->select('id', 'title', 'sku')->get()->keyBy('id');
+                $media = DB::table('media')->whereIn('parent_id', $productIds)->where('type', 'post')->get()->keyBy('parent_id');
+
+                $orderItems = $items->map(function ($it) use ($products, $media) {
+                    $prod = $products->get($it->product_id);
+                    $img = $media->get($it->product_id);
+                    return [
+                        'id'            => $it->id,
+                        'product_title' => $prod ? $prod->title : 'Product #' . $it->product_id,
+                        'product_sku'   => $prod ? $prod->sku : '',
+                        'image'         => $img && $img->filename ? asset('storage/uploads/image/' . $img->filename) : null,
+                        'quantity'      => (int) $it->quantity,
+                        'unit_price'    => (float) $it->unit_price,
+                        'subtotal'      => (float) $it->subtotal,
+                        'color'         => $it->color,
+                    ];
+                });
+
+                if ($order->delivery_boy_id) {
+                    $cachedLoc = \Illuminate\Support\Facades\Cache::get("rider_location_{$order->delivery_boy_id}");
+                    if ($cachedLoc) {
+                        $riderLocation = $cachedLoc;
+                    } else {
+                        $meta = DB::table('user_meta')
+                            ->where('user_id', $order->delivery_boy_id)
+                            ->where('key', 'rider_live_location')
+                            ->value('value');
+                        if ($meta) {
+                            $riderLocation = json_decode($meta, true);
+                        }
+                    }
+                }
+
+                $initialOrder = [
+                    'id'                       => $order->id,
+                    'order_number'             => 'ORD-' . str_pad($order->id, 5, '0', STR_PAD_LEFT),
+                    'tracking_number'          => $order->tracking_number,
+                    'status'                   => $order->status,
+                    'payment_method'           => ucfirst($order->payment_method ?? 'cod'),
+                    'payment_status'           => ucfirst($order->payment_status ?? 'unpaid'),
+                    'total_price'              => (float) $order->total_price,
+                    'shipping_carrier'         => $order->shipping_carrier,
+                    'shipping_address'         => $order->shipping_address,
+                    'shipping_city'            => $order->shipping_city,
+                    'shipping_state'           => $order->shipping_state,
+                    'shipping_country'         => $order->shipping_country,
+                    'created_at'               => $order->created_at,
+                    'shipped_date'             => $order->shipped_date,
+                    'completed_date'           => $order->completed_date,
+                    'delivery_otp_verified_at' => $order->delivery_otp_verified_at,
+                    'rider_name'               => $order->rider_name,
+                    'rider_email'              => $order->rider_email,
+                    'items'                    => $orderItems,
+                ];
+            }
+        }
+
+        return Inertia::render('Frontend/TrackOrder/Index', [
+            'initialCode'   => $code,
+            'initialOrder'  => $initialOrder,
+            'riderLocation' => $riderLocation,
         ]);
     }
 

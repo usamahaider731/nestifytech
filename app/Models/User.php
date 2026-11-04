@@ -54,7 +54,17 @@ class User extends Authenticatable implements MustVerifyEmail
             'image' => 'array'
         ];
     }
-    protected $appends = ['user_role', 'user_avater', 'user_permissions', 'meta'];
+    protected $appends = ['user_role', 'user_avater', 'user_permissions', 'meta', 'is_online'];
+
+    /**
+     * Check whether the user is currently online.
+     * Uses Cache first (super fast), falls back to last_seen_at within 5 minutes.
+     */
+    public function getIsOnlineAttribute(): bool
+    {
+        return \Illuminate\Support\Facades\Cache::has("user-is-online-{$this->id}")
+            || (!empty($this->last_seen_at) && \Carbon\Carbon::parse($this->last_seen_at)->gt(now()->subMinutes(5)));
+    }
 
     public function getMetaAttribute()
     {
@@ -90,9 +100,12 @@ class User extends Authenticatable implements MustVerifyEmail
         return $meta;
     }
 
+    /**
+     * Scope or query for currently online users (active in the last 5 minutes).
+     */
     public static function online()
     {
-        return User::where('active', true);
+        return static::where('last_seen_at', '>=', now()->subMinutes(5));
     }
     public static function recentlyActive($limit = null)
     {

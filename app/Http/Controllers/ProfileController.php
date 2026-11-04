@@ -112,6 +112,7 @@ class ProfileController extends Controller
                 'avatar' => $avatarUrl,
                 'avatar_filename' => $avatarMedia->filename ?? null,
                 'member_since' => $createdAtFormatted,
+                'wallet_balance' => (float) ($user->wallet_balance ?? 0),
                 'created_at' => $createdAtIso,
                 // Password is intentionally NOT exposed to the frontend for security.
                 'last_seen_at' => $user->last_seen_at ?? null,
@@ -148,6 +149,7 @@ class ProfileController extends Controller
                 'pending_orders' => $pendingOrders,
                 'cancelled_orders' => $cancelledOrders,
                 'total_spent' => $totalSpent,
+                'wallet_balance' => (float) ($user->wallet_balance ?? 0),
                 'reviews_count' => $reviewsCount,
                 'activities_count' => $activitiesCount,
                 'wishlist_count' => $wishlistCount,

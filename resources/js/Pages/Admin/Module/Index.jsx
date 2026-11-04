@@ -162,7 +162,7 @@ function Index({ data, table, type, stats }) {
     // If the schema defines specific actions
     if (column && column.actions && Array.isArray(column.actions)) {
       return (
-        <div className='w-full flex h-12 my-auto items-center gap-3 justify-center'>
+        <div className='w-full  flex h-12 my-auto items-center gap-3 justify-center'>
           <ActionDropdown>
             <ActionDropdown.Trigger>
               <TbDotsVertical className='cursor-pointer size-4.25' />
@@ -669,7 +669,7 @@ function Index({ data, table, type, stats }) {
 
       <Table
         values={data}
-        className='w-full'
+        className='min-w-full overflow-x-auto min-h-auto'
         bulk={table?.bulk}
         keywords={table?.keywords}
         type={type}
@@ -699,7 +699,7 @@ function Index({ data, table, type, stats }) {
                     <Table.TD.Checkbox valueId={row.id} />
                   </Table.TD>
                   {columns.map((col) => (
-                    <Table.TD style={{ width: col.width }} className='font-medium text-center' key={col.id}>
+                    <Table.TD style={{ width: col.width, minWidth: col.width }} className='font-medium text-center overflow-visible' key={col.id}>
                       {fieldRender(row, col)}
                     </Table.TD>
                   ))}

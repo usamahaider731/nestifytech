@@ -498,6 +498,74 @@ export default function DeliveryOrders({ orders, filters, rider, stats }) {
     const [selectedOrderForOtp, setSelectedOrderForOtp] = useState(null)
     const [selectedOrderForSettlement, setSelectedOrderForSettlement] = useState(null)
     const [ordersList, setOrdersList] = useState(orders.data || [])
+    const [isSharingLocation, setIsSharingLocation] = useState(false)
+    const [lastLocationSync, setLastLocationSync] = useState(null)
+    const watchIdRef = React.useRef(null)
+
+    // Watch rider GPS coordinates and broadcast to server
+    const toggleLiveLocation = () => {
+        if (isSharingLocation) {
+            if (watchIdRef.current !== null) {
+                navigator.geolocation.clearWatch(watchIdRef.current)
+                watchIdRef.current = null
+            }
+            setIsSharingLocation(false)
+            pushToast('Live GPS location broadcasting paused.', 'success')
+            return
+        }
+
+        if (!navigator.geolocation) {
+            pushToast('Geolocation is not supported by your browser.', 'error')
+            return
+        }
+
+        setIsSharingLocation(true)
+        pushToast('Live location sharing activated! Broadcasting GPS coordinates...', 'success')
+
+        // Send immediately once
+        navigator.geolocation.getCurrentPosition(
+            (pos) => sendLocationUpdate(pos.coords),
+            (err) => console.warn('Location error:', err),
+            { enableHighAccuracy: true }
+        )
+
+        // Then watch position
+        watchIdRef.current = navigator.geolocation.watchPosition(
+            (pos) => {
+                sendLocationUpdate(pos.coords)
+            },
+            (err) => {
+                console.warn('Geolocation watch error:', err)
+            },
+            {
+                enableHighAccuracy: true,
+                maximumAge: 10000,
+                timeout: 15000,
+            }
+        )
+    }
+
+    const sendLocationUpdate = async (coords) => {
+        try {
+            await axios.post(route('delivery.location.update'), {
+                latitude: coords.latitude,
+                longitude: coords.longitude,
+                heading: coords.heading,
+                speed: coords.speed,
+            })
+            setLastLocationSync(new Date().toLocaleTimeString())
+        } catch (err) {
+            console.error('Failed to sync rider location:', err)
+        }
+    }
+
+    React.useEffect(() => {
+        return () => {
+            if (watchIdRef.current !== null) {
+                navigator.geolocation.clearWatch(watchIdRef.current)
+            }
+        }
+    }, [])
 
     const handleTabChange = (tabKey) => {
         setActiveTab(tabKey)
@@ -539,13 +607,18 @@ export default function DeliveryOrders({ orders, filters, rider, stats }) {
                             <RiEBike2Line className="size-8" />
                         </div>
                         <div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
                                 <h1 className="text-xl sm:text-2xl font-bold text-heading">
                                     Delivery Boy Portal
                                 </h1>
                                 <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-500 border border-emerald-500/30 uppercase tracking-wider">
                                     Active Rider
                                 </span>
+                                {rider.store_title && (
+                                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-primary/15 text-primary border border-primary/25">
+                                        📍 Branch: {rider.store_title}
+                                    </span>
+                                )}
                             </div>
                             <p className="text-xs text-res mt-0.5">
                                 Welcome back, <strong className="text-heading font-semibold">{rider.name}</strong>. Here are your assigned customer deliveries and COD cash records.
@@ -553,8 +626,22 @@ export default function DeliveryOrders({ orders, filters, rider, stats }) {
                         </div>
                     </div>
 
-                    {/* Quick switch to main orders if permitted */}
-                    <div className="flex items-center gap-2">
+                    {/* Quick switch to main orders if permitted & Live GPS broadcaster toggle */}
+                    <div className="flex flex-wrap items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={toggleLiveLocation}
+                            className={`px-3.5 py-2 text-xs font-bold rounded-xl border transition-all inline-flex items-center gap-2 shadow-xs cursor-pointer ${
+                                isSharingLocation
+                                    ? 'bg-emerald-600 text-white border-emerald-500 animate-pulse'
+                                    : 'bg-accent hover:bg-dynamic text-heading border-permanent/30'
+                            }`}
+                        >
+                            <span className={`size-2 rounded-full ${isSharingLocation ? 'bg-white' : 'bg-emerald-500'}`} />
+                            <RiNavigationLine className="size-4" />
+                            <span>{isSharingLocation ? `GPS Live (${lastLocationSync || 'Active'})` : 'Enable Live GPS Broadcast'}</span>
+                        </button>
+
                         <Link
                             href={route('admin.orders.index')}
                             className="px-3.5 py-2 text-xs font-semibold rounded-xl bg-accent hover:bg-dynamic text-heading border border-permanent/30 transition-all inline-flex items-center gap-1.5 shadow-xs"

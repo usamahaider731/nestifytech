@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 
-export default function SvgViewer({ width, height, src, key, className = '' }) {
+export default function SvgViewer({ width, height, src, className = '' }) {
   const [svgContent, setSvgContent] = useState('');
   const svgRef = useRef();
-
-  // Fetch SVG file whenever src changes
   useEffect(() => {
     if (!src) return;
     fetch(src)
@@ -12,8 +10,6 @@ export default function SvgViewer({ width, height, src, key, className = '' }) {
       .then(setSvgContent)
       .catch(err => console.error('SVG load error:', err));
   }, [src]);
-
-  // Apply styling classes to the SVG element
   useEffect(() => {
     if (svgRef.current) {
       const svgEl = svgRef.current.querySelector('svg');
@@ -23,11 +19,9 @@ export default function SvgViewer({ width, height, src, key, className = '' }) {
       }
     }
   }, [svgContent]);
-
   return (
     <div
       ref={svgRef}
-      key={key}
       width={width}
       height={height}
       className={`svg-viewer ${className}`}

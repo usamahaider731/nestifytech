@@ -2,6 +2,8 @@ import AdminLayout from '@/Layouts/AdminLayout'
 import axios from 'axios'
 import React, { useState } from 'react'
 import { router, usePage } from '@inertiajs/react'
+import { hasPermission } from '@/Utils/helper'
+import { RiLockLine } from 'react-icons/ri'
 import {
     RiTruckLine,
     RiTimeLine,
@@ -28,7 +30,8 @@ import {
     RiPhoneLine,
     RiWhatsappLine,
     RiFileCopyLine,
-    RiCheckDoubleLine
+    RiCheckDoubleLine,
+    RiEBike2Line
 } from 'react-icons/ri'
 
 /* ─── Toast Notifications ────────────────────────────────────────── */
@@ -712,26 +715,50 @@ function OrderProcessModal({ order, deliveryBoys = [], onClose, onUpdated, curre
 
                             {/* Assigned Delivery Boy / Rider */}
                             <div>
-                                <label className="block text-xs font-semibold text-heading mb-1.5">
-                                    Assigned Delivery Boy / Rider
-                                </label>
-                                <select
-                                    value={deliveryBoyId}
-                                    onChange={(e) => setDeliveryBoyId(e.target.value)}
-                                    className="w-full px-3 py-2 text-xs bg-bg border border-permanent/30 rounded-xl text-heading focus:outline-hidden focus:border-primary transition-colors cursor-pointer"
-                                >
-                                    <option value="">-- Unassigned --</option>
-                                    {deliveryBoys.map((boy) => (
-                                        <option key={boy.id} value={boy.id}>
-                                            {boy.name} ({boy.email})
-                                        </option>
-                                    ))}
-                                </select>
-                                {deliveryBoys.length === 0 && (
-                                    <span className="text-[10px] text-amber-500 mt-1 block">
-                                        No users with "Delivery Boy" role found. Assign the Delivery Boy role under Our Team &rarr; Users.
-                                    </span>
-                                )}
+                                <div className="flex items-center justify-between mb-1.5">
+                                    <label className="block text-xs font-semibold text-heading">
+                                        Assigned Delivery Boy / Rider
+                                    </label>
+                                    {order.store_title && (
+                                        <span className="text-[10px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
+                                            Store: {order.store_title}
+                                        </span>
+                                    )}
+                                </div>
+                                {(() => {
+                                    // Filter delivery boys whose store_id matches the order's store_id
+                                    // If order has no specific store or boy has no specific store, allow assignment or keep currently assigned rider selectable
+                                    const eligibleDeliveryBoys = order.store_id
+                                        ? deliveryBoys.filter(boy =>
+                                            String(boy.store_id) === String(order.store_id) ||
+                                            String(boy.id) === String(order.delivery_boy_id)
+                                          )
+                                        : deliveryBoys;
+
+                                    return (
+                                        <>
+                                            <select
+                                                value={deliveryBoyId}
+                                                onChange={(e) => setDeliveryBoyId(e.target.value)}
+                                                className="w-full px-3 py-2 text-xs bg-bg border border-permanent/30 rounded-xl text-heading focus:outline-hidden focus:border-primary transition-colors cursor-pointer"
+                                            >
+                                                <option value="">-- Unassigned --</option>
+                                                {eligibleDeliveryBoys.map((boy) => (
+                                                    <option key={boy.id} value={boy.id}>
+                                                        {boy.name} ({boy.email}){boy.store_title ? ` — [${boy.store_title}]` : ''}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            {eligibleDeliveryBoys.length === 0 && (
+                                                <span className="text-[10px] text-amber-500 mt-1 block">
+                                                    {order.store_title
+                                                        ? `No delivery boys hired for "${order.store_title}". Assign a delivery boy to this store under Our Team → Users.`
+                                                        : `No users with "Delivery Boy" role found. Assign the Delivery Boy role under Our Team → Users.`}
+                                                </span>
+                                            )}
+                                        </>
+                                    );
+                                })()}
                             </div>
 
                             {/* Tracking Carrier */}
@@ -863,16 +890,19 @@ function OrderProcessModal({ order, deliveryBoys = [], onClose, onUpdated, curre
 }
 
 /* ─── Main Admin Orders Page ─────────────────────────────────────── */
-function OrdersIndex({ orders: initialOrders, deliveryBoys = [], filters = {}, stats = {} }) {
+function OrdersIndex({ orders: initialOrders, stores = [], assignedStoreId = null, deliveryBoys = [], riderPerformance = [], filters = {}, stats = {} }) {
     const { setting } = usePage().props
     const currency = setting?.site?.currency?.value || '$'
+    const canWrite = hasPermission(usePage().props?.auth?.user, 'order-write')
 
     const initial = Array.isArray(initialOrders?.data) ? initialOrders.data : (initialOrders || [])
     const [ordersList, setOrdersList] = useState(initial)
     const [search, setSearch] = useState(filters.search || '')
     const [activeTab, setActiveTab] = useState(filters.status || 'all')
+    const [selectedStore, setSelectedStore] = useState(filters.store || '')
     const [processingOrder, setProcessingOrder] = useState(null)
     const [deletingId, setDeletingId] = useState(null)
+    const [showRiderPerformance, setShowRiderPerformance] = useState(false)
 
     const { toasts, push, dismiss } = useToast()
 
@@ -889,12 +919,18 @@ function OrdersIndex({ orders: initialOrders, deliveryBoys = [], filters = {}, s
 
     const handleTabChange = (key) => {
         setActiveTab(key)
-        router.get(route('admin.orders.index'), { status: key, search }, { preserveState: true, replace: true })
+        router.get(route('admin.orders.index'), { status: key, search, store: selectedStore || undefined }, { preserveState: true, replace: true })
     }
 
     const handleSearch = (e) => {
         e.preventDefault()
-        router.get(route('admin.orders.index'), { status: activeTab, search }, { preserveState: true, replace: true })
+        router.get(route('admin.orders.index'), { status: activeTab, search, store: selectedStore || undefined }, { preserveState: true, replace: true })
+    }
+
+    const handleStoreChange = (e) => {
+        const storeVal = e.target.value
+        setSelectedStore(storeVal)
+        router.get(route('admin.orders.index'), { status: activeTab, search, store: storeVal || undefined }, { preserveState: true, replace: true })
     }
 
     const handleDelete = async (orderId) => {
@@ -937,30 +973,195 @@ function OrdersIndex({ orders: initialOrders, deliveryBoys = [], filters = {}, s
                     </p>
                 </div>
 
-                {/* Search Box */}
-                <form onSubmit={handleSearch} className="relative w-full sm:w-72">
-                    <RiSearchLine className="absolute left-3.5 top-1/2 -translate-y-1/2 text-res size-4" />
-                    <input
-                        type="text"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Search order #, customer, carrier..."
-                        className="w-full pl-9 pr-8 py-2 text-xs bg-accent border border-permanent/30 rounded-xl text-heading placeholder:text-res/60 focus:outline-hidden focus:border-primary transition-colors"
-                    />
-                    {search && (
+                <div className="flex flex-wrap items-center gap-2">
+                    {/* Store Filter / Scoping */}
+                    {assignedStoreId ? (
+                        <div className="px-3 py-1.5 rounded-xl bg-primary/10 border border-primary/20 text-xs font-semibold text-primary flex items-center gap-1.5">
+                            <span>🏪 Assigned Store:</span>
+                            <span className="font-bold underline">
+                                {stores.find(s => String(s.id) === String(assignedStoreId))?.title || `Store #${assignedStoreId}`}
+                            </span>
+                        </div>
+                    ) : stores.length > 0 ? (
+                        <div className="relative">
+                            <select
+                                value={selectedStore}
+                                onChange={handleStoreChange}
+                                className="px-3 py-2 text-xs bg-accent border border-permanent/30 rounded-xl text-heading font-medium focus:outline-hidden focus:border-primary transition-colors cursor-pointer"
+                            >
+                                <option value="">All Stores / Hubs</option>
+                                {stores.map((st) => (
+                                    <option key={st.id} value={st.id}>
+                                        🏪 {st.title}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    ) : null}
+
+                    {/* Delivery Boy Performance Analytics Button */}
+                    <button
+                        type="button"
+                        onClick={() => setShowRiderPerformance(!showRiderPerformance)}
+                        className={`px-3.5 py-2 text-xs font-bold rounded-xl border transition-all inline-flex items-center gap-1.5 shadow-xs cursor-pointer ${
+                            showRiderPerformance
+                                ? 'bg-emerald-600 text-white border-emerald-500'
+                                : 'bg-accent hover:bg-dynamic text-heading border-permanent/30'
+                        }`}
+                    >
+                        <RiEBike2Line className="size-4 text-emerald-500" />
+                        <span>Delivery Boy Performance</span>
+                        {riderPerformance.length > 0 && (
+                            <span className="px-1.5 py-0.2 bg-emerald-500/20 text-emerald-500 rounded-full text-[10px]">
+                                {riderPerformance.length}
+                            </span>
+                        )}
+                    </button>
+
+                    {/* Search Box */}
+                    <form onSubmit={handleSearch} className="relative w-full sm:w-64">
+                        <RiSearchLine className="absolute left-3.5 top-1/2 -translate-y-1/2 text-res size-4" />
+                        <input
+                            type="text"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Search order #, customer..."
+                            className="w-full pl-9 pr-8 py-2 text-xs bg-accent border border-permanent/30 rounded-xl text-heading placeholder:text-res/60 focus:outline-hidden focus:border-primary transition-colors"
+                        />
+                        {search && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setSearch('')
+                                    router.get(route('admin.orders.index'), { status: activeTab, store: selectedStore || undefined }, { preserveState: true, replace: true })
+                                }}
+                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-res hover:text-heading cursor-pointer"
+                            >
+                                <RiCloseLine size={14} />
+                            </button>
+                        )}
+                    </form>
+                </div>
+            </div>
+
+            {/* ── Delivery Boy Performance Analytics Panel ── */}
+            {showRiderPerformance && (
+                <div className="bg-accent rounded-2xl border-2 border-emerald-500/30 p-5 shadow-lg space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-permanent/20 gap-2">
+                        <div>
+                            <h2 className="text-base font-bold text-heading flex items-center gap-2">
+                                <span className="p-1 rounded-lg bg-emerald-500/10 text-emerald-500">
+                                    <RiEBike2Line className="size-5" />
+                                </span>
+                                Delivery Boy & Rider Performance Analytics
+                            </h2>
+                            <p className="text-xs text-res mt-0.5">
+                                Performance tracking: total delivered parcels, turnaround time, on-time delivery rate, and COD cash collected.
+                            </p>
+                        </div>
                         <button
                             type="button"
-                            onClick={() => {
-                                setSearch('')
-                                router.get(route('admin.orders.index'), { status: activeTab }, { preserveState: true, replace: true })
-                            }}
-                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-res hover:text-heading cursor-pointer"
+                            onClick={() => setShowRiderPerformance(false)}
+                            className="text-xs font-semibold text-res hover:text-heading px-2 py-1 rounded-lg bg-dynamic/50"
                         >
-                            <RiCloseLine size={14} />
+                            Close Panel
                         </button>
-                    )}
-                </form>
-            </div>
+                    </div>
+
+                    <div className="w-full overflow-x-auto">
+                        <table className="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr className="border-b border-permanent/20 bg-dynamic/40 text-[10px] uppercase tracking-wider text-secondary font-semibold">
+                                    <th className="px-3.5 py-3">Rider Name</th>
+                                    <th className="px-3.5 py-3 text-center">Assigned</th>
+                                    <th className="px-3.5 py-3 text-center">Delivered</th>
+                                    <th className="px-3.5 py-3 text-center">In Progress</th>
+                                    <th className="px-3.5 py-3 text-center">Completion Rate</th>
+                                    <th className="px-3.5 py-3 text-center">Avg Delivery Time</th>
+                                    <th className="px-3.5 py-3 text-right">COD Collected</th>
+                                    <th className="px-3.5 py-3 text-right">Cash in Hand</th>
+                                    <th className="px-3.5 py-3 text-center">GPS Status</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-permanent/15">
+                                {riderPerformance.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={9} className="py-8 text-center text-res">
+                                            No delivery riders configured in the system.
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    riderPerformance.map((rp) => (
+                                        <tr key={rp.id} className="hover:bg-dynamic/20 transition-colors">
+                                            <td className="px-3.5 py-3 font-semibold text-heading">
+                                                <div className="flex items-center gap-2.5">
+                                                    <Avatar name={rp.name} />
+                                                    <div>
+                                                        <span className="block font-bold">{rp.name}</span>
+                                                        <span className="text-[11px] text-res font-normal">{rp.email}</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-3.5 py-3 text-center font-bold text-heading">
+                                                {rp.total_assigned}
+                                            </td>
+                                            <td className="px-3.5 py-3 text-center">
+                                                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-bold">
+                                                    {rp.delivered_count}
+                                                </span>
+                                            </td>
+                                            <td className="px-3.5 py-3 text-center">
+                                                <span className="px-2.5 py-0.5 rounded-full bg-sky-500/10 text-sky-600 font-bold">
+                                                    {rp.active_count}
+                                                </span>
+                                            </td>
+                                            <td className="px-3.5 py-3 text-center">
+                                                <div className="inline-flex items-center gap-1.5">
+                                                    <div className="w-16 bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+                                                        <div
+                                                            className="bg-emerald-500 h-full rounded-full transition-all"
+                                                            style={{ width: `${Math.min(rp.completion_rate, 100)}%` }}
+                                                        />
+                                                    </div>
+                                                    <span className="font-mono font-bold text-[11px]">{rp.completion_rate}%</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-3.5 py-3 text-center font-mono text-heading">
+                                                {rp.avg_delivery_minutes !== null ? (
+                                                    <span className="inline-flex items-center gap-1 text-teal-600 font-bold">
+                                                        <RiTimeLine className="size-3.5" />
+                                                        {rp.avg_delivery_minutes < 60
+                                                            ? `${rp.avg_delivery_minutes} mins`
+                                                            : `${Math.floor(rp.avg_delivery_minutes / 60)}h ${rp.avg_delivery_minutes % 60}m`}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-res">—</span>
+                                                )}
+                                            </td>
+                                            <td className="px-3.5 py-3 text-right font-mono font-bold text-heading">
+                                                {currency} {rp.cod_collected.toLocaleString()}
+                                            </td>
+                                            <td className="px-3.5 py-3 text-right font-mono font-bold text-amber-500">
+                                                {currency} {rp.cod_in_hand.toLocaleString()}
+                                            </td>
+                                            <td className="px-3.5 py-3 text-center">
+                                                {rp.live_location ? (
+                                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                                                        <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                                        Broadcasting
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-res text-[11px]">Offline</span>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
 
             {/* ── Metric Stat Cards ── */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -1180,25 +1381,31 @@ function OrdersIndex({ orders: initialOrders, deliveryBoys = [], filters = {}, s
                                             <td className="px-3.5 py-4 text-right">
                                                 <div className="flex items-center justify-end gap-1">
                                                     {/* Process Button */}
-                                                    <button
+                                                    {canWrite ? (
+                                                      <button
                                                         type="button"
                                                         onClick={() => setProcessingOrder(order)}
                                                         className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all cursor-pointer inline-flex items-center gap-1 shadow-xs"
-                                                    >
+                                                      >
                                                         <RiTruckLine size={13} />
                                                         Process
-                                                    </button>
+                                                      </button>
+                                                    ) : (
+                                                      <span className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border accent secondary cursor-not-allowed opacity-50 inline-flex items-center gap-1" title="No permission"><RiLockLine size={13} /></span>
+                                                    )}
 
                                                     {/* Delete Button */}
-                                                    <button
+                                                    {canWrite && (
+                                                      <button
                                                         type="button"
                                                         onClick={() => handleDelete(order.id)}
                                                         disabled={deletingId === order.id}
                                                         className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
                                                         title="Delete Order"
-                                                    >
+                                                      >
                                                         <RiCloseLine size={16} />
-                                                    </button>
+                                                      </button>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>

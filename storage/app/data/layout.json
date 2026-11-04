@@ -1,5 +1,91 @@
 {
     "layout": {
+        "Single_Category": [
+            {
+                "title": "Single Category Layout",
+                "style": "main",
+                "fields": [
+                    {
+                        "label": "Width Layout Type",
+                        "type": "dropdown",
+                        "name": "width_layout",
+                        "value": "container",
+                        "searchable": false,
+                        "options": [
+                            {
+                                "id": "container",
+                                "title": "Container"
+                            },
+                            {
+                                "id": "full_width",
+                                "title": "Full Width"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Product Card Style",
+                        "name": "product_card_style",
+                        "type": "dropdown",
+                        "value": "both",
+                        "searchable": false,
+                        "options": [
+                            {
+                                "id": "v1",
+                                "title": "V1"
+                            },
+                            {
+                                "id": "v2",
+                                "title": "V2"
+                            },
+                            {
+                                "id": "both",
+                                "title": "Both (V1 & V2)"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Show Banner",
+                        "name": "show_banner",
+                        "type": "checkbox",
+                        "value": true
+                    },
+                    {
+                        "label": "Show Sidebar",
+                        "name": "show_sidebar",
+                        "type": "checkbox",
+                        "value": true
+                    },
+                    {
+                        "label": "Show Products",
+                        "name": "show_products",
+                        "type": "checkbox",
+                        "value": true
+                    },
+                    {
+                        "label": "Show Pagination",
+                        "name": "show_pagination",
+                        "type": "checkbox",
+                        "value": true
+                    }
+                ]
+            },
+            {
+                "style": "sidebar",
+                "title": "Information",
+                "fields": [
+                    {
+                        "type": "image",
+                        "title": "Banner Image",
+                        "style": 1,
+                        "condition": "show_banner",
+                        "condition_value": true,
+                        "name": "banner_image",
+                        "value": "1793728433_6039b3ff1a895b03a0d20722190f776c_banner_image.jpg",
+                        "single": true
+                    }
+                ]
+            }
+        ],
         "Home": [
             {
                 "title": "Gallery Settings",
@@ -807,92 +893,6 @@
                                 }
                             }
                         ]
-                    }
-                ]
-            }
-        ],
-        "Single_Category": [
-            {
-                "title": "Single Category Layout",
-                "style": "main",
-                "fields": [
-                    {
-                        "label": "Width Layout Type",
-                        "type": "dropdown",
-                        "name": "width_layout",
-                        "value": "container",
-                        "searchable": false,
-                        "options": [
-                            {
-                                "id": "container",
-                                "title": "Container"
-                            },
-                            {
-                                "id": "full_width",
-                                "title": "Full Width"
-                            }
-                        ]
-                    },
-                    {
-                        "label": "Product Card Style",
-                        "name": "product_card_style",
-                        "type": "dropdown",
-                        "value": "both",
-                        "searchable": false,
-                        "options": [
-                            {
-                                "id": "v1",
-                                "title": "V1"
-                            },
-                            {
-                                "id": "v2",
-                                "title": "V2"
-                            },
-                            {
-                                "id": "both",
-                                "title": "Both (V1 & V2)"
-                            }
-                        ]
-                    },
-                    {
-                        "label": "Show Banner",
-                        "name": "show_banner",
-                        "type": "checkbox",
-                        "value": true
-                    },
-                    {
-                        "label": "Show Sidebar",
-                        "name": "show_sidebar",
-                        "type": "checkbox",
-                        "value": true
-                    },
-                    {
-                        "label": "Show Products",
-                        "name": "show_products",
-                        "type": "checkbox",
-                        "value": true
-                    },
-                    {
-                        "label": "Show Pagination",
-                        "name": "show_pagination",
-                        "type": "checkbox",
-                        "value": true
-                    }
-                ]
-            },
-            {
-                "style": "sidebar",
-                "title": "Information",
-                "fields": [
-                    {
-                        "type": "image",
-                        "title": "Banner Image",
-                        "style": 1,
-                        "condition": "show_banner",
-                        "condition_value": true,
-                        "name": "banner_image",
-                        "value": "1790606552_6039b3ff1a895b03a0d20722190f776c_banner_image.jpg",
-                        "single": true
                     }
                 ]
             }

@@ -162,7 +162,12 @@ Route::get('/menu-locations', function () {
 });
 Route::get('/roles-options', function () {
     return response()->json(
-        \Illuminate\Support\Facades\DB::table('roles')->where('status', 'publish')->get()
+        \Illuminate\Support\Facades\DB::table('roles')
+            ->whereIn('status', ['publish', 'active'])
+            ->select('id', 'title', 'scope', 'status')
+            ->orderBy('scope', 'asc')
+            ->orderBy('title', 'asc')
+            ->get()
     );
 });
 Route::get('/attribute-options', function () {
@@ -170,6 +175,31 @@ Route::get('/attribute-options', function () {
         \Illuminate\Support\Facades\DB::table('attributes')->distinct()->pluck('name')->map(function ($name) {
             return ['id' => $name, 'title' => $name];
         })
+    );
+});
+Route::get('/user-options', function (\Illuminate\Http\Request $request) {
+    $roleFilter = $request->input('role');
+    $query = \Illuminate\Support\Facades\DB::table('users')
+        ->where('active', 1)
+        ->select('id', 'name', 'email');
+
+    if ($roleFilter) {
+        $query->where(function ($q) use ($roleFilter) {
+            $q->where('roles', 'like', "%\"{$roleFilter}\"%")
+              ->orWhere('roles', 'like', "%[{$roleFilter}]%")
+              ->orWhere('roles', 'like', "%{$roleFilter}%");
+        });
+    }
+
+    $users = $query->orderBy('name')->get();
+
+    return response()->json(
+        $users->map(fn($u) => [
+            'id'    => (string) $u->id,
+            'title' => "{$u->name} ({$u->email})",
+            'name'  => $u->name,
+            'email' => $u->email,
+        ])
     );
 });
 Route::get('/store-options', function (\Illuminate\Http\Request $request) {

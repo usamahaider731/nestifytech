@@ -55,7 +55,7 @@ const TopHeader = ({ show_language, ContainerType }) => {
                                 </Link>
                             </li>
                             <li className='lg:px-3.75 px-3 text-[11px] md:text-[13px] h-4 border-l-2 border-l-border flex'>
-                                <Link href={props.auth?.user ? route('profile.orders') : route('login')} className='flex items-center gap-1 font-medium transition-colors hover:text-primary'>
+                                <Link href={route('track.order')} className='flex items-center gap-1 font-medium transition-colors hover:text-primary'>
                                     <TbTruckDelivery size={18} />
                                     {__('Track Your Order')}
                                 </Link>

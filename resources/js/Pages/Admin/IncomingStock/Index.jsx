@@ -1,7 +1,7 @@
 import AdminLayout from '@/Layouts/AdminLayout'
 import axios from 'axios'
 import React, { useState } from 'react'
-import { router, Link } from '@inertiajs/react'
+import { router, Link, usePage } from '@inertiajs/react'
 import {
   RiTruckLine,
   RiTimeLine,
@@ -18,11 +18,17 @@ import {
   RiArrowRightLine,
   RiLoader4Line,
   RiCloseLine,
-  RiMoneyDollarCircleLine
+  RiMoneyDollarCircleLine,
+  RiLockLine
 } from 'react-icons/ri'
 import { toast } from 'react-toastify'
+import { hasPermission } from '@/Utils/helper'
 
 export default function IncomingStockIndex({ orders = {}, filters = {}, stats = {}, suppliers = [], products = [] }) {
+  const { auth } = usePage().props
+  const canRead   = hasPermission(auth?.user, 'product-read')
+  const canCreate = hasPermission(auth?.user, 'product-create')
+  const canDelete = hasPermission(auth?.user, 'product-delete')
   const [search, setSearch] = useState(filters.search || '')
   const [statusFilter, setStatusFilter] = useState(filters.status || 'all')
   const [showCreateModal, setShowCreateModal] = useState(false)
@@ -183,13 +189,13 @@ export default function IncomingStockIndex({ orders = {}, filters = {}, stats = 
 
         {/* ── Top Header Banner ── */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-accent p-6 rounded-2xl border border-permanent/30 shadow-sm">
-          <div className="flex flex-col gap-1">
+          <div className="flex md:w-3/5 flex-col gap-1 text-start">
             <div className="flex items-center gap-2 text-primary font-semibold text-xs tracking-wider uppercase">
               <RiTruckLine className="size-4" />
               <span>Inbound Procurement &amp; Restocking</span>
             </div>
             <h1 className="text-2xl font-bold text-heading">Incoming Stock Orders</h1>
-            <p className="text-sm text-secondary">
+            <p className="text-sm text-secondary w-fit text-start">
               Record purchase orders from suppliers, monitor in-transit deliveries, and automatically add stock to warehouse when received.
             </p>
           </div>
@@ -202,13 +208,23 @@ export default function IncomingStockIndex({ orders = {}, filters = {}, stats = 
               <RiRefreshLine className="size-4 text-secondary" />
               <span>Refresh</span>
             </button>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-primary to-[#9e95f5] text-white text-sm font-semibold shadow-md shadow-primary/30 hover:opacity-95 transition-all"
-            >
-              <RiAddCircleLine className="size-5" />
-              <span>+ Create Inbound PO</span>
-            </button>
+            {canCreate ? (
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="inline-flex items-center gap-2 min-w-fit px-4 py-2.5 rounded-xl bg-gradient-to-r from-primary to-[#9e95f5] text-white text-sm font-semibold shadow-md shadow-primary/30 hover:opacity-95 transition-all"
+              >
+                <RiAddCircleLine className="size-5" />
+                <span>+ Create Inbound PO</span>
+              </button>
+            ) : (
+              <span
+                title="You don't have permission to create purchase orders"
+                className="inline-flex items-center gap-2 min-w-fit px-4 py-2.5 rounded-xl bg-permanent/10 text-secondary text-sm font-semibold cursor-not-allowed select-none"
+              >
+                <RiLockLine className="size-5" />
+                <span>Create Inbound PO</span>
+              </span>
+            )}
           </div>
         </div>
 
@@ -423,7 +439,7 @@ export default function IncomingStockIndex({ orders = {}, filters = {}, stats = 
 
                         <td className="py-3.5 px-4 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            {order.status === 'ordered' && (
+                            {canCreate && order.status === 'ordered' && (
                               <button
                                 onClick={() => handleUpdateStatus(order.id, 'in_transit')}
                                 className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-500/15 text-amber-500 hover:bg-amber-500/25 transition-colors"
@@ -433,7 +449,7 @@ export default function IncomingStockIndex({ orders = {}, filters = {}, stats = 
                               </button>
                             )}
 
-                            {['ordered', 'in_transit'].includes(order.status) && (
+                            {canCreate && ['ordered', 'in_transit'].includes(order.status) && (
                               <button
                                 onClick={() => handleReceiveOrder(order)}
                                 disabled={isReceiving}
@@ -449,7 +465,7 @@ export default function IncomingStockIndex({ orders = {}, filters = {}, stats = 
                               </button>
                             )}
 
-                            {order.status !== 'received' && (
+                            {canCreate && order.status !== 'received' && (
                               <button
                                 onClick={() => handleDeleteOrder(order.id, order.po_number)}
                                 className="p-1.5 text-secondary hover:text-rose-500 rounded-lg hover:bg-dynamic/50 transition-colors"
@@ -457,6 +473,12 @@ export default function IncomingStockIndex({ orders = {}, filters = {}, stats = 
                               >
                                 <RiDeleteBinLine className="size-4" />
                               </button>
+                            )}
+
+                            {!canCreate && (
+                              <span className="text-[11px] text-secondary/50 italic flex items-center gap-1">
+                                <RiLockLine className="size-3.5" /> Read-only
+                              </span>
                             )}
                           </div>
                         </td>
@@ -470,7 +492,7 @@ export default function IncomingStockIndex({ orders = {}, filters = {}, stats = 
         </div>
 
         {/* ── Create Purchase Order Modal ── */}
-        {showCreateModal && (
+        {showCreateModal && canCreate && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
             <div className="bg-accent w-full max-w-3xl rounded-2xl border border-permanent/40 p-6 shadow-2xl my-8">
               <div className="flex items-center justify-between pb-4 border-b border-permanent/30">

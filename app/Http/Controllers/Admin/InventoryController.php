@@ -18,6 +18,24 @@ class InventoryController extends Controller
         $stockFilter = $request->input('filter', 'all'); // 'all', 'low', 'out', 'in'
         $storeFilter = $request->input('store'); // optional store ID filter
         $lowThreshold = (int) $request->input('threshold', 5);
+        $currentUser = $request->user();
+
+        // ── Store Scope for Store-Level Managers/Admins ──
+        $assignedStoreId = null;
+        if ($currentUser) {
+            $userRoles = is_string($currentUser->roles) ? json_decode($currentUser->roles, true) : (array) $currentUser->roles;
+            $isGlobalAdmin = !empty($userRoles) && DB::table('roles')->whereIn('id', $userRoles)->where('title', 'Administrator')->exists();
+
+            if (!$isGlobalAdmin) {
+                $assignedStoreId = DB::table('user_meta')
+                    ->where('user_id', $currentUser->id)
+                    ->whereIn('key', ['store_id', 'assigned_store', 'store'])
+                    ->value('value');
+            }
+        }
+
+        // Active store scope: assigned store takes absolute precedence for store users
+        $activeStoreId = $assignedStoreId ?: ($storeFilter && $storeFilter !== 'all' ? $storeFilter : null);
 
         // Fetch products with their base metadata
         $query = DB::table('posts')
@@ -218,8 +236,10 @@ class InventoryController extends Controller
             }
         }
 
-        // Filter list based on store if requested
-        if (!empty($storeFilter) && $storeFilter !== 'all') {
+        // Filter list based on store if requested or scoped to user store
+        if (!empty($activeStoreId)) {
+            $inventoryList = array_values(array_filter($inventoryList, fn($i) => (string)($i['store_id'] ?? '') === (string)$activeStoreId));
+        } elseif (!empty($storeFilter) && $storeFilter !== 'all') {
             $inventoryList = array_values(array_filter($inventoryList, fn($i) => (string)($i['store_id'] ?? '') === (string)$storeFilter));
         }
 
@@ -278,6 +298,20 @@ class InventoryController extends Controller
             return response()->json(['message' => 'Product not found.'], 404);
         }
 
+        // Verify store access for store-scoped users
+        $currentUser = $request->user();
+        if ($currentUser) {
+            $userRoles = is_string($currentUser->roles) ? json_decode($currentUser->roles, true) : (array) $currentUser->roles;
+            $isGlobalAdmin = !empty($userRoles) && DB::table('roles')->whereIn('id', $userRoles)->where('title', 'Administrator')->exists();
+            if (!$isGlobalAdmin) {
+                $userStoreId = DB::table('user_meta')->where('user_id', $currentUser->id)->whereIn('key', ['store_id', 'assigned_store', 'store'])->value('value');
+                $productStoreId = DB::table('post_meta')->where('post_id', $id)->where('key', 'store')->value('value');
+                if (!empty($userStoreId) && (string)$userStoreId !== (string)$productStoreId) {
+                    return response()->json(['message' => 'Unauthorized: You can only edit stock for your assigned store.'], 403);
+                }
+            }
+        }
+
         // Upsert stock into post_meta
         $existing = DB::table('post_meta')
             ->where('post_id', $id)
@@ -315,6 +349,20 @@ class InventoryController extends Controller
         $variation = DB::table('post_variations')->where('id', $id)->first();
         if (!$variation) {
             return response()->json(['message' => 'Variation not found.'], 404);
+        }
+
+        // Verify store access for store-scoped users
+        $currentUser = $request->user();
+        if ($currentUser) {
+            $userRoles = is_string($currentUser->roles) ? json_decode($currentUser->roles, true) : (array) $currentUser->roles;
+            $isGlobalAdmin = !empty($userRoles) && DB::table('roles')->whereIn('id', $userRoles)->where('title', 'Administrator')->exists();
+            if (!$isGlobalAdmin) {
+                $userStoreId = DB::table('user_meta')->where('user_id', $currentUser->id)->whereIn('key', ['store_id', 'assigned_store', 'store'])->value('value');
+                $productStoreId = DB::table('post_meta')->where('post_id', $variation->post_id)->where('key', 'store')->value('value');
+                if (!empty($userStoreId) && (string)$userStoreId !== (string)$productStoreId) {
+                    return response()->json(['message' => 'Unauthorized: You can only edit variation stock for your assigned store.'], 403);
+                }
+            }
         }
 
         DB::table('post_variations')

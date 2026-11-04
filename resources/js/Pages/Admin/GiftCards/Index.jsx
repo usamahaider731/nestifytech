@@ -1,6 +1,7 @@
 import AdminLayout from '@/Layouts/AdminLayout'
 import React, { useState } from 'react'
-import { router, Link } from '@inertiajs/react'
+import { router, Link, usePage } from '@inertiajs/react'
+import { hasPermission } from '@/Utils/helper'
 import axios from 'axios'
 import {
   RiCoupon2Line,
@@ -18,6 +19,7 @@ import {
   RiCalendarLine,
   RiSettings3Line,
   RiMagicLine,
+  RiLockLine,
 } from 'react-icons/ri'
 import { toast } from 'react-toastify'
 
@@ -46,6 +48,9 @@ export default function GiftCardsIndex({ cards = {}, stats = {}, users = [], fil
   const [submitting, setSubmitting] = useState(false)
   const [deletingId, setDeletingId] = useState(null)
   const [generatingCode, setGeneratingCode] = useState(false)
+
+  const { auth } = usePage().props
+  const canCreate = hasPermission(auth?.user, 'product-create')
 
   const cardsItems = cards?.data || []
 
@@ -172,10 +177,14 @@ export default function GiftCardsIndex({ cards = {}, stats = {}, users = [], fil
             <RiSettings3Line className="text-secondary" />
             <span>Popup &amp; Offers</span>
           </Link>
-          <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white font-medium text-sm hover:opacity-90 transition-opacity">
-            <RiAddCircleLine />
-            <span>Issue Gift Card</span>
-          </button>
+          {canCreate ? (
+            <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white font-medium text-sm hover:opacity-90 transition-opacity">
+              <RiAddCircleLine />
+              <span>Issue Gift Card</span>
+            </button>
+          ) : (
+            <span className="flex items-center gap-2 px-4 py-2 rounded-lg border accent secondary text-sm cursor-not-allowed opacity-60" title="No permission to issue gift cards"><RiLockLine /> Issue Gift Card</span>
+          )}
         </div>
       </div>
 
@@ -226,7 +235,7 @@ export default function GiftCardsIndex({ cards = {}, stats = {}, users = [], fil
             <RiGiftLine className="text-5xl secondary mx-auto mb-3" />
             <p className="heading font-medium">No gift cards yet</p>
             <p className="secondary text-sm mt-1">Issue your first gift card.</p>
-            <button onClick={openCreate} className="mt-4 px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:opacity-90">+ Issue Gift Card</button>
+            {canCreate && (<button onClick={openCreate} className="mt-4 px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:opacity-90">+ Issue Gift Card</button>)}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -272,12 +281,16 @@ export default function GiftCardsIndex({ cards = {}, stats = {}, users = [], fil
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <button onClick={() => openEdit(card)} className="p-1.5 rounded-lg border accent hover:bg-blue-400/10 hover:text-blue-400 hover:border-blue-400/30 transition-colors" title="Edit"><RiEditLine /></button>
-                        <button onClick={() => handleDelete(card.id, card.code)} disabled={deletingId === card.id} className="p-1.5 rounded-lg border accent hover:bg-red-400/10 hover:text-red-400 hover:border-red-400/30 transition-colors" title="Delete">
-                          {deletingId === card.id ? <RiLoader4Line className="animate-spin" /> : <RiDeleteBinLine />}
-                        </button>
-                      </div>
+                      {canCreate ? (
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => openEdit(card)} className="p-1.5 rounded-lg border accent hover:bg-blue-400/10 hover:text-blue-400 hover:border-blue-400/30 transition-colors" title="Edit"><RiEditLine /></button>
+                          <button onClick={() => handleDelete(card.id, card.code)} disabled={deletingId === card.id} className="p-1.5 rounded-lg border accent hover:bg-red-400/10 hover:text-red-400 hover:border-red-400/30 transition-colors" title="Delete">
+                            {deletingId === card.id ? <RiLoader4Line className="animate-spin" /> : <RiDeleteBinLine />}
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="flex items-center gap-1 text-xs secondary cursor-not-allowed opacity-50" title="No permission"><RiLockLine /></span>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -299,7 +312,7 @@ export default function GiftCardsIndex({ cards = {}, stats = {}, users = [], fil
       )}
 
       {/* ===== MODAL ===== */}
-      {showModal && (
+      {showModal && canCreate && (
         <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto py-8 px-4">
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={closeModal} />
           <div className="relative z-10 w-full max-w-lg bg rounded-2xl border accent shadow-2xl">

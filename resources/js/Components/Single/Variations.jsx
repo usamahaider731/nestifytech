@@ -7,7 +7,7 @@ import { addToCart } from '../../store/cartSlice';
 import { addToWishlist, removeFromWishlist, selectIsInWishlist } from '@/store/wishListSlice';
 import { recordWishlistActivity } from '@/Utils/recordWishlistActivity';
 import { useLang } from '@/contexts/LanguageContext';
-import { calculateAdjustedPrice, parseNumericPrice } from '@/Utils/helper';
+import { calculateAdjustedPrice, parseNumericPrice, resolveComboPrices } from '@/Utils/helper';
 import { RiPercentLine, RiShieldCheckLine, RiHeartLine, RiHeartFill } from 'react-icons/ri';
 import { toast } from 'react-toastify';
 
@@ -37,21 +37,26 @@ const Variations = ({ product }) => {
         setQty(1);
     }, [selectedColor]);
 
-    // Combo.price from VariationsSelector is the absolute SKU price (not a delta)
+    const comboPrices = useMemo(
+        () => (selectedCombo ? resolveComboPrices(selectedCombo, product) : null),
+        [selectedCombo, product]
+    );
+
     const activeBasePrice = useMemo(() => {
-        if (variations.length > 0 && selectedCombo) {
-            return parseNumericPrice(selectedCombo.price);
+        if (variations.length > 0 && comboPrices) {
+            return comboPrices.sellingPrice;
         }
         return (first_price > second_price && second_price > 0 ? second_price : first_price) || parseNumericPrice(product?.price);
-    }, [variations, selectedCombo, first_price, second_price, product]);
+    }, [variations, comboPrices, first_price, second_price, product]);
 
     const activeRegularPrice = useMemo(() => {
-        if (variations.length > 0 && selectedCombo) {
-            const comboPrice = parseNumericPrice(selectedCombo.price);
-            return first_price > comboPrice ? first_price : comboPrice;
+        if (variations.length > 0 && comboPrices) {
+            return comboPrices.firstPrice > comboPrices.sellingPrice
+                ? comboPrices.firstPrice
+                : comboPrices.sellingPrice;
         }
         return first_price || activeBasePrice;
-    }, [variations, selectedCombo, first_price, activeBasePrice]);
+    }, [variations, comboPrices, first_price, activeBasePrice]);
 
     const userDiscountPercent = parseNumericPrice(auth?.user?.discount || auth?.user?.meta?.discount || 0);
 

@@ -362,7 +362,7 @@
         "id": "store-locator",
         "title": "Store Locator",
         "icon": "ri-map-pin-2-line",
-        "permission": "post-read",
+        "permission": "store-read",
         "menu": [
           {
             "id": "add-store",
@@ -371,7 +371,7 @@
             "params": {
               "type": "store"
             },
-            "permission": "post-read"
+            "permission": "store-write"
           },
           {
             "id": "view-stores",
@@ -380,7 +380,7 @@
             "params": {
               "type": "store"
             },
-            "permission": "post-read"
+            "permission": "store-read"
           }
         ]
       },

@@ -72,7 +72,31 @@ function collectNumericIds(...sources) {
 }
 
 /**
- * Lowest absolute combo / size price from product variations (admin Price Mod fields).
+ * Combo selling/list prices. Combo first/second override product prices;
+ * legacy combo.price is used when combo regular/sale are empty.
+ */
+export function resolveComboPrices(combo, product = null) {
+  const productFirst = parseNumericPrice(product?.meta?.first_price?.value ?? product?.first_price);
+  const productSecond = parseNumericPrice(product?.meta?.second_price?.value ?? product?.second_price);
+  const comboFirst = parseNumericPrice(combo?.first_price);
+  const comboSecond = parseNumericPrice(combo?.second_price);
+  const legacy = parseNumericPrice(combo?.price);
+  const firstPrice = comboFirst > 0 ? comboFirst : (legacy > 0 ? legacy : productFirst);
+  const secondPrice = comboSecond > 0 ? comboSecond : (comboFirst > 0 || legacy > 0 ? 0 : productSecond);
+  const sellingPrice = (secondPrice > 0 && (firstPrice <= 0 || firstPrice > secondPrice))
+    ? secondPrice
+    : (firstPrice > 0 ? firstPrice : (secondPrice > 0 ? secondPrice : legacy));
+
+  return {
+    firstPrice,
+    secondPrice,
+    sellingPrice,
+    buyPrice: parseNumericPrice(combo?.buy_price),
+  };
+}
+
+/**
+ * Lowest selling combo / size price from product variations.
  */
 export function getLowestVariationPrice(product) {
   const variations = product?.variations;
@@ -82,16 +106,16 @@ export function getLowestVariationPrice(product) {
   for (const variation of variations) {
     const combinations = Array.isArray(variation?.combinations) ? variation.combinations : [];
     for (const combo of combinations) {
-      const price = parseNumericPrice(combo?.price);
+      const price = resolveComboPrices(combo, product).sellingPrice;
       if (price > 0 && price < min) min = price;
     }
     const sizes = Array.isArray(variation?.sizes) ? variation.sizes : [];
     for (const size of sizes) {
-      const price = parseNumericPrice(size?.price);
+      const price = resolveComboPrices(size, product).sellingPrice;
       if (price > 0 && price < min) min = price;
     }
     if (combinations.length === 0 && sizes.length === 0) {
-      const price = parseNumericPrice(variation?.price);
+      const price = resolveComboPrices(variation, product).sellingPrice;
       if (price > 0 && price < min) min = price;
     }
   }
@@ -100,7 +124,7 @@ export function getLowestVariationPrice(product) {
 
 /**
  * Resolve display base + regular price from product meta and optional variation prices.
- * first_price = regular/list, second_price = sale; variation combo.price is absolute SKU price.
+ * first_price = regular/list, second_price = sale; combo prices override product prices.
  */
 export function resolveProductPrices(product) {
   const firstPrice = parseNumericPrice(product?.meta?.first_price?.value ?? product?.first_price);
@@ -109,7 +133,6 @@ export function resolveProductPrices(product) {
   const metaSale = (firstPrice > secondPrice && secondPrice > 0)
     ? secondPrice
     : (firstPrice || parseNumericPrice(product?.price));
-  // Variation combo.price is the absolute SKU price from VariationsSelector
   const basePrice = variationMin > 0 ? variationMin : metaSale;
   const regularPrice = Math.max(firstPrice, variationMin, secondPrice, basePrice);
   return { firstPrice, secondPrice, variationMin, basePrice, regularPrice };

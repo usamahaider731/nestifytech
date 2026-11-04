@@ -94,13 +94,13 @@
                 "id": "id",
                 "label": "ID",
                 "column": "id",
-                "width": "5%",
+                "width": "50px",
                 "sort": true
             },
             {
                 "id": "image",
                 "label": "IMAGE",
-                "width": "5%",
+                "width": "80px",
                 "column": "image",
                 "type": "image",
                 "key": "filename"
@@ -110,7 +110,14 @@
                 "label": "USER",
                 "column": "name",
                 "sort": true,
-                "width": "20%"
+                "width": "150px"
+            },
+            {
+                "id": "email",
+                "label": "Email",
+                "column": "email",
+                "sort": true,
+                "width": "250px"
             },
             {
                 "id": "role",
@@ -125,20 +132,34 @@
                     "pass_value_of_key": "id",
                     "return_key": "title"
                 },
-                "width": "30%"
+                "width": "200px"
+            },
+            {
+                "id": "store",
+                "label": "STORE",
+                "column": "store_id",
+                "type": "text",
+                "meta": true,
+                "meta_key": "store_id",
+                "value_table": "posts",
+                "value_condition": {
+                    "pass_value_of_key": "id",
+                    "return_key": "title"
+                },
+                "width": "150px"
             },
             {
                 "id": "active",
                 "label": "ACTIVE",
                 "column": "active",
                 "type": "status_dot",
-                "width": "20%"
+                "width": "70px"
             },
             {
                 "id": "action",
                 "label": "ACTION",
                 "column": "action",
-                "width": "20%",
+                "width": "70px",
                 "type": "action"
             }
         ]
@@ -233,7 +254,7 @@
             ]
         },
         {
-            "title": "User Role",
+            "title": "User Role & Store Assignment",
             "style": "main",
             "fields": [
                 {
@@ -243,6 +264,18 @@
                         "model": "Roles",
                         "type": "role",
                         "use_value": false
+                    }
+                },
+                {
+                    "label": "Assigned Store",
+                    "name": "store_id",
+                    "type": "dropdown",
+                    "searchable": true,
+                    "condition": "has_store_role",
+                    "placeholder": "Assign to a branch / store (e.g. for store managers & delivery boys)...",
+                    "style": 2,
+                    "options": {
+                        "model": "Store"
                     }
                 }
             ]

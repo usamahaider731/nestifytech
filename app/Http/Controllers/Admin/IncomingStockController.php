@@ -88,11 +88,34 @@ class IncomingStockController extends Controller
             ->get();
 
         // Products with current stock for selecting items
-        $products = DB::table('posts')
+        // Scope by store: non-global-admins only see their own store's products
+        $authUser = auth()->user();
+        $userStoreId = null;
+        $isGlobalAdmin = $authUser && in_array($authUser->role ?? '', ['Administrator']);
+        if (!$isGlobalAdmin && $authUser) {
+            $storeMeta = DB::table('user_meta')
+                ->where('user_id', $authUser->id)
+                ->whereIn('key', ['store_id', 'assigned_store'])
+                ->whereNotNull('value')
+                ->where('value', '!=', '')
+                ->orderByRaw("FIELD(`key`, 'store_id', 'assigned_store')")
+                ->first();
+            $userStoreId = $storeMeta ? $storeMeta->value : null;
+        }
+
+        $productsQuery = DB::table('posts')
             ->where('posts.type', 'product')
-            ->where('posts.status', 'publish')
-            ->select('posts.id', 'posts.title', 'posts.sku')
-            ->get();
+            ->where('posts.status', 'publish');
+
+        if (!empty($userStoreId)) {
+            $productsQuery->join('post_meta as pm_store', function ($join) use ($userStoreId) {
+                $join->on('pm_store.post_id', '=', 'posts.id')
+                     ->where('pm_store.key', '=', 'store')
+                     ->where('pm_store.value', '=', (string) $userStoreId);
+            });
+        }
+
+        $products = $productsQuery->select('posts.id', 'posts.title', 'posts.sku')->get();
 
         $postIds = $products->pluck('id')->toArray();
         $variations = !empty($postIds) ? DB::table('post_variations')

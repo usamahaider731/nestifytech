@@ -13,6 +13,7 @@ use Inertia\Inertia;
 use Carbon\Carbon;
 use App\Mail\OfficeSettlementOtpMail;
 use App\Mail\DeliveryOtpMail;
+use App\Services\WalletService;
 
 class OrderController extends Controller
 {
@@ -21,8 +22,52 @@ class OrderController extends Controller
      */
     public function index(Request $request)
     {
-        $status = $request->input('status', 'all');
-        $search = $request->input('search');
+        $status      = $request->input('status', 'all');
+        $search      = $request->input('search');
+        $storeFilter = $request->input('store'); // e.g. store ID
+        $currentUser = $request->user();
+
+        // ── Store Manager Scoping ──────────────────────────────────────────
+        // Check if the logged-in user is restricted to a specific store
+        $assignedStoreId = null;
+        if ($currentUser) {
+            $userMetaStore = DB::table('user_meta')
+                ->where('user_id', $currentUser->id)
+                ->whereIn('key', ['store_id', 'assigned_store', 'store'])
+                ->value('value');
+            if (!empty($userMetaStore)) {
+                $assignedStoreId = $userMetaStore;
+            }
+        }
+
+        // Active store scope: assigned store takes precedence, then explicit filter
+        $activeStoreId = $assignedStoreId ?: ($storeFilter && $storeFilter !== 'all' ? $storeFilter : null);
+
+        // Fetch all published stores for dropdown
+        $allStores = DB::table('posts')
+            ->where('type', 'store')
+            ->where('status', 'publish')
+            ->select('id', 'title')
+            ->orderBy('title')
+            ->get();
+
+        // Helper to get order IDs matching a store
+        $storeOrderIds = null;
+        if (!empty($activeStoreId)) {
+            // Find products assigned to this store via post_meta
+            $storeProductIds = DB::table('post_meta')
+                ->where('key', 'store')
+                ->where('value', $activeStoreId)
+                ->pluck('post_id')
+                ->toArray();
+
+            // Find order IDs that contain any of these products
+            $storeOrderIds = DB::table('order_items')
+                ->whereIn('product_id', $storeProductIds)
+                ->pluck('order_id')
+                ->unique()
+                ->toArray();
+        }
 
         $query = DB::table('orders')
             ->leftJoin('users as customer', 'orders.user_id', '=', 'customer.id')
@@ -35,6 +80,10 @@ class OrderController extends Controller
                 'rider.email as delivery_boy_email',
             ])
             ->orderByDesc('orders.id');
+
+        if (!empty($activeStoreId)) {
+            $query->whereIn('orders.id', $storeOrderIds ?: [0]);
+        }
 
         if ($status !== 'all' && !empty($status)) {
             $query->where('orders.status', $status);
@@ -91,6 +140,21 @@ class OrderController extends Controller
             });
         });
 
+        // Collect all product IDs in these orders to find their assigned stores
+        $storeByProductId = DB::table('post_meta')
+            ->whereIn('post_id', $productIds)
+            ->whereIn('key', ['store', 'store_id'])
+            ->pluck('value', 'post_id')
+            ->toArray();
+
+        // Map orderId -> primary store_id
+        $storeByOrderId = [];
+        foreach ($items as $item) {
+            if (!isset($storeByOrderId[$item->order_id]) && isset($storeByProductId[$item->product_id])) {
+                $storeByOrderId[$item->order_id] = (string) $storeByProductId[$item->product_id];
+            }
+        }
+
         // Read selected delivery role from site settings or find Delivery Boy role
         $selectedRoleId = null;
         $settingFile = storage_path('app/data/setting.json');
@@ -103,7 +167,7 @@ class OrderController extends Controller
             $deliveryBoyRole = DB::table('roles')
                 ->where(function ($q) {
                     $q->where('title', 'like', '%delivery%')
-                      ->orWhere('title', 'like', '%rider%');
+                        ->orWhere('title', 'like', '%rider%');
                 })
                 ->first();
             $selectedRoleId = $deliveryBoyRole ? (string) $deliveryBoyRole->id : null;
@@ -112,23 +176,43 @@ class OrderController extends Controller
         }
 
         // Fetch only users who have the selected delivery role assigned
-        $usersQuery = DB::table('users')->select('id', 'name', 'email', 'roles')->orderBy('name');
+        $usersQuery = DB::table('users')->select('id', 'name', 'email', 'roles', 'last_seen_at')->orderBy('name');
         if (!empty($selectedRoleId)) {
             $usersList = $usersQuery->where(function ($q) use ($selectedRoleId) {
                 $q->where('roles', 'like', "%\"{$selectedRoleId}\"%")
-                  ->orWhere('roles', 'like', "%[{$selectedRoleId}]%")
-                  ->orWhere('roles', 'like', "%{$selectedRoleId}%");
+                    ->orWhere('roles', 'like', "%[{$selectedRoleId}]%")
+                    ->orWhere('roles', 'like', "%{$selectedRoleId}%");
             })->get();
         } else {
             $usersList = $usersQuery->get();
         }
 
-        $transformed = collect($orders->items())->map(function ($ord) use ($groupedItems) {
+        // Attach assigned store_id and store title to each delivery boy
+        $deliveryBoyIds = $usersList->pluck('id')->toArray();
+        $riderStores = DB::table('user_meta')
+            ->whereIn('user_id', $deliveryBoyIds)
+            ->whereIn('key', ['store_id', 'assigned_store', 'store'])
+            ->pluck('value', 'user_id')
+            ->toArray();
+
+        $storesMap = $allStores->pluck('title', 'id')->toArray();
+
+        $usersList = $usersList->map(function ($u) use ($riderStores, $storesMap) {
+            $sId = $riderStores[$u->id] ?? null;
+            $u->store_id = $sId ? (string) $sId : null;
+            $u->store_title = $sId && isset($storesMap[$sId]) ? $storesMap[$sId] : null;
+            return $u;
+        });
+
+        $transformed = collect($orders->items())->map(function ($ord) use ($groupedItems, $storeByOrderId, $storesMap) {
             $ordItems = $groupedItems->get($ord->id) ?? collect([]);
+            $orderStoreId = $storeByOrderId[$ord->id] ?? null;
             return [
                 'id'                         => $ord->id,
                 'order_number'               => 'ORD-' . str_pad($ord->id, 5, '0', STR_PAD_LEFT),
                 'user_id'                    => $ord->user_id,
+                'store_id'                   => $orderStoreId,
+                'store_title'                => $orderStoreId && isset($storesMap[$orderStoreId]) ? $storesMap[$orderStoreId] : null,
                 'customer_name'              => $ord->customer_name ?? 'Guest',
                 'customer_email'             => $ord->customer_email ?? '—',
                 'delivery_boy_id'            => $ord->delivery_boy_id,
@@ -163,17 +247,85 @@ class OrderController extends Controller
             ];
         });
 
-        // Statistics across all orders
-        $totalOrders      = DB::table('orders')->count();
-        $pendingOrders    = DB::table('orders')->where('status', 'pending')->count();
-        $processingOrders = DB::table('orders')->where('status', 'processing')->count();
-        $shippedOrders    = DB::table('orders')->where('status', 'shipped')->count();
-        $deliveredOrders  = DB::table('orders')->where('status', 'delivered')->count();
-        $completedOrders  = DB::table('orders')->where('status', 'completed')->count();
-        $cancelledOrders  = DB::table('orders')->where('status', 'cancelled')->count();
-        $totalRevenue     = DB::table('orders')->whereIn('status', ['processing', 'shipped', 'delivered', 'completed'])->sum('total_price');
-        $codCollected     = DB::table('orders')->where('payment_method', 'cod')->sum('cod_collected_amount');
-        $pendingSettlement= DB::table('orders')->where('payment_method', 'cod')->where('cod_collected_amount', '>', 0)->where('office_settlement_status', 'unsettled')->sum('cod_collected_amount');
+        // Statistics scoped to the active store (if applicable)
+        $statsBaseQuery = DB::table('orders');
+        if (!empty($activeStoreId)) {
+            $statsBaseQuery->whereIn('id', $storeOrderIds ?: [0]);
+        }
+
+        $totalOrders       = (clone $statsBaseQuery)->count();
+        $pendingOrders     = (clone $statsBaseQuery)->where('status', 'pending')->count();
+        $processingOrders  = (clone $statsBaseQuery)->where('status', 'processing')->count();
+        $shippedOrders     = (clone $statsBaseQuery)->where('status', 'shipped')->count();
+        $deliveredOrders   = (clone $statsBaseQuery)->where('status', 'delivered')->count();
+        $completedOrders   = (clone $statsBaseQuery)->where('status', 'completed')->count();
+        $cancelledOrders   = (clone $statsBaseQuery)->where('status', 'cancelled')->count();
+        $totalRevenue      = (clone $statsBaseQuery)->whereIn('status', ['processing', 'shipped', 'delivered', 'completed'])->sum('total_price');
+        $codCollected      = (clone $statsBaseQuery)->where('payment_method', 'cod')->sum('cod_collected_amount');
+        $pendingSettlement = (clone $statsBaseQuery)->where('payment_method', 'cod')->where('cod_collected_amount', '>', 0)->where('office_settlement_status', 'unsettled')->sum('cod_collected_amount');
+        $riderPerformance = collect($usersList)->map(function ($rider) {
+            $riderId = $rider->id;
+            $riderOrders = DB::table('orders')->where('delivery_boy_id', $riderId)->get();
+
+            $totalAssigned = $riderOrders->count();
+            $deliveredOrders = $riderOrders->whereIn('status', ['delivered', 'completed']);
+            $deliveredCount = $deliveredOrders->count();
+            $activeCount = $riderOrders->whereIn('status', ['pending', 'processing', 'shipped'])->count();
+            $cancelledCount = $riderOrders->where('status', 'cancelled')->count();
+            $codCollected = (float) $riderOrders->sum('cod_collected_amount');
+            $codSettled = (float) $riderOrders->where('office_settlement_status', 'settled')->sum('cod_collected_amount');
+            $codInHand = (float) $riderOrders->where('status', 'completed')
+                ->where(function ($o) {
+                    return empty($o->office_settlement_status) || $o->office_settlement_status !== 'settled';
+                })
+                ->sum('cod_collected_amount');
+            $deliveryDurations = [];
+            foreach ($deliveredOrders as $ord) {
+                $start = $ord->shipped_date ? Carbon::parse($ord->shipped_date) : ($ord->order_date ? Carbon::parse($ord->order_date) : ($ord->created_at ? Carbon::parse($ord->created_at) : null));
+                $end = $ord->delivery_otp_verified_at ? Carbon::parse($ord->delivery_otp_verified_at) : ($ord->completed_date ? Carbon::parse($ord->completed_date) : null);
+
+                if ($start && $end && $end->greaterThanOrEqualTo($start)) {
+                    $deliveryDurations[] = $start->diffInMinutes($end);
+                }
+            }
+
+            $avgDurationMinutes = count($deliveryDurations) > 0 ? (int) round(array_sum($deliveryDurations) / count($deliveryDurations)) : null;
+
+            // Live location check
+            $cachedLoc = \Illuminate\Support\Facades\Cache::get("rider_location_{$riderId}");
+            if (!$cachedLoc) {
+                $meta = DB::table('user_meta')->where('user_id', $riderId)->where('key', 'rider_live_location')->value('value');
+                if ($meta) {
+                    $cachedLoc = json_decode($meta, true);
+                }
+            }
+
+            $lastActive = null;
+            if (!empty($rider->last_seen_at)) {
+                try {
+                    $lastActive = Carbon::parse($rider->last_seen_at)->diffForHumans();
+                } catch (\Throwable $e) {
+                    $lastActive = null;
+                }
+            }
+
+            return [
+                'id'                   => $rider->id,
+                'name'                 => $rider->name,
+                'email'                => $rider->email,
+                'total_assigned'       => $totalAssigned,
+                'delivered_count'      => $deliveredCount,
+                'active_count'         => $activeCount,
+                'cancelled_count'      => $cancelledCount,
+                'completion_rate'      => $totalAssigned > 0 ? round(($deliveredCount / $totalAssigned) * 100, 1) : 0,
+                'avg_delivery_minutes' => $avgDurationMinutes,
+                'cod_collected'        => $codCollected,
+                'cod_settled'          => $codSettled,
+                'cod_in_hand'          => $codInHand,
+                'live_location'        => $cachedLoc,
+                'last_active'          => $lastActive,
+            ];
+        })->values();
 
         return Inertia::render('Admin/Orders/Index', [
             'orders' => [
@@ -183,10 +335,14 @@ class OrderController extends Controller
                 'per_page'     => $orders->perPage(),
                 'total'        => $orders->total(),
             ],
-            'deliveryBoys' => $usersList,
+            'stores'            => $allStores,
+            'assignedStoreId'   => $assignedStoreId,
+            'deliveryBoys'      => $usersList,
+            'riderPerformance'  => $riderPerformance,
             'filters' => [
                 'status' => $status,
                 'search' => $search,
+                'store'  => $activeStoreId,
             ],
             'stats' => [
                 'total'              => $totalOrders,
@@ -550,6 +706,35 @@ class OrderController extends Controller
 
         DB::table('orders')->where('id', $id)->update($update);
 
+        // ── On cancellation: restore stock + credit wallet ────────────────────
+        if ($request->status === 'cancelled' && $order->status !== 'cancelled') {
+            // Restore inventory
+            WalletService::restoreOrderStock($id);
+
+            // Credit wallet if order was paid and user exists
+            $wasPaid = in_array(strtolower($order->payment_status ?? ''), ['paid']);
+            $isNonStripe = strtolower($order->payment_method ?? '') !== 'card';
+            if ($wasPaid && !empty($order->user_id)) {
+                $refundable = (float) $order->total_price;
+                if ($isNonStripe && $refundable > 0) {
+                    WalletService::credit(
+                        (int) $order->user_id,
+                        $refundable,
+                        'order_refund',
+                        $id,
+                        null,
+                        "Admin cancelled order #" . str_pad($id, 5, '0', STR_PAD_LEFT) . " — full refund credited to wallet."
+                    );
+                    // Mark order refunded
+                    DB::table('orders')->where('id', $id)->update([
+                        'payment_status' => 'refunded',
+                        'refund_amount'  => $refundable,
+                        'refund_status'  => 'wallet_credited',
+                    ]);
+                }
+            }
+        }
+
         return response()->json([
             'success' => true,
             'message' => "Order #{$id} status updated to " . ucfirst($request->status) . '.',
@@ -564,6 +749,32 @@ class OrderController extends Controller
         $order = DB::table('orders')->where('id', $id)->first();
         if (!$order) {
             return response()->json(['success' => false, 'message' => 'Order not found.'], 404);
+        }
+
+        $isActive = !in_array($order->status, ['delivered', 'completed', 'cancelled']);
+
+        // Restore stock for non-delivered/non-cancelled orders
+        if ($isActive) {
+            WalletService::restoreOrderStock($id);
+        }
+
+        // Credit wallet if the order was paid and not yet delivered/cancelled
+        if ($isActive && !empty($order->user_id)) {
+            $wasPaid    = in_array(strtolower($order->payment_status ?? ''), ['paid']);
+            $isNonStripe = strtolower($order->payment_method ?? '') !== 'card';
+            if ($wasPaid && $isNonStripe) {
+                $refundable = (float) $order->total_price;
+                if ($refundable > 0) {
+                    WalletService::credit(
+                        (int) $order->user_id,
+                        $refundable,
+                        'order_deleted_refund',
+                        $id,
+                        null,
+                        "Order #" . str_pad($id, 5, '0', STR_PAD_LEFT) . " was deleted by admin — full refund credited to wallet."
+                    );
+                }
+            }
         }
 
         DB::table('order_items')->where('order_id', $id)->delete();

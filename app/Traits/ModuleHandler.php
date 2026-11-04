@@ -146,7 +146,6 @@ trait ModuleHandler
                 $foreignKey = $db['meta_key'] ?? (\Illuminate\Support\Str::singular($tableName) . '_id');
                 $item->meta = DB::table($metaTable)->where($foreignKey, $item->id)->get();
             }
-
             // Image handling (via media table)
             $mediaType = ($tableName === 'posts') ? 'post' : (($tableName === 'taxonomies') ? 'taxonomy' : $type);
             $image = DB::table('media')
@@ -205,6 +204,12 @@ trait ModuleHandler
             }
         }
         $request->validate($rules);
+
+        // TEMP: Log ALL store submissions immediately after validation
+        if ($type === 'store') {
+            \Log::info('[STORE-RECV] Request arrived. Keys: ' . implode(', ', array_keys($request->all())));
+            \Log::info('[STORE-RECV] manager_id = ' . json_encode($request->input('manager_id')));
+        }
 
         try {
 
@@ -309,6 +314,13 @@ trait ModuleHandler
                 // Only category must be stored as a JSON-encoded string array (["id1","id2"])
                 $jsonArrayKeys = ['category', 'category_id'];
 
+                // TEMP DEBUG
+                if ($type === 'store') {
+                    \Log::info('[STORE] all request keys: ' . implode(', ', array_keys($request->all())));
+                    \Log::info('[STORE] manager_id value: ' . json_encode($request->input('manager_id')));
+                    \Log::info('[STORE] meta to save: ' . json_encode(array_keys($metaData)));
+                }
+
                 foreach ($metaData as $key => $value) {
                     if ($value instanceof \Illuminate\Http\UploadedFile)
                         continue;
@@ -402,6 +414,9 @@ trait ModuleHandler
                 if (is_array($variations)) {
                     $variationsTable = $db['variations_table'] ?? (Str::singular($tableName) . '_variations');
                     if (Schema::hasTable($variationsTable)) {
+                        $hasComboPricing = Schema::hasColumn($variationsTable, 'first_price')
+                            && Schema::hasColumn($variationsTable, 'second_price')
+                            && Schema::hasColumn($variationsTable, 'buy_price');
                         $foreignKey = $db['meta_key'] ?? (Str::singular($tableName) . '_id');
                         $oldVariations = DB::table($variationsTable)->where($foreignKey, $recordId)->get();
 
@@ -457,6 +472,9 @@ trait ModuleHandler
                                 $combinations = [
                                     [
                                         'price' => $variation['price'] ?? 0,
+                                        'buy_price' => $variation['buy_price'] ?? 0,
+                                        'first_price' => $variation['first_price'] ?? 0,
+                                        'second_price' => $variation['second_price'] ?? 0,
                                         'stock' => $variation['stock'] ?? 0,
                                         'attributes' => []
                                     ]
@@ -529,7 +547,17 @@ trait ModuleHandler
 
                             // 2. Handle Child Variations (Combinations)
                             foreach ($combinations as $combo) {
-                                $price = isset($combo['price']) && $combo['price'] !== '' ? (float)$combo['price'] : $parentPrice;
+                                $comboFirst = money_amount($combo['first_price'] ?? 0);
+                                $comboSecond = money_amount($combo['second_price'] ?? 0);
+                                $comboBuy = money_amount($combo['buy_price'] ?? 0);
+                                $legacyPrice = isset($combo['price']) && $combo['price'] !== ''
+                                    ? money_amount($combo['price'])
+                                    : $parentPrice;
+                                $price = variation_selling_price([
+                                    'first_price' => $comboFirst,
+                                    'second_price' => $comboSecond,
+                                    'price' => $legacyPrice,
+                                ]);
                                 $stock = isset($combo['stock']) && $combo['stock'] !== '' ? (int)$combo['stock'] : 0;
 
                                 $childDataToSave = [
@@ -541,6 +569,12 @@ trait ModuleHandler
                                     'combinations' => null,
                                     'shared_attributes' => null,
                                 ];
+
+                                if ($hasComboPricing) {
+                                    $childDataToSave['buy_price'] = $comboBuy > 0 ? $comboBuy : null;
+                                    $childDataToSave['first_price'] = $comboFirst > 0 ? $comboFirst : null;
+                                    $childDataToSave['second_price'] = $comboSecond > 0 ? $comboSecond : null;
+                                }
 
                                 // Reuse old child rows or insert new
                                 if (isset($existingChildrenForColor[$childIdIndex])) {

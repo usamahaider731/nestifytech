@@ -34,16 +34,18 @@ function Index({ roles, table }) {
         if (column.type == 'action') {
             return (
                 <div className='w-full flex h-12 my-auto items-center gap-3 justify-center'>
-                    {hasPermission(auth.user, 'role-write') && (
-                        <>
+                    <>
+                        {hasPermission(auth.user, 'role-delete') && (
                             <span className='h-6.5 w-6.5 rounded-full bg-red-500 text-white text-sm flex text-center items-center justify-center cursor-pointer'>
                                 <RiDeleteBin6Line className='w-3' />
                             </span>
+                        )}
+                        {hasPermission(auth.user, 'role-write') && (
                             <Link href={route('edit.role', { id: Data.id })} className='h-6.5 w-6.5 rounded-full bg-primary text-white text-sm flex text-center items-center justify-center'>
                                 <RiFileEditLine className='w-3' />
                             </Link>
-                        </>
-                    )}
+                        )}
+                    </>
                     <Link href={route('role.detail', { id: Data.id })} className='h-6.5 w-6.5 rounded-full bg-secondary text-white text-sm flex text-center items-center justify-center'>
                         <RiFile3Fill className='w-3' />
                     </Link>

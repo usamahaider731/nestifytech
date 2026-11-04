@@ -4,21 +4,20 @@ import ProductGrid from '@/Components/Frontend/ProductGrid'
 import ProductFilters, { CatalogSort, toQuery } from '@/Components/Frontend/ProductFilters'
 import { Head, Link, router, usePage } from '@inertiajs/react'
 import ImageViwer from '@/Components/Admin/ImageViwer';
-import { RiFilter3Line, RiGridFill, RiListUnordered } from 'react-icons/ri';
+import { RiFacebookFill, RiFileCopyLine, RiFilter3Line, RiGridFill, RiListUnordered, RiShareLine, RiWhatsappLine } from 'react-icons/ri';
 import { useLang } from '@/contexts/LanguageContext';
-
-export default function Category({ category, products, filters = {}, filterOptions = {} }) {
+import Dropdown from '@/Components/Dropdown'
+import TaxonomyQrCode from '@/Components/TaxonomyQrCode'
+export default function Taxonomy({ category, products, filters = {}, filterOptions = {} }) {
   const { setting } = usePage().props;
   const { __ } = useLang();
   const [Settings] = useState(setting?.layout?.Single_Category);
   const [layoutType, setLayoutType] = useState('v1');
   const [filtersOpen, setFiltersOpen] = useState(false);
   const currency = setting.site.currency.value ?? 'PKR';
-
   const cat = Array.isArray(category) ? category[0] : category;
   const productItems = products?.data || products || [];
   const productCount = products?.total ?? productItems.length;
-
   const applySort = (sort) => {
     router.get(window.location.pathname, toQuery({ ...filters, sort }, filterOptions.price), {
       preserveState: true,
@@ -26,42 +25,65 @@ export default function Category({ category, products, filters = {}, filterOptio
       replace: true,
     });
   };
-
   return (
     <div className="mx-auto w-full max-w-[1600px] bg-bg">
       <Head title={cat?.title ? `${cat.title} - Category` : 'Category'} />
-
-      <div className="relative mb-10 bg-bg flex min-h-[280px] flex-col items-center gap-8 overflow-hidden rounded border border-border p-8 text-center shadow-sm md:min-h-[360px] md:flex-row md:p-12 lg:text-left">
+      <div className="relative mb-10 bg-bg flex min-h-[280px] flex-col items-end gap-8 overflow-hidden text-center md:min-h-[460px] md:flex-row lg:text-left">
         <ImageViwer image={Settings?.banner_image} className="absolute inset-0 z-0 size-full object-cover" />
-        <div className="absolute inset-0 z-0 bg-white/40 backdrop-blur-sm"></div>
-        <div className="absolute -top-24 -right-24 z-0 size-64 rounded-full bg-primary/10 blur-3xl"></div>
-        <div className="absolute -bottom-24 -left-24 z-0 size-64 rounded-full bg-primary/10 blur-3xl"></div>
-
-        {cat?.image && (
-          <div className="relative z-10 flex size-30 shrink-0 items-center justify-center rounded-full border border-border bg-white overflow-hidden shadow-md md:size-40">
-            <ImageViwer
-              image={cat.image}
-              width={900}
-              height={900}
-              alt={cat?.title}
-              className="h-full w-full object-cover"
-            />
+        <div className='w-full bg-bg z-20 flex'>
+          <div className='container p-5 pb-0 mx-auto flex justify-between items-start'>
+            <div className='flex gap-10'>
+              {cat?.image && (
+                <div className="relative z-10 flex size-30 -translate-y-1/2 shrink-0 items-center justify-center rounded-full border border-border bg-white overflow-hidden shadow-md md:size-40">
+                  {cat.image.filename.split('.').pop() == 'svg'
+                    ?
+                    <ImageViwer
+                      image={cat.image}
+                      width={100}
+                      alt={cat?.title}
+                      className="flex items-center justify-center mx-auto"
+                    />
+                    :
+                    <ImageViwer
+                      image={cat.image}
+                      width={900}
+                      height={900}
+                      alt={cat?.title}
+                      className="h-full w-full flex text-center items-center justify-center object-cover"
+                    />
+                  }
+                </div>
+              )}
+              <div className="relative z-10 flex-1">
+                <div className="mb-2 flex items-center justify-center gap-2 text-sm font-semibold capitalize font-oswald tracking-wider text-heading lg:justify-start">
+                  <Link href="/" className="hover:underline">{__('Home')}</Link>
+                  <span>/</span>
+                  <span>{cat?.type === 'brand' ? __('Brand') : __('Category')}</span>
+                </div>
+                <h1 className="mb-4 text-3xl font-semibold font-poppins text-primary md:text-4xl">{cat?.title}</h1>
+                {cat?.description && (
+                  <div dangerouslySetInnerHTML={{ __html: cat?.description }} className="mx-auto max-w-3xl text-base leading-relaxed text-text font-roboto lg:mx-0"></div>
+                )}
+              </div>
+            </div>
+            <div className='flex gap-1 items-center'>
+              <Dropdown>
+                <Dropdown.Trigger>
+                  <span className='size-8 hover:bg-primary flex items-center group cursor-pointer justify-center rounded border-2 border-primary'>
+                    <RiShareLine className='text-primary group-hover:text-white' />
+                  </span>
+                </Dropdown.Trigger>
+                <Dropdown.Content className='!w-32 bg-white absolute !border-0 !ring-0 rounded-none' contentClasses='!w-32 !ring-0 rounded-none text-text absolute bg-white !border-0'>
+                  <Dropdown.List className='w-full hover:bg-common text-xs flex items-center gap-2 cursor-pointer hover:text-primary' onClick={() => navigator.clipboard.writeText(window.location.href)}> <RiFileCopyLine /> {__('Copy Link')}  </Dropdown.List>
+                  <Dropdown.List className='w-full hover:bg-common text-xs flex items-center gap-2 cursor-pointer hover:text-primary' onClick={() => window.open(`https://wa.me/?text=${window.location.href}`, '_blank')}><RiWhatsappLine /> {__('Whatsapp')}</Dropdown.List>
+                  <Dropdown.Link href={`https://www.facebook.com/sharer/sharer.php?u=${window.location.href}`} target='_blank' className='w-full hover:bg-common text-xs flex items-center gap-2 cursor-pointer hover:text-primary'><RiFacebookFill /> {__('Facebook')}</Dropdown.Link>
+                </Dropdown.Content>
+              </Dropdown>
+              <TaxonomyQrCode taxonomy={cat} />
+            </div>
           </div>
-        )}
-
-        <div className="relative z-10 flex-1">
-          <div className="mb-3 flex items-center justify-center gap-2 text-sm font-semibold capitalize font-oswald tracking-wider text-permanent lg:justify-start">
-            <Link href="/" className="hover:underline">{__('Home')}</Link>
-            <span>/</span>
-            <span>{cat?.type === 'brand' ? __('Brand') : __('Category')}</span>
-          </div>
-          <h1 className="mb-4 text-4xl font-bold font-poppins text-common md:text-5xl">{cat?.title}</h1>
-          {cat?.description && (
-            <div dangerouslySetInnerHTML={{ __html: cat?.description }} className="mx-auto max-w-3xl text-base leading-relaxed text-permanent font-roboto lg:mx-0"></div>
-          )}
         </div>
       </div>
-
       <div className="flex flex-col pb-5 container mx-auto px-4 gap-6 lg:flex-row lg:items-start">
         <ProductFilters
           filters={filters}
@@ -71,7 +93,6 @@ export default function Category({ category, products, filters = {}, filterOptio
           mobileOpen={filtersOpen}
           onClose={() => setFiltersOpen(false)}
         />
-
         <div className="min-w-0 flex-1">
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded border border-border bg-white px-4 py-3 shadow-sm">
             <div className="flex items-center gap-3">
@@ -109,7 +130,6 @@ export default function Category({ category, products, filters = {}, filterOptio
               </div>
             </div>
           </div>
-
           {productItems.length > 0 ? (
             <>
               <ProductGrid
@@ -119,7 +139,6 @@ export default function Category({ category, products, filters = {}, filterOptio
                 cardType={layoutType}
                 widthType={75}
               />
-
               {products?.links && products.links.length > 3 && (
                 <div className="mt-8 flex flex-wrap items-center justify-center gap-2 pb-8">
                   {products.links.map((link, idx) => (
@@ -157,8 +176,7 @@ export default function Category({ category, products, filters = {}, filterOptio
     </div>
   )
 }
-
-Category.layout = (view) => {
+Taxonomy.layout = (view) => {
   return (
     <FrontendLayout>
       {view}

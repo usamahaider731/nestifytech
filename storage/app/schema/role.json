@@ -11,6 +11,11 @@
                 "type": "string"
             },
             {
+                "name": "scope",
+                "type": "string",
+                "default": "platform"
+            },
+            {
                 "name": "status",
                 "type": "string",
                 "default": "active"
@@ -33,6 +38,7 @@
         ],
         "main_fields": [
             "title",
+            "scope",
             "status",
             "permission"
         ],
@@ -61,7 +67,7 @@
                 "id": "id",
                 "label": "ID",
                 "column": "id",
-                "width": "5%",
+                "width": "70px",
                 "sort": true
             },
             {
@@ -69,20 +75,28 @@
                 "label": "ROLE",
                 "column": "title",
                 "sort": true,
-                "width": "55%"
+                "width": "240px"
+            },
+            {
+                "id": "scope",
+                "label": "SCOPE",
+                "column": "scope",
+                "sort": true,
+                "width": "160px",
+                "type": "text"
             },
             {
                 "id": "status",
                 "label": "STATUS",
                 "column": "status",
-                "width": "20%",
+                "width": "120px",
                 "type": "status_dot"
             },
             {
                 "id": "action",
                 "label": "ACTION",
                 "column": "action",
-                "width": "20%",
+                "width": "120px",
                 "type": "action"
             }
         ]
@@ -96,7 +110,24 @@
                     "label": "Role Title",
                     "name": "title",
                     "type": "text",
-                    "placeholder": "e.g. Administrator, Editor...",
+                    "placeholder": "e.g. Administrator, Store Manager...",
+                    "style": 2
+                },
+                {
+                    "label": "Role Scope",
+                    "name": "scope",
+                    "type": "dropdown",
+                    "options": [
+                        {
+                            "title": "Main Platform (Global)",
+                            "id": "platform"
+                        },
+                        {
+                            "title": "Store / Branch Specific",
+                            "id": "store"
+                        }
+                    ],
+                    "desc": "Select whether this role applies to the main global platform or specific store branches.",
                     "style": 2
                 },
                 {
@@ -144,6 +175,7 @@
                     "type": "matrix",
                     "rows": [
                         "Product",
+                        "Store",
                         "Blog",
                         "Blog Category",
                         "Faq",

@@ -46,8 +46,6 @@ export default function ShopByCitySection({ cities = [] }) {
                     <RiArrowRightLine className="group-hover:translate-x-1 transition-transform" />
                 </Link>
             </div>
-
-            {/* City Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-5">
                 {cities.map((city, idx) => {
                     const grad = CITY_GRADIENTS[idx % CITY_GRADIENTS.length];
@@ -55,7 +53,7 @@ export default function ShopByCitySection({ cities = [] }) {
                         <Link
                             key={city.id}
                             href={route('shop', { city: city.id })}
-                            className={`group relative overflow-hidden rounded-2xl border bg-gradient-to-br ${grad} p-4 sm:p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg bg-white flex flex-col justify-between min-h-[130px] sm:min-h-[145px]`}
+                            className={`group relative overflow-hidden rounded-xl border bg-gradient-to-br ${grad} p-4 sm:p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg bg-white flex flex-col justify-between min-h-[130px] sm:min-h-[145px]`}
                         >
                             {/* Decorative City Icon Watermark */}
                             <div className="absolute -right-3 -bottom-3 text-slate-100 group-hover:text-primary/10 transition-colors pointer-events-none">

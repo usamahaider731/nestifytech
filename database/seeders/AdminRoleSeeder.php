@@ -26,6 +26,7 @@ class AdminRoleSeeder extends Seeder
             // Content Management
             'content' => [
                 'Product-Read',       'Product-Write',       'Product-Delete',
+                'Store-Read',         'Store-Write',         'Store-Delete',
                 'Blog-Read',          'Blog-Write',          'Blog-Delete',
                 'Blog Category-Read', 'Blog Category-Write', 'Blog Category-Delete',
                 'Faq-Read',           'Faq-Write',           'Faq-Delete',

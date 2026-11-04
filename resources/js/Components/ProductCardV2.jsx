@@ -115,8 +115,8 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
             <div className="relative shrink-0 overflow-hidden bg-white sm:p-3 m-2 sm:m-0 shadow sm:shadow-none sm:w-40 ">
 
                 {productHref ? (
-                    <Link href={productHref} className="block size-full">
-                        <ImageViwer image={product.image} height={900} width={900} className="size-full object-cover rounded transition duration-500 group-hover:scale-105" />
+                    <Link href={productHref} className="items-center justify-center size-full flex">
+                        <ImageViwer image={product.image} height={900} width={900} className="size-full object-cover rounded transition duration-500 text-center group-hover:scale-105" />
                     </Link>
                 ) : (
                     <ImageViwer image={product.image} height={900} width={900} className="size-full object-cover rounded" />
@@ -128,9 +128,9 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
                         </span>
                     )}
                     {cardSetting.show_product_brand && brandTitle && (
-                        <span className="z-10 rounded bg-secondary px-1 text-[8px] font-semibold uppercase tracking-wide text-white">
+                        <Link href={route('taxonomy.view',{type: 'brand', id: product.brand.id, slug: product.brand.slug, time: Date.now()})} className="z-10 rounded bg-secondary px-1 text-[8px] font-semibold uppercase tracking-wide text-white">
                             {brandTitle}
-                        </span>
+                        </Link>
                     )}
                 </div>
             </div>
@@ -141,9 +141,9 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
                     {cardSetting.show_product_category && categories.length > 0 && (
                         <div className="flex flex-wrap gap-1.5">
                             {categories.map((category, idx) => (
-                                <span key={idx} className="rounded bg-common px-2 text-[9px] font-semibold uppercase tracking-wide text-res">
+                                <Link href={route('taxonomy.view',{type: 'category', id: category.id, slug: category.slug, time: Date.now()})} key={idx} className="rounded bg-common px-2 text-[9px] font-semibold uppercase tracking-wide text-res">
                                     {category.title}
-                                </span>
+                                </Link>
                             ))}
                         </div>
                     )}
@@ -197,7 +197,7 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
                     </div>
                 )}
 
-                <div className="flex flex-wrap mt-auto items-center gap-1.25 sm:gap-1.5">
+                <div className="flex flex-wrap md:flex-nowrap mt-auto items-center gap-1.25 sm:gap-1.5">
 
                     {cardSetting.show_product_view_button && productHref && (
                         <Link

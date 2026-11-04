@@ -20,6 +20,42 @@ function table_exists($table_name)
 {
     return \Illuminate\Support\Facades\Schema::hasTable($table_name);
 }
+
+function money_amount($value): float
+{
+    if ($value === null || $value === '') {
+        return 0.0;
+    }
+
+    return (float) str_replace([',', ' '], '', (string) $value);
+}
+
+function variation_regular_price(object|array $row): float
+{
+    $row = is_array($row) ? (object) $row : $row;
+    $first = money_amount($row->first_price ?? 0);
+    $legacy = money_amount($row->price ?? 0);
+
+    return $first > 0 ? $first : $legacy;
+}
+
+function variation_selling_price(object|array $row): float
+{
+    $row = is_array($row) ? (object) $row : $row;
+    $first = money_amount($row->first_price ?? 0);
+    $second = money_amount($row->second_price ?? 0);
+    $legacy = money_amount($row->price ?? 0);
+
+    if ($second > 0 && ($first <= 0 || $first > $second)) {
+        return $second;
+    }
+
+    if ($first > 0) {
+        return $first;
+    }
+
+    return $legacy;
+}
 function ObjectToArrayOperator($value)
 {
     if (is_array($value)) {

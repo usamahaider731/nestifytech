@@ -8,28 +8,62 @@
             "status": "nullable|string|max:20"
         },
         "schema": [
-            { "name": "user_id", "type": "unsignedBigInteger", "index": true },
-            { "name": "title", "type": "string" },
-            { "name": "sku", "type": "string", "unique": true },
-            { "name": "description", "type": "longText", "nullable": true },
-            { "name": "status", "type": "string", "default": "publish" },
-            { "name": "type", "type": "string", "index": true },
-            { "name": "created_at", "type": "timestamp", "nullable": true },
-            { "name": "updated_at", "type": "timestamp", "nullable": true }
+            {
+                "name": "user_id",
+                "type": "unsignedBigInteger",
+                "index": true
+            },
+            {
+                "name": "title",
+                "type": "string"
+            },
+            {
+                "name": "sku",
+                "type": "string",
+                "unique": true
+            },
+            {
+                "name": "description",
+                "type": "longText",
+                "nullable": true
+            },
+            {
+                "name": "status",
+                "type": "string",
+                "default": "publish"
+            },
+            {
+                "name": "type",
+                "type": "string",
+                "index": true
+            },
+            {
+                "name": "created_at",
+                "type": "timestamp",
+                "nullable": true
+            },
+            {
+                "name": "updated_at",
+                "type": "timestamp",
+                "nullable": true
+            }
         ],
-        "main_fields": ["title", "sku", "description", "status", "updated_at", "created_at"],
+        "main_fields": [
+            "title",
+            "sku",
+            "description",
+            "status",
+            "updated_at",
+            "created_at"
+        ],
         "fixed_fields": {
             "user_id": "auth_id",
             "type": "store"
         },
-        "relations": { "image": "single_image" },
-        "meta_fields": "auto",
-        "features": {
-            "category": false,
-            "brand": false,
-            "attributes": false,
-            "variations": false
+        "relations": {
+            "image": "single_image"
         },
+        "meta_fields": "auto",
         "table": "posts"
     },
     "table": {
@@ -38,12 +72,20 @@
             "title": "title",
             "subtitle": "city",
             "top_right": "country",
-            "badges": ["status"],
+            "badges": [
+                "status"
+            ],
             "actions": "action"
         },
         "keywords": true,
         "paginationPerPage": 15,
-        "paginationList": [10, 15, 25, 50, 100],
+        "paginationList": [
+            10,
+            15,
+            25,
+            50,
+            100
+        ],
         "table": "posts",
         "type": "store",
         "bulk": {
@@ -53,21 +95,128 @@
             "column": "status",
             "is_meta": false,
             "options": [
-                { "label": "Delete", "value": "delete" },
-                { "label": "Publish", "value": "publish" },
-                { "label": "Draft", "value": "draft" }
+                {
+                    "label": "Delete",
+                    "value": "delete"
+                },
+                {
+                    "label": "Publish",
+                    "value": "publish"
+                },
+                {
+                    "label": "Draft",
+                    "value": "draft"
+                }
             ]
         },
         "columns": [
-            { "id": "id", "label": "ID", "column": "id", "width": "5%", "sort": true },
-            { "id": "image", "label": "IMAGE", "width": "8%", "column": "image", "type": "image", "key": "filename" },
-            { "id": "title", "label": "STORE NAME", "column": "title", "sort": true, "width": "20%" },
-            { "id": "country", "label": "COUNTRY", "column": "country", "meta": true, "meta_key": "country", "width": "12%" },
-            { "id": "city", "label": "CITY", "column": "city", "meta": true, "meta_key": "city", "width": "12%" },
-            { "id": "address", "label": "ADDRESS", "column": "address", "meta": true, "meta_key": "address", "width": "20%", "type": "description" },
-            { "id": "phone", "label": "PHONE", "column": "phone", "meta": true, "meta_key": "phone", "width": "10%" },
-            { "id": "status", "label": "STATUS", "column": "status", "width": "8%", "type": "status_dot" },
-            { "id": "action", "label": "ACTION", "column": "action", "width": "5%", "type": "action" }
+            {
+                "id": "id",
+                "label": "ID",
+                "column": "id",
+                "width": "75px",
+                "sort": true
+            },
+            {
+                "id": "image",
+                "label": "IMAGE",
+                "width": "100px",
+                "column": "image",
+                "type": "image",
+                "key": "filename"
+            },
+            {
+                "id": "title",
+                "label": "STORE NAME",
+                "column": "title",
+                "sort": true,
+                "width": "200px"
+            },
+            {
+                "id": "sku",
+                "label": "Slug / Key",
+                "column": "sku",
+                "sort": true,
+                "width": "200px"
+            },
+            {
+                "id": "manager",
+                "label": "STORE ADMIN",
+                "column": "manager_id",
+                "meta": true,
+                "meta_key": "manager_id",
+                "value_table": "users",
+                "value_condition": {
+                    "pass_value_of_key": "id",
+                    "return_key": "name"
+                },
+                "width": "120px"
+            },
+            {
+                "id": "city",
+                "column": "city",
+                "label": "CITY",
+                "type": "badage",
+                "field": "city",
+                "meta": true,
+                "meta_key": "city",
+                "value_table": "taxonomies",
+                "is_array": true,
+                "meta_value_type": "json",
+                "value_condition": {
+                    "pass_value_of_key": "id",
+                    "return_key": "title"
+                },
+                "width": "120px"
+            },
+            {
+                "id": "state",
+                "column": "state",
+                "label": "STATE",
+                "type": "badage",
+                "field": "state",
+                "meta": true,
+                "meta_key": "state",
+                "value_table": "taxonomies",
+                "is_array": true,
+                "meta_value_type": "json",
+                "value_condition": {
+                    "pass_value_of_key": "id",
+                    "return_key": "title"
+                },
+                "width": "120px"
+            },
+            {
+                "id": "address",
+                "label": "ADDRESS",
+                "column": "address",
+                "meta": true,
+                "meta_key": "address",
+                "width": "350px",
+                "type": "description"
+            },
+            {
+                "id": "phone",
+                "label": "PHONE",
+                "column": "phone",
+                "meta": true,
+                "meta_key": "phone",
+                "width": "80px"
+            },
+            {
+                "id": "status",
+                "label": "STATUS",
+                "column": "status",
+                "width": "100px",
+                "type": "status_dot"
+            },
+            {
+                "id": "action",
+                "label": "ACTION",
+                "column": "action",
+                "width": "75px",
+                "type": "action"
+            }
         ]
     },
     "form": [
@@ -103,7 +252,6 @@
             "title": "Store Location",
             "style": "main",
             "fields": [
-
                 {
                     "label": "State / Province",
                     "name": "state",
@@ -125,7 +273,6 @@
                         "type": "city"
                     }
                 },
-                
                 {
                     "label": "Street Address / Location",
                     "name": "address",
@@ -190,6 +337,22 @@
             ]
         },
         {
+            "title": "Store Administration",
+            "style": "sidebar",
+            "fields": [
+                {
+                    "label": "Store Admin / Manager",
+                    "name": "manager_id",
+                    "type": "dropdown",
+                    "searchable": true,
+                    "placeholder": "Select user to manage this store...",
+                    "options": {
+                        "model": "User"
+                    }
+                }
+            ]
+        },
+        {
             "title": "Status & Order",
             "style": "sidebar",
             "fields": [
@@ -198,8 +361,14 @@
                     "name": "status",
                     "type": "dropdown",
                     "options": [
-                        { "id": "publish", "title": "Published" },
-                        { "id": "draft", "title": "Draft" }
+                        {
+                            "id": "publish",
+                            "title": "Published"
+                        },
+                        {
+                            "id": "draft",
+                            "title": "Draft"
+                        }
                     ]
                 },
                 {

@@ -206,6 +206,23 @@ function Dashboard({ data, ecommerce }) {
       }
     }
   }
+const formatCurrencyString = (str) => {
+  if (!str) return 'PKR 0';
+  
+  // Remove everything except digits and decimal points
+  const numericValue = parseFloat(str.replace(/[^0-9.]/g, ''));
+  
+  if (isNaN(numericValue)) return 'PKR 0';
+  
+  // Format into compact notation
+  const formatted = new Intl.NumberFormat('en-US', {
+    notation: 'compact',
+    compactDisplay: 'short',
+    maximumFractionDigits: 1,
+  }).format(numericValue);
+  
+  return `PKR ${formatted}`;
+};
   return (
     <div className='flex flex-col gap-6 pt-3 pb-12 font-sans'>
       <div className='grid grid-cols-1 lg:grid-cols-12 gap-6'>
@@ -298,7 +315,7 @@ function Dashboard({ data, ecommerce }) {
                 <RiMoneyDollarCircleLine size={18} />
               </div>
               <div className='flex flex-col'>
-                <h4 className='text-base font-extrabold text-heading leading-tight'>{stats.revenue.value}</h4>
+                <h4 title={stats.revenue.value} className='text-sm font-extrabold text-heading leading-tight'>{formatCurrencyString(stats.revenue.value)}</h4>
                 <span className='text-xs text-secondary font-medium'>{stats.revenue.label}</span>
                 <span className={`text-[10px] font-bold mt-0.25 flex items-center gap-0.5 ${stats.revenue.is_positive !== false ? 'text-green-400' : 'text-red-400'}`}>
                   {stats.revenue.is_positive !== false ? <RiArrowRightUpLine size={10} /> : <RiArrowRightDownLine size={10} />}
@@ -358,8 +375,9 @@ function Dashboard({ data, ecommerce }) {
               <div className='flex flex-col gap-4'>
                 <div className='text-center md:text-left'>
                   <span className='text-xs font-bold uppercase tracking-wider text-secondary'>Budget Status</span>
-                  <div className='flex items-baseline gap-2 mt-1'>
-                    <h3 className='text-2xl font-black text-heading'>{revenueReport.budget}</h3>
+                  <div className='flex items-baseline gap-2 flex-wrap mt-1'>
+                    {/* convert into like a 2k 1m etc */}
+                    <h3 title={revenueReport.budget} className='text-xl font-extrabold text-heading'>  {formatCurrencyString(revenueReport.budget)}</h3>
                     <span className='text-xs font-bold text-green-400 bg-green-500/15 px-2 py-0.5 rounded-full'>
                       {revenueReport.budget_growth}
                     </span>
@@ -450,7 +468,7 @@ function Dashboard({ data, ecommerce }) {
             </Link>
           </div>
           <div className='overflow-x-auto rounded-xl border border-permanent/20'>
-            <table className='w-full text-left text-xs text-res'>
+            <table className='w-full min-w-[750px] text-left text-xs text-res'>
               <thead className='bg-bg/60 text-secondary uppercase font-semibold text-[10px] tracking-wider border-b border-permanent/20'>
                 <tr>
                   <th className='px-2.5 py-3.5'>Product</th>

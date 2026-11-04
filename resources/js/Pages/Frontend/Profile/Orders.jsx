@@ -17,6 +17,7 @@ import {
     RiCustomerService2Line,
     RiAlertLine,
     RiRefund2Line,
+    RiWallet3Line,
 } from 'react-icons/ri';
 import { useLang } from '@/contexts/LanguageContext';
 import { toast } from 'react-toastify';
@@ -138,11 +139,18 @@ export default function Orders({ profile, orders = [], current_status = 'all' })
                 <div className="bg-bg border border-border rounded p-5 shadow-xs">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
                         <div>
-                            <h1 className="text-lg font-bold text-text">
-                                {__('Order History & Tracking')}
-                            </h1>
-                            <p className="text-xs text-res mt-0.5">
-                                {__('View and track your previous purchases and item shipments.')}
+                            <div className="flex items-center gap-3">
+                                <h1 className="text-lg font-bold text-text">
+                                    {__('Order History & Tracking')}
+                                </h1>
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/30 dark:border-emerald-800">
+                                    <RiWallet3Line size={14} className="text-emerald-600" />
+                                    <span>{__('Wallet Balance:')}</span>
+                                    <span className="font-bold">{currency} {Number(profile?.user?.wallet_balance ?? profile?.stats?.wallet_balance ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                </span>
+                            </div>
+                            <p className="text-xs text-res mt-1">
+                                {__('View and track your previous purchases. Cancelled orders automatically restore stock & refund to your wallet.')}
                             </p>
                         </div>
 
@@ -437,19 +445,28 @@ export default function Orders({ profile, orders = [], current_status = 'all' })
 
                         {/* Tracking Number Banner */}
                         {activeModalOrder.tracking_number && (
-                            <div className="mb-5 bg-sky-50 dark:bg-sky-950/20 border border-sky-200 dark:border-sky-800/40 rounded p-4 flex items-center gap-3">
-                                <div className="size-9 shrink-0 bg-sky-100 dark:bg-sky-900/40 rounded-full flex items-center justify-center">
-                                    <RiTruckLine size={18} className="text-sky-600" />
+                            <div className="mb-5 bg-sky-50 dark:bg-sky-950/20 border border-sky-200 dark:border-sky-800/40 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div className="flex items-center gap-3">
+                                    <div className="size-9 shrink-0 bg-sky-100 dark:bg-sky-900/40 rounded-full flex items-center justify-center">
+                                        <RiTruckLine size={18} className="text-sky-600" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <span className="text-[11px] text-sky-600 font-semibold block">{__('Tracking Number')}</span>
+                                        <span className="font-mono font-bold text-sm text-sky-800 dark:text-sky-300 tracking-widest">
+                                            {activeModalOrder.tracking_number}
+                                        </span>
+                                        {activeModalOrder.shipping_carrier && (
+                                            <span className="text-[11px] text-sky-500 block">{__('via')} {activeModalOrder.shipping_carrier}</span>
+                                        )}
+                                    </div>
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                    <span className="text-[11px] text-sky-600 font-semibold block">{__('Tracking Number')}</span>
-                                    <span className="font-mono font-bold text-sm text-sky-800 dark:text-sky-300 tracking-widest">
-                                        {activeModalOrder.tracking_number}
-                                    </span>
-                                    {activeModalOrder.shipping_carrier && (
-                                        <span className="text-[11px] text-sky-500 block">{__('via')} {activeModalOrder.shipping_carrier}</span>
-                                    )}
-                                </div>
+                                <Link
+                                    href={route('track.order', { trackingNumber: activeModalOrder.tracking_number })}
+                                    className="px-3.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold transition-all inline-flex items-center justify-center gap-1.5 shadow-sm shrink-0"
+                                >
+                                    <span>{__('Track on Live Map')}</span>
+                                    <RiArrowRightLine />
+                                </Link>
                             </div>
                         )}
 

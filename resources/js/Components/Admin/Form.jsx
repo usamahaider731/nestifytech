@@ -3,9 +3,15 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import FieldControls from './FieldsControls';
 import { RiListOrdered2 } from 'react-icons/ri';
-import { router } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 
 const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = 'product', routes, redirectUrl }) => {
+    const pageProps = usePage()?.props || {};
+    const authUser = pageProps.auth?.user;
+    const userRoles = authUser?.user_role || [];
+    const isStoreAdmin = Array.isArray(userRoles) && userRoles.some(r => /store\s*admin/i.test(r)) && !userRoles.some(r => /administrator/i.test(r));
+    const authUserStoreId = authUser?.meta?.store_id || authUser?.meta?.assigned_store;
+
     // Build actual state, parsing strings where necessary
     const buildInitialState = () => {
         const initialState = {};
@@ -20,6 +26,12 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
                 initialState[key] = val;
             }
         });
+
+        // Auto-assign store_id if current user is a Store Admin creating/editing user
+        if (isStoreAdmin && authUserStoreId && (type === 'user' || type === 'users') && !initialState.store_id) {
+            initialState.store_id = authUserStoreId;
+        }
+
         return initialState;
     };
 
@@ -55,7 +67,30 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
         setIsSaving(true);
         const formData = new FormData();
 
-        Object.entries(data).forEach(([key, value]) => {
+        // Collect all field names from the schema so untouched fields (e.g. manager_id)
+        // are still included in the submission, not silently dropped.
+        const allFieldNames = [];
+        rows.forEach(section => {
+            (section.fields || []).forEach(field => {
+                if (field.name && !['image', 'gallery'].includes(field.name)) {
+                    allFieldNames.push(field.name);
+                }
+                // Also include repeater sub-fields
+                if (field.type === 'repeater' && Array.isArray(field.fields)) {
+                    field.fields.forEach(f => f.name && allFieldNames.push(f.name));
+                }
+            });
+        });
+
+        // Build the full data object — schema fields default to '' if user never touched them
+        const fullData = { ...data };
+        allFieldNames.forEach(name => {
+            if (!(name in fullData)) {
+                fullData[name] = '';
+            }
+        });
+
+        Object.entries(fullData).forEach(([key, value]) => {
             if (key === 'variations') {
                 formData.append(key, JSON.stringify(value));
                 return;
@@ -249,6 +284,8 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
                     endpoint = `/api/attribute-options`;
                 } else if (config.model === 'Store') {
                     endpoint = `/api/store-options`;
+                } else if (config.model === 'User') {
+                    endpoint = `/api/user-options`;
                 } else {
                     endpoint = `/api/${config.model.toLowerCase()}-options/${config.type ?? ''}`;
                 }

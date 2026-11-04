@@ -206,16 +206,20 @@ class PostTaxonomy extends Model
                     }
                 }
 
+                $sellingPrice = variation_selling_price($child);
                 $combinations[] = [
                     'id' => $child->id,
-                    'price' => $child->price,
+                    'price' => $sellingPrice,
+                    'buy_price' => $child->buy_price ?? null,
+                    'first_price' => $child->first_price ?? null,
+                    'second_price' => $child->second_price ?? null,
                     'stock' => $child->stock,
                     'attributes' => $comboAttributes
                 ];
 
                 $totalStock += (int) $child->stock;
-                if ($minPrice === 0 || ($child->price > 0 && $child->price < $minPrice)) {
-                    $minPrice = $child->price;
+                if ($minPrice === 0 || ($sellingPrice > 0 && $sellingPrice < $minPrice)) {
+                    $minPrice = $sellingPrice;
                 }
             }
 
@@ -238,11 +242,110 @@ class PostTaxonomy extends Model
 
         return $rftl;
     }
+    /**
+     * Apply this product's active promotion and tax rules to a given base price.
+     * Cart/checkout uses this for variation combo prices so tax is not dropped.
+     */
+    public function applyPricingRules(float $basePrice): ?float
+    {
+        if ($basePrice <= 0.0) {
+            return null;
+        }
+
+        [$priorityDiscountRule, $priorityTaxRule] = $this->collectPromotionAndTaxRules();
+
+        $bestDiscountRule   = null;
+        $bestDiscountAmount = 0.0;
+        foreach ($priorityDiscountRule as $rule) {
+            $rate   = (float) $rule->rate_value;
+            $amount = $rule->rate_type === 'fixed' ? $rate : ($basePrice * $rate / 100);
+            if (
+                $amount > $bestDiscountAmount ||
+                ($bestDiscountRule !== null && $rule->priority > $bestDiscountRule->priority)
+            ) {
+                $bestDiscountAmount = $amount;
+                $bestDiscountRule   = $rule;
+            }
+        }
+
+        $priceAfterDiscount = $basePrice;
+        if ($bestDiscountRule !== null) {
+            $rate           = (float) $bestDiscountRule->rate_value;
+            $discountAmount = $bestDiscountRule->rate_type === 'fixed'
+                ? $rate
+                : ($basePrice * $rate / 100);
+            $priceAfterDiscount = max(0.0, $basePrice - $discountAmount);
+        }
+
+        $bestTaxRule   = null;
+        $bestTaxAmount = 0.0;
+        foreach ($priorityTaxRule as $rule) {
+            $rate   = (float) $rule->rate_value;
+            $amount = $rule->rate_type === 'fixed' ? $rate : ($priceAfterDiscount * $rate / 100);
+            if (
+                $amount > $bestTaxAmount ||
+                ($bestTaxRule !== null && $rule->priority > $bestTaxRule->priority)
+            ) {
+                $bestTaxAmount = $amount;
+                $bestTaxRule   = $rule;
+            }
+        }
+
+        $finalPrice = $priceAfterDiscount;
+        if ($bestTaxRule !== null) {
+            $rate      = (float) $bestTaxRule->rate_value;
+            $taxAmount = $bestTaxRule->rate_type === 'fixed'
+                ? $rate
+                : ($priceAfterDiscount * $rate / 100);
+            $finalPrice = $priceAfterDiscount + $taxAmount;
+        }
+
+        return round($finalPrice, 2);
+    }
+
     public function getRealPriceAfterRuleAttribute()
     {
         if (!$this->id) {
             return null;
         }
+
+        $variations = $this->variations;
+        $meta = $this->meta;
+
+        $basePrice = 0.0;
+        if (!empty($meta)) {
+            $metaMap = collect($meta)->pluck('value', 'key');
+            $second  = (float) str_replace([',', ' '], '', (string) ($metaMap['second_price'] ?? ''));
+            $first   = (float) str_replace([',', ' '], '', (string) ($metaMap['first_price'] ?? ''));
+            if ($second > 0 && $first > 0 && $first > $second) {
+                $basePrice = $second;
+            } elseif ($second > 0) {
+                $basePrice = $second;
+            } elseif ($first > 0) {
+                $basePrice = $first;
+            }
+        }
+
+        if ($basePrice == 0.0 && !empty($variations)) {
+            $minPrice = null;
+            foreach ($variations as $parent) {
+                if (isset($parent->combinations) && is_array($parent->combinations)) {
+                    foreach ($parent->combinations as $child) {
+                        $p = isset($child['price']) ? (float) $child['price'] : 0.0;
+                        if ($p > 0 && ($minPrice === null || $p < $minPrice)) {
+                            $minPrice = $p;
+                        }
+                    }
+                }
+            }
+            $basePrice = $minPrice ?? 0.0;
+        }
+
+        return $this->applyPricingRules($basePrice);
+    }
+
+    private function collectPromotionAndTaxRules(): array
+    {
         $priorityDiscountRule = [];
         $priorityTaxRule = [];
         $productRules = DB::table('promotions_and_tax_rules')->where('target_type', 'product')->where("status", "active")->get();
@@ -286,9 +389,7 @@ class PostTaxonomy extends Model
         if ($prorityProductTaxRule !== null) {
             $priorityTaxRule[] = $prorityProductTaxRule;
         }
-        $variations = $this->variations;
         $meta = $this->meta;
-        $prices = [];
         if (!empty($meta)) {
             foreach ($meta as $value) {
                 if ($value->key == 'category') {
@@ -498,92 +599,7 @@ class PostTaxonomy extends Model
             }
         }
 
-        // ── Resolve base price ─────────────────────────────────────────────────
-        $basePrice = 0.0;
-        if (!empty($meta)) {
-            $metaMap = collect($meta)->pluck('value', 'key');
-            $second  = (float) str_replace([',', ' '], '', (string) ($metaMap['second_price'] ?? ''));
-            $first   = (float) str_replace([',', ' '], '', (string) ($metaMap['first_price'] ?? ''));
-            if ($second > 0 && $first > 0 && $first > $second) {
-                $basePrice = $second;   // on-sale: second_price is the discounted price
-            } elseif ($second > 0) {
-                $basePrice = $second;
-            } elseif ($first > 0) {
-                $basePrice = $first;
-            }
-        }
-
-        // For variation products use the cheapest active combination price
-        if ($basePrice == 0.0 && !empty($variations)) {
-            $minPrice = null;
-            foreach ($variations as $parent) {
-                if (isset($parent->combinations) && is_array($parent->combinations)) {
-                    foreach ($parent->combinations as $child) {
-                        $p = isset($child['price']) ? (float) $child['price'] : 0.0;
-                        if ($p > 0 && ($minPrice === null || $p < $minPrice)) {
-                            $minPrice = $p;
-                        }
-                    }
-                }
-            }
-            $basePrice = $minPrice ?? 0.0;
-        }
-
-        if ($basePrice <= 0.0) {
-            return null; // price unknown — cannot apply rules
-        }
-
-        // ── Pick the single best discount rule (highest effective savings) ─────
-        $bestDiscountRule   = null;
-        $bestDiscountAmount = 0.0;
-        foreach ($priorityDiscountRule as $rule) {
-            $rate   = (float) $rule->rate_value;
-            $amount = $rule->rate_type === 'fixed' ? $rate : ($basePrice * $rate / 100);
-            if (
-                $amount > $bestDiscountAmount ||
-                ($bestDiscountRule !== null && $rule->priority > $bestDiscountRule->priority)
-            ) {
-                $bestDiscountAmount = $amount;
-                $bestDiscountRule   = $rule;
-            }
-        }
-
-        // ── Apply discount ────────────────────────────────────────────────────
-        $priceAfterDiscount = $basePrice;
-        if ($bestDiscountRule !== null) {
-            $rate           = (float) $bestDiscountRule->rate_value;
-            $discountAmount = $bestDiscountRule->rate_type === 'fixed'
-                ? $rate
-                : ($basePrice * $rate / 100);
-            $priceAfterDiscount = max(0.0, $basePrice - $discountAmount);
-        }
-
-        // ── Pick the single best tax rule (highest effective tax amount) ───────
-        $bestTaxRule   = null;
-        $bestTaxAmount = 0.0;
-        foreach ($priorityTaxRule as $rule) {
-            $rate   = (float) $rule->rate_value;
-            $amount = $rule->rate_type === 'fixed' ? $rate : ($priceAfterDiscount * $rate / 100);
-            if (
-                $amount > $bestTaxAmount ||
-                ($bestTaxRule !== null && $rule->priority > $bestTaxRule->priority)
-            ) {
-                $bestTaxAmount = $amount;
-                $bestTaxRule   = $rule;
-            }
-        }
-
-        // ── Apply tax ─────────────────────────────────────────────────────────
-        $finalPrice = $priceAfterDiscount;
-        if ($bestTaxRule !== null) {
-            $rate      = (float) $bestTaxRule->rate_value;
-            $taxAmount = $bestTaxRule->rate_type === 'fixed'
-                ? $rate
-                : ($priceAfterDiscount * $rate / 100);
-            $finalPrice = $priceAfterDiscount + $taxAmount;
-        }
-
-        return round($finalPrice, 2);
+        return [$priorityDiscountRule, $priorityTaxRule];
     }
 
     public function getTotalPriceAttribute()

@@ -1,7 +1,7 @@
 import AdminLayout from '@/Layouts/AdminLayout'
 import axios from 'axios'
 import React, { useState, useMemo } from 'react'
-import { router, Link } from '@inertiajs/react'
+import { router, Link, usePage } from '@inertiajs/react'
 import {
   RiArchiveLine,
   RiAlertLine,
@@ -19,11 +19,18 @@ import {
   RiLoader4Line,
   RiExchangeLine,
   RiPriceTag3Line,
-  RiStackLine
+  RiStackLine,
+  RiLockLine
 } from 'react-icons/ri'
 import { toast } from 'react-toastify'
+import { hasPermission } from '@/Utils/helper'
 
 export default function InventoryIndex({ products = [], stores = [], filters = {}, stats = {} }) {
+  const { auth } = usePage().props
+  const canRead   = hasPermission(auth?.user, 'product-read')
+  const canCreate = hasPermission(auth?.user, 'product-create')
+  const canWrite  = hasPermission(auth?.user, 'product-write')
+
   const [search, setSearch] = useState(filters.search || '')
   const [filter, setFilter] = useState(filters.filter || 'all')
   const [selectedStore, setSelectedStore] = useState(filters.store || 'all')
@@ -91,6 +98,10 @@ export default function InventoryIndex({ products = [], stores = [], filters = {
 
   // Save stock update
   const saveStock = async (item, isVariation = false) => {
+    if (!canCreate) {
+      toast.error('You do not have permission to update stock.')
+      return
+    }
     const parsedStock = parseInt(editingValue, 10)
     if (isNaN(parsedStock) || parsedStock < 0) {
       toast.error('Please enter a valid stock quantity (0 or greater).')
@@ -146,12 +157,14 @@ export default function InventoryIndex({ products = [], stores = [], filters = {
               <RiRefreshLine className="size-4 text-secondary" />
               <span>Refresh</span>
             </button>
-            <Link
-              href={route('post.create', { type: 'product' })}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-primary to-[#9e95f5] text-white text-sm font-semibold shadow-md shadow-primary/30 hover:opacity-95 transition-all"
-            >
-              <span>+ Add New Product</span>
-            </Link>
+            {canWrite && (
+              <Link
+                href={route('post.create', { type: 'product' })}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-primary to-[#9e95f5] text-white text-sm font-semibold shadow-md shadow-primary/30 hover:opacity-95 transition-all"
+              >
+                <span>+ Add New Product</span>
+              </Link>
+            )}
           </div>
         </div>
 
@@ -528,7 +541,7 @@ export default function InventoryIndex({ products = [], stores = [], filters = {
                                 >
                                   {item.stock} units
                                 </span>
-                                {!item.has_variations && (
+                                {!item.has_variations && canCreate && (
                                   <button
                                     onClick={() => startEdit(`prod-${item.id}`, item.stock)}
                                     className="p-1 text-secondary hover:text-primary rounded hover:bg-dynamic/50 transition-colors"
@@ -563,14 +576,24 @@ export default function InventoryIndex({ products = [], stores = [], filters = {
                           {/* Actions */}
                           <td className="py-3.5 px-4 text-right">
                             <div className="flex items-center justify-end gap-2">
-                              <Link
-                                href={route('post.edit', { type: 'product', id: item.id })}
-                                className="flex items-center gap-1 text-xs text-secondary hover:text-primary font-medium p-1.5 rounded-lg hover:bg-dynamic/50 transition-colors"
-                                title="Edit Product Details"
-                              >
-                                <RiEditLine className="size-4" />
-                                <span>Edit</span>
-                              </Link>
+                              {canWrite ? (
+                                <Link
+                                  href={route('post.edit', { type: 'product', id: item.id })}
+                                  className="flex items-center gap-1 text-xs text-secondary hover:text-primary font-medium p-1.5 rounded-lg hover:bg-dynamic/50 transition-colors"
+                                  title="Edit Product Details"
+                                >
+                                  <RiEditLine className="size-4" />
+                                  <span>Edit</span>
+                                </Link>
+                              ) : (
+                                <span
+                                  className="flex items-center gap-1 text-xs text-secondary/40 font-medium p-1.5 rounded-lg cursor-not-allowed"
+                                  title="You don't have permission to edit products"
+                                >
+                                  <RiLockLine className="size-4" />
+                                  <span>Edit</span>
+                                </span>
+                              )}
                               <a
                                 href={`/product/${item.id}`}
                                 target="_blank"
@@ -656,13 +679,15 @@ export default function InventoryIndex({ products = [], stores = [], filters = {
                                               >
                                                 {v.stock} pcs
                                               </span>
-                                              <button
-                                                onClick={() => startEdit(`var-${v.id}`, v.stock)}
-                                                className="p-1 text-secondary hover:text-primary rounded transition-colors"
-                                                title="Quick edit variant stock"
-                                              >
-                                                <RiEditLine className="size-3" />
-                                              </button>
+                                              {canCreate && (
+                                                <button
+                                                  onClick={() => startEdit(`var-${v.id}`, v.stock)}
+                                                  className="p-1 text-secondary hover:text-primary rounded transition-colors"
+                                                  title="Quick edit variant stock"
+                                                >
+                                                  <RiEditLine className="size-3" />
+                                                </button>
+                                              )}
                                             </div>
                                           )}
                                         </div>

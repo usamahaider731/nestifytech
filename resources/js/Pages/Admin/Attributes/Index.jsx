@@ -2,15 +2,18 @@ import React, { useState } from 'react'
 import AdminLayout from '@/Layouts/AdminLayout';
 import Table from '@/Components/Admin/Table';
 import Checkbox from '@/Components/Admin/Checkbox';
-import { RiCloseLine, RiDeleteBin2Fill, RiDeleteBin3Fill, RiDropLine, RiTableView } from 'react-icons/ri';
+import { RiCloseLine, RiDeleteBin2Fill, RiDeleteBin3Fill, RiDropLine, RiTableView, RiLockLine } from 'react-icons/ri';
 import { TbDots, TbDotsVertical } from 'react-icons/tb';
 import Popup from '@/Components/Admin/Popup';
 import PrimaryButton from '@/Components/Admin/PrimaryButton';
 import axios, { Axios } from 'axios';
 import { toast } from 'react-toastify';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
+import { hasPermission } from '@/Utils/helper';
 
 function Index({ attributes, table }) {
+    const { auth } = usePage().props
+    const canWrite = hasPermission(auth?.user, 'attribute-write')
     const [Attributes, SetAttributes] = useState(attributes.data || attributes);
     const [DropdownOpenActions, SetDropdownOpenActions] = useState(null);
     const [Delete, SetDelete] = useState(null);
@@ -117,12 +120,16 @@ function Index({ attributes, table }) {
                                                     <div className='h-10 w-full px-3 cursor-pointer flex items-center hover:bg-primary justify-start rounded-md'>
                                                         View
                                                     </div>
-                                                    <Link href={route('admin.attributes.edit', { 'id': attribute.id })} className='h-10 w-full px-3 cursor-pointer flex items-center hover:bg-dynamic justify-start rounded-md'>
+                                                    {canWrite ? (
+                                                      <Link href={route('admin.attributes.edit', { 'id': attribute.id })} className='h-10 w-full px-3 cursor-pointer flex items-center hover:bg-dynamic justify-start rounded-md'>
                                                         Edit
-                                                    </Link>
-                                                    <div onClick={() => DeleteItemsFunction(attribute.id)} className='h-10 w-full px-3 cursor-pointer flex items-center hover:bg-red-500 justify-start rounded-md'>
+                                                      </Link>
+                                                    ) : (
+                                                      <span className='h-10 w-full px-3 flex items-center secondary opacity-50 cursor-not-allowed text-xs gap-1'><RiLockLine /> Edit</span>
+                                                    )}
+                                                    {canWrite && (<div onClick={() => DeleteItemsFunction(attribute.id)} className='h-10 w-full px-3 cursor-pointer flex items-center hover:bg-red-500 justify-start rounded-md'>
                                                         Delete
-                                                    </div>
+                                                    </div>)}
                                                 </div>
                                             }
                                         </div>

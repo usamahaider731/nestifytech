@@ -43,7 +43,7 @@ const FieldControls = ({
     const processOptions = (options, name) => {
         if (!options) return [];
         if (Array.isArray(options)) return options;
-        if (options?.model && options?.type) {
+        if (options?.model) {
             return dropdownOptions[name] || [];
         }
         return [];
@@ -78,12 +78,34 @@ const FieldControls = ({
     };
     let fieldClass = '';
     if (field.condition) {
-        fieldClass = 'hidden';
+        let isVisible = false;
 
-        if (data[field.condition] == field.condition_value || data[field.condition]) {
-            fieldClass = 'flex';
+        // Custom condition: check if user has a store-scoped role selected
+        if (field.condition === 'has_store_role') {
+            const selectedRoleIds = Array.isArray(data.roles) ? data.roles.map(String) : [];
+            const selectedRoles = rolesList.filter(r => selectedRoleIds.includes(String(r.id)));
+            isVisible = selectedRoles.some(r => (r.scope === 'store') || /store|delivery/i.test(r.title));
+        } else if (typeof field.condition === 'object' && field.condition !== null) {
+            const targetVal = data[field.condition.field];
+            const expectedVal = field.condition.value;
+            if (field.condition.operator === 'in' && Array.isArray(expectedVal)) {
+                isVisible = expectedVal.includes(targetVal);
+            } else if (field.condition.operator === 'includes') {
+                isVisible = Array.isArray(targetVal) && targetVal.some(v => String(v) === String(expectedVal));
+            } else if (field.condition.operator === '!=') {
+                isVisible = targetVal != expectedVal;
+            } else {
+                isVisible = targetVal == expectedVal;
+            }
+        } else {
+            if (field.condition_value !== undefined) {
+                isVisible = data[field.condition] == field.condition_value;
+            } else {
+                isVisible = !!data[field.condition];
+            }
         }
 
+        fieldClass = isVisible ? 'flex' : 'hidden';
     }
 
     // isset condition
@@ -314,9 +336,17 @@ const FieldControls = ({
 
     // === CHECKBOX (Roles) ===
     if (field.type === 'checkbox' && field.options?.model === 'Roles') {
-        return rolesList.map(role => (
-            <div key={role.id} className={`flex flex-col gap-2 ${colSpan}`}>
-                <InputLabel className='text-heading'>{role.title}</InputLabel>
+        const platformRoles = rolesList.filter(r => (r.scope || 'platform') === 'platform');
+        const storeRoles = rolesList.filter(r => r.scope === 'store' || /store|delivery/i.test(r.title));
+
+        const renderRoleItem = (role) => (
+            <div key={role.id} className="p-3 rounded-xl bg-bg border border-permanent/30 hover:border-primary/40 flex items-center justify-between gap-3 transition-colors">
+                <div className="flex flex-col">
+                    <span className="text-xs font-semibold text-heading">{role.title}</span>
+                    <span className="text-[10px] text-res capitalize">
+                        {role.scope === 'store' || /store|delivery/i.test(role.title) ? '📍 Store / Branch Scope' : '🌐 Main Platform Scope'}
+                    </span>
+                </div>
                 <Togglebox
                     checked={!!(data.roles?.some(r => String(r) === String(role.id)))}
                     onChange={(e) => {
@@ -327,12 +357,51 @@ const FieldControls = ({
                         updateField('roles', updated);
                     }}
                 />
-                {
-                    field.desc &&
-                    <p className="text-xs font-medium text-res italic">{field.desc}</p>
-                }
             </div>
-        ));
+        );
+
+        return (
+            <div className="col-span-6 flex flex-col gap-4">
+                {/* Platform Roles Section */}
+                <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold uppercase tracking-wider text-primary">
+                            🌐 Main Platform Roles
+                        </span>
+                        <span className="text-[10px] text-res">(Admins, Global Managers, Content Editors)</span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {platformRoles.length > 0 ? (
+                            platformRoles.map(renderRoleItem)
+                        ) : (
+                            <p className="text-xs text-res italic col-span-3">No platform roles configured.</p>
+                        )}
+                    </div>
+                </div>
+
+                {/* Store-Specific Roles Section */}
+                <div className="flex flex-col gap-2 pt-2 border-t border-permanent/20">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold uppercase tracking-wider text-emerald-500">
+                                📍 Store &amp; Branch Roles
+                            </span>
+                            <span className="text-[10px] text-res">(Store Admin, Store Manager, Delivery Boys)</span>
+                        </div>
+                        <span className="text-[10px] text-amber-500 font-medium">
+                            * Requires selecting an Assigned Store below
+                        </span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {storeRoles.length > 0 ? (
+                            storeRoles.map(renderRoleItem)
+                        ) : (
+                            <p className="text-xs text-res italic col-span-3">No store-specific roles created yet.</p>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
     }
     if (field.type === 'checkbox') {
         return (
@@ -420,6 +489,11 @@ const FieldControls = ({
                 <VariationsSelector
                     value={getNestedValue(data, field.name) || []}
                     onChange={(val) => updateField(field.name, val)}
+                    productPrices={{
+                        buy_price: data.buy_price ?? '',
+                        first_price: data.first_price ?? '',
+                        second_price: data.second_price ?? '',
+                    }}
                 />
             </div>
         );

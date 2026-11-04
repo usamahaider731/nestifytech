@@ -24,7 +24,8 @@ function Table({
   paginationPerPage = 10,
   paginationList = [10, 20, 50, 100],
   onCheckChange,
-  viewMode = 'table'
+  viewMode = 'table',
+  className = ''
 }) {
   const [Values, SetValues] = useState([]);
   const [Links, SetLinks] = useState(links);
@@ -314,9 +315,11 @@ function Table({
           </div>
         )
       ) : (
-        <table className='w-full table'>
-          {children}
-        </table>
+        <div className={`w-full overflow-x-auto rounded-xl border border-permanent/20 ${className}`}>
+          <table className='w-full min-w-max table'>
+            {children}
+          </table>
+        </div>
       )}
       {Links && Links.length > 3 && (
         <Pagination />
@@ -394,7 +397,7 @@ function TH({ children, width = '', className = 'h-11 px-4 text-left font-bold t
   return (
     <th 
       className={`${className} ${sort ? 'cursor-pointer hover:bg-black/5 select-none' : ''}`} 
-      style={{ width: width }} 
+      style={{ width: width || undefined, minWidth: width || undefined }} 
       onClick={() => sort && handleSort && handleSort(column)}
       {...props}
     > 

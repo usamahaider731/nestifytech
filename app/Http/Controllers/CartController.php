@@ -26,16 +26,20 @@ class CartController extends Controller
 
         $product = $products[0] ?? null;
 
-        // ── 1. Variation price (combo-specific) ───────────────────────────────
+        // ── 1. Variation combo price + the same product tax/discount rules ────
         if (!empty($item['colorId'])) {
             $variation = DB::table('post_variations')->where('id', $item['comboId'])->first();
             if ($variation) {
-                $price = $variation->price ?? $variation->sale_price ?? null;
-                if ($price !== null && (float) $price > 0) {
-                    // Still apply promotion/tax rules on top of the variation price
-                    // by temporarily substituting it as the base — or just return raw
-                    // variation price (rules are product-level, not combo-level).
-                    return (float) $price;
+                $comboPrice = variation_selling_price($variation);
+                if ($comboPrice > 0) {
+                    if ($product) {
+                        $priced = $product->applyPricingRules($comboPrice);
+                        if ($priced !== null && $priced > 0) {
+                            return (float) $priced;
+                        }
+                    }
+
+                    return $comboPrice;
                 }
             }
         }
@@ -168,14 +172,16 @@ class CartController extends Controller
     public function placeOrder(Request $request)
     {
         $request->validate([
-            'items'           => 'required|array|min:1',
-            'items.*.comboId' => 'required|integer',
+            'items'             => 'required|array|min:1',
+            'items.*.comboId'   => 'required|integer',
             'items.*.productId' => 'required|integer',
             'items.*.colorId'   => 'nullable|integer',
             'items.*.qty'       => 'required|integer|min:1|max:999',
             // 'items.*.price' intentionally NOT validated — we look it up from the DB
             'payment_method'    => 'required|string|in:cod,card,paypal,payoneer',
             'payment_intent_id' => 'nullable|string|regex:/^pi_[A-Za-z0-9]+$/',
+            'delivery_lat'      => 'nullable|numeric|between:-90,90',
+            'delivery_lng'      => 'nullable|numeric|between:-180,180',
         ]);
 
         $items = $request->input('items');
@@ -360,12 +366,17 @@ class CartController extends Controller
             }
 
             $shippingPostal = $request->input('postal_code', '');
+            $deliveryLat    = $request->input('delivery_lat') !== null ? (float) $request->input('delivery_lat') : null;
+            $deliveryLng    = $request->input('delivery_lng') !== null ? (float) $request->input('delivery_lng') : null;
             $customerNotes  = [];
             if ($customerPhone)    $customerNotes[] = "Contact Phone: {$customerPhone}";
             if ($shippingPostal)   $customerNotes[] = "Postal Code: {$shippingPostal}";
             if ($shippingAmount > 0) $customerNotes[] = "Shipping: {$shippingAmount}";
             if ($giftCardDiscount > 0 && $appliedGiftCard) {
                 $customerNotes[] = "Gift Card Used: {$appliedGiftCard->code} (-PKR {$giftCardDiscount})";
+            }
+            if ($deliveryLat && $deliveryLng) {
+                $customerNotes[] = "Delivery GPS: {$deliveryLat},{$deliveryLng}";
             }
             $notesString = !empty($customerNotes) ? implode(' | ', $customerNotes) : null;
 
@@ -380,6 +391,8 @@ class CartController extends Controller
                 'status'                   => 'pending',
                 'shipping_address'         => $shippingAddress,
                 'shipping_city'            => $shippingCity,
+                'delivery_lat'             => $deliveryLat,
+                'delivery_lng'             => $deliveryLng,
                 'customer_notes'           => $notesString,
                 'payment_method'           => $paymentMethod,
                 'payment_status'           => $paymentStatus,

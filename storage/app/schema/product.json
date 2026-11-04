@@ -128,20 +128,20 @@
                 "id": "id",
                 "label": "ID",
                 "column": "id",
-                "width": "5%",
+                "width": "70px",
                 "sort": true
             },
             {
                 "id": "sku",
                 "label": "SKU",
                 "column": "sku",
-                "width": "10%",
+                "width": "120px",
                 "sort": true
             },
             {
                 "id": "image",
                 "label": "IMAGE",
-                "width": "5%",
+                "width": "70px",
                 "column": "image",
                 "type": "image",
                 "key": "filename"
@@ -151,7 +151,7 @@
                 "label": "PRODUCT",
                 "column": "title",
                 "sort": true,
-                "width": "20%"
+                "width": "240px"
             },
             {
                 "id": "category",
@@ -168,7 +168,7 @@
                     "pass_value_of_key": "id",
                     "return_key": "title"
                 },
-                "width": "20%"
+                "width": "180px"
             },
             {
                 "id": "brand",
@@ -184,7 +184,7 @@
                     "return_key": "title"
                 },
                 "media_type": "taxonomy",
-                "width": "10%"
+                "width": "120px"
             },
             {
                 "id": "collection",
@@ -195,6 +195,7 @@
                 "meta": true,
                 "meta_key": "collection",
                 "value_table": "taxonomies",
+                "width": "180px",
                 "is_array": true,
                 "meta_value_type": "json",
                 "value_condition": {
@@ -211,6 +212,7 @@
                 "meta": true,
                 "meta_key": "tags",
                 "value_table": "taxonomies",
+                "width": "160px",
                 "is_array": true,
                 "meta_value_type": "json",
                 "value_condition": {
@@ -227,6 +229,7 @@
                 "meta": true,
                 "meta_key": "supplier",
                 "value_table": "taxonomies",
+                "width": "150px",
                 "value_condition": {
                     "pass_value_of_key": "id",
                     "return_key": "title"
@@ -236,14 +239,14 @@
                 "id": "status",
                 "label": "STATUS",
                 "column": "status",
-                "width": "10%",
+                "width": "100px",
                 "type": "status_dot"
             },
             {
                 "id": "action",
                 "label": "ACTION",
                 "column": "action",
-                "width": "20%",
+                "width": "140px",
                 "type": "action"
             }
         ]
@@ -360,7 +363,8 @@
                 {
                     "label": "Product Variations",
                     "name": "variations",
-                    "type": "variations"
+                    "type": "variations",
+                    "placeholder": "Each combination has its own Cost, Regular Price, and Sale Price. Empty combo prices fall back to the product Price Adjustment fields."
                 }
             ]
         },
@@ -478,17 +482,19 @@
                     "label": "Cost / Buy Price (Internal)",
                     "type": "text",
                     "name": "buy_price",
-                    "placeholder": "Purchase cost from supplier"
+                    "placeholder": "Default cost. Variation combos can override this."
                 },
                 {
                     "label": "Regular Price",
                     "type": "text",
-                    "name": "first_price"
+                    "name": "first_price",
+                    "placeholder": "Default list price. Variation combos can override this."
                 },
                 {
                     "label": "Sale Price",
                     "type": "text",
-                    "name": "second_price"
+                    "name": "second_price",
+                    "placeholder": "Default sale price. Variation combos can override this."
                 },
                 {
                     "label": "Stock Quantity",

@@ -137,33 +137,30 @@ class ModuleHelper
                         ->whereIn($passKey, $values)
                         ->get([$passKey, $returnKey, 'sku']);
                         }
-                        else{
-                    $rows = DB::table($lookupTable)
-                        ->whereIn($passKey, $values)
-                        ->get([$passKey, $returnKey]);
+                        else {
+                            $rows = DB::table($lookupTable)
+                                ->whereIn($passKey, $values)
+                                ->get([$passKey, $returnKey]);
                         }
-                        if ($col['type'] == 'link') {
+
+                        if (($col['type'] ?? null) == 'link') {
                             if (isset($col['sku'])) {
                                 $titles = $rows->map(function ($r) use ($passKey, $returnKey) {
-                                return [
-                                    $passKey => $r->{$passKey} ?? null,
-                                    $returnKey => $r->{$returnKey} ?? null,
-                                    'sku' => $r->sku ?? null,
-                                ];
-                            })->values()->all();
-                            }
-                            else if (!isset($col['sku'])) {
-                                
+                                    return [
+                                        $passKey => $r->{$passKey} ?? null,
+                                        $returnKey => $r->{$returnKey} ?? null,
+                                        'sku' => $r->sku ?? null,
+                                    ];
+                                })->values()->all();
+                            } else {
                                 $titles = $rows->map(function ($r) use ($passKey, $returnKey) {
-                                return [
-                                    $passKey => $r->{$passKey} ?? null,
-                                    $returnKey => $r->{$returnKey} ?? null,
-                                    
-                                ];
-                            })->values()->all();
-                        }
-                        }
-                        else{
+                                    return [
+                                        $passKey => $r->{$passKey} ?? null,
+                                        $returnKey => $r->{$returnKey} ?? null,
+                                    ];
+                                })->values()->all();
+                            }
+                        } else {
                             $titles = $rows->pluck($returnKey)->filter()->values()->all();
                         }
 

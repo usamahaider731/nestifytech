@@ -23,6 +23,8 @@ function DropdownSelect({
     const [remoteLoading, setRemoteLoading] = useState(false);
     const dropdownRef = useRef(null);
     const prevValueRef = useRef(value);
+    // Track the last confirmed display title (from handleSelect) for restoration on blur
+    const selectedDisplayRef = useRef('');
     const safeOptions = Array.isArray(options) ? options : [];
     const isApiSearch = Boolean(apiConfig?.api && apiConfig?.endpoint && searchable);
     const apiBaseUrl = apiConfig?.api?.replace(/\/$/, '');
@@ -44,6 +46,7 @@ function DropdownSelect({
 
             if (option || !isNumericId || value === '') {
                 setLocalValue(displayValue || '');
+                selectedDisplayRef.current = displayValue || '';
                 prevValueRef.current = value;
             }
         }
@@ -55,9 +58,12 @@ function DropdownSelect({
             const stringValue = (value ?? "").toString();
             const option = safeOptions.find((opt) => (opt.id ?? opt.value ?? "").toString() === stringValue);
             if (option) {
-                setLocalValue(option.title ?? option.name ?? option.label);
+                const display = option.title ?? option.name ?? option.label;
+                setLocalValue(display);
+                selectedDisplayRef.current = display || '';
             } else {
                 setLocalValue(value || '');
+                selectedDisplayRef.current = value || '';
             }
         }
     }, [safeOptions]); // Re-run when options arrive
@@ -65,12 +71,18 @@ function DropdownSelect({
     const handleClickOutside = (event) => {
         if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
             setIsOpen(false);
+            // Restore to the last confirmed selection if user typed but didn't pick an option
+            if (!isApiSearch && selectedDisplayRef.current !== undefined) {
+                setLocalValue(selectedDisplayRef.current);
+            }
         }
     };
 
     const handleSelect = (option) => {
         setIsOpen(false);
-        setLocalValue(option.title || option.label || option.name || '');
+        const display = option.title || option.label || option.name || '';
+        setLocalValue(display);
+        selectedDisplayRef.current = display;
         onLocationChange(option.coordinates || null);
         if (typeof onChange === 'function') {
             onChange(option.id || option.value || option.name || '');
@@ -146,10 +158,9 @@ function DropdownSelect({
         const val = e.target.value;
         setLocalValue(val);
         onLocationChange(null);
-        if (typeof onChange === 'function') {
-            onChange(val);
-        }
-        if (!isOpen && val.length > 0 && !disabled && !isLoading && searchable) setIsOpen(true);
+        // Only open the dropdown for filtering — do NOT propagate raw text to onChange
+        // onChange is only called when an option is explicitly selected via handleSelect
+        if (!isOpen && !disabled && !isLoading && searchable) setIsOpen(true);
     };
 
     useEffect(() => {
@@ -162,9 +173,13 @@ function DropdownSelect({
     const availableOptions = isApiSearch ? remoteOptions : safeOptions;
     const filteredOptions = searchable && !isApiSearch
         ? availableOptions.filter(opt => {
-            const title = (opt?.title || opt.label || '').toString().toLowerCase();
-            const search = (localValue || '').toString().toLowerCase();
-            return title.includes(search);
+            const search = (localValue || '').toString().toLowerCase().trim();
+            if (!search) return true;
+            const title = (opt?.title || '').toString().toLowerCase();
+            const label = (opt?.label || '').toString().toLowerCase();
+            const name = (opt?.name || '').toString().toLowerCase();
+            const email = (opt?.email || '').toString().toLowerCase();
+            return title.includes(search) || label.includes(search) || name.includes(search) || email.includes(search);
         })
         : availableOptions;
     return (

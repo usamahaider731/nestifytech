@@ -1,6 +1,7 @@
 import AdminLayout from '@/Layouts/AdminLayout'
 import React, { useState, useMemo } from 'react'
-import { router } from '@inertiajs/react'
+import { router, usePage } from '@inertiajs/react'
+import { hasPermission } from '@/Utils/helper'
 import {
   RiPercentLine,
   RiAddCircleLine,
@@ -21,6 +22,7 @@ import {
   RiAppsLine,
   RiUserHeartLine,
   RiShieldUserLine,
+  RiLockLine,
 } from 'react-icons/ri'
 import { toast } from 'react-toastify'
 
@@ -81,6 +83,9 @@ export default function PromotionsIndex({
   const [togglingId, setTogglingId] = useState(null)
   const [deletingId, setDeletingId] = useState(null)
   const [targetSearch, setTargetSearch] = useState('')
+
+  const { auth } = usePage().props
+  const canCreate = hasPermission(auth?.user, 'product-create')
 
   const categories  = availableTargets?.categories  || []
   const brands      = availableTargets?.brands      || []
@@ -233,13 +238,19 @@ export default function PromotionsIndex({
             Configure custom discounts and tax rules targeting products, categories, brands, collections, and users.
           </p>
         </div>
-        <button
-          onClick={openCreate}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white font-medium text-sm hover:opacity-90 transition-opacity"
-        >
-          <RiAddCircleLine />
-          New Rule
-        </button>
+        {canCreate ? (
+          <button
+            onClick={openCreate}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white font-medium text-sm hover:opacity-90 transition-opacity"
+          >
+            <RiAddCircleLine />
+            New Rule
+          </button>
+        ) : (
+          <span className="flex items-center gap-2 px-4 py-2 rounded-lg border accent secondary text-sm cursor-not-allowed opacity-60" title="You don't have permission to create promotions">
+            <RiLockLine /> New Rule
+          </span>
+        )}
       </div>
 
       {/* Stats */}
@@ -294,9 +305,7 @@ export default function PromotionsIndex({
             <RiCoupon2Line className="text-5xl secondary mx-auto mb-3" />
             <p className="heading font-medium">No rules found</p>
             <p className="secondary text-sm mt-1">Create your first discount or tax rule.</p>
-            <button onClick={openCreate} className="mt-4 px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:opacity-90">
-              + Create Rule
-            </button>
+            {canCreate && (<button onClick={openCreate} className="mt-4 px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:opacity-90">+ Create Rule</button>)}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -376,7 +385,7 @@ export default function PromotionsIndex({
       )}
 
       {/* ===== CREATE / EDIT MODAL ===== */}
-      {showModal && (
+      {showModal && canCreate && (
         <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto py-8 px-4">
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={closeModal} />
           <div className="relative z-10 w-full max-w-2xl bg rounded-2xl border accent shadow-2xl">

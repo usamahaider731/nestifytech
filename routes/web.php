@@ -42,9 +42,15 @@ Route::controller(FrontendController::class)->group(function () {
     Route::get('/faqs', 'faqs')->name('faqs');
     Route::get('/faq', 'faqs')->name('faq');
     Route::get('/store-locator', 'storeLocator')->name('store.locator');
+    Route::get('/track-order/{trackingNumber?}', 'trackOrder')->name('track.order');
     Route::get('/get_languages', 'get_languages')->name('languages');
     Route::get('/set-language/{prefix}', 'setLanguage')->name('language.set');
 });
+
+// Real-time Order Tracking Telemetry API
+Route::get('/api/orders/{idOrTracking}/tracking', [\App\Http\Controllers\Delivery\DeliveryPortalController::class, 'getOrderTracking'])
+    ->name('api.orders.tracking');
+
 // Route::prefix('/developer')->middleware(['auth', 'verified'])->controller(DeveloperController::class)->group(function () {
 //     Route::get('/reset', 'reset')->name('developer.reset')->middleware('permission:developer-write');
 // });
@@ -203,6 +209,7 @@ Route::prefix('/admin')->middleware(['auth', 'verified'])->group(function () {
         Route::post('/orders/{id}/verify-otp', 'verifyDeliveryOtp')->name('delivery.orders.verify-otp');
         Route::post('/orders/{id}/generate-settlement-otp', 'generateOfficeSettlementOtp')->name('delivery.orders.generate-settlement-otp');
         Route::post('/orders/{id}/settle-payment', 'settleOfficePayment')->name('delivery.orders.settle-payment');
+        Route::post('/location', 'updateLocation')->name('delivery.location.update');
     });
     Route::prefix('/ai')->controller(AiController::class)->group(function () {
         Route::post('/check/field', 'checkField')->name('ai.check.field');

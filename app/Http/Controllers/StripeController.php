@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Stripe\Stripe;
 use Stripe\PaymentIntent;
 use Stripe\Refund;
+use App\Services\WalletService;
 
 class StripeController extends Controller
 {
@@ -128,30 +129,13 @@ class StripeController extends Controller
             }
         }
 
-        // Restore stock for each order item
-        $orderItems = DB::table('order_items')->where('order_id', $orderId)->get();
-        foreach ($orderItems as $item) {
-            if (!empty($item->combo_id)) {
-                DB::table('post_variations')
-                    ->where('id', $item->combo_id)
-                    ->increment('stock', $item->quantity);
-            } else if (!empty($item->product_id)) {
-                $stockMeta = DB::table('post_meta')
-                    ->where('post_id', $item->product_id)
-                    ->where('key', 'stock')
-                    ->first();
-                if ($stockMeta) {
-                    DB::table('post_meta')
-                        ->where('post_id', $item->product_id)
-                        ->where('key', 'stock')
-                        ->update(['value' => (string) ((int) $stockMeta->value + $item->quantity)]);
-                }
-            }
-        }
+        // ── Restore stock for each order item ──────────────────────────────
+        WalletService::restoreOrderStock($orderId);
 
         // Update order record with deduction and net refund amount
         DB::table('orders')->where('id', $orderId)->update([
             'status'                      => 'cancelled',
+            'payment_status'              => $isPaid ? 'refunded' : $order->payment_status,
             'cancellation_fee_percentage' => $cancellationFeePercent,
             'cancellation_deduction'      => $cancellationDeduction,
             'refund_amount'               => $refundAmount,
@@ -161,20 +145,45 @@ class StripeController extends Controller
             'updated_at'                  => now(),
         ]);
 
+        // ── Credit wallet for non-Stripe refunds (COD, PayPal, Payoneer) ────
+        // For Stripe, money returns to the card directly. For others, we credit
+        // the wallet so the user can use it on a future order.
+        if ($refundAmount > 0 && !empty($order->user_id)) {
+            $isStripeRefund = ($order->payment_method === 'card' && !empty($refundId));
+
+            if (!$isStripeRefund) {
+                // Non-Stripe: credit wallet
+                WalletService::credit(
+                    (int) $order->user_id,
+                    $refundAmount,
+                    'order_refund',
+                    $orderId,
+                    null,
+                    "Refund for cancelled order #" . str_pad($orderId, 5, '0', STR_PAD_LEFT) .
+                        ($cancellationDeduction > 0 ? " (after {$cancellationFeePercent}% cancellation fee)" : '')
+                );
+            }
+        }
+
         if (!empty($order->user_id)) {
             record_user_activity('order_cancelled', [
-                'title' => "Cancelled order #{$orderId}",
+                'title'    => "Cancelled order #{$orderId}",
                 'category' => 'order',
-                'detail' => $isPaid
+                'detail'   => $isPaid
                     ? "Order #{$orderId} cancelled. Deducted {$cancellationFeePercent}% (PKR " . number_format($cancellationDeduction, 2) . ") fee. Refunded PKR " . number_format($refundAmount, 2) . " back to account."
                     : "Order #{$orderId} cancelled.",
                 'order_id' => $orderId,
             ], (int) $order->user_id);
         }
 
+        $method = strtolower($order->payment_method ?? '');
         $message = 'Order cancelled successfully.';
-        if ($isPaid) {
-            $message = "Order cancelled. A cancellation fee of {$cancellationFeePercent}% (PKR " . number_format($cancellationDeduction, 2) . ") was deducted. Remaining amount of PKR " . number_format($refundAmount, 2) . " has been refunded back.";
+        if ($isPaid && $refundAmount > 0) {
+            if ($method === 'card' && !empty($refundId)) {
+                $message = "Order cancelled. A cancellation fee of {$cancellationFeePercent}% (PKR " . number_format($cancellationDeduction, 2) . ") was deducted. PKR " . number_format($refundAmount, 2) . " refunded to your card.";
+            } else {
+                $message = "Order cancelled. A cancellation fee of {$cancellationFeePercent}% (PKR " . number_format($cancellationDeduction, 2) . ") was deducted. PKR " . number_format($refundAmount, 2) . " has been credited to your wallet.";
+            }
         }
 
         return response()->json([

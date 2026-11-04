@@ -192,6 +192,21 @@ class DeliveryPortalController extends Controller
             ->where('status', 'completed')
             ->sum('cod_collected_amount');
 
+        // Fetch rider's assigned store
+        $riderStoreId = DB::table('user_meta')
+            ->where('user_id', $user->id)
+            ->whereIn('key', ['store_id', 'assigned_store'])
+            ->whereNotNull('value')
+            ->where('value', '!=', '')
+            ->value('value');
+
+        $riderStoreTitle = null;
+        if ($riderStoreId) {
+            $riderStoreTitle = DB::table('posts')
+                ->where('id', $riderStoreId)
+                ->value('title');
+        }
+
         return Inertia::render('Delivery/Orders', [
             'orders' => [
                 'data'         => $transformed->all(),
@@ -205,9 +220,11 @@ class DeliveryPortalController extends Controller
                 'search' => $search,
             ],
             'rider' => [
-                'id'    => $user->id,
-                'name'  => $user->name,
-                'email' => $user->email,
+                'id'          => $user->id,
+                'name'        => $user->name,
+                'email'       => $user->email,
+                'store_id'    => $riderStoreId,
+                'store_title' => $riderStoreTitle,
             ],
             'stats' => [
                 'total_assigned'         => $totalAssigned,
@@ -542,6 +559,114 @@ class DeliveryPortalController extends Controller
         return response()->json([
             'success' => true,
             'message' => "Cash of {$order->cod_collected_amount} successfully handed over and settled with the office!",
+        ]);
+    }
+
+    /**
+     * Update delivery rider's live GPS coordinates.
+     */
+    public function updateLocation(Request $request)
+    {
+        $request->validate([
+            'latitude'  => 'required|numeric',
+            'longitude' => 'required|numeric',
+            'heading'   => 'nullable|numeric',
+            'speed'     => 'nullable|numeric',
+        ]);
+
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthenticated.'], 401);
+        }
+
+        $locData = [
+            'latitude'   => (float) $request->latitude,
+            'longitude'  => (float) $request->longitude,
+            'heading'    => $request->filled('heading') ? (float) $request->heading : null,
+            'speed'      => $request->filled('speed') ? (float) $request->speed : null,
+            'updated_at' => now()->toIso8601String(),
+            'timestamp'  => now()->timestamp,
+        ];
+
+        // Store in user_meta for persistence
+        DB::table('user_meta')->updateOrInsert(
+            ['user_id' => $user->id, 'key' => 'rider_live_location'],
+            ['value' => json_encode($locData), 'updated_at' => now(), 'created_at' => now()]
+        );
+
+        // Also cache for high-frequency queries (5 minutes TTL)
+        \Illuminate\Support\Facades\Cache::put("rider_location_{$user->id}", $locData, 300);
+
+        return response()->json([
+            'success'  => true,
+            'location' => $locData,
+        ]);
+    }
+
+    /**
+     * Public / customer API to fetch live tracking telemetry for an order.
+     */
+    public function getOrderTracking(Request $request, $idOrTracking)
+    {
+        $order = DB::table('orders')
+            ->leftJoin('users as riders', 'orders.delivery_boy_id', '=', 'riders.id')
+            ->where('orders.id', $idOrTracking)
+            ->orWhere('orders.tracking_number', $idOrTracking)
+            ->select([
+                'orders.id',
+                'orders.tracking_number',
+                'orders.status',
+                'orders.payment_method',
+                'orders.payment_status',
+                'orders.shipping_address',
+                'orders.shipping_city',
+                'orders.shipping_state',
+                'orders.shipping_country',
+                'orders.created_at',
+                'orders.shipped_date',
+                'orders.completed_date',
+                'orders.delivery_otp_verified_at',
+                'orders.delivery_boy_id',
+                'riders.name as rider_name',
+                'riders.email as rider_email',
+            ])
+            ->first();
+
+        if (!$order) {
+            return response()->json(['success' => false, 'message' => 'Order not found.'], 404);
+        }
+
+        // Get rider live coordinates if rider assigned
+        $riderLocation = null;
+        if ($order->delivery_boy_id) {
+            $cached = \Illuminate\Support\Facades\Cache::get("rider_location_{$order->delivery_boy_id}");
+            if ($cached) {
+                $riderLocation = $cached;
+            } else {
+                $meta = DB::table('user_meta')
+                    ->where('user_id', $order->delivery_boy_id)
+                    ->where('key', 'rider_live_location')
+                    ->value('value');
+                if ($meta) {
+                    $riderLocation = json_decode($meta, true);
+                }
+            }
+        }
+
+        // Default warehouse / store location from site or fallback
+        $storeLat = 31.5204; // Default central hub (Lahore)
+        $storeLng = 74.3587;
+
+        return response()->json([
+            'success'        => true,
+            'order'          => $order,
+            'rider_location' => $riderLocation,
+            'store_location' => [
+                'latitude'  => $storeLat,
+                'longitude' => $storeLng,
+                'name'      => config('app.name', 'NestifyTech') . ' Dispatch Fulfillment Hub',
+            ],
+            'server_time'    => now()->toIso8601String(),
         ]);
     }
 }

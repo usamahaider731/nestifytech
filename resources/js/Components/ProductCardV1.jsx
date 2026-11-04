@@ -130,7 +130,7 @@ const ProductCardV1 = ({ className = '', product = {} }) => {
                         </button>
                     )}
                     {cardSetting.show_product_compare_button && (
-                        <button type="button" onClick={compareHandle} className={`flex size-9 items-center justify-center rounded-full text-res shadow-md transition hover:bg-primary/10 hover:text-heading ${isCompare ? 'bg-primary/10 text-heading' : 'bg-white'}`} aria-label={__('Add to Compare')}>
+                        <button type="button" onClick={compareHandle} className={`flex size-9 items-center justify-center rounded-full text-res shadow-md transition hover:bg-primary/70 hover:text-heading ${isCompare ? 'bg-primary/10 text-heading' : 'bg-white'}`} aria-label={__('Add to Compare')}>
                             <RiStackLine className="size-4" />
                         </button>
                     )}

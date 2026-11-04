@@ -152,11 +152,19 @@ function Index({ users, userStats, table, currentTab = 'all' }) {
                 </Table.TD>
                 <Table.TD className='font-normal text-center text-base'>{User.id}</Table.TD>
                 <Table.TD className='font-normal text-center text-base'>
-                  <div className='w-full flex items-center justify-center'>{User.image ?
-                    <ImageViwer image={User.image} className='max-w-6 max-h-6 h-6 rounded-full' />
-                    :
-                    <img src="/assets/image/profile-avatar.webp" className='size-6 rounded-full object-cover' alt="" />
-                  }</div>
+                  <div className='w-full flex items-center justify-center'>
+                    <div className='relative w-fit'>
+                      {User.image ?
+                        <ImageViwer image={User.image} className='max-w-6 max-h-6 h-6 rounded-full' />
+                        :
+                        <img src="/assets/image/profile-avatar.webp" className='size-6 rounded-full object-cover' alt="" />
+                      }
+                      <span
+                        className={`bsolute -bottom-0.5 -right-0.5 size-2 rounded-full ring-1 ring-permanent` }
+                        title={User.is_online ? 'Online' : 'Offline'}
+                      />
+                    </div>
+                  </div>
                 </Table.TD>
                 <Table.TD className='font-normal text-center text-base'>{User.name}</Table.TD>
                 <Table.TD className='font-normal text-center text-base'>

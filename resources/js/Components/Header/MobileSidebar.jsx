@@ -336,7 +336,7 @@ export default function MobileSidebar({ isOpen, onClose }) {
                                                     {__('Store Locator')}
                                                 </Link>
                                                 <Link
-                                                    href={auth?.user ? route('profile.orders') : route('login')}
+                                                    href={route('track.order')}
                                                     onClick={onClose}
                                                     className="flex items-center gap-2.5 py-2 px-3 rounded-lg text-xs font-medium text-res hover:text-primary hover:bg-slate-100/80 transition-colors"
                                                 >

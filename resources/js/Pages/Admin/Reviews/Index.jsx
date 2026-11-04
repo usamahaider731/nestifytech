@@ -1,7 +1,8 @@
 import AdminLayout from '@/Layouts/AdminLayout'
 import axios from 'axios'
 import React, { useMemo, useState } from 'react'
-import { Link } from '@inertiajs/react'
+import { Link, usePage } from '@inertiajs/react'
+import { hasPermission } from '@/Utils/helper'
 import {
     RiStarFill, RiCheckLine, RiCloseLine, RiDeleteBinLine,
     RiMessage3Line, RiArrowLeftLine, RiTimeLine, RiUserLine,
@@ -69,7 +70,7 @@ function Avatar({ name }) {
 }
 
 /* ─── Review Card ─────────────────────────────────────────── */
-function ReviewCard({ rev, onStatusChange, onDelete, showRepliesLink }) {
+function ReviewCard({ rev, onStatusChange, onDelete, showRepliesLink, canWrite }) {
     const [expanded, setExpanded] = useState(false)
     const [loading, setLoading] = useState(null)
     const comment = rev.comment || ''
@@ -151,14 +152,14 @@ function ReviewCard({ rev, onStatusChange, onDelete, showRepliesLink }) {
 
                 {/* Actions */}
                 <div className="flex items-center gap-2 flex-wrap pt-1 border-t border-secondary/10">
-                    {rev.status !== 'approved' && (
+                    {canWrite && rev.status !== 'approved' && (
                         <button onClick={() => handleStatus('approved')} disabled={!!loading}
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-green-50 text-green-700 border border-green-200 hover:bg-green-500 hover:text-white hover:border-green-500 transition-all disabled:opacity-50">
                             {loading === 'approve' ? <RiLoader4Line className="animate-spin size-3.5" /> : <RiCheckLine className="size-3.5" />}
                             Approve
                         </button>
                     )}
-                    {rev.status !== 'rejected' && (
+                    {canWrite && rev.status !== 'rejected' && (
                         <button onClick={() => handleStatus('rejected')} disabled={!!loading}
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-50 text-red-600 border border-red-200 hover:bg-red-500 hover:text-white hover:border-red-500 transition-all disabled:opacity-50">
                             {loading === 'reject' ? <RiLoader4Line className="animate-spin size-3.5" /> : <RiCloseLine className="size-3.5" />}
@@ -171,11 +172,11 @@ function ReviewCard({ rev, onStatusChange, onDelete, showRepliesLink }) {
                             <RiMessage3Line className="size-3.5" />Replies
                         </Link>
                     )}
-                    <button onClick={handleDelete} disabled={!!loading}
+                    {canWrite && (<button onClick={handleDelete} disabled={!!loading}
                         className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-400 hover:bg-red-50 hover:text-red-600 border border-transparent hover:border-red-200 transition-all disabled:opacity-50">
                         {loading === 'delete' ? <RiLoader4Line className="animate-spin size-3.5" /> : <RiDeleteBinLine className="size-3.5" />}
                         Delete
-                    </button>
+                    </button>)}
                 </div>
             </div>
         </div>
@@ -185,6 +186,8 @@ function ReviewCard({ rev, onStatusChange, onDelete, showRepliesLink }) {
 /* ─── Page ───────────────────────────────────────────────── */
 function ReviewIndex({ reviews: initialReviews, selectedParentId }) {
     const { toasts, push, dismiss } = useToast()
+    const { auth } = usePage().props
+    const canWrite = hasPermission(auth?.user, 'review-write')
     const initial = Array.isArray(initialReviews) ? initialReviews : (initialReviews?.data ?? [])
     const [reviews, setReviews] = useState(initial)
     const [filter, setFilter] = useState('all')
@@ -290,7 +293,8 @@ function ReviewIndex({ reviews: initialReviews, selectedParentId }) {
                         <ReviewCard key={rev.id} rev={rev}
                             onStatusChange={handleStatusChange}
                             onDelete={handleDelete}
-                            showRepliesLink={!selectedParentId} />
+                            showRepliesLink={!selectedParentId}
+                            canWrite={canWrite} />
                     ))}
                 </div>
             )}
