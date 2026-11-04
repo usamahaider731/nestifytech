@@ -97,6 +97,16 @@
             "permission": "setting-write"
           },
           {
+            "id": "oauth-setting",
+            "title": "OAuth Settings",
+            "route": "admin.setting",
+            "params": {
+              "type": "oauth"
+            },
+            "icon": "ri-oauth-line",
+            "permission": "setting-read"
+          },
+          {
             "id": "payment-setting",
             "title": "Payment Gateways",
             "route": "admin.setting",

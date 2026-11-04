@@ -80,6 +80,31 @@ class AppServiceProvider extends ServiceProvider
             }
         }
 
+        // Dynamically apply OAuth (Google/Facebook) settings from Admin Settings
+        if (!empty($data['oauth'])) {
+            $oauth = $data['oauth'];
+
+            if (!empty($oauth['google_client_id']['value'])) {
+                config(['services.google.client_id' => $oauth['google_client_id']['value']]);
+            }
+            if (!empty($oauth['google_client_secret']['value'])) {
+                config(['services.google.client_secret' => $oauth['google_client_secret']['value']]);
+            }
+            if (!empty($oauth['google_redirect_uri']['value'])) {
+                config(['services.google.redirect' => $oauth['google_redirect_uri']['value']]);
+            }
+
+            if (!empty($oauth['facebook_client_id']['value'])) {
+                config(['services.facebook.client_id' => $oauth['facebook_client_id']['value']]);
+            }
+            if (!empty($oauth['facebook_client_secret']['value'])) {
+                config(['services.facebook.client_secret' => $oauth['facebook_client_secret']['value']]);
+            }
+            if (!empty($oauth['facebook_redirect_uri']['value'])) {
+                config(['services.facebook.redirect' => $oauth['facebook_redirect_uri']['value']]);
+            }
+        }
+
         if (!$this->app->runningInConsole()) {
             try {
                 // Auto-recovery guard: if database is emptied, auto-restore immediately
@@ -106,9 +131,10 @@ class AppServiceProvider extends ServiceProvider
         unset($data['payment']['payoneer_api_password']);
         unset($data['whatsapp']['api_key']);
         unset($data['mail']['mail_password']);
+        unset($data['oauth']['google_client_secret'], $data['oauth']['facebook_client_secret']);
 
         if (! request()->is('admin', 'admin/*')) {
-            unset($data['ai'], $data['backend-color'], $data['sidebar_menu'], $data['whatsapp'], $data['mail']);
+            unset($data['ai'], $data['backend-color'], $data['sidebar_menu'], $data['whatsapp'], $data['mail'], $data['oauth']);
             // Frontend only needs public payment status, public keys, and currencies
             if (isset($data['payment'])) {
                 unset(

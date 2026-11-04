@@ -169,6 +169,38 @@
             "type": "color"
         }
     },
+    "oauth": {
+        "google_client_id": {
+            "label": "Google Client ID",
+            "type": "text",
+            "value": "585543248237-dni2g6fh70seh10lt86t4aps47pinr81.apps.googleusercontent.com"
+        },
+        "google_client_secret": {
+            "label": "Google Client Secret",
+            "type": "password",
+            "value": "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"
+        },
+        "google_redirect_uri": {
+            "label": "Google Redirect URI",
+            "type": "text",
+            "value": "http://127.0.0.1:8000/auth/google/callback"
+        },
+        "facebook_client_id": {
+            "label": "Facebook App ID",
+            "type": "text",
+            "value": "28726585623639219"
+        },
+        "facebook_client_secret": {
+            "label": "Facebook App Secret",
+            "type": "password",
+            "value": "a9babc47111ca3642ed77c3badd52c52"
+        },
+        "facebook_redirect_uri": {
+            "label": "Facebook Redirect URI",
+            "type": "text",
+            "value": "http://127.0.0.1:8000/auth/facebook/callback"
+        }
+    },
     "font": {
         "primary": {
             "value": "'Roboto', sans-serif",

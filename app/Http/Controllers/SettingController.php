@@ -43,6 +43,7 @@ class SettingController extends Controller
             'whatsapp' => 'setting-read',
             'mail' => 'setting-read',
             'popup' => 'setting-read',
+            'oauth' => 'setting-read',
         ];
 
         $permissionKey = strtolower($request->type);
@@ -171,6 +172,7 @@ class SettingController extends Controller
             'stripe' => 'setting-write',
             'whatsapp' => 'setting-write',
             'mail' => 'setting-write',
+            'oauth' => 'setting-write',
         ];
         $permissionKey = strtolower($request->type);
         if (isset($typePermissionMap[$permissionKey])) {

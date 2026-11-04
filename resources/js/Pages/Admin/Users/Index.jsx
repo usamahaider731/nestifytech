@@ -212,7 +212,5 @@ function Index({ users, userStats, table, currentTab = 'all' }) {
     </div>
   );
 }
-
 export default Index;
-
 Index.layout = (page) => <AdminLayout title="Users">{page}</AdminLayout>;
