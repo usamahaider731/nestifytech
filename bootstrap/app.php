@@ -27,6 +27,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin/module/*/submit*',
             'admin/taxonomy/*/submit*',
             'admin/post/*/submit*',
+            'admin/setting/*',
+            'admin/setting/*/active-colors',
             'newsletter/subscribe',
             'newsletter/unsubscribe/*',
             'contact/submit'
