@@ -974,14 +974,13 @@ class FrontendController extends Controller
                 ->where('parent_id', $store->id)
                 ->where('type', 'store')
                 ->first();
-
             return [
                 'id'          => $store->id,
                 'name'        => $store->title,
                 'description' => $store->description,
-                'country'     => $getMeta('country'),
-                'city'        => $getMeta('city'),
-                'state'       => $getMeta('state'),
+                'country'     =>  get_taxonomy('country', 'id', get_taxonomy('state', 'id', $getMeta('state'), 1)->parent_id, 1)->title ?? '',
+                'city'        => get_taxonomy('city', 'id', $getMeta('city'), 1)->title ?? '', 
+                'state'       => get_taxonomy('state', 'id', $getMeta('state'), 1)->title ?? '',
                 'address'     => $getMeta('address'),
                 'phone'       => $getMeta('phone'),
                 'email'       => $getMeta('email'),

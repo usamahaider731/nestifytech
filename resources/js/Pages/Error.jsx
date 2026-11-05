@@ -1,6 +1,8 @@
-import React from 'react';
-import { Head, Link } from '@inertiajs/react';
+import React, { useEffect } from 'react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { useLang } from '@/contexts/LanguageContext';
+import { buildPalettesFromTypes } from '@/Utils/colorPalettes';
+import { applyThemeColors } from '@/Utils/applyThemeColors';
 import {
     RiHome4Line,
     RiArrowGoBackLine,
@@ -56,8 +58,32 @@ const ERROR_DETAILS = {
     },
 };
 
+const STORAGE_KEY = 'nestify-site-color-theme';
+
+function paletteToColors(palette) {
+    const colors = { ...palette };
+    delete colors.label;
+    delete colors.swatch;
+    return colors;
+}
+
 export default function ErrorPage({ status = 404, message = null }) {
+    const { setting } = usePage().props || {};
     const { __ } = useLang();
+
+    useEffect(() => {
+        try {
+            const themes = setting?.color?.color_types?.value ?? [];
+            const defaultKey = setting?.color?.color_type?.value ?? '';
+            const palettes = buildPalettesFromTypes(themes);
+            const paletteKeys = Object.keys(palettes);
+            const saved = localStorage.getItem(STORAGE_KEY);
+            const key = (saved && palettes[saved]) ? saved : ((defaultKey && palettes[defaultKey]) ? defaultKey : (paletteKeys[0] || ''));
+            if (key && palettes[key]) {
+                applyThemeColors(paletteToColors(palettes[key]));
+            }
+        } catch (e) {}
+    }, [setting]);
     const statusCode = Number(status) || 404;
     const config = ERROR_DETAILS[statusCode] || {
         badge: `${statusCode} Error`,

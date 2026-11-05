@@ -16,10 +16,6 @@ import {
     RiTimeLine,
 } from 'react-icons/ri';
 import { useLang } from '@/contexts/LanguageContext';
-
-/**
- * Helper: extract a scalar string/number value from post meta
- */
 function getMeta(page, key) {
     if (!page?.meta) return null;
     if (Array.isArray(page.meta)) {
@@ -33,10 +29,6 @@ function getMeta(page, key) {
     }
     return null;
 }
-
-/**
- * Helper: safely extract and parse JSON array/object from post meta
- */
 function getMetaJson(page, key, fallback = null) {
     const raw = getMeta(page, key);
     if (!raw) return fallback;
@@ -62,10 +54,7 @@ export default function PageSingle({
 }) {
     const { __ } = useLang();
     const [copied, setCopied] = useState(false);
-
     if (!page) return null;
-
-    // Meta extraction
     const shortDescription = page.short_description ?? getMeta(page, 'short_description');
     const seoTitle         = page.seo_title        ?? getMeta(page, 'seo_title');
     const seoDescription   = page.seo_description  ?? getMeta(page, 'seo_description');
@@ -160,8 +149,7 @@ export default function PageSingle({
                             </h1>
 
                             {shortDescription && (
-                                <p className="mt-3 max-w-2xl mx-auto text-sm sm:text-base text-res/80 italic leading-relaxed">
-                                    {shortDescription}
+                                <p dangerouslySetInnerHTML={{ __html: shortDescription }} className="mt-3 max-w-2xl mx-auto text-sm sm:text-base text-res/80 italic leading-relaxed">
                                 </p>
                             )}
                         </div>
