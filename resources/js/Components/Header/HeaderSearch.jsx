@@ -6,7 +6,7 @@ import Dropdown from '../Dropdown';
 import { RiAiGenerateText, RiAppsLine, RiArrowUpDownFill, RiBubbleChartFill, RiDashboardLine, RiExpandUpDownFill, RiFontSize2, RiFunctionLine, RiGlobalLine, RiLayoutTop2Line, RiMenu2Line, RiPaletteLine, RiPriceTag2Line, RiPriceTag3Line, RiSearch2Line, RiSettingsLine, RiShieldUserLine, RiShoppingBag3Line, RiShoppingCart2Line, RiTranslate2, RiTranslateAi } from 'react-icons/ri';
 import { FaUser } from 'react-icons/fa';
 
-const HeaderSearch = () => {
+const HeaderSearch = ({ isMobile = false, onAfterSearch }) => {
     const { __ } = useLang();
     const { searchCategories = [] } = usePage().props;
     const IconMap = {
@@ -67,6 +67,7 @@ const HeaderSearch = () => {
         if (e) e.preventDefault();
         setProductDropdownOpen(false);
         setCategoryDropdownOpen(false);
+        if (onAfterSearch) onAfterSearch();
 
         const params = {};
         if (productKeyword.trim()) {
@@ -81,6 +82,7 @@ const HeaderSearch = () => {
 
     const handleSelectResult = (item) => {
         setProductDropdownOpen(false);
+        if (onAfterSearch) onAfterSearch();
         if (item.route && item.route !== '#ai-search') {
             router.get(item.route);
         } else {
@@ -91,7 +93,13 @@ const HeaderSearch = () => {
 
     return (
         <>
-            <form onSubmit={handleSearchSubmit} className='lg:ltr:mr-10 lg:rtl:ml-10 z-50 bg-white rounded-full flex items-center min-w-0 flex-1 relative'>
+            <form
+                onSubmit={handleSearchSubmit}
+                className={isMobile
+                    ? 'w-full z-50 bg-white rounded-full flex items-center min-w-0 relative shadow-sm'
+                    : 'lg:ltr:mr-10 lg:rtl:ml-10 z-50 bg-white rounded-full sm:flex items-center hidden min-w-0 flex-1 relative'
+                }
+            >
                 <Dropdown className="flex-1 min-w-0">
                     <Dropdown.Trigger className='relative z-50 h-8 sm:h-9 lg:h-10 ltr:rounded-l-full ltr:rounded-r-none rtl:rounded-r-full rtl:rounded-l-none ltr:border-r-0 rtl:border-l-0 border-2 text-sm text-text !border-primary '>
                         {({ open }) => (
@@ -118,7 +126,7 @@ const HeaderSearch = () => {
                         )}
                     </Dropdown.Trigger>
                     {productDropdownOpen && productResults.length > 0 && (
-                        <Dropdown.Content className='min-w-full bg-white border-border shadow-lg max-h-80 overflow-y-auto' contentClasses='!border-border !ring-0 rounded-none'>
+                        <Dropdown.Content align='left' className='min-w-full bg-white border-border shadow-lg max-h-80 overflow-y-auto' contentClasses='!border-border !ring-0 rounded-none'>
                             {productResults.map((item, index) => (
                                 <Dropdown.List
                                     key={index}
@@ -143,8 +151,8 @@ const HeaderSearch = () => {
                     )}
                 </Dropdown>
 
-                <Dropdown className="hidden md:block flex-1 min-w-0">
-                    <Dropdown.Trigger className='relative z-50 h-9 lg:h-10 rounded-r-none border-r-0 border-l-border border-l border-2 text-xs lg:text-sm text-text !border-y-primary '>
+                <Dropdown className={`${isMobile ? 'block max-w-[120px] sm:max-w-[140px]' : 'hidden md:block'} flex-1 min-w-0`}>
+                    <Dropdown.Trigger className='relative z-50 h-8 sm:h-9 lg:h-10 rounded-none border-r-0 border-l-border border-l border-y-2 text-xs lg:text-sm text-text !border-y-primary '>
                         {({ open }) => (
                             <div
                                 onClick={(e) => {

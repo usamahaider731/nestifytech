@@ -49,7 +49,7 @@ const MainNav = ({ ContainerType, isScrolled = false, onOpenSidebar }) => {
                 }`}
         >
             <div className={`${ContainerType === 'container' ? 'container mx-auto' : ''} px-5 relative`}>
-                <div className={`flex flex-1 items-center gap-1.5 sm:gap-5 lg:gap-10 transition-all duration-300 ${isScrolled ? 'py-2.5' : 'py-5 lg:py-7'
+                <div className={`flex flex-1 items-center gap-1.5 sm:gap-5 lg:gap-10 justify-between transition-all duration-300 ${isScrolled ? 'py-2.5' : 'py-5 lg:py-7'
                     }`}>
 
                     {/* Logo */}
@@ -68,21 +68,12 @@ const MainNav = ({ ContainerType, isScrolled = false, onOpenSidebar }) => {
 
                     {/* Search — always shown */}
                     <HeaderSearch />
-                    <button
-                        type="button"
-                        onClick={onOpenSidebar}
-                        className="md:hidden flex items-center justify-center cursor-pointer text-text transition-colors hover:text-primary"
-                        aria-label="Open menu"
-                    >
-                        <RiMenuLine size={21} />
-                    </button>
-                    {/* Action icons */}
                     <div className="flex gap-3  text-text sm:gap-4 lg:gap-6">
                         {/* Wishlist — hidden on xs, shown sm+ */}
                         <button
                             type="button"
                             onClick={() => dispatch(toggleWishlist(true))}
-                            className="relative hidden md:flex cursor-pointer items-center text-text transition hover:text-primary"
+                            className="relative flex cursor-pointer items-center text-text transition hover:text-primary"
                             aria-label={__('Open Wishlist')}
                         >
                             <RiHeartLine className='lg:size-5 size-4.5' />
@@ -93,11 +84,10 @@ const MainNav = ({ ContainerType, isScrolled = false, onOpenSidebar }) => {
                             )}
                         </button>
 
-                        {/* Compare — hidden on xs, shown sm+ */}
                         <button
                             type="button"
                             onClick={() => dispatch(toggleCompare(true))}
-                            className="relative hidden md:flex cursor-pointer items-center text-text transition hover:text-primary"
+                            className="relative flex cursor-pointer items-center text-text transition hover:text-primary"
                             aria-label={__('Open Compare')}
                         >
                             <RiRepeat2Line className='lg:size-5 size-4.5' />
@@ -181,7 +171,7 @@ const MainNav = ({ ContainerType, isScrolled = false, onOpenSidebar }) => {
                         <button
                             type="button"
                             onClick={() => setIsOpen(true)}
-                            className="md:flex hidden gap-3 items-center text-left"
+                            className="flex gap-3 items-center text-left"
                             aria-label={__('Open cart')}
                         >
                             <div className="relative flex items-center">
@@ -193,13 +183,23 @@ const MainNav = ({ ContainerType, isScrolled = false, onOpenSidebar }) => {
                                 )}
                             </div>
                             {/* Show subtotal — hide text on xs */}
-                            <div className="hidden md:flex flex-col">
+                            <div className="flex flex-col">
                                 <span className="md:text-md text-sm font-medium md:font-semibold lg:font-semibold">
                                     {currency} {subtotal.toLocaleString()}
                                 </span>
                             </div>
                         </button>
                     </div>
+                    <button
+                        type="button"
+                        onClick={onOpenSidebar}
+                        className="md:hidden flex items-center justify-center cursor-pointer text-text transition-colors hover:text-primary"
+                        aria-label="Open menu"
+                    >
+                        <RiMenuLine size={21} />
+                    </button>
+                    {/* Action icons */}
+
                 </div>
             </div>
         </div>

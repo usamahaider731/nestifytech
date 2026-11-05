@@ -4,6 +4,7 @@ import { Link, usePage } from '@inertiajs/react';
 import { useLang } from '@/contexts/LanguageContext';
 import ImageViwer from '@/Components/Admin/ImageViwer';
 import LanguageDropdown from './LanguageDropdown';
+import HeaderSearch from './HeaderSearch';
 import {
     RiCloseLine,
     RiHome4Line,
@@ -90,6 +91,11 @@ export default function MobileSidebar({ isOpen, onClose }) {
                                             >
                                                 <RiCloseLine size={22} />
                                             </button>
+                                        </div>
+
+                                        {/* Mobile Search Bar */}
+                                        <div className="px-4 py-3 bg-slate-50/50 border-b border-slate-100">
+                                            <HeaderSearch isMobile={true} onAfterSearch={onClose} />
                                         </div>
 
                                         {/* User Brief Card */}
