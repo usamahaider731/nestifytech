@@ -960,32 +960,71 @@ class FrontendController extends Controller
             ->orderBy('id', 'asc')
             ->get();
 
-        // Attach meta for each store
-        $stores = $rawStores->map(function ($store) {
-            $meta = DB::table('post_meta')
-                ->where('post_id', $store->id)
-                ->get()
-                ->keyBy('key');
+        if ($rawStores->isEmpty()) {
+            return Inertia::render('Frontend/StoreLocator/Index', [
+                'stores'    => [],
+                'countries' => [],
+            ]);
+        }
 
+        $storeIds = $rawStores->pluck('id')->toArray();
+
+        // Batch-fetch ALL meta in one query (no N+1)
+        $allMeta = DB::table('post_meta')
+            ->whereIn('post_id', $storeIds)
+            ->get()
+            ->groupBy('post_id');
+
+        // Batch-fetch ALL store images in one query
+        $allMedia = DB::table('media')
+            ->whereIn('parent_id', $storeIds)
+            ->where('type', 'store')
+            ->get()
+            ->keyBy('parent_id');
+
+        // Collect unique taxonomy IDs for city/state to batch-resolve them
+        $cityIds  = [];
+        $stateIds = [];
+        foreach ($rawStores as $store) {
+            $meta = $allMeta->get($store->id, collect())->keyBy('key');
+            $cityVal  = $meta->get('city')?->value;
+            $stateVal = $meta->get('state')?->value;
+            if ($cityVal  && is_numeric($cityVal))  $cityIds[]  = (int) $cityVal;
+            if ($stateVal && is_numeric($stateVal)) $stateIds[] = (int) $stateVal;
+        }
+
+        // Batch-fetch city & state taxonomies
+        $cityTaxonomies  = DB::table('taxonomies')->whereIn('id', array_unique($cityIds))->get()->keyBy('id');
+        $stateTaxonomies = DB::table('taxonomies')->whereIn('id', array_unique($stateIds))->get()->keyBy('id');
+
+        // Collect unique country parent IDs from states, then batch-fetch
+        $countryParentIds = $stateTaxonomies->pluck('parent_id')->filter()->unique()->toArray();
+        $countryTaxonomies = DB::table('taxonomies')->whereIn('id', $countryParentIds)->get()->keyBy('id');
+
+        $stores = $rawStores->map(function ($store) use ($allMeta, $allMedia, $cityTaxonomies, $stateTaxonomies, $countryTaxonomies) {
+            $meta    = $allMeta->get($store->id, collect())->keyBy('key');
             $getMeta = fn($key) => $meta->get($key)?->value ?? null;
 
-            // Resolve image from media table
-            $media = DB::table('media')
-                ->where('parent_id', $store->id)
-                ->where('type', 'store')
-                ->first();
+            $cityId   = $getMeta('city');
+            $stateId  = $getMeta('state');
+            $cityObj  = ($cityId  && is_numeric($cityId))  ? $cityTaxonomies->get((int) $cityId)   : null;
+            $stateObj = ($stateId && is_numeric($stateId)) ? $stateTaxonomies->get((int) $stateId) : null;
+            $countryObj = $stateObj ? $countryTaxonomies->get((int) $stateObj->parent_id) : null;
+
+            $media = $allMedia->get($store->id);
+
             return [
                 'id'          => $store->id,
                 'name'        => $store->title,
                 'description' => $store->description,
-                'country'     =>  get_taxonomy('country', 'id', get_taxonomy('state', 'id', $getMeta('state'), 1)->parent_id, 1)->title ?? '',
-                'city'        => get_taxonomy('city', 'id', $getMeta('city'), 1)->title ?? '', 
-                'state'       => get_taxonomy('state', 'id', $getMeta('state'), 1)->title ?? '',
+                'country'     => $countryObj->title ?? '',
+                'city'        => $cityObj->title    ?? '',
+                'state'       => $stateObj->title   ?? '',
                 'address'     => $getMeta('address'),
                 'phone'       => $getMeta('phone'),
                 'email'       => $getMeta('email'),
                 'website'     => $getMeta('website'),
-                'latitude'    => $getMeta('latitude') ? (float) $getMeta('latitude') : null,
+                'latitude'    => $getMeta('latitude')  ? (float) $getMeta('latitude')  : null,
                 'longitude'   => $getMeta('longitude') ? (float) $getMeta('longitude') : null,
                 'sort_order'  => (int) ($getMeta('sort_order') ?? 0),
                 'image'       => $media ? '/storage/uploads/image/' . $media->filename : null,
