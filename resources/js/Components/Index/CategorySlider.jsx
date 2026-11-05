@@ -23,17 +23,17 @@ const CategorySlider = ({categories}) => {
             </div>
             
             <div className='flex w-full'>
-                <div show={8} options={{ loop: true, align: 'start', dragFree: true }} className='grid sm:grid-cols-4 grid-cols-2 md:grid-cols-6 lg:grid-cols-8 w-full gap-y-4 sm:gap-y-0'>
+                <div show={8} options={{ loop: true, align: 'start', dragFree: true }} className='grid sm:grid-cols-4 grid-cols-3 md:grid-cols-6 lg:grid-cols-8 w-full gap-y-4 sm:gap-y-0'>
                     {Categories.length > 0 && Categories.map((cat) => {
                         return (
                             <Link href={route('taxonomy.view', {type: 'category', id: cat.id, slug: cat.slug, time: Date.now()})} key={cat.id} className='flex flex-col embla__slide cursor-pointer items-center group sm:py-4'>
-                                <div className='relative flex size-24 bg-white items-center justify-center overflow-hidden rounded-full border-2 border-primary p-1 transition-all duration-300 md:size-28'>
+                                <div className='relative flex size-20 bg-white items-center justify-center overflow-hidden rounded-full border-2 border-primary p-1 transition-all duration-300 sm:size-28'>
                                     <div className="roundedn-full transition-colors z-10 pointer-events-none">
                                     <ImageViwer image={cat.image?.filename} alt={cat.title} className='size-full object-cover rounded-full img-scale-hover z-0' />
                                     </div>
                                 </div>
-                                <h4 className='mt-2 line-clamp-1 px-2 text-center text-sm font-medium text-heading transition-colors group-hover:text-primary'>{cat.title}</h4>
-                                <span className='mt-0.75 line-clamp-1 px-3 rounded-full py-0.25 bg-common text-center text-[10px] font-medium text-text transition-colors group-hover:text-primary'>{cat.all_products?.length || 0}  {__('item') + (cat.all_products?.length > 2 ? 's' : '')}</span>
+                                <h4 className='mt-2 line-clamp-1 px-2 text-center text-xs sm:text-sm font-medium text-heading transition-colors group-hover:text-primary'>{cat.title}</h4>
+                                <span className='sm:mt-0.75 mt-0.5 line-clamp-1 text-xs sm:text-sm px-3 rounded-full py-0.5 sm:py-0.25 bg-common text-center text-[10px] font-medium text-text transition-colors group-hover:text-primary'>{cat.all_products?.length || 0}  {__('item') + (cat.all_products?.length > 2 ? 's' : '')}</span>
                             </Link>
                         )
                     })}

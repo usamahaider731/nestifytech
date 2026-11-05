@@ -50,7 +50,7 @@ function Index({ data }) {
             <div className={`${containerClass} px-4 pb-12 pt-8 sm:px-6 lg:pb-16 lg:px-8`}>
                 {!data.main_slider && <HeroBanner />}
                 {data.categories && (
-                    <div className="mt-8 lg:mt-14">
+                    <div className="sm:mt-8 lg:mt-14">
                         <CategorySlider categories={data.categories} />
                     </div>
                 )}

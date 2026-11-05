@@ -87,7 +87,7 @@ const MainNav = ({ ContainerType, isScrolled = false, onOpenSidebar }) => {
                         <button
                             type="button"
                             onClick={() => dispatch(toggleCompare(true))}
-                            className="relative flex cursor-pointer items-center text-text transition hover:text-primary"
+                            className="relative hidden sm:flex cursor-pointer items-center text-text transition hover:text-primary"
                             aria-label={__('Open Compare')}
                         >
                             <RiRepeat2Line className='lg:size-5 size-4.5' />
