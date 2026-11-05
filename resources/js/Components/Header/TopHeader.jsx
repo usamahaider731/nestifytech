@@ -69,19 +69,19 @@ const TopHeader = ({ show_language, ContainerType }) => {
                                 </li>
                             }
                             <li className='lg:px-3.75 px-3 text-[11px] md:text-[13px] h-4 flex items-center border-l-2 border-border relative'>
-                                {props.auth.user ? (
+                                {props.auth?.user ? (
                                     <div className="relative group">
                                         <Link
                                             href={route('profile.index')}
                                             className="font-medium hover:text-primary flex items-center gap-1 cursor-pointer"
                                         >
                                             <RiUserLine size={16} />
-                                            <span className="truncate max-w-[120px]">{props.auth.user.name || __('My Account')}</span>
+                                            <span className="truncate max-w-[120px]">{props.auth?.user?.name || __('My Account')}</span>
                                         </Link>
                                         <div className="absolute right-0 top-full pt-2 hidden group-hover:block z-50 min-w-44">
                                             <div className="bg-bg border border-border rounded shadow-lg py-1.5 text-xs text-text">
                                                 <div className="px-3 py-1.5 border-b border-border font-semibold text-res text-[11px] truncate">
-                                                    {props.auth.user.email}
+                                                    {props.auth?.user?.email}
                                                 </div>
                                                 <Link
                                                     href={route('profile.index')}

@@ -23,8 +23,8 @@ const Footer = () => {
         window.scrollTo({ top: 0 });
     };
     const [FooterMenuList, SetFooterMenuList] = useState({ name: '', menus: [] });
-    const FooterSetting = setting.layout.Footer;
-    const FooterMenu = FooterSetting.footer_menu_lists;
+    const FooterSetting = setting?.layout?.Footer;
+    const FooterMenu = FooterSetting?.footer_menu_lists;
     useEffect(() => {
         if (!FooterMenu || FooterMenu.length === 0) return;
 
@@ -47,7 +47,7 @@ const Footer = () => {
                 console.error('Failed to load footer menus:', error);
             });
     }, [FooterMenu]);
-    const logo_path = setting.site[FooterSetting.footer_logo]?.value;
+    const logo_path = setting?.site?.[FooterSetting?.footer_logo]?.value;
 
     // Newsletter subscription state
     const [nlEmail, setNlEmail] = useState('');
@@ -196,7 +196,7 @@ const Footer = () => {
                                     className="flex text-white items-center bg-dynamic gap-2 whitespace-nowrap sm:px-6 h-9 sm:h-10.5 text-xs font-medium sm:font-extrabold uppercase tracking-[0.15em] transition-colors cursor-pointer justify-center max-sm:rounded-full max-sm:w-9 disabled:opacity-70"
                                 >
                                     <span className='hidden sm:flex'>
-                                        {nlState === 'loading' ? __('Subscribing...') : (auth.user ? __('Subscribe') : __('Sign up'))}
+                                        {nlState === 'loading' ? __('Subscribing...') : (auth?.user ? __('Subscribe') : __('Sign up'))}
                                     </span>
                                     <FiSend />
                                 </button>
