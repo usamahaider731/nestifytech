@@ -73,7 +73,7 @@ function MapView({ stores, activeId, onMarkerClick }) {
                 height:${isActive ? 40 : 32}px;
                 background:${isActive ? 'var(--color-primary, #6366f1)' : '#fff'};
                 border:3px solid ${isActive ? '#fff' : 'var(--color-primary, #6366f1)'};
-                border-radius:50% 50% 50% 0;
+                border-radius:30% 30% 30% 0;
                 transform:rotate(-45deg);
                 box-shadow:0 4px 15px rgba(0,0,0,.25);
                 transition:all .2s;
@@ -151,7 +151,7 @@ function StoreCard({ store, isActive, onClick }) {
             style={{
                 background: isActive ? 'var(--color-primary, #6366f1)' : 'var(--card-bg, #fff)',
                 color: isActive ? '#fff' : 'inherit',
-                borderRadius: '14px',
+                borderRadius: '10px',
                 padding: '18px',
                 cursor: 'pointer',
                 transition: 'all .25s ease',
@@ -204,7 +204,6 @@ function StoreCard({ store, isActive, onClick }) {
 // ─── Store Detail Panel ────────────────────────────────────────────────────────
 function StoreDetail({ store, onClose }) {
     if (!store) return null;
-    console.log(store);
     return (
         <div style={{
             background: 'var(--card-bg, #fff)',
@@ -249,17 +248,17 @@ function StoreDetail({ store, onClose }) {
                 {store.address && (
                     <InfoRow icon={<RiMapPin2Line size={16} />} label="Address" value={store.address} />
                 )}
-                {store.phone && (
+                {store.phone && store.phone != null && (
                     <InfoRow icon={<RiPhoneLine size={16} />} label="Phone">
                         <a href={`tel:${store.phone}`} style={{ color: 'var(--color-primary, #6366f1)', textDecoration: 'none' }}>{store.phone}</a>
                     </InfoRow>
                 )}
-                {store.email && (
+                {store.email && store.email != null && (
                     <InfoRow icon={<RiMailLine size={16} />} label="Email">
                         <a href={`mailto:${store.email}`} style={{ color: 'var(--color-primary, #6366f1)', textDecoration: 'none' }}>{store.email}</a>
                     </InfoRow>
                 )}
-                {store.website && (
+                {store.website && store.website != null && (
                     <InfoRow icon={<RiGlobalLine size={16} />} label="Website">
                         <a href={store.website} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary, #6366f1)', textDecoration: 'none' }}>
                             {store.website.replace(/^https?:\/\//, '')}
@@ -385,7 +384,7 @@ export default function StoreLocatorIndex({ stores = [], countries = [] }) {
                 </div>
             </section>
 
-            <div style={{ maxWidth: 1340, margin: '0 auto', padding: '32px 20px' }}>
+            <div style={{ margin: '0 auto', padding: '32px 20px' }} className='container'>
 
                 {/* Controls row */}
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', marginBottom: 24, justifyContent: 'space-between' }}>
@@ -442,12 +441,10 @@ export default function StoreLocatorIndex({ stores = [], countries = [] }) {
 
                 {/* Content grid */}
                 {filtered.length > 0 && (
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: viewMode === 'list' ? '1fr' : viewMode === 'map' ? '1fr' : '360px 1fr',
-                        gap: 24,
-                        alignItems: 'start',
-                    }}>
+                    <div className={`grid gap-6 items-start ${viewMode === 'list' || viewMode === 'map'
+                        ? 'grid-cols-1'
+                        : 'grid-cols-1 lg:grid-cols-[360px_1fr]'
+                        }`}>
                         {/* Store list panel */}
                         {viewMode !== 'map' && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
