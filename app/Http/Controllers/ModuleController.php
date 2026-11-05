@@ -476,21 +476,16 @@ class ModuleController extends Controller
         }
 
         if ($type === 'reviews') {
-            if ($request->has('id')) {
-                $query = $query->where('parent_id', $request->id);
+            $parentId = $id ?? $request->query('id');
+
+            // Agar specific review ke replies dekhne hon tab hi parent_id filter ho
+            if ($parentId !== null && $parentId !== '' && (int)$parentId !== 0) {
+                $query = $query->where('parent_id', (int) $parentId);
             }
-            else {
-                $query = $query->where(function ($q) {
-                    $q->whereNull('parent_id')
-                        ->orWhere('parent_id', 0)
-                        ->orWhere('parent_id', '')
-                        ->orWhere('parent_id', '0');
-                });
-            }
+            // Agar koi id na di ho, to bina kisi restriction ke tamam reviews show hon
         }
         
         $result = $this->handleTableRequest($request, $type, $query);
-
         if ($type === 'roles' || $type === 'role') {
             $allUsers = DB::table('users')->select('id', 'name', 'roles')->get();
             $mediaMap = DB::table('media')
@@ -556,7 +551,8 @@ class ModuleController extends Controller
 
         // Pass selectedParentId for the Reviews page
         if ($type === 'reviews') {
-            $payload['selectedParentId'] = $request->has('id') ? (int) $request->id : null;
+            $parentId = $id ?? $request->query('id');
+            $payload['selectedParentId'] = ($parentId !== null && $parentId !== '' && (int)$parentId !== 0) ? (int) $parentId : null;
         }
 
         return Inertia::render($view, $payload);

@@ -10,7 +10,7 @@ const CategorySlider = ({categories}) => {
     const [Categories, setCategories] = useState(categories);
     return (
         <div className='flex flex-col items-center justify-between'>
-            <div className='flex justify-between items-end w-full mb-8'>
+            <div className='flex flex-col sm:flex-row justify-between gap-7 sm:gap-0 sm:items-end w-full mb-8'>
                 <div className='flex flex-col'>
                     <p className='mb-2 text-xs font-bold uppercase tracking-[0.18em] text-primary'>{__('Browse the store')}</p>
                     <h2 className='text-2xl font-extrabold text-heading md:text-3xl'>{__('Featured Categories')}</h2>
@@ -23,10 +23,10 @@ const CategorySlider = ({categories}) => {
             </div>
             
             <div className='flex w-full'>
-                <div show={8} options={{ loop: true, align: 'start', dragFree: true }} className='grid sm:grid-cols-4 grid-cols-2 md:grid-cols-6 lg:grid-cols-8 w-full'>
+                <div show={8} options={{ loop: true, align: 'start', dragFree: true }} className='grid sm:grid-cols-4 grid-cols-2 md:grid-cols-6 lg:grid-cols-8 w-full gap-y-4 sm:gap-y-0'>
                     {Categories.length > 0 && Categories.map((cat) => {
                         return (
-                            <Link href={route('taxonomy.view', {type: 'category', id: cat.id, slug: cat.slug, time: Date.now()})} key={cat.id} className='flex flex-col embla__slide cursor-pointer items-center group py-4'>
+                            <Link href={route('taxonomy.view', {type: 'category', id: cat.id, slug: cat.slug, time: Date.now()})} key={cat.id} className='flex flex-col embla__slide cursor-pointer items-center group sm:py-4'>
                                 <div className='relative flex size-24 bg-white items-center justify-center overflow-hidden rounded-full border-2 border-primary p-1 transition-all duration-300 md:size-28'>
                                     <div className="roundedn-full transition-colors z-10 pointer-events-none">
                                     <ImageViwer image={cat.image?.filename} alt={cat.title} className='size-full object-cover rounded-full img-scale-hover z-0' />

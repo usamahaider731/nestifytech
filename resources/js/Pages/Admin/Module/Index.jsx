@@ -211,7 +211,7 @@ function Index({ data, table, type, stats }) {
                     <button
                       key={idx}
                       onClick={() => handlePostAction(href, actionItem.data || {}, actionItem.label)}
-                      className={`h-10 w-full px-3 cursor-pointer flex items-center justify-start rounded-md transition-colors text-sm font-medium ${actionItem.label === 'Approve' ? 'text-green-600 hover:bg-green-100' :
+                      className={`h-10 min-w-full w-full px-3 cursor-pointer flex items-center justify-start rounded-md transition-colors text-sm font-medium ${actionItem.label === 'Approve' ? 'text-green-600 hover:bg-green-100' :
                           actionItem.label === 'Reject' ? 'text-red-500 hover:bg-red-100' :
                             actionItem.label === 'Delete' ? 'text-red-700 hover:bg-red-100' :
                               'text-heading hover:bg-primary hover:text-white'

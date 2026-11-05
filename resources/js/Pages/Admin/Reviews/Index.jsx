@@ -10,7 +10,6 @@ import {
     RiErrorWarningLine, RiCheckboxCircleLine, RiLoader4Line
 } from 'react-icons/ri'
 
-/* ─── Mini Toast ──────────────────────────────────────────── */
 function useToast() {
     const [toasts, setToasts] = useState([])
     const push = (msg, type = 'success') => {
@@ -41,7 +40,7 @@ function ToastStack({ toasts, dismiss }) {
 function Stars({ rating }) {
     return (
         <div className="flex gap-0.5">
-            {[1,2,3,4,5].map(i => <RiStarFill key={i} className={`size-3.5 ${i <= rating ? 'text-amber-400' : 'text-secondary/20'}`} />)}
+            {[1, 2, 3, 4, 5].map(i => <RiStarFill key={i} className={`size-3.5 ${i <= rating ? 'text-amber-400' : 'text-secondary/20'}`} />)}
         </div>
     )
 }
@@ -49,8 +48,8 @@ function Stars({ rating }) {
 /* ─── Status Badge ─────────────────────────────────────── */
 const STATUS_MAP = {
     approved: { cls: 'bg-green-100 text-green-700 border-green-200', dot: 'bg-green-500' },
-    pending:  { cls: 'bg-amber-100 text-amber-700 border-amber-200', dot: 'bg-amber-500' },
-    rejected: { cls: 'bg-red-100 text-red-600 border-red-200',       dot: 'bg-red-500' },
+    pending: { cls: 'bg-amber-100 text-amber-700 border-amber-200', dot: 'bg-amber-500' },
+    rejected: { cls: 'bg-red-100 text-red-600 border-red-200', dot: 'bg-red-500' },
 }
 function StatusBadge({ status }) {
     const s = STATUS_MAP[status] ?? { cls: 'bg-gray-100 text-gray-600 border-gray-200', dot: 'bg-gray-400' }
@@ -63,8 +62,8 @@ function StatusBadge({ status }) {
 
 /* ─── Avatar ─────────────────────────────────────────────── */
 function Avatar({ name }) {
-    const initials = (name || 'G').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase()
-    const colors = ['bg-violet-500','bg-blue-500','bg-pink-500','bg-teal-500','bg-orange-500']
+    const initials = (name || 'G').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+    const colors = ['bg-violet-500', 'bg-blue-500', 'bg-pink-500', 'bg-teal-500', 'bg-orange-500']
     const color = colors[(name?.charCodeAt(0) ?? 0) % colors.length]
     return <div className={`size-9 rounded-full ${color} flex items-center justify-center text-white text-xs font-bold shrink-0`}>{initials}</div>
 }
@@ -90,7 +89,7 @@ function ReviewCard({ rev, onStatusChange, onDelete, showRepliesLink, canWrite }
         try {
             await axios.delete(route('admin.reviews.destroy', { id: rev.id }))
             onDelete(rev.id)
-        } catch {}
+        } catch { }
         setLoading(null)
     }
 
@@ -125,7 +124,7 @@ function ReviewCard({ rev, onStatusChange, onDelete, showRepliesLink, canWrite }
                     <Stars rating={rev.rating ?? 0} />
                     <span className="text-[10px] text-res flex items-center gap-1">
                         <RiTimeLine className="size-3" />
-                        {rev.created_at ? new Date(rev.created_at).toLocaleDateString('en-US',{day:'numeric',month:'short',year:'numeric'}) : '—'}
+                        {rev.created_at ? new Date(rev.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
                     </span>
                 </div>
 
@@ -133,7 +132,7 @@ function ReviewCard({ rev, onStatusChange, onDelete, showRepliesLink, canWrite }
                 <div className="bg-common/40 rounded-lg px-3.5 py-3 text-sm text-res leading-relaxed min-h-[52px] flex-1">
                     {comment ? (
                         <>
-                            {isLong && !expanded ? comment.slice(0,160) + '…' : comment}
+                            {isLong && !expanded ? comment.slice(0, 160) + '…' : comment}
                             {isLong && (
                                 <button onClick={() => setExpanded(!expanded)} className="ml-1 text-primary text-xs font-medium hover:underline">
                                     {expanded ? 'Show less' : 'Read more'}
@@ -154,21 +153,21 @@ function ReviewCard({ rev, onStatusChange, onDelete, showRepliesLink, canWrite }
                 <div className="flex items-center gap-2 flex-wrap pt-1 border-t border-secondary/10">
                     {canWrite && rev.status !== 'approved' && (
                         <button onClick={() => handleStatus('approved')} disabled={!!loading}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-green-50 text-green-700 border border-green-200 hover:bg-green-500 hover:text-white hover:border-green-500 transition-all disabled:opacity-50">
+                            className="flex items-center gap-1.5 px-3 min-w-full h-9 w-full py-1.5 rounded-lg text-xs font-semibold bg-green-50 text-green-700 border border-green-200 hover:bg-green-500 hover:text-white hover:border-green-500 transition-all disabled:opacity-50">
                             {loading === 'approve' ? <RiLoader4Line className="animate-spin size-3.5" /> : <RiCheckLine className="size-3.5" />}
                             Approve
                         </button>
                     )}
                     {canWrite && rev.status !== 'rejected' && (
                         <button onClick={() => handleStatus('rejected')} disabled={!!loading}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-50 text-red-600 border border-red-200 hover:bg-red-500 hover:text-white hover:border-red-500 transition-all disabled:opacity-50">
+                            className="flex items-center gap-1.5 px-3 w-full h-9 min-w-full py-1.5 rounded-lg text-xs font-semibold bg-red-50 text-red-600 border border-red-200 hover:bg-red-500 hover:text-white hover:border-red-500 transition-all disabled:opacity-50">
                             {loading === 'reject' ? <RiLoader4Line className="animate-spin size-3.5" /> : <RiCloseLine className="size-3.5" />}
                             Reject
                         </button>
                     )}
                     {showRepliesLink && (
                         <Link href={`/admin/reviews?id=${rev.id}`}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all">
+                            className="flex items-center gap-1.5 w-full min-w-full h-9 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all">
                             <RiMessage3Line className="size-3.5" />Replies
                         </Link>
                     )}
@@ -194,8 +193,8 @@ function ReviewIndex({ reviews: initialReviews, selectedParentId }) {
     const [search, setSearch] = useState('')
 
     const stats = useMemo(() => ({
-        total:    reviews.length,
-        pending:  reviews.filter(r => r.status === 'pending').length,
+        total: reviews.length,
+        pending: reviews.filter(r => r.status === 'pending').length,
         approved: reviews.filter(r => r.status === 'approved').length,
         rejected: reviews.filter(r => r.status === 'rejected').length,
     }), [reviews])
@@ -218,10 +217,10 @@ function ReviewIndex({ reviews: initialReviews, selectedParentId }) {
     }
 
     const TABS = [
-        { key:'all',      label:'All',      count: stats.total,    active: 'bg-heading text-permanent' },
-        { key:'pending',  label:'Pending',  count: stats.pending,  active: 'bg-amber-500 text-white' },
-        { key:'approved', label:'Approved', count: stats.approved, active: 'bg-green-500 text-white' },
-        { key:'rejected', label:'Rejected', count: stats.rejected, active: 'bg-red-500 text-white' },
+        { key: 'all', label: 'All', count: stats.total, active: 'bg-heading text-permanent' },
+        { key: 'pending', label: 'Pending', count: stats.pending, active: 'bg-amber-500 text-white' },
+        { key: 'approved', label: 'Approved', count: stats.approved, active: 'bg-green-500 text-white' },
+        { key: 'rejected', label: 'Rejected', count: stats.rejected, active: 'bg-red-500 text-white' },
     ]
 
     return (
@@ -253,10 +252,10 @@ function ReviewIndex({ reviews: initialReviews, selectedParentId }) {
             {!selectedParentId && (
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     {[
-                        { label:'Total Reviews',    val: stats.total,    bg:'bg-accent',   text:'text-blue-600' },
-                        { label:'Pending Review',   val: stats.pending,  bg:'bg-accent', text:'text-amber-600' },
-                        { label:'Approved',         val: stats.approved, bg:'bg-accent', text:'text-green-600' },
-                        { label:'Rejected',         val: stats.rejected, bg:'bg-accent',     text:'text-red-500' },
+                        { label: 'Total Reviews', val: stats.total, bg: 'bg-accent', text: 'text-blue-600' },
+                        { label: 'Pending Review', val: stats.pending, bg: 'bg-accent', text: 'text-amber-600' },
+                        { label: 'Approved', val: stats.approved, bg: 'bg-accent', text: 'text-green-600' },
+                        { label: 'Rejected', val: stats.rejected, bg: 'bg-accent', text: 'text-red-500' },
                     ].map(s => (
                         <div key={s.label} className={`rounded-xl border p-4 flex flex-col gap-1 ${s.bg}`}>
                             <span className={`text-3xl font-bold ${s.text}`}>{s.val}</span>

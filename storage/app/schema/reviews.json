@@ -1,6 +1,5 @@
 {
     "db": {
-        "model": "App\\Models\\Posts",
         "type": "reviews",
         "validation": {
             "rating": "required|integer|max:100",
@@ -83,9 +82,6 @@
             "updated_at",
             "created_at"
         ],
-        "fixed_fields": {
-            "user_id": "auth_id"
-        },
         "table": "reviews"
     },
     "table": {

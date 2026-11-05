@@ -11,6 +11,8 @@ class ReviewController extends Controller
     // ====== ADMIN METHODS ======
     public function index($id = null)
     {
+        // dd($reviews);
+
         $query = \App\Models\Review::query()->with(['user:id,name,email', 'post:id,title']);
 
         if ($id !== null && $id !== '' && $id !== '0') {
@@ -24,7 +26,6 @@ class ReviewController extends Controller
         }
 
         $reviews = $query->latest()->get();
-
         return \Inertia\Inertia::render('Admin/Reviews/Index', [
             'reviews' => $reviews,
             'selectedParentId' => $id !== null && $id !== '' ? (int) $id : null,

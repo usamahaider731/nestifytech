@@ -34,13 +34,13 @@ function Index({ data }) {
             )}
 
             <div className="border-b border-border">
-                <div className={`${containerClass} grid grid-cols-2 divide-x divide-border px-4 py-5 sm:px-6 md:grid-cols-4 lg:px-8`}>
+                <div className={`${containerClass} grid grid-cols-2 md:divide-x divide-x-0 divide-border px-4 py-5 sm:px-6 md:grid-cols-4 lg:px-8`}>
                     {services.map((service, index) => (
-                        <div key={index} className="flex items-center lg:gap-3 gap-2 px-2 lg:px-3 first:pl-0 last:pr-0 md:px-5">
+                        <div key={index} className="flex items-center lg:gap-3 gap-2 px-2 lg:px-3 odd:pl-0 even:pr-0 md:px-5">
                             <ImageViwer image={service.service_icon} alt={service.title} className="shrink-0 lg:text-2xl lg:h-8 lg:w-8 text-xl size-6 text-primary" />
                             <div className="min-w-0">
-                                <p className="truncate text-xs font-semibold lg:font-bold uppercase tracking-wide text-heading">{service.title}</p>
-                                <p className="mt-1 truncate text-[10px] lg:text-[11px] text-res">{service.description}</p>
+                                <p className="truncate text-[10px] max-sm:leading-3.5 sm:text-xs font-semibold lg:font-bold uppercase tracking-wide text-heading">{service.title}</p>
+                                <p className="mt-1 truncate text-[9px] sm:text-[10px] lg:text-[11px] text-res">{service.description}</p>
                             </div>
                         </div>
                     ))}
