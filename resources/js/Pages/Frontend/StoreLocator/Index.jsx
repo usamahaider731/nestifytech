@@ -204,7 +204,7 @@ function StoreCard({ store, isActive, onClick }) {
 // ─── Store Detail Panel ────────────────────────────────────────────────────────
 function StoreDetail({ store, onClose }) {
     if (!store) return null;
-
+    console.log(store);
     return (
         <div style={{
             background: 'var(--card-bg, #fff)',

@@ -15,7 +15,7 @@ class FrontendController extends Controller
 
     function __construct()
     {
-        
+
         parent::__construct();
 
         $this->settings = view()->shared('setting');
@@ -96,7 +96,6 @@ class FrontendController extends Controller
                 'limit' => 10,
                 'latest' => true,
             ]));
-            
         }
         $data['popluar_products'] = get_posts($this->productQuery([
             'limit' => 10,
@@ -261,9 +260,7 @@ class FrontendController extends Controller
     {
         return Inertia::render('Frontend/Compare/Index');
     }
-    public function developer() {
-        
-        }
+    public function developer() {}
     public function shop(Request $request)
     {
         $validated = $request->validate([
@@ -978,7 +975,7 @@ class FrontendController extends Controller
         // Batch-fetch ALL store images in one query
         $allMedia = DB::table('media')
             ->whereIn('parent_id', $storeIds)
-            ->where('type', 'store')
+            ->where('type', 'post')
             ->get()
             ->keyBy('parent_id');
 
