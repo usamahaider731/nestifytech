@@ -3,35 +3,23 @@ import { Link, usePage } from '@inertiajs/react';
 import ImageViwer from './Admin/ImageViwer';
 import { useLang } from '@/contexts/LanguageContext';
 import { normalizeProduct } from '@/Utils/normalizeProduct';
-import {
-    RiArrowRightLine,
-    RiHeart2Line,
-    RiRepeat2Line,
-    RiShoppingBagLine,
-    RiStackLine,
-    RiStarFill,
-    RiStarHalfFill,
-} from 'react-icons/ri';
+import { RiArrowRightLine, RiHeart2Line, RiRepeat2Line, RiShoppingBagLine, RiStackLine, RiStarFill, RiStarHalfFill } from 'react-icons/ri';
 import { FaCompass, FaEye } from 'react-icons/fa';
 import { MdCompareArrows } from 'react-icons/md';
-
 import { useSelector, useDispatch } from 'react-redux';
 import { addToCompare, removeFromCompare, selectIsInCompare } from '@/store/compareSlice';
 import { addToWishlist, removeFromWishlist, selectIsInWishlist } from '@/store/wishListSlice';
 import { RiHeart2Fill } from 'react-icons/ri';
 import { recordWishlistActivity } from '@/Utils/recordWishlistActivity';
 import { calculateAdjustedPrice, resolveProductPrices, parseNumericPrice } from '@/Utils/helper';
-
 const ProductCardV2 = ({ className = '', product = {} }) => {
     const { setting, auth, activePricingRules = [] } = usePage().props;
     const cardSetting = setting.layout.Product_Card_V2;
     const currency = setting.site.currency.value ?? 'PKR';
     const { __ } = useLang();
     const dispatch = useDispatch();
-
     const isCompare = useSelector(selectIsInCompare(product.id));
     const isWishlist = useSelector(selectIsInWishlist(product.id));
-
     const compareHandle = () => {
         if (isCompare) {
             dispatch(removeFromCompare(product.id));
@@ -39,9 +27,7 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
             dispatch(addToCompare({ productId: product.id, product }));
         }
     }
-
     const isOwner = Boolean(auth?.user?.id && product?.user_id && Number(auth.user.id) === Number(product.user_id));
-
     const wishlistHandle = () => {
         if (isOwner) {
             alert(__('You cannot like or wishlist your own product.'));
@@ -55,14 +41,11 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
             if (auth?.user) recordWishlistActivity('wishlist_added', product.id);
         }
     }
-
     const categories = product.category ?? [];
     const [stock, setStock] = useState(0);
     const [discount, setDiscount] = useState(0);
-
     const { firstPrice, secondPrice, basePrice: baseRaw, regularPrice: regularRaw } = resolveProductPrices(product);
     const userDiscountPercent = parseNumericPrice(auth?.user?.discount || auth?.user?.meta?.discount || 0);
-
     const pricing = calculateAdjustedPrice({
         basePrice: baseRaw,
         regularPrice: regularRaw,
@@ -75,16 +58,13 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
         user: auth?.user || null,
         pricingRules: activePricingRules,
     });
-
     const salePrice = pricing.finalPrice;
     const brandTitle = Array.isArray(product.brand) ? product.brand[0]?.title : product.brand?.title;
     const shortDescription = String(product.meta?.short_description?.value ?? '');
-
     const productHref =
         product.sku && product.id
             ? route('post', { sku: product.sku, id: product.id, type: 'product' })
             : null;
-
     useEffect(() => {
         if (product.variations?.length > 0) {
             setStock(product.variations.reduce((acc, variation) => {
@@ -99,7 +79,6 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
         } else {
             setStock(product.meta?.stock?.value ?? 0);
         }
-
         if (pricing.totalDiscountPercentage > 0) {
             setDiscount(pricing.totalDiscountPercentage);
         } else if (firstPrice > secondPrice && firstPrice > 0) {
@@ -108,18 +87,15 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
             setDiscount(0);
         }
     }, [product, firstPrice, secondPrice, pricing.totalDiscountPercentage]);
-
-
     return (
         <article className={`group flex flex-col overflow-hidden rounded sm:h-40 border border-border bg-white shadow-sm transition duration-300 hover:border-primary/40 hover:shadow-xl sm:flex-row ${className}`}>
             <div className="relative shrink-0 overflow-hidden bg-white sm:p-3 m-2 sm:m-0 shadow sm:shadow-none sm:w-40 ">
-
                 {productHref ? (
                     <Link href={productHref} className="items-center justify-center size-full flex">
-                        <ImageViwer image={product.image} height={900} width={900} className="w-full object-cover aspect-video rounded transition duration-500 text-center group-hover:scale-105" />
+                        <ImageViwer image={product.image} height={900} width={900} className="max-sm:w-full sm:size-full object-cover max-sm:aspect-video rounded transition duration-500 text-center group-hover:scale-105" />
                     </Link>
                 ) : (
-                    <ImageViwer image={product.image} height={900} width={900} className="size-full object-cover rounded" />
+                    <ImageViwer image={product.image} height={900} width={900} className="max-sm:w-full sm:size-full object-cover max-sm:aspect-video rounded" />
                 )}
                 <div className='flex items-center absolute group-hover:bottom-5 -bottom-full duration-200 ease-in-out left-auto right-auto gap-1'>
                     {cardSetting.show_product_stock_info && (
@@ -134,10 +110,8 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
                     )}
                 </div>
             </div>
-
             <div className="flex flex-1 flex-col gap-1 p-3 border-l border-border">
                 <div className="flex items-start justify-between gap-5">
-
                     {cardSetting.show_product_category && categories.length > 0 && (
                         <div className="flex flex-wrap gap-1.5">
                             {categories.map((category, idx) => (
@@ -147,7 +121,6 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
                             ))}
                         </div>
                     )}
-
                     <div className="ml-auto flex items-center gap-1">
                         {cardSetting.show_product_wishlist_button && (
                             <button type="button" onClick={wishlistHandle} title={__('Add to Wish List')} className={`transition hover:text-red-500 ${isWishlist ? 'text-red-500' : 'text-res'}`}>
@@ -156,7 +129,6 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
                         )}
                     </div>
                 </div>
-
                 <div className="flex flex-col gap-1 sm:items-start sm:justify-between">
                     {productHref ? (
                         <Link href={productHref}>
@@ -187,18 +159,14 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
                                 {currency} {regularRaw.toLocaleString()}
                             </span>
                         )}
-
                         {cardSetting.show_product_discount_price && discount > 0 && (
                             <span className="ml-5 text-primary font-poppins text-xs font-medium">
                                 {Math.round(discount)}% {__('Off')}
                             </span>
                         )}
-
                     </div>
                 )}
-
                 <div className="flex flex-wrap md:flex-nowrap mt-auto items-center gap-1.25 sm:gap-1.5">
-
                     {cardSetting.show_product_view_button && productHref && (
                         <Link
                             href={productHref}
@@ -218,11 +186,9 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
                             {__('Add To Compare')}
                         </button>
                     )}
-
                 </div>
             </div>
         </article>
     );
 };
-
 export default ProductCardV2;

@@ -50,9 +50,9 @@ const Footer = () => {
     const logo_path = setting.site[FooterSetting.footer_logo]?.value;
 
     // Newsletter subscription state
-    const [nlEmail, setNlEmail]     = useState('');
-    const [nlState, setNlState]      = useState('idle'); // idle | loading | success | error
-    const [nlMessage, setNlMessage]  = useState('');
+    const [nlEmail, setNlEmail] = useState('');
+    const [nlState, setNlState] = useState('idle'); // idle | loading | success | error
+    const [nlMessage, setNlMessage] = useState('');
 
     const handleNewsletterSubmit = async (e) => {
         e.preventDefault();
@@ -175,32 +175,33 @@ const Footer = () => {
                         </div>
 
                         {nlState === 'success' ? (
-                                <div className="flex items-center gap-3 h-10.5 px-5 bg-green-500/20 border border-green-500/40 rounded-full text-green-300 text-sm font-semibold">
-                                    <FiCheckCircle size={16} />
-                                    <span>{nlMessage}</span>
-                                </div>
-                            ) : (
-                                <form onSubmit={handleNewsletterSubmit} className="flex w-fit overflow-hidden rounded-full bg-white">
-                                    <input
-                                        type="email"
-                                        value={nlEmail}
-                                        onChange={(e) => setNlEmail(e.target.value)}
-                                        placeholder={nlState === 'error' ? (nlMessage || __('Enter your email address')) : __('Enter your email address')}
-                                        className={`w-80 bg-transparent border-none outline-none ring-0 px-5 h-10.5 text-base placeholder:text-text/70 focus:outline-none ${
-                                            nlState === 'error' ? 'text-rose-600 placeholder:text-rose-400' : 'text-text'
+                            <div className="flex items-center gap-3 h-10.5 px-5 bg-green-500/20 border border-green-500/40 rounded-full text-green-300 text-sm font-semibold">
+                                <FiCheckCircle size={16} />
+                                <span>{nlMessage}</span>
+                            </div>
+                        ) : (
+                            <form onSubmit={handleNewsletterSubmit} className="flex w-fit overflow-hidden max-sm:p-1 rounded-full bg-white">
+                                <input
+                                    type="email"
+                                    value={nlEmail}
+                                    onChange={(e) => setNlEmail(e.target.value)}
+                                    placeholder={nlState === 'error' ? (nlMessage || __('Enter your email address')) : __('Enter your email address')}
+                                    className={`sm:w-80 bg-transparent border-none outline-none ring-0 sm:px-5 px-3 h-9 sm:h-10.5 text-sm sm:text-base placeholder:text-text/70 focus:outline-none ${nlState === 'error' ? 'text-rose-600 placeholder:text-rose-400' : 'text-text'
                                         }`}
-                                        required
-                                    />
-                                    <button
-                                        type="submit"
-                                        disabled={nlState === 'loading'}
-                                        className="flex text-white items-center bg-dynamic gap-2 whitespace-nowrap px-6 h-10.5 text-xs font-extrabold uppercase tracking-[0.15em] text-slate-900 transition-colors cursor-pointer disabled:opacity-70"
-                                    >
+                                    required
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={nlState === 'loading'}
+                                    className="flex text-white items-center bg-dynamic gap-2 whitespace-nowrap sm:px-6 h-9 sm:h-10.5 text-xs font-medium sm:font-extrabold uppercase tracking-[0.15em] transition-colors cursor-pointer justify-center max-sm:rounded-full max-sm:w-9 disabled:opacity-70"
+                                >
+                                    <span className='hidden sm:flex'>
                                         {nlState === 'loading' ? __('Subscribing...') : (auth.user ? __('Subscribe') : __('Sign up'))}
-                                        <FiSend />
-                                    </button>
-                                </form>
-                            )}
+                                    </span>
+                                    <FiSend />
+                                </button>
+                            </form>
+                        )}
                     </div>
                 </div>
             </div>
