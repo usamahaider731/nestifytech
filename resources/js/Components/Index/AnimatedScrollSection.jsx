@@ -8,7 +8,6 @@ import ImageViwer from '../Admin/ImageViwer';
 gsap.registerPlugin(ScrollTrigger);
 
 export default function AnimatedScrollSection({ data = [] }) {
-    console.log(data)
     const { __, locale } = useLang();
     const sectionRef = useRef(null);
     const titleRef = useRef(null);

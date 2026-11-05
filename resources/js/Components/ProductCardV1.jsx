@@ -112,12 +112,12 @@ const ProductCardV1 = ({ className = '', product = {} }) => {
             <div className="relative aspect-square overflow-hidden bg-white">
                 <div className="pointer-events-none absolute inset-x-3 top-3 z-20 flex items-start justify-between">
                     {cardSetting.show_product_stock_info && (
-                        <span className={`rounded-md px-2.5 text-[9px] font-semibold uppercase tracking-wide ${stock > 0 ? 'bg-primary text-white' : 'bg-secondary text-white'}`}>
+                        <span className={`rounded-md px-2.5 hidden sm:flex text-[9px] font-semibold uppercase tracking-wide ${stock > 0 ? 'bg-primary text-white' : 'bg-secondary text-white'}`}>
                             {stock > 0 ? __('In Stock') : __('Out of Stock')}
                         </span>
                     )}
                     {cardSetting.show_product_discount_price && discount > 0 && (
-                        <span className="rounded-md bg-primary px-2 text-[9px] font-semibold text-white">
+                        <span className="rounded-md hidden sm:flex bg-primary px-2 text-[9px] font-semibold text-white">
                             -{Math.round(discount)}%
                         </span>
                     )}
@@ -145,10 +145,10 @@ const ProductCardV1 = ({ className = '', product = {} }) => {
                 )}
             </div>
 
-            <div className="flex flex-1 border-t border-border flex-col gap-2 p-4">
+            <div className="flex flex-1 border-t border-border flex-col sm:gap-2 gap-1 p-2 sm:p-4">
                 <div className="flex items-center justify-between gap-2">
                     {cardSetting.show_product_category && categories.length > 0 && (
-                        <p className="line-clamp-1 text-[10px] font-bold uppercase tracking-widest text-res">
+                        <p className="line-clamp-1 text-[8px] max-sm:leading-2.5 sm:text-[10px] font-semibold sm:font-bold uppercase tracking-widest text-res">
                             {categories.map((category) => category?.title).filter(Boolean).join(', ')}
                         </p>
                     )}
@@ -170,21 +170,21 @@ const ProductCardV1 = ({ className = '', product = {} }) => {
 
                 {productHref ? (
                     <Link href={productHref}>
-                        <h3 className="line-clamp-2 font-poppins min-h-10 text-sm font-semibold leading-snug text-heading transition hover:text-primary">
+                        <h3 className="line-clamp-2 font-poppins sm:min-h-10 min-h-6 text-[11px] sm:text-sm font-semibold leading-snug text-heading transition hover:text-primary">
                             {product.title}
                         </h3>
                     </Link>
                 ) : (
-                    <h3 className="line-clamp-2 font-poppins min-h-10 text-sm font-bold leading-snug text-heading">{product.title}</h3>
+                    <h3 className="line-clamp-2 font-poppins sm:min-h-10 min-h-6 text-[11px] sm:text-sm font-semibold leading-snug text-heading">{product.title}</h3>
                 )}
 
-                <div className="mt-auto flex flex-col items-end justify-between gap-2 pt-1">
+                <div className="mt-auto flex flex-col items-end justify-between gap-0.5 sm:gap-2 sm:pt-1">
                     <div className="flex flex-wrap w-full items-baseline gap-x-2">
-                        <span className="text-sm font-bold font-oswald text-heading">
+                        <span className="sm:text-sm text-[11px] font-bold font-oswald text-heading">
                             {currency} {salePrice.toLocaleString()}
                         </span>
                         {pricing.totalSavings > 0 && regularRaw > salePrice && (
-                            <span className="text-xs font-medium text-res font-oswald line-through">
+                            <span className="sm:text-xs text-[10px] font-medium text-res font-oswald line-through">
                                 {currency} {regularRaw.toLocaleString()}
                             </span>
                         )}
@@ -193,11 +193,11 @@ const ProductCardV1 = ({ className = '', product = {} }) => {
                         <Link
                             href={productHref}
                             type="button"
-                            className="h-10 w-full flex gap-2 shrink-0 items-center justify-center rounded bg-primary text-heading shadow-sm transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="sm:h-10 h-8 w-full flex gap-2 shrink-0 items-center justify-center rounded bg-primary text-heading shadow-sm transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
                             aria-label={__('Show Details')}
                         >
-                            <FaEye className="size-4" />
-                            <span className='text-sm font-semibold font-poppins text-heading'>{__('Show Details')}</span>
+                            <FaEye className="sm:size-4 size-3" />
+                            <span className='sm:text-sm text-xs font-semibold font-poppins text-heading'>{__('Show Details')}</span>
                         </Link>
                     )}
                 </div>

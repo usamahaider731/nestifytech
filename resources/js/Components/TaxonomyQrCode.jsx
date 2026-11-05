@@ -4,7 +4,6 @@ import { useLang } from '@/contexts/LanguageContext';
 import { RiDownload2Line, RiQrCodeLine, RiCloseLine } from 'react-icons/ri';
 
 const TaxonomyQrCode = ({ taxonomy }) => {
-    console.log(taxonomy)
     const { __ } = useLang();
     const [open, setOpen] = useState(false);
     const canvasRef = useRef(null);

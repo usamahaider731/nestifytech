@@ -116,7 +116,7 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
 
                 {productHref ? (
                     <Link href={productHref} className="items-center justify-center size-full flex">
-                        <ImageViwer image={product.image} height={900} width={900} className="size-full object-cover rounded transition duration-500 text-center group-hover:scale-105" />
+                        <ImageViwer image={product.image} height={900} width={900} className="w-full object-cover aspect-video rounded transition duration-500 text-center group-hover:scale-105" />
                     </Link>
                 ) : (
                     <ImageViwer image={product.image} height={900} width={900} className="size-full object-cover rounded" />

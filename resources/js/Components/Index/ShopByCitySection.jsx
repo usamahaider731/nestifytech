@@ -25,14 +25,14 @@ export default function ShopByCitySection({ cities = [] }) {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
                 <div>
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider mb-2.5">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold font-roboto uppercase tracking-wider mb-2.5">
                         <BiMapPin size={14} />
                         <span>{__('Localized Shopping')}</span>
                     </div>
-                    <h2 className="text-2xl sm:text-3xl font-extrabold text-heading tracking-tight font-poppins">
+                    <h2 className="text-2xl sm:text-3xl font-bold sm:font-extrabold text-heading tracking-tight font-poppins">
                         {__('Shop by City & Nearby Stores')}
                     </h2>
-                    <p className="mt-1.5 text-xs sm:text-sm text-res max-w-xl">
+                    <p className="mt-1.5 text-xs sm:text-sm font-roboto text-res max-w-xl">
                         {__('Browse items currently available from official branch stores in your neighborhood for faster pickup & local delivery.')}
                     </p>
                 </div>
@@ -46,7 +46,7 @@ export default function ShopByCitySection({ cities = [] }) {
                     <RiArrowRightLine className="group-hover:translate-x-1 transition-transform" />
                 </Link>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-5">
                 {cities.map((city, idx) => {
                     const grad = CITY_GRADIENTS[idx % CITY_GRADIENTS.length];
                     return (
