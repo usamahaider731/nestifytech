@@ -45,7 +45,7 @@ const SingleProductSlider = ({ product }) => {
     return (
         <div className='flex w-full flex-col'>
             {/* Main Image Slider */}
-            <div className='relative w-full rounded-2xl h-80 sm:h-96 md:h-110 bg-white border border-border/60 overflow-hidden'>
+            <div className='relative w-full rounded-lg sm:rounded-2xl h-80 sm:h-96 md:h-110 bg-white border border-border/60 overflow-hidden'>
                 <Slider setApi={setMainApi} containerClass='w-full h-full' show={1} autoplayOptions={{ delay: 3000, pause: 'hover' }} showNavigation={totalSlides > 1}>
                     {Gallery && Gallery.map((slide, index) => {
                         const name = (slide.name ?? slide?.filename?.split('.').at(0));

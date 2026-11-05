@@ -92,10 +92,10 @@ const ProductCardV2 = ({ className = '', product = {} }) => {
             <div className="relative shrink-0 overflow-hidden bg-white sm:p-3 m-2 sm:m-0 shadow sm:shadow-none sm:w-40 ">
                 {productHref ? (
                     <Link href={productHref} className="items-center justify-center size-full flex">
-                        <ImageViwer image={product.image} height={900} width={900} className="max-sm:w-full sm:size-full object-cover max-sm:aspect-video rounded transition duration-500 text-center group-hover:scale-105" />
+                        <ImageViwer image={product.image} height={900} width={900} className="max-sm:w-full sm:size-full object-cover max-sm:aspect-square rounded transition duration-500 text-center group-hover:scale-105" />
                     </Link>
                 ) : (
-                    <ImageViwer image={product.image} height={900} width={900} className="max-sm:w-full sm:size-full object-cover max-sm:aspect-video rounded" />
+                    <ImageViwer image={product.image} height={900} width={900} className="max-sm:w-full sm:size-full object-cover max-sm:aspect-square rounded" />
                 )}
                 <div className='flex items-center absolute group-hover:bottom-5 -bottom-full duration-200 ease-in-out left-auto right-auto gap-1'>
                     {cardSetting.show_product_stock_info && (

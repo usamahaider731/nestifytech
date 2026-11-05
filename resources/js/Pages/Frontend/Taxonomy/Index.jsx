@@ -31,10 +31,10 @@ export default function Taxonomy({ category, products, filters = {}, filterOptio
       <div className="relative mb-10 bg-bg flex min-h-[280px] flex-col items-end gap-8 overflow-hidden text-center md:min-h-[460px] md:flex-row lg:text-left">
         <ImageViwer image={Settings?.banner_image} className="absolute inset-0 z-0 size-full object-cover" />
         <div className='w-full bg-bg z-20 flex'>
-          <div className='container p-5 pb-0 mx-auto flex justify-between items-start'>
-            <div className='flex gap-10'>
+          <div className='container p-5 pb-0 mx-auto flex flex-col-reverse sm:flex-row gap-5 sm:gap-0 justify-between items-start'>
+            <div className='flex  gap-5 flex-col sm:flex-row sm:gap-10'>
               {cat?.image && (
-                <div className="relative z-10 flex size-30 -translate-y-1/2 shrink-0 items-center justify-center rounded-full border border-border bg-white overflow-hidden shadow-md md:size-40">
+                <div className="relative z-10 flex sm:size-30 w-full sm:-translate-y-1/2 shrink-0 items-center justify-center rounded-lg sm:rounded-full border border-border bg-white overflow-hidden shadow-md md:size-40">
                   {cat.image.filename.split('.').pop() == 'svg'
                     ?
                     <ImageViwer
@@ -54,15 +54,15 @@ export default function Taxonomy({ category, products, filters = {}, filterOptio
                   }
                 </div>
               )}
-              <div className="relative z-10 flex-1">
+              <div className="relative flex flex-col items-start z-10 flex-1">
                 <div className="mb-2 flex items-center justify-center gap-2 text-sm font-semibold capitalize font-oswald tracking-wider text-heading lg:justify-start">
                   <Link href="/" className="hover:underline">{__('Home')}</Link>
                   <span>/</span>
                   <span>{cat?.type === 'brand' ? __('Brand') : __('Category')}</span>
                 </div>
-                <h1 className="mb-4 text-3xl font-semibold font-poppins text-primary md:text-4xl">{cat?.title}</h1>
+                <h1 className="sm:mb-4 text-3xl font-semibold font-poppins text-primary md:text-4xl">{cat?.title}</h1>
                 {cat?.description && (
-                  <div dangerouslySetInnerHTML={{ __html: cat?.description }} className="mx-auto max-w-3xl text-base leading-relaxed text-text font-roboto lg:mx-0"></div>
+                  <div dangerouslySetInnerHTML={{ __html: cat?.description }} className="sm:mx-auto max-w-3xl text-base leading-relaxed text-text font-roboto lg:mx-0"></div>
                 )}
               </div>
             </div>

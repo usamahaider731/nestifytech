@@ -261,7 +261,7 @@ const SingleProductTabs = ({ product }) => {
             <div className="flex flex-wrap gap-1 border-b border-border">
                 {TABS.map((tab) => (
                     <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id)}
-                        className={`px-5 py-3 text-sm font-semibold transition-colors border-b-2 -mb-px ${activeTab === tab.id ? 'border-primary text-primary' : 'border-transparent text-res hover:text-heading'}`}>
+                        className={`sm:px-5 px-3.5 py-3 text-xs sm:text-sm font-semibold transition-colors border-b-2 -mb-px ${activeTab === tab.id ? 'border-primary text-primary' : 'border-transparent text-res hover:text-heading'}`}>
                         {__(tab.label)}
                     </button>
                 ))}

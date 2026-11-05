@@ -42,7 +42,7 @@ const ProductTopSection = ({ product }) => {
     return (
         <div className='flex flex-col w-full'>
             <div className='flex flex-wrap-reverse gap-y-3 justify-between mx-auto w-full'>
-                <div className='flex font-oswald gap-2 md:gap-3 items-center'>
+                <div className='flex font-oswald flex-wrap gap-2 md:gap-3 items-center'>
                     <span className='text-dynamic text-xs md:text-sm font-medium'>{__('Home')}</span>
                     <span className=''>
                         <RiArrowRightSLine className='md:text-base text-sm' />
@@ -88,8 +88,8 @@ const ProductTopSection = ({ product }) => {
                 </div>
                 <div className='flex-1 h-fit sticky top-20'>
                     <div className='flex flex-col gap-5'>
-                        <div className='flex flex-col gap-5'>
-                            <h1 className='text-primary font-semibold font-poppins text-2xl'>
+                        <div className='flex flex-col sm:gap-5'>
+                            <h1 className='text-primary font-semibold font-poppins text-base sm:text-2xl'>
                                 {product.title}
                             </h1>
                             <div className='flex flex-col sm:gap-2 gap-4 font-roboto'>

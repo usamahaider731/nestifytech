@@ -255,9 +255,9 @@ const Variations = ({ product }) => {
             )}
 
             {/* Quantity */}
-            <div className='flex gap-4 items-center'>
+            <div className='flex gap-4 items-start sm:items-center'>
                 <div className='w-24 text-dynamic text-sm shrink-0'>{__('Quantity')}</div>
-                <div className='flex items-center gap-4 flex-1'>
+                <div className='flex flex-wrap items-center gap-4 flex-1'>
                     <QuantitySelector
                         maxStock={availableStock}
                         selectedStock={qty}
@@ -282,7 +282,7 @@ const Variations = ({ product }) => {
                     type='button'
                     onClick={handleAddToCart}
                     disabled={isOwner || availableStock < 1 || (variations.length > 0 && !selectedCombo)}
-                    className='flex-1 max-w-44 bg-primary hover:bg-primary/80 text-white py-3 rounded-sm font-medium font-poppins text-lg transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer'
+                    className='flex-1 sm:max-w-44 bg-primary hover:bg-primary/80 text-white py-3 rounded-sm font-medium font-poppins text-base sm:text-lg transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer'
                 >
                     {__('Add to Cart')}
                 </button>
