@@ -64,3 +64,6 @@ Homestead.yaml
 # =========================
 .DS_Store
 Thumbs.db
+# Installer lock files
+storage/installed
+storage/app/license.json

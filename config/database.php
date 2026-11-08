@@ -57,10 +57,17 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
-                Pdo\Mysql::ATTR_SSL_CA => (env('MYSQL_ATTR_SSL_CA') && env('MYSQL_ATTR_SSL_CA') !== 'true' && env('MYSQL_ATTR_SSL_CA') !== '1') ? env('MYSQL_ATTR_SSL_CA') : null,
+            'options' => extension_loaded('pdo_mysql') ? [
+                // Use system CA bundle for SSL (Laravel Cloud / ProxySQL requires SSL)
+                // If MYSQL_ATTR_SSL_CA is a real file path use it, otherwise use system default
+                Pdo\Mysql::ATTR_SSL_CA => (
+                    env('MYSQL_ATTR_SSL_CA') &&
+                    env('MYSQL_ATTR_SSL_CA') !== 'true' &&
+                    env('MYSQL_ATTR_SSL_CA') !== '1'
+                ) ? env('MYSQL_ATTR_SSL_CA') : '/etc/ssl/certs/ca-certificates.crt',
+                // Do NOT verify server certificate (works with ProxySQL self-signed certs)
                 \PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
-            ]) : [],
+            ] : [],
         ],
 
         'mariadb' => [
@@ -78,10 +85,14 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
-                Pdo\Mysql::ATTR_SSL_CA => (env('MYSQL_ATTR_SSL_CA') && env('MYSQL_ATTR_SSL_CA') !== 'true' && env('MYSQL_ATTR_SSL_CA') !== '1') ? env('MYSQL_ATTR_SSL_CA') : null,
+            'options' => extension_loaded('pdo_mysql') ? [
+                Pdo\Mysql::ATTR_SSL_CA => (
+                    env('MYSQL_ATTR_SSL_CA') &&
+                    env('MYSQL_ATTR_SSL_CA') !== 'true' &&
+                    env('MYSQL_ATTR_SSL_CA') !== '1'
+                ) ? env('MYSQL_ATTR_SSL_CA') : '/etc/ssl/certs/ca-certificates.crt',
                 \PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
-            ]) : [],
+            ] : [],
         ],
 
         'pgsql' => [
