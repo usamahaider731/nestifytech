@@ -58,7 +58,7 @@ return [
             'strict' => true,
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
-                Pdo\Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                Pdo\Mysql::ATTR_SSL_CA => (env('MYSQL_ATTR_SSL_CA') && env('MYSQL_ATTR_SSL_CA') !== 'true' && env('MYSQL_ATTR_SSL_CA') !== '1') ? env('MYSQL_ATTR_SSL_CA') : null,
                 \PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
             ]) : [],
         ],
@@ -79,7 +79,7 @@ return [
             'strict' => true,
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
-                Pdo\Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                Pdo\Mysql::ATTR_SSL_CA => (env('MYSQL_ATTR_SSL_CA') && env('MYSQL_ATTR_SSL_CA') !== 'true' && env('MYSQL_ATTR_SSL_CA') !== '1') ? env('MYSQL_ATTR_SSL_CA') : null,
                 \PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
             ]) : [],
         ],
