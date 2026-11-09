@@ -57,17 +57,22 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
-            'options' => extension_loaded('pdo_mysql') ? [
-                // Use system CA bundle for SSL (Laravel Cloud / ProxySQL requires SSL)
-                // If MYSQL_ATTR_SSL_CA is a real file path use it, otherwise use system default
-                Pdo\Mysql::ATTR_SSL_CA => (
-                    env('MYSQL_ATTR_SSL_CA') &&
-                    env('MYSQL_ATTR_SSL_CA') !== 'true' &&
-                    env('MYSQL_ATTR_SSL_CA') !== '1'
-                ) ? env('MYSQL_ATTR_SSL_CA') : '/etc/ssl/certs/ca-certificates.crt',
-                // Do NOT verify server certificate (works with ProxySQL self-signed certs)
-                \PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
-            ] : [],
+            'options' => extension_loaded('pdo_mysql') ? (function () {
+                // Determine SSL CA path:
+                // 1. If MYSQL_ATTR_SSL_CA env is a real file path → use it
+                // 2. Else if system Linux CA bundle exists (Laravel Cloud) → use it
+                // 3. Otherwise (local Windows dev) → no SSL CA (skip SSL)
+                $customCa = env('MYSQL_ATTR_SSL_CA');
+                $useCustomCa = $customCa && $customCa !== 'true' && $customCa !== '1' && file_exists($customCa);
+                $linuxCa = '/etc/ssl/certs/ca-certificates.crt';
+                $sslCa = $useCustomCa ? $customCa : (file_exists($linuxCa) ? $linuxCa : null);
+
+                $opts = [Pdo\Mysql::ATTR_SSL_VERIFY_SERVER_CERT => false];
+                if ($sslCa) {
+                    $opts[Pdo\Mysql::ATTR_SSL_CA] = $sslCa;
+                }
+                return $opts;
+            })() : [],
         ],
 
         'mariadb' => [
@@ -85,14 +90,22 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
-            'options' => extension_loaded('pdo_mysql') ? [
-                Pdo\Mysql::ATTR_SSL_CA => (
-                    env('MYSQL_ATTR_SSL_CA') &&
-                    env('MYSQL_ATTR_SSL_CA') !== 'true' &&
-                    env('MYSQL_ATTR_SSL_CA') !== '1'
-                ) ? env('MYSQL_ATTR_SSL_CA') : '/etc/ssl/certs/ca-certificates.crt',
-                \PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
-            ] : [],
+            'options' => extension_loaded('pdo_mysql') ? (function () {
+                // Determine SSL CA path:
+                // 1. If MYSQL_ATTR_SSL_CA env is a real file path → use it
+                // 2. Else if system Linux CA bundle exists (Laravel Cloud) → use it
+                // 3. Otherwise (local Windows dev) → no SSL CA (skip SSL)
+                $customCa = env('MYSQL_ATTR_SSL_CA');
+                $useCustomCa = $customCa && $customCa !== 'true' && $customCa !== '1' && file_exists($customCa);
+                $linuxCa = '/etc/ssl/certs/ca-certificates.crt';
+                $sslCa = $useCustomCa ? $customCa : (file_exists($linuxCa) ? $linuxCa : null);
+
+                $opts = [Pdo\Mysql::ATTR_SSL_VERIFY_SERVER_CERT => false];
+                if ($sslCa) {
+                    $opts[Pdo\Mysql::ATTR_SSL_CA] = $sslCa;
+                }
+                return $opts;
+            })() : [],
         ],
 
         'pgsql' => [
