@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import {
     RiQuestionAnswerLine,
     RiArrowRightLine,
@@ -15,6 +15,7 @@ import {
 } from 'react-icons/ri';
 import ImageViwer from '@/Components/Admin/ImageViwer';
 import { useLang } from '@/contexts/LanguageContext';
+import { formatPhoneNumber } from '@/Utils/helper';
 
 export default function PageFooterSection({
     widgetType = 'none',
@@ -26,6 +27,7 @@ export default function PageFooterSection({
     recentBlogs = [],
     className = '',
 }) {
+    const { setting } = usePage().props;
     const { __ } = useLang();
     const [openFaqIndex, setOpenFaqIndex] = useState(0);
     const [email, setEmail] = useState('');
@@ -90,27 +92,27 @@ export default function PageFooterSection({
         const faqList = Array.isArray(faqs) && faqs.length > 0
             ? faqs.slice(0, 5)
             : [
-                  {
-                      id: 1,
-                      title: 'How long does standard delivery usually take?',
-                      description: 'Standard domestic delivery typically arrives within 2 to 4 business days. Expedited shipping is available at checkout for next-day delivery.',
-                  },
-                  {
-                      id: 2,
-                      title: 'What is your refund and return policy?',
-                      description: 'We offer an unconditional 30-day return policy for unused items in original packaging. Refunds are processed back to your original payment method within 3-5 business days.',
-                  },
-                  {
-                      id: 3,
-                      title: 'Are all products authentic and covered by warranty?',
-                      description: 'Yes, 100% of our products are directly sourced from authorized manufacturers and include official manufacturer warranties.',
-                  },
-                  {
-                      id: 4,
-                      title: 'How can I contact your customer support department?',
-                      description: 'You can reach us through email at support@nestifytech.com, phone at +1 (800) 123-4567, or via our 24/7 online contact center.',
-                  },
-              ];
+                {
+                    id: 1,
+                    title: 'How long does standard delivery usually take?',
+                    description: 'Standard domestic delivery typically arrives within 2 to 4 business days. Expedited shipping is available at checkout for next-day delivery.',
+                },
+                {
+                    id: 2,
+                    title: 'What is your refund and return policy?',
+                    description: 'We offer an unconditional 30-day return policy for unused items in original packaging. Refunds are processed back to your original payment method within 3-5 business days.',
+                },
+                {
+                    id: 3,
+                    title: 'Are all products authentic and covered by warranty?',
+                    description: 'Yes, 100% of our products are directly sourced from authorized manufacturers and include official manufacturer warranties.',
+                },
+                {
+                    id: 4,
+                    title: 'How can I contact your customer support department?',
+                    description: 'You can reach us through email at support@nestifytech.com, phone at +1 (800) 123-4567, or via our 24/7 online contact center.',
+                },
+            ];
 
         return (
             <section className={`my-16 py-12 bg-common/50 border-y border-border/40 ${className}`}>
@@ -144,9 +146,8 @@ export default function PageFooterSection({
                                             {faq.title}
                                         </span>
                                         <div
-                                            className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${
-                                                isOpen ? 'bg-primary text-white rotate-180' : 'bg-white text-res'
-                                            }`}
+                                            className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${isOpen ? 'bg-primary text-white rotate-180' : 'bg-white text-res'
+                                                }`}
                                         >
                                             <RiArrowDownSLine size={18} />
                                         </div>
@@ -209,10 +210,10 @@ export default function PageFooterSection({
                                 {__('Speak directly with our technical support and order agents.')}
                             </p>
                             <a
-                                href="tel:+18001234567"
+                                href={`tel:${setting?.site?.contact_number?.value || ''}`}
                                 className="mt-auto text-sm font-bold text-primary hover:underline"
                             >
-                                +1 (800) 123-4567
+                                {formatPhoneNumber(setting?.site?.contact_number?.value)}
                             </a>
                         </div>
 
@@ -231,7 +232,7 @@ export default function PageFooterSection({
                                 href="mailto:support@nestifytech.com"
                                 className="mt-auto text-sm font-bold text-primary hover:underline"
                             >
-                                support@nestifytech.com
+                                {setting.site.contact_email.value}
                             </a>
                         </div>
 

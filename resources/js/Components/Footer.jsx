@@ -12,6 +12,7 @@ import ImageViwer from './Admin/ImageViwer';
 import { RiArrowUpLine, RiArrowUpSLine, RiArrowUpWideLine, RiInstagramFill, RiLinkedinBoxFill, RiPinterestFill, RiTwitterXFill, RiWhatsappFill, RiWhatsappLine, RiYoutubeFill, RiGlobalLine } from 'react-icons/ri';
 import { FaTiktok, FaXTwitter, FaYoutube, FaLinkedin, FaGithub, FaSnapchat, FaPinterest, FaDiscord } from 'react-icons/fa6';
 import { useLang } from '@/contexts/LanguageContext';
+import { formatPhoneNumber } from '@/Utils/helper';
 import axios from 'axios';
 
 const Footer = () => {
@@ -224,7 +225,12 @@ const Footer = () => {
 
                                 <div className='flex flex-col'>
                                     <p className="text-sm text-text">{__('Got Questions ? Call us 24/7!')}</p>
-                                    <div className="mt-2 text-2xl font-medium text-heading">{setting.site.phone.value}</div>
+                                    <a
+                                        href={`tel:${setting?.site?.contact_number?.value || ''}`}
+                                        className="mt-2 text-2xl font-medium text-heading hover:text-primary transition-colors"
+                                    >
+                                        {formatPhoneNumber(setting?.site?.contact_number?.value)}
+                                    </a>
                                 </div></div>
 
                             <div className="flex flex-col items-start gap-3 text-sm text-text">

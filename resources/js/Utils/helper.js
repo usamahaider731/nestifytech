@@ -423,3 +423,57 @@ export function calculateAdjustedPrice({
     monthlyInstallment,
   };
 }
+
+/**
+ * Format a raw phone string into a clean, human-readable phone format.
+ * Examples:
+ *  - "+923218086139" -> "+92 321 8086139"
+ *  - "03218086139"   -> "0321 8086139"
+ *  - "+18001234567"  -> "+1 (800) 123-4567"
+ *  - "18001234567"   -> "+1 (800) 123-4567"
+ *  - "1234567890"    -> "(123) 456-7890"
+ */
+export function formatPhoneNumber(phone) {
+  if (!phone) return '';
+  const raw = String(phone).trim();
+
+  // If already formatted with spaces, dashes, or parentheses, preserve it
+  if (/[()\-\s]/.test(raw) && !raw.startsWith('+') && raw.length > 8) {
+    return raw;
+  }
+
+  const hasPlus = raw.startsWith('+');
+  const digits = raw.replace(/\D/g, '');
+
+  if (!digits) return raw;
+
+  // Pakistan phone numbers: +92 3XX XXXXXXX or 03XX XXXXXXX
+  if (hasPlus && digits.startsWith('92') && digits.length === 12) {
+    return `+92 ${digits.slice(2, 5)} ${digits.slice(5)}`;
+  }
+  if (!hasPlus && digits.startsWith('03') && digits.length === 11) {
+    return `${digits.slice(0, 4)} ${digits.slice(4)}`;
+  }
+  if (!hasPlus && digits.startsWith('92') && digits.length === 12) {
+    return `+92 ${digits.slice(2, 5)} ${digits.slice(5)}`;
+  }
+
+  // US/Canada 10 or 11 digits: +1 (XXX) XXX-XXXX
+  if (digits.length === 11 && digits.startsWith('1')) {
+    return `+1 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`;
+  }
+  if (digits.length === 10) {
+    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+  }
+
+  // Generic international fallback with spacing
+  if (hasPlus) {
+    if (digits.length > 7) {
+      return `+${digits.slice(0, 2)} ${digits.slice(2, 5)} ${digits.slice(5)}`;
+    }
+    return `+${digits}`;
+  }
+
+  return raw;
+}
+

@@ -1,10 +1,15 @@
 import React from 'react';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { RiCustomerService2Fill, RiMailLine, RiPhoneLine, RiTimeLine, RiArrowRightLine } from 'react-icons/ri';
 import { useLang } from '@/contexts/LanguageContext';
+import { formatPhoneNumber } from '@/Utils/helper';
 
 export default function ContactCardWidget({ className = '' }) {
     const { __ } = useLang();
+    const { setting } = usePage().props;
+    const rawPhone = setting?.site?.contact_number?.value ?? '';
+    const formattedPhone = formatPhoneNumber(rawPhone);
+    const email = setting?.site?.contact_email?.value ?? '';
 
     return (
         <div className={`relative overflow-hidden rounded border border-primary/25 bg-gradient-to-br from-primary/10 via-bg to-primary/5 p-5 shadow-sm transition-all hover:shadow-md ${className}`}>
@@ -32,18 +37,18 @@ export default function ContactCardWidget({ className = '' }) {
 
                 <div className="space-y-2 mb-4 text-xs">
                     <a
-                        href="mailto:support@nestifytech.com"
+                        href={`mailto:${email}`}
                         className="flex items-center gap-2.5 text-res/80 hover:text-primary transition-colors py-1 px-2 rounded-lg hover:bg-white/60"
                     >
                         <RiMailLine size={15} className="text-primary shrink-0" />
-                        <span className="truncate">support@nestifytech.com</span>
+                        <span className="truncate">{email}</span>
                     </a>
                     <a
-                        href="tel:+18001234567"
+                        href={`tel:${rawPhone}`}
                         className="flex items-center gap-2.5 text-res/80 hover:text-primary transition-colors py-1 px-2 rounded-lg hover:bg-white/60"
                     >
                         <RiPhoneLine size={15} className="text-primary shrink-0" />
-                        <span>+1 (800) 123-4567</span>
+                        <span>{formattedPhone}</span>
                     </a>
                     <div className="flex items-center gap-2.5 text-res/70 py-1 px-2">
                         <RiTimeLine size={15} className="text-primary shrink-0" />
