@@ -1061,8 +1061,6 @@
                 btnSaveAdminAndFinalize.disabled = false;
                 btnSaveAdminAndFinalize.innerHTML = '<i class="ri-checkbox-circle-line"></i> Complete Installation';
             }
-                btnSaveAdminAndFinalize.innerHTML = '<i class="ri-checkbox-circle-line"></i> Complete Installation';
-            }
         });
     }
 </script>
