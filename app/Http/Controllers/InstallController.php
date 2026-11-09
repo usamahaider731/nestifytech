@@ -259,6 +259,40 @@ class InstallController extends Controller
     }
 
     /**
+     * Create a PDO connection with SSL support for cloud databases (e.g. Laravel Cloud ProxySQL).
+     */
+    private function createInstallerPdo(string $host, string|int $port, ?string $database, string $username, ?string $password): PDO
+    {
+        $dsn = "mysql:host={$host};port={$port};charset=utf8mb4";
+        if ($database) {
+            $dsn .= ";dbname={$database}";
+        }
+
+        $options = [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_TIMEOUT => 8,
+        ];
+
+        // Check if SSL is needed (Laravel Cloud host or Linux cert available)
+        $linuxCa = '/etc/ssl/certs/ca-certificates.crt';
+        $customCa = env('MYSQL_ATTR_SSL_CA');
+        $useCustomCa = $customCa && $customCa !== 'true' && $customCa !== '1' && file_exists($customCa);
+        $sslCa = $useCustomCa ? $customCa : (file_exists($linuxCa) ? $linuxCa : null);
+
+        // If host contains laravel.cloud or public.db, enforce SSL options
+        $isCloudHost = str_contains(strtolower($host), 'laravel.cloud') || str_contains(strtolower($host), 'public.db');
+
+        if ($sslCa || $isCloudHost) {
+            $options[\Pdo\Mysql::ATTR_SSL_VERIFY_SERVER_CERT] = false;
+            if ($sslCa) {
+                $options[\Pdo\Mysql::ATTR_SSL_CA] = $sslCa;
+            }
+        }
+
+        return new PDO($dsn, $username, $password ?? '', $options);
+    }
+
+    /**
      * Test Database Connection
      */
     public function testDatabase(Request $request)
@@ -276,11 +310,13 @@ class InstallController extends Controller
         ]);
 
         try {
-            $dsn = "mysql:host={$validated['db_host']};port={$validated['db_port']};charset=utf8mb4";
-            $pdo = new PDO($dsn, $validated['db_username'], $validated['db_password'] ?? '', [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_TIMEOUT => 5,
-            ]);
+            $pdo = $this->createInstallerPdo(
+                $validated['db_host'],
+                $validated['db_port'],
+                null,
+                $validated['db_username'],
+                $validated['db_password'] ?? ''
+            );
 
             // Check if database exists, create if not
             $dbName = str_replace('`', '``', $validated['db_database']);
@@ -316,12 +352,14 @@ class InstallController extends Controller
         ]);
 
         try {
-            // Verify connection first
-            $dsn = "mysql:host={$validated['db_host']};port={$validated['db_port']};charset=utf8mb4";
-            $pdo = new PDO($dsn, $validated['db_username'], $validated['db_password'] ?? '', [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_TIMEOUT => 5,
-            ]);
+            // Verify connection first using SSL-aware PDO
+            $pdo = $this->createInstallerPdo(
+                $validated['db_host'],
+                $validated['db_port'],
+                null,
+                $validated['db_username'],
+                $validated['db_password'] ?? ''
+            );
             $dbName = str_replace('`', '``', $validated['db_database']);
             $pdo->exec("CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;");
 
@@ -373,11 +411,8 @@ class InstallController extends Controller
             $username = config('database.connections.mysql.username', 'root');
             $password = config('database.connections.mysql.password', '');
 
-            $dsn = "mysql:host={$host};port={$port};dbname={$database};charset=utf8mb4";
-            $pdo = new PDO($dsn, $username, $password, [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_EMULATE_PREPARES => false,
-            ]);
+            $pdo = $this->createInstallerPdo($host, $port, $database, $username, $password);
+            $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 
             $pdo->exec("SET FOREIGN_KEY_CHECKS = 0;");
             $pdo->exec("SET SQL_MODE = 'NO_AUTO_VALUE_ON_ZERO';");

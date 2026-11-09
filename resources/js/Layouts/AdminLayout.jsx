@@ -1,5 +1,6 @@
 import AdminPanel from '@/Components/Admin/AdminPanel'
 import Header from '@/Components/Admin/Header'
+import ChatBot from '@/Components/Admin/ChatBot'
 import React from 'react'
 import { ToastContainer } from 'react-toastify'
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext'
@@ -23,6 +24,7 @@ function AdminLayoutInner({ children, title }) {
                 <main className='px-6 pb-8 flex-1 min-w-0'>
                     {children}
                 </main>
+                <ChatBot />
             </div>
             <ToastContainer
                 position="top-right"

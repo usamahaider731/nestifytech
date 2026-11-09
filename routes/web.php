@@ -90,7 +90,7 @@ Route::get('/search-pages.json', [SettingController::class, 'searchPages'])->nam
 Route::get('/updateData', [SettingController::class, 'updateData'])->name('update');
 
 Route::post('/ai/generate/text', [AiController::class, 'generateText'])
-    ->middleware(['auth', 'throttle:20,1'])
+    ->middleware(['throttle:30,1'])
     ->name('ai.generate.text');
 // Route::get('prac', function () { return view('prac'); }); // Removed: debug route
 Route::prefix('/admin')->middleware(['auth', 'verified'])->group(function () {

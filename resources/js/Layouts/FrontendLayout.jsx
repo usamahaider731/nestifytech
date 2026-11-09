@@ -12,6 +12,7 @@ import CountryDetector from '@/Components/CountryDetector';
 import { ToastContainer } from 'react-toastify';
 import CookieConsent from '@/Components/CookieConsent';
 import PromoPopup from '@/Components/PromoPopup';
+import FrontendChatBot from '@/Components/FrontendChatBot';
 
 export default function FrontendLayout({ children, title }) {
     return (
@@ -42,6 +43,7 @@ export default function FrontendLayout({ children, title }) {
                     <CompareDrawer />
                     <PromoPopup />
                     <CookieConsent />
+                    <FrontendChatBot />
                 </div>
             </CartProvider>
         </LanguageProvider>
