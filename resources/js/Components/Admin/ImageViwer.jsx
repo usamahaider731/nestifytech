@@ -80,14 +80,23 @@ function ImageViwer({
         );
     }
 
-    // String without extension (using thumbnail route with fallback)
+    // String without extension — try direct storage path with common extensions via onError chain
     if (typeof image === 'string' && !image.includes('.')) {
         return (
             <img
-                src={route('thumb.image', { filename: image, height: height, width: width, extension: 'jpg' })}
+                src={`/storage/uploads/image/${image}.webp`}
                 className={className}
                 alt={alt}
-                onError={handleError}
+                onError={(e) => {
+                    // Try jpg fallback, then placeholder
+                    if (e.target.src.endsWith('.webp')) {
+                        e.target.src = `/storage/uploads/image/${image}.jpg`;
+                    } else if (e.target.src.endsWith('.jpg')) {
+                        e.target.src = `/storage/uploads/image/${image}.png`;
+                    } else {
+                        handleError(e);
+                    }
+                }}
                 {...props}
             />
         );
@@ -109,7 +118,6 @@ function ImageViwer({
     // Object with filename/name
     if (image?.filename || image?.name) {
         const file = image.filename || image.name;
-        const ext = file.split('.').pop();
 
         if (file.startsWith('http://') || file.startsWith('https://') || file.startsWith('/')) {
             return (
@@ -123,9 +131,11 @@ function ImageViwer({
             );
         }
 
+        // Use direct storage URL to avoid route regex ambiguity with filenames
+        // that contain underscores and dots (e.g. 1786225579_abc_500x500.webp)
         return (
             <img
-                src={route('thumb.image', { filename: file, height: height, width: width, extension: ext || 'jpg' })}
+                src={`/storage/uploads/image/${file}`}
                 className={className}
                 alt={alt}
                 onError={handleError}
