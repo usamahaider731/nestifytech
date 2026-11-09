@@ -19,7 +19,16 @@ class CheckInstallation
             return $next($request);
         }
 
-        $isInstalled = File::exists(storage_path('installed')) || env('APP_INSTALLED', false);
+        $isInstalled = File::exists(storage_path('installed'))
+            || filter_var(env('APP_INSTALLED', false), FILTER_VALIDATE_BOOLEAN)
+            || (function () {
+                $settingPath = storage_path('app/data/setting.json');
+                if (File::exists($settingPath)) {
+                    $json = json_decode(File::get($settingPath), true);
+                    return !empty($json['site']['installed']['value']);
+                }
+                return false;
+            })();
 
         // If not installed and not requesting install routes, redirect to /install
         if (!$isInstalled) {
@@ -27,9 +36,15 @@ class CheckInstallation
                 return redirect()->route('install.index');
             }
         } else {
-            // If already installed and user tries to access /install, redirect to home
-            if ($request->is('install*')) {
-                return redirect('/');
+            // If already installed and any user (or attacker) tries to access /install routes:
+            if ($request->is('install*') || $request->is('api/install*')) {
+                if ($request->expectsJson() || $request->is('api/*') || $request->isMethod('post')) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'NestifyTech is already installed. Access denied.',
+                    ], 403);
+                }
+                return redirect('/')->with('error', 'NestifyTech is already installed.');
             }
         }
 

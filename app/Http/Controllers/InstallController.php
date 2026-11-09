@@ -48,6 +48,10 @@ class InstallController extends Controller
      */
     public function getLicensePricing(Request $request)
     {
+        if ($this->isInstalled()) {
+            return response()->json(['success' => false, 'message' => 'Already installed.'], 403);
+        }
+
         $serverUrl = rtrim($this->getLicenseServerUrl(), '/') . '/pricing';
         try {
             $response = \Illuminate\Support\Facades\Http::timeout(10)
@@ -104,6 +108,10 @@ class InstallController extends Controller
      */
     public function verifyLicensePayment(Request $request)
     {
+        if ($this->isInstalled()) {
+            return response()->json(['success' => false, 'message' => 'Already installed.'], 403);
+        }
+
         $serverUrl = rtrim($this->getLicenseServerUrl(), '/') . '/pay';
         $payload = $request->all();
         $payload['domain'] = $request->getHost();
@@ -144,7 +152,22 @@ class InstallController extends Controller
 
     public function isInstalled(): bool
     {
-        return File::exists($this->installedLockPath) || env('APP_INSTALLED', false);
+        if (File::exists($this->installedLockPath)) {
+            return true;
+        }
+
+        if (filter_var(env('APP_INSTALLED', false), FILTER_VALIDATE_BOOLEAN)) {
+            return true;
+        }
+
+        if (File::exists($this->settingFilePath)) {
+            $settings = json_decode(File::get($this->settingFilePath), true) ?: [];
+            if (!empty($settings['site']['installed']['value'])) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -511,13 +534,26 @@ class InstallController extends Controller
                 Artisan::call('key:generate', ['--force' => true]);
             }
 
-            // Create lock file & update .env with APP_INSTALLED=true
+            // Create lock file, set setting.json flag, & update .env with APP_INSTALLED=true
             $installData = [
                 'installed_at' => now()->toIso8601String(),
                 'version'      => '2.0.0',
                 'installer'    => 'NestifyTech Web Installer',
             ];
             @File::put($this->installedLockPath, json_encode($installData, JSON_PRETTY_PRINT));
+
+            // Set permanent installed flag in setting.json
+            try {
+                if (File::exists($this->settingFilePath)) {
+                    $settings = json_decode(File::get($this->settingFilePath), true) ?: [];
+                    $settings['site']['installed'] = [
+                        'label' => 'Application Installed',
+                        'type'  => 'checkbox',
+                        'value' => true,
+                    ];
+                    File::put($this->settingFilePath, json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+                }
+            } catch (\Throwable $ignore) {}
             
             try {
                 $this->updateEnvFile([
