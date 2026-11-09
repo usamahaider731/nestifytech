@@ -16,15 +16,37 @@ class MediaController extends Controller
         }
         $thumbFile = "{$filename}_{$height}_{$width}.{$extension}";
         $thumbPath = public_path("storage/uploads/image/thumb/{$thumbFile}");
-        $originalPath = public_path("storage/uploads/image/{$filename}.{$extension}");
 
         if (file_exists($thumbPath)) {
             return response()->file($thumbPath);
         }
 
+        // Try the requested extension first, then fall back to common formats
+        // This handles cases where JS passes 'jpg' but file is stored as webp/png/jpeg
+        $originalPath = null;
+        $resolvedExtension = $extension;
+        $baseDir = public_path('storage/uploads/image');
+
+        $candidateExtensions = array_unique([$extension, 'webp', 'jpg', 'jpeg', 'png', 'gif', 'avif']);
+        foreach ($candidateExtensions as $ext) {
+            $candidate = "{$baseDir}/{$filename}.{$ext}";
+            if (file_exists($candidate)) {
+                $originalPath = $candidate;
+                $resolvedExtension = $ext;
+                // Update thumb path to use the resolved extension for cache consistency
+                $thumbFile = "{$filename}_{$height}_{$width}.{$resolvedExtension}";
+                $thumbPath = "{$baseDir}/thumb/{$thumbFile}";
+                // Check if thumb already exists for resolved extension
+                if (file_exists($thumbPath)) {
+                    return response()->file($thumbPath);
+                }
+                break;
+            }
+        }
+
         $placeholderPath = public_path('assets/image/placeholder.svg');
 
-        if (!file_exists($originalPath)) {
+        if (!$originalPath) {
             if (file_exists($placeholderPath)) {
                 return response()->file($placeholderPath, [
                     'Content-Type' => 'image/svg+xml',
