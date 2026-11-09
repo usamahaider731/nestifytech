@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import FrontendLayout from '@/Layouts/FrontendLayout';
 import { useLang } from '@/contexts/LanguageContext';
 import axios from 'axios';
@@ -26,6 +26,8 @@ import {
 
 /* ─── Leaflet Map Component (Esri Street + Satellite, live tracking) ── */
 function TrackingMap({ order, riderLocation, userLocation, onEnableLocation, isLocatingUser }) {
+    const {setting} = usePage().props;
+    console.log(setting.site, order)
     const mapContainerRef = useRef(null);
     const mapInstanceRef  = useRef(null);
     const tileLayerRef    = useRef(null);
@@ -210,12 +212,9 @@ function TrackingMap({ order, riderLocation, userLocation, onEnableLocation, isL
         markersRef.current.user = L.marker(userCoords, { icon: userIcon })
             .addTo(map)
             .bindPopup(`<div style="font-family:system-ui;padding:6px 2px;"><strong style="font-size:13px;color:#4f46e5;display:block;margin-bottom:2px;">📍 Delivery Destination</strong><span style="font-size:11px;color:#64748b;">${order?.shipping_address || 'Customer Location'}, ${order?.shipping_city || ''}</span></div>`);
-
-        // 3. Rider Live Pin
         if (riderLocation?.latitude && riderLocation?.longitude) {
             const riderCoords = [riderLocation.latitude, riderLocation.longitude];
             bounds.push(riderCoords);
-
             const riderIcon = L.divIcon({
                 className: 'custom-map-icon',
                 html: `
@@ -263,11 +262,11 @@ function TrackingMap({ order, riderLocation, userLocation, onEnableLocation, isL
     useEffect(() => { updateMarkers(); }, [order, riderLocation, userLocation, geocodedUserCoords]);
 
     return (
-        <div className="relative w-full h-[380px] sm:h-[460px] rounded-2xl overflow-hidden border border-border shadow-lg">
+        <div className="relative w-full max-sm:aspect-square sm:h-[460px] rounded-xl sm:rounded-2xl overflow-hidden border border-border shadow-lg">
             <div ref={mapContainerRef} className="w-full h-full z-10" />
 
             {/* Map Style Toggle (top-left) */}
-            <div className="absolute top-3 left-3 z-20 flex items-center gap-1 bg-white/95 backdrop-blur-md p-1 rounded-xl border border-border shadow-md">
+            <div className="absolute top-1.5 sm:top-3 left-1.5 sm:left-3 z-20 flex items-center gap-1 bg-white/95 backdrop-blur-md p-1 rounded-xl border border-border shadow-md">
                 <button
                     type="button"
                     onClick={() => handleStyleChange('streets')}
@@ -285,7 +284,7 @@ function TrackingMap({ order, riderLocation, userLocation, onEnableLocation, isL
             </div>
 
             {/* GPS Enable Button (top-right) */}
-            <div className="absolute top-3 right-3 z-20">
+            <div className="absolute sm:top-3 top-1.5 right-1.5 sm:right-3 z-20">
                 <button
                     type="button"
                     onClick={onEnableLocation}
@@ -429,12 +428,12 @@ export default function TrackOrder({ initialCode, initialOrder, riderLocation: p
             <Head title={__('Live Order Tracking - NestifyTech')} />
             <div className="bg-bg py-8 sm:py-12 min-h-screen">
                 <div className="container mx-auto px-4 max-w-6xl space-y-8">
-                    <div className="bg-white rounded-3xl border border-border p-6 sm:p-8 shadow-sm text-center max-w-3xl mx-auto space-y-4">
+                    <div className="bg-white rounded-xl sm:rounded-3xl border border-border p-5 sm:p-8 shadow-sm text-center max-w-3xl mx-auto space-y-4">
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider">
                             <RiEBike2Line className="size-4" />
                             {__('Real-Time Telemetry & GPS')}
                         </div>
-                        <h1 className="text-2xl sm:text-4xl font-extrabold text-heading tracking-tight">
+                        <h1 className="text-2xl font-poppins sm:text-4xl font-bold sm:font-extrabold text-heading tracking-tight">
                             {__('Track Your Order in Real-Time')}
                         </h1>
                         <p className="text-xs sm:text-sm text-res max-w-xl mx-auto">
@@ -466,7 +465,7 @@ export default function TrackOrder({ initialCode, initialOrder, riderLocation: p
                     {order ? (
                         <div className="space-y-8">
                             {/* ── Status Timeline Card ── */}
-                            <div className="bg-white rounded-3xl border border-border p-6 sm:p-8 shadow-sm">
+                            <div className="bg-white rounded-xl sm:rounded-3xl border border-border p-6 sm:p-8 shadow-sm">
                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-6 border-b border-border gap-4">
                                     <div>
                                         <div className="flex items-center gap-3">
@@ -490,7 +489,7 @@ export default function TrackOrder({ initialCode, initialOrder, riderLocation: p
                                 </div>
 
                                 {/* Timeline Steps */}
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 relative">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 relative">
                                     {STAGES.map((stg, i) => {
                                         const isDone = i <= stageIdx;
                                         const isCurrent = i === stageIdx;
@@ -523,7 +522,7 @@ export default function TrackOrder({ initialCode, initialOrder, riderLocation: p
                             {/* ── Live Map & Telemetry Section ── */}
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                                 <div className="lg:col-span-2 space-y-4">
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex sm:items-center flex-col sm:flex-row  justify-between">
                                         <h3 className="font-bold text-lg text-heading flex items-center gap-2">
                                             <RiNavigationLine className="text-emerald-500" />
                                             {__('Live Rider & Destination Map')}
@@ -595,7 +594,7 @@ export default function TrackOrder({ initialCode, initialOrder, riderLocation: p
                                                 {__('Destination Address')}
                                             </span>
                                             <p className="text-xs font-medium text-heading bg-bg p-3 rounded-xl border border-border">
-                                                {order.shipping_address}, {order.shipping_city}, {order.shipping_state}
+                                                {order.shipping_address}
                                             </p>
                                         </div>
 

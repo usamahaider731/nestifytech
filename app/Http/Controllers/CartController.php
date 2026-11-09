@@ -182,6 +182,8 @@ class CartController extends Controller
             'payment_intent_id' => 'nullable|string|regex:/^pi_[A-Za-z0-9]+$/',
             'delivery_lat'      => 'nullable|numeric|between:-90,90',
             'delivery_lng'      => 'nullable|numeric|between:-180,180',
+            'city_id'           => 'nullable|integer',
+            'state_id'          => 'nullable|integer',
         ]);
 
         $items = $request->input('items');
@@ -356,13 +358,22 @@ class CartController extends Controller
             $fullName        = trim("{$firstName} {$lastName}") ?: optional(Auth::user())->name;
             $customerPhone   = $request->input('phone', '') ?: (optional(Auth::user())->meta ? optional(Auth::user())->meta->phone : '');
             $shippingAddress = $request->input('address', '');
-            $shippingCity    = $request->input('city', '');
 
-            if (!empty($shippingCity) && is_numeric($shippingCity)) {
-                $cityTaxonomyTitle = DB::table('taxonomies')->where('id', (int) $shippingCity)->value('title');
-                if ($cityTaxonomyTitle) {
-                    $shippingCity = $cityTaxonomyTitle;
-                }
+            // Resolve city / state / country from IDs (taxonomy table)
+            $cityId   = $request->input('city_id');
+            $stateId  = $request->input('state_id');
+
+            $cityRow  = $cityId  && is_numeric($cityId)  ? DB::table('taxonomies')->where('id', (int) $cityId)->first()  : null;
+            $stateRow = $stateId && is_numeric($stateId) ? DB::table('taxonomies')->where('id', (int) $stateId)->first() : null;
+            $countryRow = $stateRow && $stateRow->parent_id ? DB::table('taxonomies')->where('id', (int) $stateRow->parent_id)->first() : null;
+
+            $shippingCity    = $cityRow  ? $cityRow->title  : ($request->input('city', ''));
+            $shippingState   = $stateRow ? $stateRow->title : '';
+            $shippingCountry = $countryRow ? $countryRow->title : '';
+
+            // Fallback: if city was sent as plain text (old flow)
+            if (!$cityRow && !empty($request->input('city', ''))) {
+                $shippingCity = $request->input('city', '');
             }
 
             $shippingPostal = $request->input('postal_code', '');
@@ -371,6 +382,8 @@ class CartController extends Controller
             $customerNotes  = [];
             if ($customerPhone)    $customerNotes[] = "Contact Phone: {$customerPhone}";
             if ($shippingPostal)   $customerNotes[] = "Postal Code: {$shippingPostal}";
+            if ($shippingState)    $customerNotes[] = "State: {$shippingState}";
+            if ($shippingCountry)  $customerNotes[] = "Country: {$shippingCountry}";
             if ($shippingAmount > 0) $customerNotes[] = "Shipping: {$shippingAmount}";
             if ($giftCardDiscount > 0 && $appliedGiftCard) {
                 $customerNotes[] = "Gift Card Used: {$appliedGiftCard->code} (-PKR {$giftCardDiscount})";
@@ -391,6 +404,8 @@ class CartController extends Controller
                 'status'                   => 'pending',
                 'shipping_address'         => $shippingAddress,
                 'shipping_city'            => $shippingCity,
+                'shipping_state'           => $shippingState,
+                'shipping_country'         => $shippingCountry,
                 'delivery_lat'             => $deliveryLat,
                 'delivery_lng'             => $deliveryLng,
                 'customer_notes'           => $notesString,

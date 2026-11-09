@@ -23,6 +23,23 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\InstallController;
+
+/*
+|--------------------------------------------------------------------------
+| Installation Wizard Routes
+|--------------------------------------------------------------------------
+*/
+Route::prefix('install')->name('install.')->controller(InstallController::class)->group(function () {
+    Route::get('/', 'index')->name('index');
+    Route::get('/license/pricing', 'getLicensePricing')->name('license.pricing');
+    Route::post('/license/pay', 'verifyLicensePayment')->name('license.pay');
+    Route::post('/database/test', 'testDatabase')->name('db.test');
+    Route::post('/database/save', 'saveDatabase')->name('db.save');
+    Route::post('/database/import', 'importDatabase')->name('db.import');
+    Route::post('/admin/save', 'setupAdmin')->name('admin.save');
+    Route::post('/finalize', 'setupPaymentAndFinalize')->name('finalize');
+});
 
 Route::controller(FilterController::class)->group(function () {
     Route::post("bulk/action", "bulk_action")->middleware(['auth', 'verified'])->name("bulk.action");

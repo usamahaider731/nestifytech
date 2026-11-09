@@ -15,12 +15,12 @@
             "type": "text",
             "value": "Shop the World"
         },
-        "email": {
+        "contact_email": {
             "label": "Contact Email",
             "type": "text",
-            "value": "info@nestifytech.com"
+            "value": "admin@nestifytech.com"
         },
-        "phone": {
+        "contact_number": {
             "label": "Contact Number",
             "type": "phone",
             "value": "+923218086139"
@@ -1024,11 +1024,11 @@
                     "value": "pkr"
                 },
                 "eur": {
-                    "label": "EUR - Euro (€)",
+                    "label": "EUR - Euro (\u20ac)",
                     "value": "eur"
                 },
                 "gbp": {
-                    "label": "GBP - British Pound (£)",
+                    "label": "GBP - British Pound (\u00a3)",
                     "value": "gbp"
                 },
                 "cad": {
@@ -1122,11 +1122,11 @@
                     "value": "USD"
                 },
                 "EUR": {
-                    "label": "EUR - Euro (€)",
+                    "label": "EUR - Euro (\u20ac)",
                     "value": "EUR"
                 },
                 "GBP": {
-                    "label": "GBP - British Pound (£)",
+                    "label": "GBP - British Pound (\u00a3)",
                     "value": "GBP"
                 },
                 "CAD": {
@@ -1167,7 +1167,7 @@
         "payoneer_section": {
             "type": "section",
             "label": "Payoneer Mass Payouts & Checkout",
-            "description": "Accept payments globally via Payoneer — ideal for international sellers and freelance marketplaces.",
+            "description": "Accept payments globally via Payoneer \u2014 ideal for international sellers and freelance marketplaces.",
             "icon": "ri-global-line",
             "toggle_field": "payoneer_enabled"
         },
@@ -1236,7 +1236,7 @@
             "label": "Payoneer Partner ID (p4)",
             "type": "text",
             "style": 2,
-            "placeholder": "Optional — Enter Payoneer Partner ID if provided",
+            "placeholder": "Optional \u2014 Enter Payoneer Partner ID if provided",
             "condition": {
                 "field": "payoneer_enabled",
                 "value": true
@@ -1258,11 +1258,11 @@
                     "value": "USD"
                 },
                 "EUR": {
-                    "label": "EUR - Euro (€)",
+                    "label": "EUR - Euro (\u20ac)",
                     "value": "EUR"
                 },
                 "GBP": {
-                    "label": "GBP - British Pound (£)",
+                    "label": "GBP - British Pound (\u00a3)",
                     "value": "GBP"
                 },
                 "CAD": {
@@ -1543,8 +1543,8 @@
             "label": "Top Badge Text",
             "type": "text",
             "style": 2,
-            "placeholder": "e.g. Limited Time Mega Sale • Extra 25% Off",
-            "value": "Limited Time Mega Sale • Extra 25% Off"
+            "placeholder": "e.g. Limited Time Mega Sale \u2022 Extra 25% Off",
+            "value": "Limited Time Mega Sale \u2022 Extra 25% Off"
         },
         "popup_title": {
             "label": "Popup Title",

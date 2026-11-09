@@ -6,6 +6,12 @@ use App\Http\Controllers\SearchController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+// External Licensing Server API (Can be pointed to any remote server or kept local)
+Route::prefix('license-server')->controller(\App\Http\Controllers\LicenseServerMockController::class)->group(function () {
+    Route::get('/pricing', 'getPricing');
+    Route::post('/pay', 'processPayment');
+});
+
 Route::get('/taxonomy-options/{type}', function (Request $request, $type) {
     $useValue = $request->boolean('use_value', false);
     $asOptions = $request->boolean('as_options', false);

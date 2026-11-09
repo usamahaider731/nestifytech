@@ -13,7 +13,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->trustProxies(at: '*');
-        $middleware->web(append: [
+        $middleware->web(prepend: [
+            \App\Http\Middleware\CheckInstallation::class,
+        ], append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
             \App\Http\Middleware\UpdateUserLastSeen::class,
             \App\Http\Middleware\LogUserActivity::class,
@@ -31,7 +33,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin/setting/*/active-colors',
             'newsletter/subscribe',
             'newsletter/unsubscribe/*',
-            'contact/submit'
+            'contact/submit',
+            'install/*',
         ]);
         $middleware->alias([
             'permission' => \App\Http\Middleware\CheckPermission::class,

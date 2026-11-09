@@ -1095,7 +1095,7 @@ class FrontendController extends Controller
                         }
                     }
                 }
-
+dd($order);
                 $initialOrder = [
                     'id'                       => $order->id,
                     'order_number'             => 'ORD-' . str_pad($order->id, 5, '0', STR_PAD_LEFT),

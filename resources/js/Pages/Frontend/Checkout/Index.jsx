@@ -133,9 +133,45 @@ function CheckoutFormContent() {
         phone: user?.meta?.phone || '',
         address: user?.meta?.address || '',
         city: user?.meta?.city || '',
+        city_id: '',
+        state_id: '',
         postal_code: user?.meta?.postal_code || '',
         payment_method: defaultMethod
     });
+
+    // ── State / City cascade dropdowns ───────────────────────────────────────
+    const [states, setStates] = useState([]);
+    const [cities, setCities] = useState([]);
+    const [statesLoading, setStatesLoading] = useState(false);
+    const [citiesLoading, setCitiesLoading] = useState(false);
+
+    // Load states once on mount
+    useEffect(() => {
+        setStatesLoading(true);
+        axios.get('/api/taxonomies', { params: { type: 'state', limit: -1 } })
+            .then(res => {
+                const data = res.data?.data || res.data || [];
+                setStates(Array.isArray(data) ? data : []);
+            })
+            .catch(() => {})
+            .finally(() => setStatesLoading(false));
+    }, []);
+
+    // Load cities when state changes
+    useEffect(() => {
+        if (!form.state_id) {
+            setCities([]);
+            return;
+        }
+        setCitiesLoading(true);
+        axios.get('/api/taxonomies', { params: { type: 'city', parent_id: form.state_id, limit: -1 } })
+            .then(res => {
+                const data = res.data?.data || res.data || [];
+                setCities(Array.isArray(data) ? data : []);
+            })
+            .catch(() => {})
+            .finally(() => setCitiesLoading(false));
+    }, [form.state_id]);
 
     // ── Helper: reverse geocode coordinate (multi-language support) ──────────
     const reverseGeocode = useCallback(async (lat, lng) => {
@@ -644,7 +680,12 @@ function CheckoutFormContent() {
     }, []); // run once on mount only
 
     const handleChange = (e) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        if (name === 'state_id') {
+            setForm(prev => ({ ...prev, state_id: value, city_id: '', city: '' }));
+        } else {
+            setForm({ ...form, [name]: value });
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -718,12 +759,13 @@ function CheckoutFormContent() {
                         phone: form.phone,
                         address: form.address || selectedLabel || form.city,
                         city: form.city,
+                        city_id: form.city_id || null,
+                        state_id: form.state_id || null,
                         postal_code: form.postal_code || '',
                         gift_card_code: appliedGiftCard ? appliedGiftCard.code : null,
                         delivery_lat: selectedCoords.lat,
                         delivery_lng: selectedCoords.lng,
                     });
-
                     const orderData = orderRes.data;
 
                     if (!orderData.success) {
@@ -760,6 +802,8 @@ function CheckoutFormContent() {
                     phone: form.phone,
                     address: form.address || selectedLabel || form.city,
                     city: form.city,
+                    city_id: form.city_id || null,
+                    state_id: form.state_id || null,
                     postal_code: form.postal_code || '',
                     gift_card_code: appliedGiftCard ? appliedGiftCard.code : null,
                     delivery_lat: selectedCoords.lat,
@@ -857,8 +901,59 @@ function CheckoutFormContent() {
                                         <input required type="tel" name="phone" value={form.phone} onChange={handleChange} className="w-full bg-bg border border-border focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-md px-4 py-3 text-sm text-text transition-all outline-hidden" placeholder="+92 300 1234567" />
                                     </div>
                                     <div className="md:col-span-2">
+                                        <label className="block text-sm font-semibold text-heading mb-2">State / Province</label>
+                                        <div className="relative">
+                                            <select
+                                                name="state_id"
+                                                value={form.state_id}
+                                                onChange={handleChange}
+                                                className="w-full bg-bg border border-border focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-md px-4 py-3 text-sm text-text transition-all outline-hidden appearance-none"
+                                            >
+                                                <option value="">
+                                                    {statesLoading ? 'Loading states...' : '— Select State / Province —'}
+                                                </option>
+                                                {states.map(s => (
+                                                    <option key={s.id} value={s.id}>{s.title}</option>
+                                                ))}
+                                            </select>
+                                            <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-res">▾</div>
+                                        </div>
+                                    </div>
+                                    <div className="md:col-span-2">
                                         <label className="block text-sm font-semibold text-heading mb-2">City</label>
-                                        <input required type="text" name="city" value={form.city} onChange={handleChange} className="w-full bg-bg border border-border focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-md px-4 py-3 text-sm text-text transition-all outline-hidden" placeholder="e.g. Lahore, Karachi, Islamabad" />
+                                        <div className="relative">
+                                            {form.state_id ? (
+                                                <select
+                                                    name="city_id"
+                                                    value={form.city_id}
+                                                    onChange={e => {
+                                                        const id = e.target.value;
+                                                        const selected = cities.find(c => String(c.id) === String(id));
+                                                        setForm(prev => ({ ...prev, city_id: id, city: selected ? selected.title : '' }));
+                                                    }}
+                                                    className="w-full bg-bg border border-border focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-md px-4 py-3 text-sm text-text transition-all outline-hidden appearance-none"
+                                                >
+                                                    <option value="">
+                                                        {citiesLoading ? 'Loading cities...' : '— Select City —'}
+                                                    </option>
+                                                    {cities.map(c => (
+                                                        <option key={c.id} value={c.id}>{c.title}</option>
+                                                    ))}
+                                                </select>
+                                            ) : (
+                                                <input
+                                                    type="text"
+                                                    name="city"
+                                                    value={form.city}
+                                                    onChange={handleChange}
+                                                    className="w-full bg-bg border border-border focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-md px-4 py-3 text-sm text-text transition-all outline-hidden"
+                                                    placeholder="Select a state first, or type city name"
+                                                />
+                                            )}
+                                            <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-res">
+                                                {form.state_id ? '▾' : ''}
+                                            </div>
+                                        </div>
                                     </div>
                                     <div className="md:col-span-2">
                                         <div className="flex items-center justify-between mb-2">

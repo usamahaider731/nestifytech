@@ -136,7 +136,7 @@ export default function PromoPopup() {
         >
             {/* Modal Card */}
             <div 
-                className="relative w-full max-w-lg bg-white dark:bg-neutral-900 rounded-3xl shadow-2xl border border-neutral-100 dark:border-neutral-800 overflow-hidden transform transition-all animate-scaleUp"
+                className="relative w-full max-w-lg bg-white dark:bg-neutral-900 rounded-xl shadow-2xl border border-neutral-100 dark:border-neutral-800 overflow-hidden transform transition-all animate-scaleUp"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Decorative Background Glow */}
@@ -153,51 +153,51 @@ export default function PromoPopup() {
                 </button>
 
                 {/* Top Badge Strip */}
-                <div className="bg-gradient-to-r from-amber-500 via-rose-500 to-indigo-600 px-6 py-2.5 text-center text-white text-xs font-semibold tracking-wider uppercase flex items-center justify-center gap-2 shadow-sm">
+                <div className="bg-gradient-to-r from-primary via-secondary to-indigo-600 px-6 py-2.5 text-center text-white text-xs font-roboto font-semibold tracking-wider uppercase flex items-center justify-center gap-2 shadow-sm">
                     <IoFlashOutline className="w-4 h-4 animate-bounce" />
                     <span>{badgeText}</span>
                     <IoSparkles className="w-3.5 h-3.5" />
                 </div>
 
-                <div className="p-6 sm:p-8 text-center relative z-10">
+                <div className="p-4 text-center relative z-10">
                     {/* Big Discount Visual */}
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 text-rose-600 dark:text-rose-400 text-xs font-bold uppercase tracking-wider mb-3">
-                        <IoSparkles className="w-3.5 h-3.5" />
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/10 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 text-secondary font-roboto text-xs font-semibold uppercase tracking-wider mb-3">
+                        <IoSparkles className="w-3 h-3" />
                         Exclusive Visitor Offer
                     </div>
 
-                    <h2 id="promo-title" className="text-2xl sm:text-3xl font-extrabold text-neutral-900 dark:text-white tracking-tight">
+                    <h2 id="promo-title" className="text-2xl sm:text-3xl font-poppins font-bold text-neutral-900 dark:text-white tracking-tight">
                         {rawTitle.includes(highlightText) ? (
                             <>
                                 {rawTitle.split(highlightText)[0]}
-                                <span className="bg-gradient-to-r from-rose-500 to-amber-500 bg-clip-text text-transparent">{highlightText}</span>
+                                <span className="bg-gradient-to-r from-secondary to-primary bg-clip-text text-transparent">{highlightText}</span>
                                 {rawTitle.split(highlightText)[1]}
                             </>
                         ) : rawTitle}
                     </h2>
 
-                    <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400 max-w-sm mx-auto">
+                    <p className="mt-2 text-sm font-roboto text-neutral-600 dark:text-neutral-400 max-w-sm mx-auto">
                         {description}
                     </p>
 
                     {/* Countdown Timer */}
-                    <div className="my-5 flex items-center justify-center gap-2.5 sm:gap-3 text-neutral-800 dark:text-neutral-100">
-                        <div className="flex flex-col items-center bg-neutral-100 dark:bg-neutral-800/80 rounded-2xl px-3.5 py-2 min-w-[58px] border border-neutral-200/60 dark:border-neutral-700/60">
-                            <span className="text-xl font-bold font-mono">
+                    <div className="my-3 flex items-center justify-center gap-2.5 sm:gap-3 text-neutral-800 dark:text-neutral-100">
+                        <div className="flex flex-col items-center bg-neutral-100 dark:bg-neutral-800/80 rounded-lg px-2.5 py-1.5 min-w-[58px] border border-neutral-200/60 dark:border-neutral-700/60">
+                            <span className="text-xl font-bold font-oswald">
                                 {String(timeLeft.hours).padStart(2, '0')}
                             </span>
                             <span className="text-[10px] uppercase font-semibold text-neutral-500 dark:text-neutral-400">Hours</span>
                         </div>
                         <span className="text-xl font-bold text-neutral-400 pb-3">:</span>
-                        <div className="flex flex-col items-center bg-neutral-100 dark:bg-neutral-800/80 rounded-2xl px-3.5 py-2 min-w-[58px] border border-neutral-200/60 dark:border-neutral-700/60">
-                            <span className="text-xl font-bold font-mono">
+                        <div className="flex flex-col items-center bg-neutral-100 dark:bg-neutral-800/80 rounded-lg px-2.5 py-1.5 min-w-[58px] border border-neutral-200/60 dark:border-neutral-700/60">
+                            <span className="text-xl font-bold font-oswald">
                                 {String(timeLeft.minutes).padStart(2, '0')}
                             </span>
                             <span className="text-[10px] uppercase font-semibold text-neutral-500 dark:text-neutral-400">Mins</span>
                         </div>
                         <span className="text-xl font-bold text-neutral-400 pb-3">:</span>
-                        <div className="flex flex-col items-center bg-neutral-100 dark:bg-neutral-800/80 rounded-2xl px-3.5 py-2 min-w-[58px] border border-neutral-200/60 dark:border-neutral-700/60">
-                            <span className="text-xl font-bold font-mono text-rose-500">
+                        <div className="flex flex-col items-center bg-neutral-100 dark:bg-neutral-800/80 rounded-lg px-2.5 py-1.5 min-w-[58px] border border-neutral-200/60 dark:border-neutral-700/60">
+                            <span className="text-xl font-bold font-oswald text-primary">
                                 {String(timeLeft.seconds).padStart(2, '0')}
                             </span>
                             <span className="text-[10px] uppercase font-semibold text-neutral-500 dark:text-neutral-400">Secs</span>
@@ -205,10 +205,10 @@ export default function PromoPopup() {
                     </div>
 
                     {/* Coupon Code Pill */}
-                    <div className="bg-neutral-50 dark:bg-neutral-800/50 border-2 border-dashed border-rose-300 dark:border-rose-800/60 rounded-2xl p-3 flex items-center justify-between gap-3 max-w-sm mx-auto mb-5">
+                    <div className="bg-secondary/3 dark:bg-neutral-800/50 border-2 border-dashed border-secondary/30 dark:border-rose-800/60 rounded-xl p-2 flex items-center justify-between gap-2.5 max-w-sm mx-auto mb-5">
                         <div className="text-left pl-2">
                             <div className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold">Coupon / Gift Code</div>
-                            <div className="font-mono font-extrabold text-base sm:text-lg text-rose-600 dark:text-rose-400 tracking-wider">
+                            <div className="font-roboto font-bold text-base sm:text-lg text-rose-600 dark:text-rose-400 tracking-wider">
                                 {discountCode}
                             </div>
                         </div>
@@ -253,7 +253,7 @@ export default function PromoPopup() {
                             <div className="grid grid-cols-2 gap-2.5">
                                 <button
                                     type="submit"
-                                    className="w-full py-3 px-4 rounded-xl font-semibold text-xs sm:text-sm text-white bg-gradient-to-r from-rose-500 via-rose-600 to-amber-500 hover:from-rose-600 hover:to-amber-600 transition-all shadow-lg shadow-rose-500/25 flex items-center justify-center gap-1.5"
+                                    className="w-full py-3 px-4 rounded-xl font-semibold text-xs sm:text-sm text-white bg-gradient-to-r from-secondary to-primary transition-all shadow-lg shadow-secondary/25 flex items-center justify-center gap-1.5"
                                 >
                                     <span>{ctaText}</span>
                                 </button>
@@ -274,7 +274,7 @@ export default function PromoPopup() {
                     )}
 
                     {/* Bottom fine print */}
-                    <p className="mt-4 text-[11px] text-neutral-400 dark:text-neutral-500">
+                    <p className="mt-3 text-[11px] text-neutral-400 dark:text-neutral-500">
                         *Valid on orders over $50. No spam, unsubscribe anytime.{' '}
                         <button 
                             type="button" 

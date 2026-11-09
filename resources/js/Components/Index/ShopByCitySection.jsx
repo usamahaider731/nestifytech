@@ -29,7 +29,7 @@ export default function ShopByCitySection({ cities = [] }) {
                         <BiMapPin size={14} />
                         <span>{__('Localized Shopping')}</span>
                     </div>
-                    <h2 className="text-2xl sm:text-3xl font-bold sm:font-extrabold text-heading tracking-tight font-poppins">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-heading tracking-tight font-poppins">
                         {__('Shop by City & Nearby Stores')}
                     </h2>
                     <p className="mt-1.5 text-xs sm:text-sm font-roboto text-res max-w-xl">
