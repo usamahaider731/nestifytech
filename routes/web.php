@@ -95,6 +95,15 @@ Route::post('/ai/generate/text', [AiController::class, 'generateText'])
 // Route::get('prac', function () { return view('prac'); }); // Removed: debug route
 Route::prefix('/admin')->middleware(['auth', 'verified'])->group(function () {
     Route::get('/', [DashboardController::class, 'dashboard'])->name('admin.dashboard');
+
+    Route::post('/clear-cache', function () {
+        try {
+            \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+            return response()->json(['success' => true, 'message' => 'Cache and optimization cleared successfully!']);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => 'Cache clear error: ' . $e->getMessage()], 500);
+        }
+    })->name('admin.clear.cache');
     Route::controller(SettingController::class)->group(function () {
         Route::get('/setting/{type}', 'setting')->name('admin.setting');
         Route::post('/setting/{type}', 'settingUpdate')->name('setting.update');

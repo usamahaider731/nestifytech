@@ -6,6 +6,7 @@ import Dropdown from '../Dropdown';
 import ImageViwer from './ImageViwer';
 import SearchPopup from './SearchPopup';
 import ShortcutsModal from './ShortcutsModal';
+import CommandPalette from './CommandPalette';
 import { useTheme } from '@/contexts/ThemeContext';
 
 function Header() {
@@ -15,6 +16,7 @@ function Header() {
     const dropdownRef = useRef(null);
     const [ShowSearchPopup, SetShowSearchPopup] = useState(false);
     const [ShowShortcutsModal, SetShowShortcutsModal] = useState(false);
+    const [ShowCommandPalette, SetShowCommandPalette] = useState(false);
 
     const handleSearchPopup = () => {
         SetShowSearchPopup(true);
@@ -23,9 +25,25 @@ function Header() {
 
     useEffect(() => {
         const handleKeyDown = (event) => {
+            // Check if user is inside an input/textarea
+            const target = event.target;
+            const isInput = target.tagName === 'INPUT' || 
+                            target.tagName === 'TEXTAREA' || 
+                            target.tagName === 'SELECT' || 
+                            target.isContentEditable;
+
+            // Ctrl + J or Cmd + J or Alt + Space: Open Command Palette
+            if (((event.ctrlKey || event.metaKey) && event.key === 'j') || (event.altKey && event.code === 'Space')) {
+                event.preventDefault();
+                SetShowCommandPalette(prev => !prev);
+                return;
+            }
+
+            // Ctrl + K or Cmd + K: Open Search Popup
             if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
                 event.preventDefault();
                 document.querySelector("#searchField")?.click();
+                return;
             }
         };
 
@@ -47,9 +65,23 @@ function Header() {
                             >
                                 <div className='flex items-center gap-3'>
                                     <RiSearchLine className='text-lg text-secondary' />
-                                    <span className='text-xs font-medium text-res hidden sm:inline-block'>Search (Ctrl+K)</span>
+                                    <span className='text-xs font-medium text-res hidden sm:inline-block'>Search keywords (Ctrl+K)</span>
                                 </div>
-                                <kbd className='text-[10px] bg-dynamic/70 px-1.5 py-0.5 rounded text-secondary font-mono font-bold border border-permanent/40 shadow-xs hidden sm:inline-block'>⌘K</kbd>
+                                <div className='flex items-center gap-1.5 hidden sm:flex'>
+                                    <button
+                                        type='button'
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            SetShowCommandPalette(true);
+                                        }}
+                                        className='text-[10px] bg-primary/10 hover:bg-primary/20 text-primary px-2 py-0.5 rounded font-mono font-bold border border-primary/30 shadow-xs flex items-center gap-1 transition-all'
+                                        title='Open Command Launcher (Ctrl+J)'
+                                    >
+                                        <span>⌘J</span>
+                                        <span>Commands</span>
+                                    </button>
+                                    <kbd className='text-[10px] bg-dynamic/70 px-1.5 py-0.5 rounded text-secondary font-mono font-bold border border-permanent/40 shadow-xs'>⌘K</kbd>
+                                </div>
                             </div>
                         </div>
 
@@ -161,6 +193,7 @@ function Header() {
 
             {ShowSearchPopup && <SearchPopup close={SetShowSearchPopup} />}
             <ShortcutsModal isOpen={ShowShortcutsModal} onClose={SetShowShortcutsModal} />
+            <CommandPalette isOpen={ShowCommandPalette} onClose={() => SetShowCommandPalette(false)} />
         </>
     )
 }

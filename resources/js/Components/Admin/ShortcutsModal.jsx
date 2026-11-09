@@ -13,7 +13,10 @@ import {
     RiSunLine, 
     RiHomeLine, 
     RiKey2Line,
-    RiSearchLine
+    RiSearchLine,
+    RiAppsLine,
+    RiStarLine,
+    RiInboxLine
 } from 'react-icons/ri';
 import { useTheme } from '@/contexts/ThemeContext';
 
@@ -95,6 +98,27 @@ export default function ShortcutsModal({ isOpen, onClose }) {
                 return;
             }
 
+            // Alt + C: Categories
+            if (e.altKey && (e.key === 'c' || e.key === 'C')) {
+                e.preventDefault();
+                router.visit(route('taxonomy.index', { type: 'category' }));
+                return;
+            }
+
+            // Alt + R: Reviews
+            if (e.altKey && (e.key === 'r' || e.key === 'R')) {
+                e.preventDefault();
+                router.visit(route('admin.reviews.index'));
+                return;
+            }
+
+            // Alt + I: Contact Inquiries
+            if (e.altKey && (e.key === 'i' || e.key === 'I')) {
+                e.preventDefault();
+                router.visit(route('admin.contact.index'));
+                return;
+            }
+
             // Alt + H: Visit Public Storefront
             if (e.altKey && (e.key === 'h' || e.key === 'H')) {
                 e.preventDefault();
@@ -116,8 +140,11 @@ export default function ShortcutsModal({ isOpen, onClose }) {
                 { key: 'Alt + D', label: 'Go to Dashboard', icon: <RiDashboardLine className="text-blue-500" /> },
                 { key: 'Alt + P', label: 'Products Catalog', icon: <RiShoppingBag3Line className="text-emerald-500" /> },
                 { key: 'Alt + N', label: 'Add New Product', icon: <RiAddCircleLine className="text-violet-500" /> },
+                { key: 'Alt + C', label: 'Product Categories', icon: <RiAppsLine className="text-amber-500" /> },
                 { key: 'Alt + O', label: 'Orders Management', icon: <RiShoppingCart2Line className="text-amber-500" /> },
                 { key: 'Alt + U', label: 'Users & Customers', icon: <RiUser3Line className="text-sky-500" /> },
+                { key: 'Alt + R', label: 'Customer Reviews', icon: <RiStarLine className="text-yellow-400" /> },
+                { key: 'Alt + I', label: 'Contact Inquiries', icon: <RiInboxLine className="text-indigo-400" /> },
                 { key: 'Alt + S', label: 'Store Settings', icon: <RiSettings3Line className="text-indigo-500" /> },
             ]
         },
@@ -212,3 +239,4 @@ export default function ShortcutsModal({ isOpen, onClose }) {
         </div>
     );
 }
+
