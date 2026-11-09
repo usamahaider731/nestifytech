@@ -5,6 +5,7 @@ import { IoNotificationsOutline } from "react-icons/io5";
 import Dropdown from '../Dropdown';
 import ImageViwer from './ImageViwer';
 import SearchPopup from './SearchPopup';
+import ShortcutsModal from './ShortcutsModal';
 import { useTheme } from '@/contexts/ThemeContext';
 
 function Header() {
@@ -13,6 +14,7 @@ function Header() {
     const [SearchLists, SetSearchLists] = useState([]);
     const dropdownRef = useRef(null);
     const [ShowSearchPopup, SetShowSearchPopup] = useState(false);
+    const [ShowShortcutsModal, SetShowShortcutsModal] = useState(false);
 
     const handleSearchPopup = () => {
         SetShowSearchPopup(true);
@@ -69,7 +71,11 @@ function Header() {
                                 </span>
                             </button>
 
-                            <button className='p-2 rounded-lg text-res hover:text-primary hover:bg-dynamic/50 transition-colors hidden sm:block' title="Shortcuts">
+                            <button 
+                                onClick={() => SetShowShortcutsModal(true)}
+                                className='p-2 rounded-lg text-res hover:text-primary hover:bg-dynamic/50 transition-colors hidden sm:block' 
+                                title="Keyboard Shortcuts (Shift + ?)"
+                            >
                                 <RiLayoutGridLine className='text-xl' />
                             </button>
 
@@ -154,6 +160,7 @@ function Header() {
             </header>
 
             {ShowSearchPopup && <SearchPopup close={SetShowSearchPopup} />}
+            <ShortcutsModal isOpen={ShowShortcutsModal} onClose={SetShowShortcutsModal} />
         </>
     )
 }
