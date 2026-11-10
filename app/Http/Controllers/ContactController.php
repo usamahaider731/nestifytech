@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\ContactInquiryAdminMail;
 use App\Mail\ContactInquiryAutoReplyMail;
+use App\Mail\ContactInquiryAdminReplyMail;
 use App\Models\ContactInquiry;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
@@ -211,31 +212,25 @@ class ContactController extends Controller
         $siteConfig  = $settings['site'] ?? [];
         $mailEnabled = filter_var($mailConfig['mail_enabled']['value'] ?? true, FILTER_VALIDATE_BOOLEAN);
 
-        if (!$mailEnabled) return;
+        if (!$mailEnabled) {
+            Log::info("Admin reply skipped: mail_enabled is false in settings.");
+            return;
+        }
 
-        $fromName    = $siteConfig['name']['value'] ?? 'NestifyTech Support';
-        $fromAddress = $mailConfig['mail_from_address']['value'] ?? config('mail.from.address');
+        $fromName    = $siteConfig['name']['value'] ?? config('mail.from.name', 'NestifyTech Support');
+        $fromAddress = $mailConfig['mail_from_address']['value'] ?? config('mail.from.address', 'noreply@nestifytech.com');
 
         try {
-            Mail::send([], [], function ($message) use ($inquiry, $replyText, $fromName, $fromAddress) {
-                $message->to($inquiry->email, $inquiry->name)
-                    ->from($fromAddress, $fromName)
-                    ->subject('Re: ' . ($inquiry->subject ?: 'Your Inquiry – ' . $fromName))
-                    ->html(
-                        "<div style='font-family:sans-serif;max-width:600px;margin:auto'>" .
-                        "<p>Dear <strong>{$inquiry->name}</strong>,</p>" .
-                        "<p>Thank you for reaching out. Here is our response to your inquiry:</p>" .
-                        "<div style='background:#f5f5f5;border-left:4px solid #7367f0;padding:16px;border-radius:4px;margin:16px 0'>" .
-                        nl2br(htmlspecialchars($replyText)) .
-                        "</div>" .
-                        "<p>If you have further questions, feel free to contact us again.</p>" .
-                        "<p>Warm regards,<br><strong>{$fromName}</strong></p>" .
-                        "<hr style='margin-top:30px'><p style='font-size:11px;color:#999'>This is a reply to your inquiry submitted on " .
-                        $inquiry->created_at->format('M d, Y') . ".</p></div>"
-                    );
-            });
+            Mail::to($inquiry->email, $inquiry->name)->send(
+                new ContactInquiryAdminReplyMail($inquiry, $replyText, $fromName, $fromAddress)
+            );
+            Log::info("Admin reply sent successfully to {$inquiry->email} for inquiry #{$inquiry->id}");
         } catch (\Throwable $e) {
-            Log::error('Admin reply email failed: ' . $e->getMessage(), ['inquiry_id' => $inquiry->id]);
+            Log::error('Admin reply email failed: ' . $e->getMessage(), [
+                'inquiry_id' => $inquiry->id,
+                'email'      => $inquiry->email,
+                'exception'  => $e,
+            ]);
         }
     }
 
