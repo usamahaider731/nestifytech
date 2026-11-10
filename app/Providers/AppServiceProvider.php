@@ -53,30 +53,42 @@ class AppServiceProvider extends ServiceProvider
         $data = json_decode($settings, true) ?: [];
         $menu = [];
 
-        // Dynamically apply email settings from Admin Settings (Mailtrap/SMTP)
+        // Dynamically apply email settings from Admin Settings (setting.json is source of truth)
         if (!empty($data['mail'])) {
             $mailSettings = $data['mail'];
-            if (!empty($mailSettings['mail_host']['value'])) {
-                config(['mail.mailers.smtp.host' => $mailSettings['mail_host']['value']]);
-            }
-            if (!empty($mailSettings['mail_port']['value'])) {
-                config(['mail.mailers.smtp.port' => (int) $mailSettings['mail_port']['value']]);
-            }
-            if (!empty($mailSettings['mail_username']['value'])) {
-                config(['mail.mailers.smtp.username' => $mailSettings['mail_username']['value']]);
-            }
-            if (!empty($mailSettings['mail_password']['value'])) {
-                config(['mail.mailers.smtp.password' => $mailSettings['mail_password']['value']]);
-            }
-            if (isset($mailSettings['mail_encryption']['value'])) {
-                $enc = $mailSettings['mail_encryption']['value'];
-                config(['mail.mailers.smtp.encryption' => $enc === 'none' ? null : $enc]);
-            }
-            if (!empty($mailSettings['mail_from_address']['value'])) {
-                config(['mail.from.address' => $mailSettings['mail_from_address']['value']]);
-            }
-            if (!empty($mailSettings['mail_from_name']['value'])) {
-                config(['mail.from.name' => $mailSettings['mail_from_name']['value']]);
+            $mailEnabled  = filter_var($mailSettings['mail_enabled']['value'] ?? true, FILTER_VALIDATE_BOOLEAN);
+
+            if ($mailEnabled) {
+                // Force default mailer to smtp so .env MAIL_MAILER is irrelevant
+                config(['mail.default' => 'smtp']);
+
+                if (!empty($mailSettings['mail_host']['value'])) {
+                    config(['mail.mailers.smtp.host' => $mailSettings['mail_host']['value']]);
+                }
+                if (!empty($mailSettings['mail_port']['value'])) {
+                    config(['mail.mailers.smtp.port' => (int) $mailSettings['mail_port']['value']]);
+                }
+                if (!empty($mailSettings['mail_username']['value'])) {
+                    config(['mail.mailers.smtp.username' => $mailSettings['mail_username']['value']]);
+                }
+                if (!empty($mailSettings['mail_password']['value'])) {
+                    config(['mail.mailers.smtp.password' => $mailSettings['mail_password']['value']]);
+                }
+                if (isset($mailSettings['mail_encryption']['value'])) {
+                    $enc = $mailSettings['mail_encryption']['value'];
+                    config(['mail.mailers.smtp.encryption' => $enc === 'none' ? null : $enc]);
+                    // Laravel 11+: set scheme=null so STARTTLS is used on port 587
+                    config(['mail.mailers.smtp.scheme' => null]);
+                }
+                if (!empty($mailSettings['mail_from_address']['value'])) {
+                    config(['mail.from.address' => $mailSettings['mail_from_address']['value']]);
+                }
+                if (!empty($mailSettings['mail_from_name']['value'])) {
+                    config(['mail.from.name' => $mailSettings['mail_from_name']['value']]);
+                }
+            } else {
+                // Mail disabled: switch to log driver so nothing is sent
+                config(['mail.default' => 'log']);
             }
         }
 
