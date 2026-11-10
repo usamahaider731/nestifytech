@@ -25,7 +25,7 @@
         "contact_email": {
             "label": "Contact Email",
             "type": "text",
-            "value": "admin@nestifytech.com"
+            "value": "info.nestifytech@gmail.com"
         },
         "contact_number": {
             "label": "Contact Number",
@@ -1441,7 +1441,7 @@
                     "value": "mailgun"
                 }
             },
-            "value": "mailtrap"
+            "value": "smtp"
         },
         "mail_host": {
             "label": "SMTP Host",
@@ -1452,7 +1452,7 @@
                 "field": "mail_enabled",
                 "value": true
             },
-            "value": "sandbox.smtp.mailtrap.io"
+            "value": "smtp.gmail.com"
         },
         "mail_port": {
             "label": "SMTP Port",
@@ -1463,7 +1463,7 @@
                 "field": "mail_enabled",
                 "value": true
             },
-            "value": 2525
+            "value": 587
         },
         "mail_encryption": {
             "label": "Encryption Protocol",
@@ -1499,7 +1499,7 @@
                 "field": "mail_enabled",
                 "value": true
             },
-            "value": "72ef4b055c7052"
+            "value": "usamahaiderkhokher@gmail.com"
         },
         "mail_password": {
             "label": "SMTP Password \/ API Key",
@@ -1510,7 +1510,7 @@
                 "field": "mail_enabled",
                 "value": true
             },
-            "value": "5f883e5b94d1c9"
+            "value": "iatm bufk dasf attz"
         },
         "mail_from_address": {
             "label": "From Email Address",
@@ -1521,7 +1521,7 @@
                 "field": "mail_enabled",
                 "value": true
             },
-            "value": "noreply@nestifytech.com"
+            "value": "usamahaiderkhokher@gmail.com"
         },
         "mail_from_name": {
             "label": "From Display Name",
@@ -1540,7 +1540,7 @@
             "style": 2,
             "placeholder": "support@nestifytech.com",
             "description": "Email address where inquiries submitted from the Contact Us form are delivered.",
-            "value": "support@nestifytech.com"
+            "value": "usamahaiderkhokher@gmail.com"
         },
         "contact_autoreply_enabled": {
             "label": "Send Confirmation Email to Customer",
