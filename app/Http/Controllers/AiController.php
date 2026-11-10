@@ -75,7 +75,7 @@ class AiController extends Controller
             : 'Generate the content now using the product details provided in the system instructions.';
 
         $platform = $this->data['ai_platform']['value'] ?? 'groq';
-        $apiKey = $this->data['api_key']['value'] ?? env('GROQ_API_KEY', env('AI_API_KEY'));
+        $apiKey   = $this->data['api_key']['value'] ?? env('AI_API_KEY', env('GROQ_API_KEY', env('OPENROUTER_API_KEY')));
         $maxTokens = in_array($type, ['description', 'short_description', 'seo_description'], true) ? 1200 : 500;
 
         $messages = [
@@ -85,42 +85,55 @@ class AiController extends Controller
 
         // 1. If an external API key is provided and valid, try it first
         if (!empty($apiKey)) {
-            $endpoint = match ($platform) {
-                'openai' => 'https://api.openai.com/v1/chat/completions',
-                'groq' => 'https://api.groq.com/openai/v1/chat/completions',
-                'experientiallabs' => 'https://api.experientiallabs.ai/v1/chat/completions',
-                default => 'https://api.groq.com/openai/v1/chat/completions',
+        $endpoint = match ($platform) {
+                'openai'          => 'https://api.openai.com/v1/chat/completions',
+                'groq'            => 'https://api.groq.com/openai/v1/chat/completions',
+                'openrouter'      => 'https://openrouter.ai/api/v1/chat/completions',
+                'experientiallabs'=> 'https://api.experientiallabs.ai/v1/chat/completions',
+                default           => 'https://api.groq.com/openai/v1/chat/completions',
             };
 
             $payload = match ($platform) {
                 'openai' => [
-                    'model' => $this->data['model']['value'] ?? 'gpt-4o-mini',
-                    'messages' => $messages,
+                    'model'       => $this->data['model']['value'] ?? 'gpt-4o-mini',
+                    'messages'    => $messages,
                     'temperature' => 0.7,
-                    'max_tokens' => $maxTokens,
+                    'max_tokens'  => $maxTokens,
                 ],
                 'groq' => [
-                    'model' => $this->data['model']['value'] ?? 'llama-3.3-70b-versatile',
-                    'messages' => $messages,
+                    'model'       => $this->data['model']['value'] ?? 'qwen/qwen3.8-27b',
+                    'messages'    => $messages,
                     'temperature' => 0.7,
-                    'max_tokens' => $maxTokens,
+                    'max_tokens'  => $maxTokens,
+                ],
+                'openrouter' => [
+                    'model'       => $this->data['model']['value'] ?? 'deepseek/deepseek-r1:free',
+                    'messages'    => $messages,
+                    'temperature' => 0.7,
+                    'max_tokens'  => $maxTokens,
                 ],
                 'experientiallabs' => [
-                    'model' => $this->data['model']['value'] ?? 'gpt-5.6-luna',
-                    'messages' => $messages,
+                    'model'      => $this->data['model']['value'] ?? 'gpt-5.6-luna',
+                    'messages'   => $messages,
                     'max_tokens' => $maxTokens,
                 ],
                 default => [
-                    'model' => 'llama-3.3-70b-versatile',
-                    'messages' => $messages,
+                    'model'      => 'qwen/qwen3.8-27b',
+                    'messages'   => $messages,
                     'max_tokens' => $maxTokens,
                 ],
             };
 
             try {
+                $extraHeaders = $platform === 'openrouter' ? [
+                    'HTTP-Referer' => config('app.url', 'https://nestifytech.laravel.cloud'),
+                    'X-Title'      => 'NestifyTech AI',
+                ] : [];
+
                 $response = Http::timeout(15)
                     ->connectTimeout(5)
                     ->withToken($apiKey)
+                    ->withHeaders($extraHeaders)
                     ->acceptJson()
                     ->post($endpoint, $payload);
 

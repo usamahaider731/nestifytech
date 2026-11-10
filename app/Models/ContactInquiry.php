@@ -18,9 +18,13 @@ class ContactInquiry extends Model
         'subject',
         'message',
         'status',
+        'priority',
+        'is_starred',
+        'assigned_to',
         'ip_address',
         'user_agent',
         'admin_notes',
+        'admin_reply',
         'replied_at',
     ];
 
@@ -28,5 +32,6 @@ class ContactInquiry extends Model
         'replied_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'is_starred'  => 'boolean',
     ];
 }

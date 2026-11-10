@@ -275,6 +275,9 @@ Route::prefix('/admin')->middleware(['auth', 'verified'])->group(function () {
     Route::prefix('/contact-inquiries')->controller(ContactController::class)->group(function () {
         Route::get('/', 'adminIndex')->name('admin.contact.index');
         Route::post('/settings', 'adminUpdateSettings')->name('admin.contact.settings');
+        Route::post('/bulk-action', 'adminBulkAction')->name('admin.contact.bulk');
+        Route::get('/export-csv', 'adminExportCsv')->name('admin.contact.export');
+        Route::post('/{id}/toggle-star', 'adminToggleStar')->name('admin.contact.toggle-star');
         Route::put('/{id}', 'adminUpdate')->name('admin.contact.update');
         Route::delete('/{id}', 'adminDestroy')->name('admin.contact.destroy');
     });

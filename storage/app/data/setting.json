@@ -606,26 +606,37 @@
             "searchable": false,
             "search": false,
             "options": {
-                "openai": {
-                    "label": "Open AI",
-                    "value": "openai"
-                },
                 "groq": {
-                    "label": "Groq",
+                    "label": "Groq (Free)",
                     "value": "groq"
+                },
+                "openrouter": {
+                    "label": "OpenRouter (Free Models)",
+                    "value": "openrouter"
+                },
+                "openai": {
+                    "label": "Open AI (Paid)",
+                    "value": "openai"
                 },
                 "experientiallabs": {
                     "label": "Experientiallabs",
                     "value": "experientiallabs"
                 }
             },
-            "value": "experientiallabs"
+            "value": "groq"
         },
         "api_key": {
-            "value": "xpl_7b9416585ae2f56dfd31485f0779986238e2141b",
-            "label": "Api Key",
+            "value": "",
+            "label": "Api Key (Groq / OpenRouter / OpenAI)",
             "type": "text",
             "style": "2"
+        },
+        "model": {
+            "value": "qwen/qwen3.8-27b",
+            "label": "AI Model (e.g. qwen/qwen3.8-27b for Groq, deepseek/deepseek-r1:free for OpenRouter)",
+            "type": "text",
+            "style": "2",
+            "placeholder": "qwen/qwen3.8-27b"
         },
         "description_prompt": {
             "value": "Write an SEO-optimized product description between 100 and 350 characters.\n\nProduct Title: {title}\nBrand: {brand}\nCategory: {category}\n\nInclude:\n\nA meta description (maximum 160 characters)\n\nBullet-point features\n\nA short Benefits section explaining customer value\n\n2 short FAQs related to the product\n\nTone should be human-friendly, clear, and professional.\nAvoid unnecessary fluff. Make it suitable for an e-commerce product page.",

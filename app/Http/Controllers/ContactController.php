@@ -21,7 +21,6 @@ class ContactController extends Controller
     {
         // 1. Spam bot honeypot protection (hidden field)
         if ($request->filled('website_hp')) {
-            // Silently pretend success to trick bots
             return back()->with('success', 'Thank you! Your message has been sent successfully.');
         }
 
@@ -50,7 +49,14 @@ class ContactController extends Controller
             'message.min'      => 'Message must be at least 10 characters long.',
         ]);
 
-        // 4. Save into database
+        // 4. Auto-detect priority from keywords
+        $priority = 'normal';
+        $text = strtolower(($validated['message'] ?? '') . ' ' . ($validated['subject'] ?? ''));
+        foreach (['urgent', 'asap', 'immediately', 'emergency', 'critical'] as $kw) {
+            if (str_contains($text, $kw)) { $priority = 'urgent'; break; }
+        }
+
+        // 5. Save into database
         $inquiry = ContactInquiry::create([
             'name'       => trim($validated['name']),
             'email'      => strtolower(trim($validated['email'])),
@@ -58,52 +64,32 @@ class ContactController extends Controller
             'subject'    => $validated['subject'] ? trim($validated['subject']) : null,
             'message'    => trim($validated['message']),
             'status'     => 'new',
+            'priority'   => $priority,
             'ip_address' => $request->ip(),
             'user_agent' => substr((string) $request->userAgent(), 0, 500),
         ]);
 
-        // 5. Send dynamic emails according to Admin Email Settings
+        // 6. Send emails
         $settingFile = storage_path('app/data/setting.json');
-        $settings = File::exists($settingFile) ? json_decode(File::get($settingFile), true) : [];
+        $settings    = File::exists($settingFile) ? json_decode(File::get($settingFile), true) : [];
+        $mailConfig  = $settings['mail'] ?? [];
+        $siteConfig  = $settings['site'] ?? [];
 
-        $mailConfig = $settings['mail'] ?? [];
-        $siteConfig = $settings['site'] ?? [];
+        $adminRecipient = $mailConfig['contact_recipient_email']['value']
+            ?? $siteConfig['email']['value']
+            ?? $mailConfig['mail_from_address']['value']
+            ?? config('mail.from.address', 'info@nestifytech.com');
 
-        // Determine destination admin email (priority: contact_recipient_email > site.email > mail_from_address)
-        $adminRecipient = $mailConfig['contact_recipient_email']['value'] ?? null;
-        if (empty($adminRecipient)) {
-            $adminRecipient = $siteConfig['email']['value'] ?? null;
-        }
-        if (empty($adminRecipient)) {
-            $adminRecipient = $mailConfig['mail_from_address']['value'] ?? null;
-        }
-        if (empty($adminRecipient)) {
-            $adminRecipient = config('mail.from.address', 'info@nestifytech.com');
-        }
-
-        $mailEnabled = filter_var($mailConfig['mail_enabled']['value'] ?? true, FILTER_VALIDATE_BOOLEAN);
+        $mailEnabled      = filter_var($mailConfig['mail_enabled']['value'] ?? true, FILTER_VALIDATE_BOOLEAN);
         $autoReplyEnabled = filter_var($mailConfig['contact_autoreply_enabled']['value'] ?? true, FILTER_VALIDATE_BOOLEAN);
 
         if ($mailEnabled) {
-            // Notify Admin / Support Inbox
-            try {
-                Mail::to($adminRecipient)->send(new ContactInquiryAdminMail($inquiry));
-            } catch (\Throwable $e) {
-                Log::error('Failed sending contact inquiry notification to admin: ' . $e->getMessage(), [
-                    'recipient' => $adminRecipient,
-                    'inquiry_id' => $inquiry->id,
-                ]);
+            try { Mail::to($adminRecipient)->send(new ContactInquiryAdminMail($inquiry)); } catch (\Throwable $e) {
+                Log::error('Admin mail failed: ' . $e->getMessage(), ['inquiry_id' => $inquiry->id]);
             }
-
-            // Send confirmation auto-reply to client
-            if ($autoReplyEnabled && !empty($inquiry->email)) {
-                try {
-                    Mail::to($inquiry->email)->send(new ContactInquiryAutoReplyMail($inquiry));
-                } catch (\Throwable $e) {
-                    Log::error('Failed sending contact inquiry auto-reply to client: ' . $e->getMessage(), [
-                        'client_email' => $inquiry->email,
-                        'inquiry_id'   => $inquiry->id,
-                    ]);
+            if ($autoReplyEnabled) {
+                try { Mail::to($inquiry->email)->send(new ContactInquiryAutoReplyMail($inquiry)); } catch (\Throwable $e) {
+                    Log::error('Auto-reply failed: ' . $e->getMessage(), ['inquiry_id' => $inquiry->id]);
                 }
             }
         }
@@ -119,13 +105,13 @@ class ContactController extends Controller
         $query = ContactInquiry::query();
 
         if ($request->filled('search')) {
-            $search = trim($request->search);
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('subject', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%")
-                  ->orWhere('message', 'like', "%{$search}%");
+            $s = trim($request->search);
+            $query->where(function ($q) use ($s) {
+                $q->where('name', 'like', "%{$s}%")
+                  ->orWhere('email', 'like', "%{$s}%")
+                  ->orWhere('subject', 'like', "%{$s}%")
+                  ->orWhere('phone', 'like', "%{$s}%")
+                  ->orWhere('message', 'like', "%{$s}%");
             });
         }
 
@@ -133,7 +119,19 @@ class ContactController extends Controller
             $query->where('status', $request->status);
         }
 
-        $inquiries = $query->orderBy('id', 'desc')->paginate(15)->withQueryString();
+        if ($request->filled('priority') && $request->priority !== 'all') {
+            $query->where('priority', $request->priority);
+        }
+
+        if ($request->starred === 'true') {
+            $query->where('is_starred', true);
+        }
+
+        // Urgent first, then by newest
+        $query->orderByRaw("CASE priority WHEN 'urgent' THEN 0 WHEN 'normal' THEN 1 ELSE 2 END")
+              ->orderBy('id', 'desc');
+
+        $inquiries = $query->paginate(15)->withQueryString();
 
         $stats = [
             'total'    => ContactInquiry::count(),
@@ -141,13 +139,13 @@ class ContactController extends Controller
             'read'     => ContactInquiry::where('status', 'read')->count(),
             'replied'  => ContactInquiry::where('status', 'replied')->count(),
             'archived' => ContactInquiry::where('status', 'archived')->count(),
+            'urgent'   => ContactInquiry::where('priority', 'urgent')->whereIn('status', ['new', 'read'])->count(),
+            'starred'  => ContactInquiry::where('is_starred', true)->count(),
         ];
 
-        // Retrieve current contact settings for admin configuration modal/quick access
-        $settingFile = storage_path('app/data/setting.json');
-        $settings = File::exists($settingFile) ? json_decode(File::get($settingFile), true) : [];
-        $mailConfig = $settings['mail'] ?? [];
-
+        $settingFile     = storage_path('app/data/setting.json');
+        $settings        = File::exists($settingFile) ? json_decode(File::get($settingFile), true) : [];
+        $mailConfig      = $settings['mail'] ?? [];
         $contactSettings = [
             'recipient_email'   => $mailConfig['contact_recipient_email']['value'] ?? ($settings['site']['email']['value'] ?? 'support@nestifytech.com'),
             'autoreply_enabled' => filter_var($mailConfig['contact_autoreply_enabled']['value'] ?? true, FILTER_VALIDATE_BOOLEAN),
@@ -159,35 +157,194 @@ class ContactController extends Controller
         return Inertia::render('Admin/Contact/Index', [
             'inquiries'       => $inquiries,
             'stats'           => $stats,
-            'filters'         => $request->only(['search', 'status']),
+            'filters'         => $request->only(['search', 'status', 'priority', 'starred']),
             'contactSettings' => $contactSettings,
         ]);
     }
 
     /**
-     * Admin update inquiry status and notes.
+     * Admin update inquiry (status, notes, reply, priority, star, assigned_to).
      */
     public function adminUpdate(Request $request, $id)
     {
-        $inquiry = ContactInquiry::findOrFail($id);
-
+        $inquiry  = ContactInquiry::findOrFail($id);
         $validated = $request->validate([
             'status'      => ['required', 'in:new,read,replied,archived'],
             'admin_notes' => ['nullable', 'string', 'max:2000'],
+            'admin_reply' => ['nullable', 'string', 'max:5000'],
+            'priority'    => ['nullable', 'in:low,normal,urgent'],
+            'is_starred'  => ['nullable', 'boolean'],
+            'assigned_to' => ['nullable', 'string', 'max:150'],
         ]);
 
-        $updateData = [
+        $data = [
             'status'      => $validated['status'],
             'admin_notes' => $validated['admin_notes'] ?? $inquiry->admin_notes,
+            'admin_reply' => $validated['admin_reply'] ?? $inquiry->admin_reply,
+            'priority'    => $validated['priority'] ?? ($inquiry->priority ?? 'normal'),
+            'is_starred'  => $validated['is_starred'] ?? $inquiry->is_starred,
+            'assigned_to' => $validated['assigned_to'] ?? $inquiry->assigned_to,
         ];
 
         if ($validated['status'] === 'replied' && !$inquiry->replied_at) {
-            $updateData['replied_at'] = now();
+            $data['replied_at'] = now();
         }
 
-        $inquiry->update($updateData);
+        $inquiry->update($data);
+
+        // Send reply email to customer if admin_reply was filled
+        if (!empty($validated['admin_reply'])) {
+            $this->sendAdminReplyEmail($inquiry, $validated['admin_reply']);
+        }
 
         return back()->with('success', 'Inquiry updated successfully.');
+    }
+
+    /**
+     * Send reply email from admin to customer.
+     */
+    protected function sendAdminReplyEmail(ContactInquiry $inquiry, string $replyText): void
+    {
+        $settingFile = storage_path('app/data/setting.json');
+        $settings    = File::exists($settingFile) ? json_decode(File::get($settingFile), true) : [];
+        $mailConfig  = $settings['mail'] ?? [];
+        $siteConfig  = $settings['site'] ?? [];
+        $mailEnabled = filter_var($mailConfig['mail_enabled']['value'] ?? true, FILTER_VALIDATE_BOOLEAN);
+
+        if (!$mailEnabled) return;
+
+        $fromName    = $siteConfig['name']['value'] ?? 'NestifyTech Support';
+        $fromAddress = $mailConfig['mail_from_address']['value'] ?? config('mail.from.address');
+
+        try {
+            Mail::send([], [], function ($message) use ($inquiry, $replyText, $fromName, $fromAddress) {
+                $message->to($inquiry->email, $inquiry->name)
+                    ->from($fromAddress, $fromName)
+                    ->subject('Re: ' . ($inquiry->subject ?: 'Your Inquiry – ' . $fromName))
+                    ->html(
+                        "<div style='font-family:sans-serif;max-width:600px;margin:auto'>" .
+                        "<p>Dear <strong>{$inquiry->name}</strong>,</p>" .
+                        "<p>Thank you for reaching out. Here is our response to your inquiry:</p>" .
+                        "<div style='background:#f5f5f5;border-left:4px solid #7367f0;padding:16px;border-radius:4px;margin:16px 0'>" .
+                        nl2br(htmlspecialchars($replyText)) .
+                        "</div>" .
+                        "<p>If you have further questions, feel free to contact us again.</p>" .
+                        "<p>Warm regards,<br><strong>{$fromName}</strong></p>" .
+                        "<hr style='margin-top:30px'><p style='font-size:11px;color:#999'>This is a reply to your inquiry submitted on " .
+                        $inquiry->created_at->format('M d, Y') . ".</p></div>"
+                    );
+            });
+        } catch (\Throwable $e) {
+            Log::error('Admin reply email failed: ' . $e->getMessage(), ['inquiry_id' => $inquiry->id]);
+        }
+    }
+
+    /**
+     * Toggle starred status (AJAX).
+     */
+    public function adminToggleStar($id)
+    {
+        $inquiry = ContactInquiry::findOrFail($id);
+        $inquiry->update(['is_starred' => !$inquiry->is_starred]);
+
+        return response()->json(['status' => 'success', 'is_starred' => $inquiry->is_starred]);
+    }
+
+    /**
+     * Bulk actions on selected inquiries.
+     */
+    public function adminBulkAction(Request $request)
+    {
+        $validated = $request->validate([
+            'action' => ['required', 'in:mark_read,mark_replied,archive,delete,mark_starred,mark_unstarred'],
+            'ids'    => ['required', 'array', 'min:1'],
+            'ids.*'  => ['integer'],
+        ]);
+
+        $ids    = $validated['ids'];
+        $count  = count($ids);
+
+        switch ($validated['action']) {
+            case 'mark_read':
+                ContactInquiry::whereIn('id', $ids)->update(['status' => 'read']);
+                $msg = "{$count} inquiries marked as read.";
+                break;
+            case 'mark_replied':
+                ContactInquiry::whereIn('id', $ids)->update(['status' => 'replied', 'replied_at' => now()]);
+                $msg = "{$count} inquiries marked as replied.";
+                break;
+            case 'archive':
+                ContactInquiry::whereIn('id', $ids)->update(['status' => 'archived']);
+                $msg = "{$count} inquiries archived.";
+                break;
+            case 'mark_starred':
+                ContactInquiry::whereIn('id', $ids)->update(['is_starred' => true]);
+                $msg = "{$count} inquiries starred.";
+                break;
+            case 'mark_unstarred':
+                ContactInquiry::whereIn('id', $ids)->update(['is_starred' => false]);
+                $msg = "{$count} inquiries unstarred.";
+                break;
+            case 'delete':
+                ContactInquiry::whereIn('id', $ids)->delete();
+                $msg = "{$count} inquiries deleted.";
+                break;
+            default:
+                $msg = 'Bulk action completed.';
+        }
+
+        return back()->with('success', $msg);
+    }
+
+    /**
+     * Export inquiries as CSV download.
+     */
+    public function adminExportCsv(Request $request)
+    {
+        $query = ContactInquiry::query();
+
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('priority') && $request->priority !== 'all') {
+            $query->where('priority', $request->priority);
+        }
+
+        $inquiries = $query->orderBy('id', 'desc')->get();
+
+        $headers = [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="contact_inquiries_' . now()->format('Y-m-d') . '.csv"',
+            'Cache-Control'       => 'no-cache',
+        ];
+
+        $callback = function () use ($inquiries) {
+            $handle = fopen('php://output', 'w');
+            fputs($handle, "\xEF\xBB\xBF"); // UTF-8 BOM for Excel
+            fputcsv($handle, ['ID', 'Name', 'Email', 'Phone', 'Subject', 'Message', 'Status', 'Priority', 'Starred', 'Assigned To', 'Admin Notes', 'Admin Reply', 'Replied At', 'Received At']);
+
+            foreach ($inquiries as $inq) {
+                fputcsv($handle, [
+                    $inq->id,
+                    $inq->name,
+                    $inq->email,
+                    $inq->phone ?? '',
+                    $inq->subject ?? '',
+                    $inq->message,
+                    $inq->status,
+                    $inq->priority ?? 'normal',
+                    ($inq->is_starred ?? false) ? 'Yes' : 'No',
+                    $inq->assigned_to ?? '',
+                    $inq->admin_notes ?? '',
+                    $inq->admin_reply ?? '',
+                    $inq->replied_at?->format('Y-m-d H:i') ?? '',
+                    $inq->created_at->format('Y-m-d H:i'),
+                ]);
+            }
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     /**
@@ -201,36 +358,18 @@ class ContactController extends Controller
         ]);
 
         $settingFile = storage_path('app/data/setting.json');
-        $settings = File::exists($settingFile) ? json_decode(File::get($settingFile), true) : [];
+        $settings    = File::exists($settingFile) ? json_decode(File::get($settingFile), true) : [];
 
-        if (!isset($settings['mail'])) {
-            $settings['mail'] = [];
-        }
+        if (!isset($settings['mail'])) $settings['mail'] = [];
 
-        if (!isset($settings['mail']['contact_recipient_email'])) {
-            $settings['mail']['contact_recipient_email'] = [
-                'label'       => 'Contact Form Recipient Email (Admin Inbox)',
-                'type'        => 'text',
-                'style'       => 2,
-                'placeholder' => 'support@nestifytech.com',
-                'description' => 'Email address where inquiries submitted from the Contact Us form are delivered.',
-                'value'       => $validated['recipient_email'],
-            ];
-        } else {
-            $settings['mail']['contact_recipient_email']['value'] = $validated['recipient_email'];
-        }
-
-        if (!isset($settings['mail']['contact_autoreply_enabled'])) {
-            $settings['mail']['contact_autoreply_enabled'] = [
-                'label'       => 'Send Confirmation Email to Customer',
-                'type'        => 'checkbox',
-                'style'       => 1,
-                'value_label' => 'Enable automatic receipt acknowledgment email to client',
-                'value'       => (bool) $validated['autoreply_enabled'],
-            ];
-        } else {
-            $settings['mail']['contact_autoreply_enabled']['value'] = (bool) $validated['autoreply_enabled'];
-        }
+        $settings['mail']['contact_recipient_email'] = array_merge(
+            $settings['mail']['contact_recipient_email'] ?? [],
+            ['label' => 'Contact Form Recipient Email', 'type' => 'text', 'value' => $validated['recipient_email']]
+        );
+        $settings['mail']['contact_autoreply_enabled'] = array_merge(
+            $settings['mail']['contact_autoreply_enabled'] ?? [],
+            ['label' => 'Send Confirmation Email to Customer', 'type' => 'checkbox', 'value' => (bool) $validated['autoreply_enabled']]
+        );
 
         File::put($settingFile, json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
@@ -238,13 +377,11 @@ class ContactController extends Controller
     }
 
     /**
-     * Admin delete inquiry.
+     * Admin delete single inquiry.
      */
     public function adminDestroy($id)
     {
-        $inquiry = ContactInquiry::findOrFail($id);
-        $inquiry->delete();
-
+        ContactInquiry::findOrFail($id)->delete();
         return back()->with('success', 'Inquiry deleted successfully.');
     }
 }
