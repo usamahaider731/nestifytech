@@ -3,32 +3,10 @@ import {
     RiUpload2Fill, 
     RiSparklingLine, 
     RiUserSmileLine, 
-    RiMagicLine, 
     RiCloseLine, 
     RiCheckLine,
-    RiRefreshLine,
-    RiImageAddLine
+    RiRefreshLine
 } from 'react-icons/ri';
-
-const AI_STYLES = [
-    { id: 'banner_ecommerce', name: '🏷️ E-Commerce Promo Banner', promptSuffix: 'wide e-commerce hero web banner, high quality commercial advertisement design, modern digital marketing layout, crisp vibrant visual, ultra wide 16:9 banner standard, professional 8k' },
-    { id: 'banner_lifestyle', name: '🌿 Aesthetic Category Hero', promptSuffix: 'wide promotional lifestyle banner, elegant retail collection display, soft ambient studio lighting, clean spacious backdrop suitable for web store header, 8k resolution' },
-    { id: 'photorealistic', name: '📸 Studio Product Shot', promptSuffix: 'professional commercial product photography, studio lighting, crisp focus, 8k uhd, clean isolated background' },
-    { id: 'ecommerce', name: '🛍️ Clean E-Commerce White', promptSuffix: 'professional e-commerce product photograph, pure white background, sharp details, commercial catalogue standard' },
-    { id: 'lifestyle', name: '🌿 Aesthetic Lifestyle', promptSuffix: 'lifestyle product photography, elegant modern ambient interior, soft natural sunlight, aesthetic depth of field' },
-    { id: 'cinematic', name: '🎬 Cinematic & Dramatic', promptSuffix: 'dramatic lighting, cinematic commercial render, high-end luxury brand presentation, sharp textures' },
-    { id: 'vector_logo', name: '🎨 Minimalist Vector Logo', promptSuffix: 'minimalist vector flat logo, modern tech brand icon, sharp geometric emblem, white background, svg style graphic design' },
-    { id: 'avatar_person', name: '👤 Realistic Avatar', promptSuffix: 'professional user profile avatar, friendly warm smile, modern studio lighting' },
-];
-
-const SAMPLE_PRODUCT_IDEAS = [
-    'Wireless noise cancelling headphones sleek black',
-    'Luxury automatic mechanical watch silver',
-    'Modern ergonomic running shoes neon accents',
-    'Smartwatch with AMOLED display and leather strap',
-    'Minimalist ceramic coffee mug pastel tones',
-    'High performance gaming laptop RGB keyboard',
-];
 
 const ImageUploader = React.memo(function ImageUploader({
     className = '',
@@ -43,21 +21,7 @@ const ImageUploader = React.memo(function ImageUploader({
 }) {
     const [images, setImages] = useState([]);
     const [generatingAvatar, setGeneratingAvatar] = useState(false);
-    const [generatingAiImage, setGeneratingAiImage] = useState(false);
-    const [showAiModal, setShowAiModal] = useState(false);
-    const [activeTab, setActiveTab] = useState('stock'); // 'stock' (100% real commercial photos) or 'ai_flux' (neural generation)
-    const [aiPrompt, setAiPrompt] = useState('');
-    const [selectedStyle, setSelectedStyle] = useState('banner_ecommerce');
-    const [aiError, setAiError] = useState(null);
     const initializedRef = useRef(false);
-
-    // Auto-detect context type (logo, banner, category, product, avatar)
-    const normalizedName = (name + ' ' + fieldLabel).toLowerCase();
-    const isLogo = normalizedName.includes('logo') || normalizedName.includes('favicon');
-    const isBanner = normalizedName.includes('banner') || normalizedName.includes('slider');
-    const isCategory = normalizedName.includes('category') || normalizedName.includes('brand');
-
-    const contextDisplayName = contextTitle || fieldLabel || 'Item';
 
     const formatFileSize = (bytes) => {
         if (!bytes) return '0 Bytes';
@@ -65,83 +29,6 @@ const ImageUploader = React.memo(function ImageUploader({
         const sizes = ['Bytes', 'KB', 'MB', 'GB'];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
-    };
-
-    // 🤖 AI Neural Image Generator (Pollinations Flux / SDXL High-Def Engine)
-    const handleGenerateAiProductImage = async (e) => {
-        if (e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-        if (!aiPrompt.trim()) {
-            setAiError('Please enter a description or idea.');
-            return;
-        }
-
-        setGeneratingAiImage(true);
-        setAiError(null);
-
-        try {
-            const styleObj = AI_STYLES.find(s => s.id === selectedStyle) || AI_STYLES[0];
-            const fullPrompt = `${aiPrompt.trim()}, ${styleObj.promptSuffix}`;
-            const seed = Math.floor(Math.random() * 1000000);
-
-            // Wide aspect ratio for banners (1280x500 or 1200x630), square (800x800) for products/logos
-            const width = isBanner ? 1280 : 800;
-            const height = isBanner ? 500 : 800;
-
-            let blob = null;
-            let fileExt = 'jpg';
-
-            if (activeTab === 'stock') {
-                // High-resolution real photography curated from Unsplash Source/Pexels catalog
-                const searchKeywords = encodeURIComponent(aiPrompt.trim().replace(/[^a-zA-Z0-9\s]/g, ''));
-                const stockUrl = `https://images.unsplash.com/photo-${isBanner ? '1505740420928-5e560c06d30e' : '1523275335684-37898b6baf30'}?auto=format&fit=crop&w=${width}&h=${height}&q=85`;
-                // Alternatively use direct Unsplash source topic if available or query-based high-res stream
-                const dynamicStockUrl = `https://pollinations.ai/p/${encodeURIComponent(aiPrompt.trim())}?width=${width}&height=${height}&seed=${seed}&model=flux&enhance=true`;
-                
-                try {
-                    const stockRes = await fetch(dynamicStockUrl);
-                    if (stockRes.ok) {
-                        blob = await stockRes.blob();
-                    }
-                } catch (e) {
-                    // Fallback to stock photo
-                }
-            }
-
-            if (!blob) {
-                // Direct generative call to high-definition FLUX engine
-                const aiImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=${width}&height=${height}&seed=${seed}&model=flux&nologo=true&enhance=true`;
-                const res = await fetch(aiImageUrl);
-                if (!res.ok) {
-                    throw new Error('Image generation service timed out. Please try again.');
-                }
-                blob = await res.blob();
-            }
-            const safeName = aiPrompt.trim().toLowerCase().replace(/[^a-z0-9]/g, '-').slice(0, 30) || (isBanner ? 'category-banner' : 'ai-image');
-            const file = new File([blob], `${safeName}-${seed}.jpg`, { type: 'image/jpeg' });
-
-            const preview = {
-                url: URL.createObjectURL(file),
-                name: file.name,
-                size: file.size,
-                isLocal: true,
-                file: file,
-            };
-
-            const updatedImages = multiple ? [...images, preview] : [preview];
-            setImages(updatedImages);
-            onChange(multiple ? updatedImages.map(img => img.file).filter(Boolean) : file);
-
-            setShowAiModal(false);
-            setAiPrompt('');
-        } catch (err) {
-            console.error('Failed to generate AI image', err);
-            setAiError(err.message || 'Failed to generate AI image.');
-        } finally {
-            setGeneratingAiImage(false);
-        }
     };
 
     const handleAutoGenerateAvatar = async (e) => {
@@ -330,52 +217,9 @@ const ImageUploader = React.memo(function ImageUploader({
                 )}
             </label>
 
-            {/* 🌟 Floating AI Action Buttons (Product Image & Avatar) */}
-            <div className="mt-3 flex items-center gap-2 flex-wrap">
-                {/* 🎨 AI Product Image Generator Button */}
-                <button
-                    type="button"
-                    onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        // Pre-fill context-aware prompt if not already typed
-                        if (!aiPrompt) {
-                            const autoPrompt = isLogo
-                                ? `${contextDisplayName} logo, modern minimalist vector tech brand identity icon`
-                                : isBanner
-                                ? `${contextDisplayName} promotional banner, modern online shopping hero banner with trending ${contextDisplayName} items, commercial retail presentation`
-                                : isCategory
-                                ? `${contextDisplayName} collection banner, modern tech and electronics display showcase, high end retail presentation`
-                                : contextTitle
-                                ? `${contextTitle}, professional commercial product photography, studio lighting`
-                                : '';
-                            setAiPrompt(autoPrompt);
-                            if (isBanner || isCategory) {
-                                setSelectedStyle('banner_ecommerce');
-                            } else if (isLogo) {
-                                setSelectedStyle('vector_logo');
-                            }
-                        }
-                        setShowAiModal(true);
-                    }}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-xs transition-all cursor-pointer"
-                >
-                    <RiMagicLine className="size-4 animate-pulse" />
-                    <span>
-                        {isLogo 
-                            ? 'Generate Logo with AI' 
-                            : isBanner 
-                            ? 'Generate Banner with AI (16:9 Wide)' 
-                            : isCategory 
-                            ? `Generate Category Banner (${contextDisplayName})` 
-                            : contextTitle 
-                            ? `Generate AI Image for "${contextTitle.length > 20 ? contextTitle.slice(0, 18) + '...' : contextTitle}"` 
-                            : 'Generate Image with AI'}
-                    </span>
-                </button>
-
-                {/* 👤 Auto Avatar Button */}
-                {autoAvatar && (
+            {/* Auto Avatar Button for user profile / avatars */}
+            {autoAvatar && (
+                <div className="mt-3 flex items-center gap-2 flex-wrap">
                     <button
                         type="button"
                         onClick={handleAutoGenerateAvatar}
@@ -385,166 +229,6 @@ const ImageUploader = React.memo(function ImageUploader({
                         <RiSparklingLine className={`size-3.5 ${generatingAvatar ? 'animate-spin' : ''}`} />
                         {generatingAvatar ? 'Generating Avatar...' : 'Auto-Generate Avatar'}
                     </button>
-                )}
-            </div>
-
-            {/* 🔹 Full AI Product Image Generator Modal */}
-            {showAiModal && (
-                <div 
-                    className="fixed inset-0 z-[9999] bg-black/75 backdrop-blur-xs flex items-center justify-center p-4"
-                    onClick={() => setShowAiModal(false)}
-                >
-                    <div 
-                        className="bg-bg border border-border/80 rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl text-heading animate-scaleIn overflow-y-auto max-h-[80vh]"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        {/* Header */}
-                        <div className="flex items-center justify-between border-b border-border/50 pb-3">
-                            <div className="flex items-center gap-2">
-                                <span className="p-2 rounded-xl bg-purple-500/10 text-purple-500">
-                                    <RiImageAddLine className="size-5" />
-                                </span>
-                                <div>
-                                    <h3 className="font-bold text-sm text-heading font-oswald uppercase">
-                                        {isLogo ? 'AI Logo Generator' : isBanner ? 'AI Banner Generator' : 'AI Product Image Generator'}
-                                    </h3>
-                                    <p className="text-[11px] text-res/70">
-                                        {contextDisplayName ? (
-                                            <>Generating for: <strong className="text-purple-500 font-semibold">{contextDisplayName}</strong></>
-                                        ) : (
-                                            'Generate high-resolution e-commerce images instantly'
-                                        )}
-                                    </p>
-                                </div>
-                            </div>
-                            <button
-                                type="button"
-                                onClick={() => setShowAiModal(false)}
-                                className="p-1 rounded-lg text-res hover:text-heading hover:bg-dynamic/40"
-                            >
-                                <RiCloseLine size={20} />
-                            </button>
-                        </div>
-
-                        {/* Mode Selector Tabs (Studio Stock vs FLUX AI) */}
-                        <div className="flex rounded-xl bg-dynamic/20 p-1 border border-border/40 gap-1">
-                            <button
-                                type="button"
-                                onClick={() => setActiveTab('stock')}
-                                className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all ${
-                                    activeTab === 'stock'
-                                        ? 'bg-purple-600 text-white shadow-xs'
-                                        : 'text-res hover:text-heading hover:bg-dynamic/40'
-                                }`}
-                            >
-                                🌟 Studio Commercial Stock (Unsplash High-Res)
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setActiveTab('ai_flux')}
-                                className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all ${
-                                    activeTab === 'ai_flux'
-                                        ? 'bg-purple-600 text-white shadow-xs'
-                                        : 'text-res hover:text-heading hover:bg-dynamic/40'
-                                }`}
-                            >
-                                ⚡ FLUX.1 Neural Engine
-                            </button>
-                        </div>
-
-                        {/* Prompt Input */}
-                        <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-heading uppercase tracking-wider block">
-                                {activeTab === 'stock' ? 'Search Keyword / Topic' : 'Product Description / Prompt'}
-                            </label>
-                            <textarea
-                                rows={2}
-                                value={aiPrompt}
-                                onChange={(e) => setAiPrompt(e.target.value)}
-                                placeholder="e.g. Modern wireless gaming headphones matte black with neon blue LED trim on white background..."
-                                className="w-full bg-dynamic/20 border border-border/60 rounded-xl p-3 text-xs text-heading focus:outline-none focus:border-primary resize-none placeholder:text-res/50"
-                            />
-                        </div>
-
-                        {/* Idea Pills */}
-                        <div className="space-y-1.5">
-                            <span className="text-[10px] font-bold text-res/70 uppercase tracking-wider block">
-                                Quick Product Ideas:
-                            </span>
-                            <div className="flex flex-wrap gap-1.5">
-                                {SAMPLE_PRODUCT_IDEAS.map((idea, i) => (
-                                    <button
-                                        key={i}
-                                        type="button"
-                                        onClick={() => setAiPrompt(idea)}
-                                        className="text-[10px] px-2.5 py-1 rounded-full bg-dynamic/30 hover:bg-dynamic/60 border border-border/40 text-res hover:text-heading truncate max-w-[260px] transition-all"
-                                    >
-                                        "{idea}"
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Style Selector */}
-                        <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-heading uppercase tracking-wider block">
-                                Photography & Render Style
-                            </label>
-                            <div className="grid grid-cols-2 gap-2">
-                                {AI_STYLES.map((st) => (
-                                    <button
-                                        key={st.id}
-                                        type="button"
-                                        onClick={() => setSelectedStyle(st.id)}
-                                        className={`p-2.5 rounded-xl border text-left text-xs transition-all ${
-                                            selectedStyle === st.id
-                                                ? 'border-purple-500 bg-purple-500/10 text-purple-600 dark:text-purple-400 font-bold'
-                                                : 'border-border/60 bg-dynamic/10 hover:bg-dynamic/30 text-res'
-                                        }`}
-                                    >
-                                        <div className="font-semibold text-heading text-[11px]">{st.name}</div>
-                                        <div className="text-[9px] text-res/70 truncate mt-0.5">{st.promptSuffix.slice(0, 42)}...</div>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Error alert */}
-                        {aiError && (
-                            <div className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-xs">
-                                {aiError}
-                            </div>
-                        )}
-
-                        {/* Actions */}
-                        <div className="flex items-center justify-end gap-2 pt-3 border-t border-border/50">
-                            <button
-                                type="button"
-                                onClick={() => setShowAiModal(false)}
-                                className="px-4 py-2 rounded-xl border border-border/60 text-xs font-bold text-res hover:text-heading"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="button"
-                                onClick={handleGenerateAiProductImage}
-                                disabled={generatingAiImage || !aiPrompt.trim()}
-                                className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs uppercase tracking-wider shadow-sm shadow-purple-900/30 disabled:opacity-50"
-                            >
-                                {generatingAiImage ? (
-                                    <>
-                                        <RiSparklingLine className="size-4 animate-spin" />
-                                        <span>AI Rendering Image...</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <RiMagicLine className="size-4" />
-                                        <span>Generate & Use Image</span>
-                                    </>
-                                )}
-                            </button>
-                        </div>
-                    </div>
                 </div>
             )}
         </div>
