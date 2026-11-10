@@ -236,8 +236,10 @@ const FieldControls = ({
                     name={field.name}
                     multiple={!!field.multiple}
                     value={value}
+                    contextTitle={data.title || data.name || data.site_name || field.label || ''}
+                    fieldLabel={field.label || field.name || ''}
                     autoAvatar={field.auto_avatar ?? (field.name === 'image')}
-                    avatarSeed={data.name || data.email || ''}
+                    avatarSeed={data.name || data.email || data.title || ''}
                     onChange={(files) => updateField(field.name, files)}
                 />
             </div>

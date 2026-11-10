@@ -394,6 +394,8 @@ function Form({ Data = [], name = '', link = '', type = '', colorPalettes = {} }
                     <ImageUploader
                         name={key}
                         value={setting.value}
+                        contextTitle={data.name || setting.label || key}
+                        fieldLabel={setting.label || key}
                         onChange={(value) => handleChange({ target: { value } }, key)}
                     />
                 </div>

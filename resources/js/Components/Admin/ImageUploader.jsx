@@ -36,6 +36,8 @@ const ImageUploader = React.memo(function ImageUploader({
     multiple = false,
     autoAvatar = false,
     avatarSeed = '',
+    contextTitle = '',
+    fieldLabel = '',
 }) {
     const [images, setImages] = useState([]);
     const [generatingAvatar, setGeneratingAvatar] = useState(false);
@@ -45,6 +47,14 @@ const ImageUploader = React.memo(function ImageUploader({
     const [selectedStyle, setSelectedStyle] = useState('ecommerce');
     const [aiError, setAiError] = useState(null);
     const initializedRef = useRef(false);
+
+    // Auto-detect context type (logo, banner, category, product, avatar)
+    const normalizedName = (name + ' ' + fieldLabel).toLowerCase();
+    const isLogo = normalizedName.includes('logo') || normalizedName.includes('favicon');
+    const isBanner = normalizedName.includes('banner') || normalizedName.includes('slider');
+    const isCategory = normalizedName.includes('category') || normalizedName.includes('brand');
+
+    const contextDisplayName = contextTitle || fieldLabel || 'Item';
 
     const formatFileSize = (bytes) => {
         if (!bytes) return '0 Bytes';

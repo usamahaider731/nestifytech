@@ -40,7 +40,11 @@ const FrontendChatBot = () => {
                 setMessages(prev => [...prev, { role: 'assistant', content: 'I am sorry, but I am having trouble connecting right now.' }]);
             }
         } catch (error) {
-            setMessages(prev => [...prev, { role: 'assistant', content: 'Under maintenance. Please try again later.' }]);
+            console.error('Chatbot error:', error);
+            const errMsg = error?.response?.data?.message
+                || (error?.message?.includes('Network') ? 'Connection issue. Please check your internet and try again.' : null)
+                || 'Sorry, I could not reach the server. Please try again in a moment! 🙏';
+            setMessages(prev => [...prev, { role: 'assistant', content: errMsg }]);
         } finally {
             setLoading(false);
         }

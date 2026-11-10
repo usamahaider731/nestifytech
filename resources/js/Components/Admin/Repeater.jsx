@@ -181,6 +181,8 @@ function Repeater({ value = [], onChange, label = "Item", fields = [], dropdownO
                         name={`${field.name}-${index}`}
                         value={item[field.name]}
                         multiple={!!field.multiple}
+                        contextTitle={item.title || item.name || field.label || ''}
+                        fieldLabel={field.label || field.name || ''}
                         onChange={(val) => handleFieldChange(index, field.name, val)}
                     />
                 );
