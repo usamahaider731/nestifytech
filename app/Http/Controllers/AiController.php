@@ -253,15 +253,43 @@ class AiController extends Controller
     protected function buildPrompt(string $prompt, array $fields, string $type): string
     {
         if ($type === 'customer_chatbot') {
-            // Fetch live catalog summary from database
+            // Fetch live catalog summary with real pricing & stock from database
             $allProducts = DB::table('posts')
                 ->where('type', 'product')
                 ->where('status', 'publish')
                 ->get(['id', 'title', 'sku']);
 
-            $catalogList = $allProducts->map(function ($p) {
-                return "- {$p->title} (SKU: {$p->sku}, URL: /post/product/{$p->sku}/{$p->id})";
-            })->implode("\n");
+            $catalogItems = [];
+            foreach ($allProducts as $p) {
+                $meta = DB::table('post_meta')->where('post_id', $p->id)->pluck('value', 'key')->all();
+                
+                // Stock calculation
+                $varStock = (int) DB::table('post_variations')->where('post_id', $p->id)->sum('stock');
+                $metaStock = isset($meta['stock']) ? (int) $meta['stock'] : 0;
+                $effectiveStock = max($varStock, $metaStock);
+                $stockStatus = $effectiveStock > 0 ? "IN STOCK ({$effectiveStock} units available)" : "OUT OF STOCK (0 units available)";
+
+                // Price calculation
+                $sellingPrice = $meta['second_price'] ?? ($meta['first_price'] ?? null);
+                $originalPrice = $meta['first_price'] ?? null;
+                $varPrices = DB::table('post_variations')->where('post_id', $p->id)->pluck('price')->filter()->unique()->all();
+                
+                if (!empty($varPrices)) {
+                    $minP = min($varPrices);
+                    $maxP = max($varPrices);
+                    $priceStr = $minP === $maxP ? "PKR {$minP}" : "PKR {$minP} - PKR {$maxP}";
+                } elseif ($sellingPrice) {
+                    $priceStr = $originalPrice && $originalPrice > $sellingPrice 
+                        ? "PKR {$sellingPrice} (Discounted from PKR {$originalPrice})"
+                        : "PKR {$sellingPrice}";
+                } else {
+                    $priceStr = "Price on inquiry";
+                }
+
+                $catalogItems[] = "- Product: {$p->title}\n  Status: {$stockStatus}\n  Price: {$priceStr}\n  URL: /post/product/{$p->sku}/{$p->id}";
+            }
+
+            $catalogList = implode("\n\n", $catalogItems);
 
             $categories = DB::table('taxonomies')
                 ->where('type', 'category')
@@ -273,23 +301,25 @@ class AiController extends Controller
                 ->pluck('title')
                 ->implode(', ');
 
-            return "You are 'Nestify Assistant', a helpful, honest and direct e-commerce sales assistant for the online store 'NestifyTech'.
+            return "You are 'Nestify Assistant', a professional, accurate and honest e-commerce shopping assistant for the online store 'NestifyTech'.
 
-LIVE STORE CATALOG (THESE ARE THE ONLY PRODUCTS ACTUALLY IN OUR STORE):
+LIVE STORE INVENTORY, REAL-TIME PRICING & STOCK DATA:
 {$catalogList}
 
-CATEGORIES AVAILABLE:
+CATEGORIES IN STORE:
 {$categories}
 
-BRANDS AVAILABLE:
+BRANDS IN STORE:
 {$brands}
 
-STRICT OPERATING RULES:
-1. ONLY recommend products from the LIVE STORE CATALOG above. If a user asks for 'Samsung products', tell them EXACTLY what Samsung items we have (e.g. 'Samsung Galaxy S25 Ultra (12GB-256GB)' and 'Samsung Galaxy s22 ultra | 12GB Ram | official PTA approved').
-2. NEVER make up products, fictional accessories, or say you don't have access to the store's inventory. You HAVE the full live catalog above.
-3. If an item is NOT in our catalog, clearly state: 'We currently don't have [product] in stock, but here is what we do have: ...'.
-4. Provide the exact product name and direct link format if relevant.
-5. Be concise, friendly, and helpful.";
+CRITICAL RULES YOU MUST STRICTLY FOLLOW:
+1. ACCURATE STOCK CHECKS: Always check the 'Status' for each item above.
+   - For example: 'Samsung Galaxy S25 Ultra (12GB-256GB)' has 0 units and is OUT OF STOCK. If user asks if it's out of stock, say: 'Yes, the Samsung Galaxy S25 Ultra is currently OUT OF STOCK.'
+   - Never claim an item is in stock if its status says OUT OF STOCK.
+2. ACCURATE REAL-TIME PRICES: You HAVE the exact prices in PKR in the inventory list above. State the exact price when asked (e.g. S22 Ultra is PKR 146,000 - PKR 184,999, HP EliteBook is PKR 80,000, TCL TV is PKR 87,999). NEVER say you don't have access to pricing data.
+3. BUDGET RECOMMENDATIONS: When a customer asks for items in a price range (e.g. 20,000 to 250,000 PKR), look at the actual prices and recommend the matching IN-STOCK items with their exact prices.
+4. ONLY RECOMMEND STORE ITEMS: Only recommend products from the inventory above. Never invent products.
+5. BE CONCISE & HELPFUL: Provide direct clickable links like [Product Name](/post/product/SKU/ID).";
         }
 
         $context = '';
