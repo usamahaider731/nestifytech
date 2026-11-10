@@ -93,11 +93,11 @@
             "value": "250"
         },
         "delivery_role": {
-            "label": "Delivery Boy / Rider Staff Role",
+            "label": "Delivery Boy \/ Rider Staff Role",
             "type": "dropdown",
             "value": 2,
             "searchable": false,
-            "description": "Select which staff role is treated as Delivery Boy/Rider for order dispatch.",
+            "description": "Select which staff role is treated as Delivery Boy\/Rider for order dispatch.",
             "options": {
                 "model": "App\\Models\\Roles",
                 "type": "role",
@@ -132,35 +132,35 @@
                 {
                     "platform": "facebook",
                     "title": "Facebook",
-                    "url": "https://facebook.com/nestifytech",
+                    "url": "https:\/\/facebook.com\/nestifytech",
                     "icon": "ri-facebook-fill",
                     "status": "1"
                 },
                 {
                     "platform": "instagram",
                     "title": "Instagram",
-                    "url": "https://instagram.com/nestifytech",
+                    "url": "https:\/\/instagram.com\/nestifytech",
                     "icon": "ri-instagram-line",
                     "status": "1"
                 },
                 {
                     "platform": "tiktok",
                     "title": "TikTok",
-                    "url": "https://tiktok.com/@nestifytech",
+                    "url": "https:\/\/tiktok.com\/@nestifytech",
                     "icon": "ri-tiktok-line",
                     "status": "1"
                 },
                 {
                     "platform": "twitter",
                     "title": "X (Twitter)",
-                    "url": "https://x.com/nestifytech",
+                    "url": "https:\/\/x.com\/nestifytech",
                     "icon": "ri-twitter-x-line",
                     "status": "1"
                 },
                 {
                     "platform": "youtube",
                     "title": "YouTube",
-                    "url": "https://youtube.com/@nestifytech",
+                    "url": "https:\/\/youtube.com\/@nestifytech",
                     "icon": "ri-youtube-line",
                     "status": "1"
                 }
@@ -180,9 +180,9 @@
                 },
                 {
                     "name": "url",
-                    "label": "Profile / Page URL",
+                    "label": "Profile \/ Page URL",
                     "type": "text",
-                    "placeholder": "https://..."
+                    "placeholder": "https:\/\/..."
                 },
                 {
                     "name": "icon",
@@ -622,7 +622,7 @@
             "value": "experientiallabs"
         },
         "api_key": {
-            "value": "xpl_d80e303f1548890ba51b0d15468edcbbff60fe0e",
+            "value": "xpl_7b9416585ae2f56dfd31485f0779986238e2141b",
             "label": "Api Key",
             "type": "text",
             "style": "2"
@@ -662,7 +662,7 @@
                     "active": true,
                     "placement": "product_sidebar",
                     "ad_type": "image",
-                    "link": "/view/post/product/NT-1326932/2",
+                    "link": "\/view\/post\/product\/NT-1326932\/2",
                     "open_new_tab": true,
                     "iframe": null,
                     "html": null,
@@ -673,7 +673,7 @@
                     "active": true,
                     "placement": "product_bottom",
                     "ad_type": "image",
-                    "link": "http://nestifytech.localhost/post/product/NT-1326932/2",
+                    "link": "http:\/\/nestifytech.localhost\/post\/product\/NT-1326932\/2",
                     "open_new_tab": true,
                     "iframe": null,
                     "html": null,
@@ -684,7 +684,7 @@
                     "active": true,
                     "placement": "home_bottom",
                     "ad_type": "image",
-                    "link": "/view/post/product/NST-1260900004/6",
+                    "link": "\/view\/post\/product\/NST-1260900004\/6",
                     "open_new_tab": true,
                     "iframe": null,
                     "html": null,
@@ -695,7 +695,7 @@
                     "active": true,
                     "placement": "home_after_categories",
                     "ad_type": "image",
-                    "link": "/view/specific/classification/category/20/electronics",
+                    "link": "\/view\/specific\/classification\/category\/20\/electronics",
                     "open_new_tab": true,
                     "iframe": null,
                     "html": null,
@@ -706,7 +706,7 @@
                     "active": true,
                     "placement": "blog_bottom",
                     "ad_type": "image",
-                    "link": "/view/post/product/NST-82600001/12",
+                    "link": "\/view\/post\/product\/NST-82600001\/12",
                     "open_new_tab": true,
                     "iframe": null,
                     "html": null,
@@ -717,7 +717,7 @@
                     "active": true,
                     "placement": "blog_sidebar",
                     "ad_type": "image",
-                    "link": "/view/post/product/NT-1326932/2",
+                    "link": "\/view\/post\/product\/NT-1326932\/2",
                     "open_new_tab": true,
                     "iframe": null,
                     "html": null,
@@ -728,7 +728,7 @@
                     "active": true,
                     "placement": "single_blog_bottom",
                     "ad_type": "image",
-                    "link": "/view/specific/classification/category/20/electronics",
+                    "link": "\/view\/specific\/classification\/category\/20\/electronics",
                     "open_new_tab": true,
                     "iframe": null,
                     "html": null,
@@ -811,7 +811,7 @@
                         },
                         {
                             "id": "iframe",
-                            "title": "Iframe / Embed"
+                            "title": "Iframe \/ Embed"
                         },
                         {
                             "id": "html",
@@ -823,7 +823,7 @@
                     "name": "link",
                     "label": "Ad Link",
                     "type": "text",
-                    "placeholder": "https://example.com"
+                    "placeholder": "https:\/\/example.com"
                 },
                 {
                     "name": "open_new_tab",
@@ -840,13 +840,13 @@
                     "name": "iframe",
                     "label": "Iframe URL or Embed Code",
                     "type": "textarea",
-                    "placeholder": "https://... or <iframe src=\"...\"></iframe>"
+                    "placeholder": "https:\/\/... or <iframe src=\"...\"><\/iframe>"
                 },
                 {
                     "name": "html",
                     "label": "HTML Code",
                     "type": "textarea",
-                    "placeholder": "<div>Your ad HTML</div>"
+                    "placeholder": "<div>Your ad HTML<\/div>"
                 }
             ]
         }
@@ -940,7 +940,7 @@
         "stripe_section": {
             "type": "section",
             "label": "Stripe Card Payments",
-            "description": "Accept all major debit/credit cards securely via Stripe.",
+            "description": "Accept all major debit\/credit cards securely via Stripe.",
             "icon": "ri-bank-card-line",
             "toggle_field": "stripe_enabled"
         },
@@ -962,11 +962,11 @@
             },
             "options": {
                 "test": {
-                    "label": "Test / Sandbox",
+                    "label": "Test \/ Sandbox",
                     "value": "test"
                 },
                 "live": {
-                    "label": "Live / Production",
+                    "label": "Live \/ Production",
                     "value": "live"
                 }
             },
@@ -1024,11 +1024,11 @@
                     "value": "pkr"
                 },
                 "eur": {
-                    "label": "EUR - Euro (\u20ac)",
+                    "label": "EUR - Euro (€)",
                     "value": "eur"
                 },
                 "gbp": {
-                    "label": "GBP - British Pound (\u00a3)",
+                    "label": "GBP - British Pound (£)",
                     "value": "gbp"
                 },
                 "cad": {
@@ -1075,11 +1075,11 @@
             },
             "options": {
                 "sandbox": {
-                    "label": "Sandbox / Testing",
+                    "label": "Sandbox \/ Testing",
                     "value": "sandbox"
                 },
                 "live": {
-                    "label": "Live / Production",
+                    "label": "Live \/ Production",
                     "value": "live"
                 }
             },
@@ -1122,11 +1122,11 @@
                     "value": "USD"
                 },
                 "EUR": {
-                    "label": "EUR - Euro (\u20ac)",
+                    "label": "EUR - Euro (€)",
                     "value": "EUR"
                 },
                 "GBP": {
-                    "label": "GBP - British Pound (\u00a3)",
+                    "label": "GBP - British Pound (£)",
                     "value": "GBP"
                 },
                 "CAD": {
@@ -1167,7 +1167,7 @@
         "payoneer_section": {
             "type": "section",
             "label": "Payoneer Mass Payouts & Checkout",
-            "description": "Accept payments globally via Payoneer \u2014 ideal for international sellers and freelance marketplaces.",
+            "description": "Accept payments globally via Payoneer — ideal for international sellers and freelance marketplaces.",
             "icon": "ri-global-line",
             "toggle_field": "payoneer_enabled"
         },
@@ -1189,11 +1189,11 @@
             },
             "options": {
                 "sandbox": {
-                    "label": "Sandbox / Testing",
+                    "label": "Sandbox \/ Testing",
                     "value": "sandbox"
                 },
                 "live": {
-                    "label": "Live / Production",
+                    "label": "Live \/ Production",
                     "value": "live"
                 }
             },
@@ -1236,7 +1236,7 @@
             "label": "Payoneer Partner ID (p4)",
             "type": "text",
             "style": 2,
-            "placeholder": "Optional \u2014 Enter Payoneer Partner ID if provided",
+            "placeholder": "Optional — Enter Payoneer Partner ID if provided",
             "condition": {
                 "field": "payoneer_enabled",
                 "value": true
@@ -1258,11 +1258,11 @@
                     "value": "USD"
                 },
                 "EUR": {
-                    "label": "EUR - Euro (\u20ac)",
+                    "label": "EUR - Euro (€)",
                     "value": "EUR"
                 },
                 "GBP": {
-                    "label": "GBP - British Pound (\u00a3)",
+                    "label": "GBP - British Pound (£)",
                     "value": "GBP"
                 },
                 "CAD": {
@@ -1330,15 +1330,15 @@
             "label": "API Endpoint URL",
             "type": "text",
             "style": 2,
-            "placeholder": "https://graph.facebook.com/v20.0/{phone_number_id}/messages",
+            "placeholder": "https:\/\/graph.facebook.com\/v20.0\/{phone_number_id}\/messages",
             "condition": {
                 "field": "whatsapp_enabled",
                 "value": true
             },
-            "value": "https://wasenderapi.com/api/send-message"
+            "value": "https:\/\/wasenderapi.com\/api\/send-message"
         },
         "api_key": {
-            "label": "Meta / Facebook Access Token",
+            "label": "Meta \/ Facebook Access Token",
             "type": "password",
             "style": 2,
             "placeholder": "Enter your Meta System User or User Access Token (EAA...)",
@@ -1360,7 +1360,7 @@
             "value": "1396790376847486"
         },
         "sender_phone": {
-            "label": "WhatsApp Connected Number (Display / Support)",
+            "label": "WhatsApp Connected Number (Display \/ Support)",
             "type": "phone",
             "style": 2,
             "placeholder": "+1234567890",
@@ -1384,7 +1384,7 @@
     "mail": {
         "mail_section": {
             "type": "section",
-            "label": "SMTP / Mailtrap Email Configuration",
+            "label": "SMTP \/ Mailtrap Email Configuration",
             "description": "Configure outgoing transactional and notification emails using Mailtrap sandbox or production SMTP.",
             "icon": "ri-mail-settings-line",
             "toggle_field": "mail_enabled"
@@ -1397,7 +1397,7 @@
             "value": true
         },
         "mail_provider": {
-            "label": "Mail Service / Gateway",
+            "label": "Mail Service \/ Gateway",
             "type": "dropdown",
             "style": 2,
             "searchable": false,
@@ -1407,7 +1407,7 @@
             },
             "options": {
                 "mailtrap": {
-                    "label": "Mailtrap (Testing & Sandbox / Production)",
+                    "label": "Mailtrap (Testing & Sandbox \/ Production)",
                     "value": "mailtrap"
                 },
                 "smtp": {
@@ -1473,7 +1473,7 @@
             "value": "tls"
         },
         "mail_username": {
-            "label": "SMTP Username / API User",
+            "label": "SMTP Username \/ API User",
             "type": "text",
             "style": 2,
             "placeholder": "Enter SMTP Username",
@@ -1484,7 +1484,7 @@
             "value": "72ef4b055c7052"
         },
         "mail_password": {
-            "label": "SMTP Password / API Key",
+            "label": "SMTP Password \/ API Key",
             "type": "password",
             "style": 2,
             "placeholder": "Enter SMTP Password or Token",
@@ -1534,7 +1534,7 @@
     },
     "popup": {
         "sale_popup_enabled": {
-            "label": "Enable Sale / Offer Popup",
+            "label": "Enable Sale \/ Offer Popup",
             "type": "checkbox",
             "value": true,
             "value_label": "Enable Promotional Sale Popup on Frontend"
@@ -1543,8 +1543,8 @@
             "label": "Top Badge Text",
             "type": "text",
             "style": 2,
-            "placeholder": "e.g. Limited Time Mega Sale \u2022 Extra 25% Off",
-            "value": "Limited Time Mega Sale \u2022 Extra 25% Off"
+            "placeholder": "e.g. Limited Time Mega Sale • Extra 25% Off",
+            "value": "Limited Time Mega Sale • Extra 25% Off"
         },
         "popup_title": {
             "label": "Popup Title",
@@ -1561,13 +1561,13 @@
             "value": "25% OFF"
         },
         "popup_description": {
-            "label": "Popup Subtitle / Description",
+            "label": "Popup Subtitle \/ Description",
             "type": "textarea",
             "placeholder": "Enter promo message or discount conditions...",
             "value": "Upgrade your shopping bag today. Use coupon code at checkout or subscribe to receive our VIP deals directly."
         },
         "popup_coupon_code": {
-            "label": "Promo / Coupon / Gift Card Code",
+            "label": "Promo \/ Coupon \/ Gift Card Code",
             "type": "text",
             "style": 1,
             "placeholder": "e.g. NESTIFY25 or GC-WELCOME",
@@ -1584,8 +1584,8 @@
             "label": "Shop Button Link",
             "type": "text",
             "style": 1,
-            "placeholder": "e.g. /shop",
-            "value": "/shop"
+            "placeholder": "e.g. \/shop",
+            "value": "\/shop"
         },
         "popup_delay_seconds": {
             "label": "Popup Delay (Seconds)",
@@ -1616,7 +1616,7 @@
         "google_redirect_uri": {
             "label": "Google Redirect URI",
             "type": "text",
-            "value": "http://127.0.0.1:8000/auth/google/callback"
+            "value": "http:\/\/127.0.0.1:8000\/auth\/google\/callback"
         },
         "facebook_client_id": {
             "label": "Facebook App ID",
@@ -1631,7 +1631,7 @@
         "facebook_redirect_uri": {
             "label": "Facebook Redirect URI",
             "type": "text",
-            "value": "http://127.0.0.1:8000/auth/facebook/callback"
+            "value": "http:\/\/127.0.0.1:8000\/auth\/facebook\/callback"
         }
     }
 }
