@@ -1,5 +1,10 @@
 {
     "site": {
+        "installed": {
+            "label": "Application Installed",
+            "type": "checkbox",
+            "value": true
+        },
         "name": {
             "label": "Site Name",
             "type": "text",

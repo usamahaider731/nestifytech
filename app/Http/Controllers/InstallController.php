@@ -160,9 +160,13 @@ class InstallController extends Controller
             return true;
         }
 
+        if (app()->isProduction() || !empty(env('LARAVEL_CLOUD'))) {
+            return true;
+        }
+
         if (File::exists($this->settingFilePath)) {
             $settings = json_decode(File::get($this->settingFilePath), true) ?: [];
-            if (!empty($settings['site']['installed']['value'])) {
+            if (!empty($settings['site']['installed']['value']) || !empty($settings['site']['name']['value'])) {
                 return true;
             }
         }

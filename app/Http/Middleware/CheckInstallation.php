@@ -21,11 +21,13 @@ class CheckInstallation
 
         $isInstalled = File::exists(storage_path('installed'))
             || filter_var(env('APP_INSTALLED', false), FILTER_VALIDATE_BOOLEAN)
+            || app()->isProduction()
+            || !empty(env('LARAVEL_CLOUD'))
             || (function () {
                 $settingPath = storage_path('app/data/setting.json');
                 if (File::exists($settingPath)) {
                     $json = json_decode(File::get($settingPath), true);
-                    return !empty($json['site']['installed']['value']);
+                    return !empty($json['site']['installed']['value']) || !empty($json['site']['name']['value']);
                 }
                 return false;
             })();
