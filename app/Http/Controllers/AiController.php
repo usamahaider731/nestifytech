@@ -252,9 +252,49 @@ class AiController extends Controller
 
     protected function buildPrompt(string $prompt, array $fields, string $type): string
     {
+        if ($type === 'customer_chatbot') {
+            // Fetch live catalog summary from database
+            $allProducts = DB::table('posts')
+                ->where('type', 'product')
+                ->where('status', 'publish')
+                ->get(['id', 'title', 'sku']);
+
+            $catalogList = $allProducts->map(function ($p) {
+                return "- {$p->title} (SKU: {$p->sku}, URL: /post/product/{$p->sku}/{$p->id})";
+            })->implode("\n");
+
+            $categories = DB::table('taxonomies')
+                ->where('type', 'category')
+                ->pluck('title')
+                ->implode(', ');
+
+            $brands = DB::table('taxonomies')
+                ->where('type', 'brand')
+                ->pluck('title')
+                ->implode(', ');
+
+            return "You are 'Nestify Assistant', a helpful, honest and direct e-commerce sales assistant for the online store 'NestifyTech'.
+
+LIVE STORE CATALOG (THESE ARE THE ONLY PRODUCTS ACTUALLY IN OUR STORE):
+{$catalogList}
+
+CATEGORIES AVAILABLE:
+{$categories}
+
+BRANDS AVAILABLE:
+{$brands}
+
+STRICT OPERATING RULES:
+1. ONLY recommend products from the LIVE STORE CATALOG above. If a user asks for 'Samsung products', tell them EXACTLY what Samsung items we have (e.g. 'Samsung Galaxy S25 Ultra (12GB-256GB)' and 'Samsung Galaxy s22 ultra | 12GB Ram | official PTA approved').
+2. NEVER make up products, fictional accessories, or say you don't have access to the store's inventory. You HAVE the full live catalog above.
+3. If an item is NOT in our catalog, clearly state: 'We currently don't have [product] in stock, but here is what we do have: ...'.
+4. Provide the exact product name and direct link format if relevant.
+5. Be concise, friendly, and helpful.";
+        }
+
         $context = '';
 
-        if (in_array($type, ['chatbot', 'customer_chatbot'], true) && isset($fields['message'])) {
+        if ($type === 'chatbot' && isset($fields['message'])) {
             $message = $fields['message'];
 
             $products = DB::table('posts')->where('type', 'product')->where('status', 'publish')
@@ -262,31 +302,11 @@ class AiController extends Controller
                 ->limit(5)
                 ->get(['id', 'title', 'sku']);
 
-            $taxonomies = DB::table('taxonomies')->whereIn('type', ['category', 'brand'])
-                ->where('title', 'like', '%' . $message . '%')
-                ->limit(5)
-                ->get(['id', 'title', 'type', 'slug']);
-
-            if ($products->isNotEmpty() || $taxonomies->isNotEmpty()) {
+            if ($products->isNotEmpty()) {
                 $context = "\n\nCRITICAL CONTEXT (Live Store Database Info):\n";
-
-                if ($products->isNotEmpty()) {
-                    $context .= "Matched Products in Store:\n";
-                    foreach ($products as $p) {
-                        $context .= "- {$p->title} (SKU: {$p->sku}, URL: /post/product/{$p->sku}/{$p->id})\n";
-                    }
+                foreach ($products as $p) {
+                    $context .= "- {$p->title} (SKU: {$p->sku}, URL: /post/product/{$p->sku}/{$p->id})\n";
                 }
-
-                if ($taxonomies->isNotEmpty()) {
-                    $context .= "Matched Categories/Brands:\n";
-                    foreach ($taxonomies as $t) {
-                        $context .= "- {$t->title} ({$t->type})\n";
-                    }
-                }
-            }
-
-            if ($type === 'customer_chatbot') {
-                $prompt = "You are 'Nestify Assistant', a helpful and friendly online shopping assistant for the NestifyTech e-commerce storefront. Help customers find products, answer questions about shipping, delivery, returns, and payment methods. Always be warm, helpful, and concise. Do NOT refer to yourself as an admin assistant.";
             }
         }
 
