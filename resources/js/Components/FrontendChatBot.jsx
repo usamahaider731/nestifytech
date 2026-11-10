@@ -27,7 +27,7 @@ const FrontendChatBot = () => {
 
         try {
             const response = await axios.post('/ai/generate/text', {
-                type: 'chatbot',
+                type: 'customer_chatbot',
                 requiredFieldsValue: {
                     message: input,
                     history: messages.slice(-4).map(m => `${m.role}: ${m.content}`).join('\n')

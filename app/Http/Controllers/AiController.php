@@ -70,7 +70,7 @@ class AiController extends Controller
             $type
         );
 
-        $userMessage = $type === 'chatbot'
+        $userMessage = in_array($type, ['chatbot', 'customer_chatbot'], true)
             ? ($request->requiredFieldsValue['message'] ?? 'Hello')
             : 'Generate the content now using the product details provided in the system instructions.';
 
@@ -167,7 +167,7 @@ class AiController extends Controller
      */
     protected function generateAutonomousResponse(string $type, array $fields): string
     {
-        if ($type === 'chatbot') {
+        if ($type === 'chatbot' || $type === 'customer_chatbot') {
             $msg = strtolower(trim((string) ($fields['message'] ?? '')));
             
             // 1. Order tracking query
@@ -209,7 +209,11 @@ class AiController extends Controller
                 return "Here are the top matches from our store right now:\n\n{$list}\n\nClick any item or use our top search bar to view full specifications, customer reviews, and live stock!";
             }
 
-            return "Hello! I am your **NestifyAI Assistant**. 👋 I can help you search our product catalog, check live order delivery status, or guide you through warranties and store policies. What can I find for you today?";
+            if ($type === 'customer_chatbot') {
+                return "Hello! I am your **Nestify Assistant** 👋. Welcome to our store! I can help you find products, check live delivery & tracking, or answer any questions about our products and policies. What are you looking for today?";
+            }
+
+            return "Hello! I am **NestifyAI**, your assistant for the NestifyTech Admin Panel. How can I help you manage your products, settings, or orders today?";
         }
 
         if ($type === 'short_description') {
@@ -250,29 +254,39 @@ class AiController extends Controller
     {
         $context = '';
 
-        if ($type === 'chatbot' && isset($fields['message'])) {
+        if (in_array($type, ['chatbot', 'customer_chatbot'], true) && isset($fields['message'])) {
             $message = $fields['message'];
 
-            $products = DB::table('posts')->where('type', 'product')
+            $products = DB::table('posts')->where('type', 'product')->where('status', 'publish')
                 ->where('title', 'like', '%' . $message . '%')
-                ->limit(3)
-                ->get();
+                ->limit(5)
+                ->get(['id', 'title', 'sku', 'price', 'slug']);
 
             $taxonomies = DB::table('taxonomies')->whereIn('type', ['category', 'brand'])
                 ->where('title', 'like', '%' . $message . '%')
-                ->limit(3)
-                ->get();
+                ->limit(5)
+                ->get(['id', 'title', 'type', 'slug']);
 
             if ($products->isNotEmpty() || $taxonomies->isNotEmpty()) {
-                $context = "\n\nCRITICAL CONTEXT (Current System Data):\n";
+                $context = "\n\nCRITICAL CONTEXT (Live Store Database Info):\n";
 
                 if ($products->isNotEmpty()) {
-                    $context .= 'Products found: ' . $products->pluck('title')->implode(', ') . "\n";
+                    $context .= "Matched Products in Store:\n";
+                    foreach ($products as $p) {
+                        $context .= "- {$p->title} (SKU: {$p->sku}, Price: {$p->price}, URL: /post/product/{$p->sku}/{$p->id})\n";
+                    }
                 }
 
                 if ($taxonomies->isNotEmpty()) {
-                    $context .= 'Categories/Brands found: ' . $taxonomies->pluck('title')->implode(', ') . "\n";
+                    $context .= "Matched Categories/Brands:\n";
+                    foreach ($taxonomies as $t) {
+                        $context .= "- {$t->title} ({$t->type})\n";
+                    }
                 }
+            }
+
+            if ($type === 'customer_chatbot') {
+                $prompt = "You are 'Nestify Assistant', a helpful and friendly online shopping assistant for the NestifyTech e-commerce storefront. Help customers find products, answer questions about shipping, delivery, returns, and payment methods. Always be warm, helpful, and concise. Do NOT refer to yourself as an admin assistant.";
             }
         }
 
