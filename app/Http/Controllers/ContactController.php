@@ -195,16 +195,19 @@ class ContactController extends Controller
 
         // Send reply email to customer if admin_reply was filled
         if (!empty($validated['admin_reply'])) {
-            $this->sendAdminReplyEmail($inquiry, $validated['admin_reply']);
+            $emailResult = $this->sendAdminReplyEmail($inquiry, $validated['admin_reply']);
+            if (!$emailResult['success']) {
+                return back()->with('warning', 'Inquiry updated, but email sending failed: ' . $emailResult['error']);
+            }
         }
 
-        return back()->with('success', 'Inquiry updated successfully.');
+        return back()->with('success', 'Inquiry updated and reply email sent successfully.');
     }
 
     /**
      * Send reply email from admin to customer.
      */
-    protected function sendAdminReplyEmail(ContactInquiry $inquiry, string $replyText): void
+    protected function sendAdminReplyEmail(ContactInquiry $inquiry, string $replyText): array
     {
         $settingFile = storage_path('app/data/setting.json');
         $settings    = File::exists($settingFile) ? json_decode(File::get($settingFile), true) : [];
@@ -214,23 +217,44 @@ class ContactController extends Controller
 
         if (!$mailEnabled) {
             Log::info("Admin reply skipped: mail_enabled is false in settings.");
-            return;
+            return ['success' => false, 'error' => 'Mail is disabled in settings.'];
         }
 
-        $fromName    = $siteConfig['name']['value'] ?? config('mail.from.name', 'NestifyTech Support');
-        $fromAddress = $mailConfig['mail_from_address']['value'] ?? config('mail.from.address', 'noreply@nestifytech.com');
+        // Apply dynamically configured SMTP directly to ensure transport freshness
+        if (!empty($mailConfig['mail_host']['value'])) {
+            config([
+                'mail.default' => 'smtp',
+                'mail.mailers.smtp.host' => $mailConfig['mail_host']['value'] ?? 'smtp.gmail.com',
+                'mail.mailers.smtp.port' => (int) ($mailConfig['mail_port']['value'] ?? 587),
+                'mail.mailers.smtp.username' => $mailConfig['mail_username']['value'] ?? '',
+                'mail.mailers.smtp.password' => $mailConfig['mail_password']['value'] ?? '',
+                'mail.mailers.smtp.encryption' => ($mailConfig['mail_encryption']['value'] ?? 'tls') === 'none' ? null : ($mailConfig['mail_encryption']['value'] ?? 'tls'),
+                'mail.mailers.smtp.scheme' => null,
+            ]);
+        }
+
+        // Purge any stale mailer instance cached in the Laravel container
+        try {
+            app()->forgetInstance('mailer');
+            Mail::clearResolvedInstances();
+        } catch (\Throwable $e) {}
+
+        $fromName    = $siteConfig['name']['value'] ?? ($mailConfig['mail_from_name']['value'] ?? config('mail.from.name', 'NestifyTech Support'));
+        $fromAddress = $mailConfig['mail_from_address']['value'] ?? config('mail.from.address', 'usamahaiderkhokher@gmail.com');
 
         try {
-            Mail::to($inquiry->email, $inquiry->name)->send(
+            Mail::mailer('smtp')->to($inquiry->email, $inquiry->name)->send(
                 new ContactInquiryAdminReplyMail($inquiry, $replyText, $fromName, $fromAddress)
             );
             Log::info("Admin reply sent successfully to {$inquiry->email} for inquiry #{$inquiry->id}");
+            return ['success' => true, 'error' => null];
         } catch (\Throwable $e) {
             Log::error('Admin reply email failed: ' . $e->getMessage(), [
                 'inquiry_id' => $inquiry->id,
                 'email'      => $inquiry->email,
                 'exception'  => $e,
             ]);
+            return ['success' => false, 'error' => $e->getMessage()];
         }
     }
 
