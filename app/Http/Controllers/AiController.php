@@ -260,7 +260,7 @@ class AiController extends Controller
             $products = DB::table('posts')->where('type', 'product')->where('status', 'publish')
                 ->where('title', 'like', '%' . $message . '%')
                 ->limit(5)
-                ->get(['id', 'title', 'sku', 'price', 'slug']);
+                ->get(['id', 'title', 'sku']);
 
             $taxonomies = DB::table('taxonomies')->whereIn('type', ['category', 'brand'])
                 ->where('title', 'like', '%' . $message . '%')
@@ -273,7 +273,7 @@ class AiController extends Controller
                 if ($products->isNotEmpty()) {
                     $context .= "Matched Products in Store:\n";
                     foreach ($products as $p) {
-                        $context .= "- {$p->title} (SKU: {$p->sku}, Price: {$p->price}, URL: /post/product/{$p->sku}/{$p->id})\n";
+                        $context .= "- {$p->title} (SKU: {$p->sku}, URL: /post/product/{$p->sku}/{$p->id})\n";
                     }
                 }
 
