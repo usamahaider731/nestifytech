@@ -1521,7 +1521,7 @@
                 "field": "mail_enabled",
                 "value": true
             },
-            "value": "usamahaiderkhokher@gmail.com"
+            "value": "info.nestifytech@gmail.com"
         },
         "mail_from_name": {
             "label": "From Display Name",
@@ -1540,7 +1540,7 @@
             "style": 2,
             "placeholder": "support@nestifytech.com",
             "description": "Email address where inquiries submitted from the Contact Us form are delivered.",
-            "value": "usamahaiderkhokher@gmail.com"
+            "value": "info.nestifytech@gmail.com"
         },
         "contact_autoreply_enabled": {
             "label": "Send Confirmation Email to Customer",
