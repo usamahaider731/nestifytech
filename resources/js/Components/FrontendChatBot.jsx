@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { RiMessage3Line, RiCloseLine, RiSendPlaneFill, RiRobotLine } from 'react-icons/ri';
+import { RiMessage3Line, RiCloseLine, RiSendPlaneFill, RiRobotLine, RiRobot2Line } from 'react-icons/ri';
 import axios from 'axios';
 
 const FrontendChatBot = () => {
@@ -58,7 +58,7 @@ const FrontendChatBot = () => {
                     onClick={() => setIsOpen(true)}
                     className="bg-primary hover:bg-primary/90 text-white p-4 rounded-full shadow-2xl transition-transform hover:scale-110 active:scale-95 flex items-center justify-center"
                 >
-                    <RiMessage3Line className="text-2xl" />
+                    <RiRobot2Line className="text-2xl" />
                 </button>
             )}
 
@@ -69,7 +69,7 @@ const FrontendChatBot = () => {
                     <div className="bg-primary p-4 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="size-10 bg-white/20 rounded-full flex items-center justify-center">
-                                <RiRobotLine className="text-white text-xl" />
+                                <RiRobot2Line className="text-white text-xl" />
                             </div>
                             <div>
                                 <h4 className="text-white font-bold text-sm leading-none">Nestify Assistant</h4>

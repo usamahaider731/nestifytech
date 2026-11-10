@@ -8,7 +8,8 @@ import {
   RiChat3Line, 
   RiUser3Line,
   RiMagicLine,
-  RiHistoryLine
+  RiHistoryLine,
+  RiRobot2Line
 } from 'react-icons/ri';
 import axios from 'axios';
 import { Dialog, Transition } from '@headlessui/react';
@@ -121,7 +122,7 @@ const ChatBot = () => {
                 onClick={() => setIsOpen(true)}
                 className="fixed bottom-6 right-6 bg-primary p-4 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all z-[999]"
             >
-                <RiRobotLine className="text-white text-2xl" />
+                <RiRobot2Line className="text-white text-2xl" />
             </button>
 
             <Transition show={isOpen} as={React.Fragment}>

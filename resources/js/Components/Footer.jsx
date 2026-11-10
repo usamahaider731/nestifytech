@@ -338,7 +338,7 @@ const Footer = () => {
                     <button
                         onClick={scrollToTop}
                         aria-label={__('Scroll to top')}
-                        className="flex h-10 w-10 z-30 fixed bottom-10 right-10 cursor-pointer hover:text-white items-center justify-center rounded-full text-primary bg-white border-2 border-primary transition-colors hover:bg-[#fed700] hover:text-slate-900"
+                        className="flex h-10 w-10 z-30 fixed bottom-8 right-30 cursor-pointer hover:text-white items-center justify-center rounded-full text-primary bg-white border-2 border-primary transition-colors hover:bg-[#fed700] hover:text-slate-900"
                     >
                         <RiArrowUpSLine className='text-sm size-5' />
                     </button>
