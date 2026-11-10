@@ -301,10 +301,34 @@ class AiController extends Controller
                 ->pluck('title')
                 ->implode(', ');
 
+            // Store policy, taxes & active promotions
+            $settingFile = storage_path('app/data/setting.json');
+            $settings = File::exists($settingFile) ? json_decode(File::get($settingFile), true) : [];
+            $site = $settings['site'] ?? [];
+            $shippingFee = $site['shipping']['value'] ?? '250';
+            $defaultTax = $site['default_tax_fee']['value'] ?? '2.5';
+            $cancelFee = $site['order_cancellation_fee']['value'] ?? '5';
+
+            $activeTaxesAndOffers = DB::table('promotions_and_tax_rules')
+                ->where('status', 'active')
+                ->get();
+            $offersList = $activeTaxesAndOffers->map(function ($rule) {
+                return "- {$rule->name} ({$rule->type}): {$rule->rate_value}% ({$rule->rate_type})";
+            })->implode("\n");
+
             return "You are 'Nestify Assistant', a professional, accurate and honest e-commerce shopping assistant for the online store 'NestifyTech'.
 
 LIVE STORE INVENTORY, REAL-TIME PRICING & STOCK DATA:
 {$catalogList}
+
+STORE POLICIES, TAXES, SHIPPING & OFFERS:
+- Standard Shipping Fee: PKR {$shippingFee}
+- Default Tax Fee: {$defaultTax}% per product
+- Category Specific Taxes & Rules:
+{$offersList}
+- Order Cancellation Fee: {$cancelFee}%
+- Payment Options: Cash on Delivery (COD), PayPal, Credit/Debit Cards, Gift Cards
+- Return/Exchange: 7-Day return and warranty policy on eligible products
 
 CATEGORIES IN STORE:
 {$categories}
@@ -316,10 +340,11 @@ CRITICAL RULES YOU MUST STRICTLY FOLLOW:
 1. ACCURATE STOCK CHECKS: Always check the 'Status' for each item above.
    - For example: 'Samsung Galaxy S25 Ultra (12GB-256GB)' has 0 units and is OUT OF STOCK. If user asks if it's out of stock, say: 'Yes, the Samsung Galaxy S25 Ultra is currently OUT OF STOCK.'
    - Never claim an item is in stock if its status says OUT OF STOCK.
-2. ACCURATE REAL-TIME PRICES: You HAVE the exact prices in PKR in the inventory list above. State the exact price when asked (e.g. S22 Ultra is PKR 146,000 - PKR 184,999, HP EliteBook is PKR 80,000, TCL TV is PKR 87,999). NEVER say you don't have access to pricing data.
-3. BUDGET RECOMMENDATIONS: When a customer asks for items in a price range (e.g. 20,000 to 250,000 PKR), look at the actual prices and recommend the matching IN-STOCK items with their exact prices.
-4. ONLY RECOMMEND STORE ITEMS: Only recommend products from the inventory above. Never invent products.
-5. BE CONCISE & HELPFUL: Provide direct clickable links like [Product Name](/post/product/SKU/ID).";
+2. ACCURATE REAL-TIME PRICES & OFFERS: You HAVE the exact prices in PKR in the inventory list above. State the exact price when asked (e.g. S22 Ultra is PKR 146,000 - PKR 184,999, HP EliteBook is PKR 80,000, TCL TV is PKR 87,999). NEVER say you don't have access to pricing data.
+3. TAXES, SHIPPING & OFFERS: When user asks about tax, shipping, or offers, accurately quote: Standard Shipping PKR {$shippingFee}, Default Tax {$defaultTax}% (plus category specific taxes like Mobile 7.5%, Laptop 15%, LED 10%).
+4. BUDGET RECOMMENDATIONS: When a customer asks for items in a price range (e.g. 20,000 to 250,000 PKR), look at the actual prices and recommend the matching IN-STOCK items with their exact prices.
+5. ONLY RECOMMEND STORE ITEMS: Only recommend products from the inventory above. Never invent products.
+6. BE CONCISE & HELPFUL: Provide direct clickable links like [Product Name](/post/product/SKU/ID).";
         }
 
         $context = '';
