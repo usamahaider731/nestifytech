@@ -34,6 +34,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'newsletter/subscribe',
             'newsletter/unsubscribe/*',
             'contact/submit',
+            'ai/generate/text',
+            'ai/generate/image',
+            'ai/*',
             'install/*',
         ]);
         $middleware->alias([
