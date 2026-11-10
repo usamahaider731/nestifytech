@@ -11,11 +11,13 @@ import {
 } from 'react-icons/ri';
 
 const AI_STYLES = [
+    { id: 'banner_ecommerce', name: '🏷️ E-Commerce Promo Banner', promptSuffix: 'wide e-commerce hero web banner, high quality commercial advertisement design, modern digital marketing layout, crisp vibrant visual, ultra wide 16:9 banner standard, professional 8k' },
+    { id: 'banner_lifestyle', name: '🌿 Aesthetic Category Hero', promptSuffix: 'wide promotional lifestyle banner, elegant retail collection display, soft ambient studio lighting, clean spacious backdrop suitable for web store header, 8k resolution' },
     { id: 'photorealistic', name: '📸 Studio Product Shot', promptSuffix: 'professional commercial product photography, studio lighting, crisp focus, 8k uhd, clean isolated background' },
     { id: 'ecommerce', name: '🛍️ Clean E-Commerce White', promptSuffix: 'professional e-commerce product photograph, pure white background, sharp details, commercial catalogue standard' },
     { id: 'lifestyle', name: '🌿 Aesthetic Lifestyle', promptSuffix: 'lifestyle product photography, elegant modern ambient interior, soft natural sunlight, aesthetic depth of field' },
     { id: 'cinematic', name: '🎬 Cinematic & Dramatic', promptSuffix: 'dramatic lighting, cinematic commercial render, high-end luxury brand presentation, sharp textures' },
-    { id: 'avatar_bot', name: '🤖 Tech Avatar', promptSuffix: 'vector tech avatar, futuristic aesthetic, sleek clean style' },
+    { id: 'vector_logo', name: '🎨 Minimalist Vector Logo', promptSuffix: 'minimalist vector flat logo, modern tech brand icon, sharp geometric emblem, white background, svg style graphic design' },
     { id: 'avatar_person', name: '👤 Realistic Avatar', promptSuffix: 'professional user profile avatar, friendly warm smile, modern studio lighting' },
 ];
 
@@ -71,7 +73,7 @@ const ImageUploader = React.memo(function ImageUploader({
             e.stopPropagation();
         }
         if (!aiPrompt.trim()) {
-            setAiError('Please enter a product description or idea.');
+            setAiError('Please enter a description or idea.');
             return;
         }
 
@@ -79,12 +81,16 @@ const ImageUploader = React.memo(function ImageUploader({
         setAiError(null);
 
         try {
-            const styleObj = AI_STYLES.find(s => s.id === selectedStyle) || AI_STYLES[1];
+            const styleObj = AI_STYLES.find(s => s.id === selectedStyle) || AI_STYLES[0];
             const fullPrompt = `${aiPrompt.trim()}, ${styleObj.promptSuffix}`;
             const seed = Math.floor(Math.random() * 1000000);
 
-            // Direct generative call to high-definition AI engine
-            const aiImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=800&height=800&seed=${seed}&nologo=true&enhance=true`;
+            // Wide aspect ratio for banners (1280x500 or 1200x630), square (800x800) for products/logos
+            const width = isBanner ? 1280 : 800;
+            const height = isBanner ? 500 : 800;
+
+            // Direct generative call to high-definition AI engine with flux model for realistic renders
+            const aiImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=${width}&height=${height}&seed=${seed}&model=flux&nologo=true&enhance=true`;
 
             const res = await fetch(aiImageUrl);
             if (!res.ok) {
@@ -92,7 +98,7 @@ const ImageUploader = React.memo(function ImageUploader({
             }
 
             const blob = await res.blob();
-            const safeName = aiPrompt.trim().toLowerCase().replace(/[^a-z0-9]/g, '-').slice(0, 30) || 'ai-product';
+            const safeName = aiPrompt.trim().toLowerCase().replace(/[^a-z0-9]/g, '-').slice(0, 30) || (isBanner ? 'category-banner' : 'ai-image');
             const file = new File([blob], `${safeName}-${seed}.jpg`, { type: 'image/jpeg' });
 
             const preview = {
@@ -316,13 +322,18 @@ const ImageUploader = React.memo(function ImageUploader({
                             const autoPrompt = isLogo
                                 ? `${contextDisplayName} logo, modern minimalist vector tech brand identity icon`
                                 : isBanner
-                                ? `${contextDisplayName} promotional banner, vibrant e-commerce hero display, high quality`
+                                ? `${contextDisplayName} promotional banner, modern online shopping hero banner with trending ${contextDisplayName} items, commercial retail presentation`
                                 : isCategory
-                                ? `${contextDisplayName} category thumbnail, clean minimalist product background`
+                                ? `${contextDisplayName} collection banner, modern tech and electronics display showcase, high end retail presentation`
                                 : contextTitle
                                 ? `${contextTitle}, professional commercial product photography, studio lighting`
                                 : '';
                             setAiPrompt(autoPrompt);
+                            if (isBanner || isCategory) {
+                                setSelectedStyle('banner_ecommerce');
+                            } else if (isLogo) {
+                                setSelectedStyle('vector_logo');
+                            }
                         }
                         setShowAiModal(true);
                     }}
@@ -333,9 +344,9 @@ const ImageUploader = React.memo(function ImageUploader({
                         {isLogo 
                             ? 'Generate Logo with AI' 
                             : isBanner 
-                            ? 'Generate Banner with AI' 
+                            ? 'Generate Banner with AI (16:9 Wide)' 
                             : isCategory 
-                            ? `Generate Category Image (${contextDisplayName})` 
+                            ? `Generate Category Banner (${contextDisplayName})` 
                             : contextTitle 
                             ? `Generate AI Image for "${contextTitle.length > 20 ? contextTitle.slice(0, 18) + '...' : contextTitle}"` 
                             : 'Generate Image with AI'}
@@ -363,7 +374,7 @@ const ImageUploader = React.memo(function ImageUploader({
                     onClick={() => setShowAiModal(false)}
                 >
                     <div 
-                        className="bg-bg border border-border/80 rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl text-heading animate-scaleIn"
+                        className="bg-bg border border-border/80 rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl text-heading animate-scaleIn overflow-y-auto max-h-[80vh]"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Header */}
