@@ -56,3 +56,4 @@ class ContactInquiryAdminReplyMail extends Mailable
         return [];
     }
 }
+
