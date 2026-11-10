@@ -27,8 +27,25 @@ class AiController extends Controller
         }
 
         $settings = json_decode(File::get($this->file), true);
+        $aiSettings = $settings['ai'] ?? [];
 
-        return $settings['ai'] ?? [];
+        // Decode API key if encoded
+        if (isset($aiSettings['api_key']['value'])) {
+            $val = (string) $aiSettings['api_key']['value'];
+            if (str_starts_with($val, 'nst_x:')) {
+                $rawHex = substr($val, 6);
+                $bin = @hex2bin($rawHex) ?: '';
+                $dec = '';
+                for ($i = 0; $i < strlen($bin); $i++) {
+                    $dec .= chr(ord($bin[$i]) ^ 42);
+                }
+                $aiSettings['api_key']['value'] = $dec;
+            } elseif (str_starts_with($val, 'enc_b64:')) {
+                $aiSettings['api_key']['value'] = base64_decode(substr($val, 8));
+            }
+        }
+
+        return $aiSettings;
     }
 
     protected function aiIsEnabled(): bool

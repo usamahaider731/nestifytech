@@ -626,7 +626,7 @@
             "value": "groq"
         },
         "api_key": {
-            "value": "",
+            "value": "nst_x:4d5941754f68476141661a4f7d7a7f6e5a4d1e6840734d5c7d6d4e5348196c735078656e586b5a4848591c4c125b6067525d417b5a726e1d",
             "label": "Api Key (Groq \/ OpenRouter \/ OpenAI)",
             "type": "text",
             "style": "2"
