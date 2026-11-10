@@ -311,12 +311,35 @@ const ImageUploader = React.memo(function ImageUploader({
                     onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
+                        // Pre-fill context-aware prompt if not already typed
+                        if (!aiPrompt) {
+                            const autoPrompt = isLogo
+                                ? `${contextDisplayName} logo, modern minimalist vector tech brand identity icon`
+                                : isBanner
+                                ? `${contextDisplayName} promotional banner, vibrant e-commerce hero display, high quality`
+                                : isCategory
+                                ? `${contextDisplayName} category thumbnail, clean minimalist product background`
+                                : contextTitle
+                                ? `${contextTitle}, professional commercial product photography, studio lighting`
+                                : '';
+                            setAiPrompt(autoPrompt);
+                        }
                         setShowAiModal(true);
                     }}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-xs transition-all cursor-pointer"
                 >
                     <RiMagicLine className="size-4 animate-pulse" />
-                    <span>Generate Product Image with AI</span>
+                    <span>
+                        {isLogo 
+                            ? 'Generate Logo with AI' 
+                            : isBanner 
+                            ? 'Generate Banner with AI' 
+                            : isCategory 
+                            ? `Generate Category Image (${contextDisplayName})` 
+                            : contextTitle 
+                            ? `Generate AI Image for "${contextTitle.length > 20 ? contextTitle.slice(0, 18) + '...' : contextTitle}"` 
+                            : 'Generate Image with AI'}
+                    </span>
                 </button>
 
                 {/* 👤 Auto Avatar Button */}
@@ -351,10 +374,14 @@ const ImageUploader = React.memo(function ImageUploader({
                                 </span>
                                 <div>
                                     <h3 className="font-bold text-sm text-heading font-oswald uppercase">
-                                        AI Product Image Generator
+                                        {isLogo ? 'AI Logo Generator' : isBanner ? 'AI Banner Generator' : 'AI Product Image Generator'}
                                     </h3>
                                     <p className="text-[11px] text-res/70">
-                                        Generate high-resolution e-commerce product photos instantly
+                                        {contextDisplayName ? (
+                                            <>Generating for: <strong className="text-purple-500 font-semibold">{contextDisplayName}</strong></>
+                                        ) : (
+                                            'Generate high-resolution e-commerce images instantly'
+                                        )}
                                     </p>
                                 </div>
                             </div>
