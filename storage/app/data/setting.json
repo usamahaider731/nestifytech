@@ -1,4 +1,4 @@
-﻿{
+{
     "site": {
         "name": {
             "label": "Site Name",
@@ -1035,11 +1035,11 @@
                     "value": "pkr"
                 },
                 "eur": {
-                    "label": "EUR - Euro (â‚¬)",
+                    "label": "EUR - Euro (€)",
                     "value": "eur"
                 },
                 "gbp": {
-                    "label": "GBP - British Pound (Â£)",
+                    "label": "GBP - British Pound (£)",
                     "value": "gbp"
                 },
                 "cad": {
@@ -1133,11 +1133,11 @@
                     "value": "USD"
                 },
                 "EUR": {
-                    "label": "EUR - Euro (â‚¬)",
+                    "label": "EUR - Euro (€)",
                     "value": "EUR"
                 },
                 "GBP": {
-                    "label": "GBP - British Pound (Â£)",
+                    "label": "GBP - British Pound (£)",
                     "value": "GBP"
                 },
                 "CAD": {
@@ -1178,7 +1178,7 @@
         "payoneer_section": {
             "type": "section",
             "label": "Payoneer Mass Payouts & Checkout",
-            "description": "Accept payments globally via Payoneer â€” ideal for international sellers and freelance marketplaces.",
+            "description": "Accept payments globally via Payoneer — ideal for international sellers and freelance marketplaces.",
             "icon": "ri-global-line",
             "toggle_field": "payoneer_enabled"
         },
@@ -1247,7 +1247,7 @@
             "label": "Payoneer Partner ID (p4)",
             "type": "text",
             "style": 2,
-            "placeholder": "Optional â€” Enter Payoneer Partner ID if provided",
+            "placeholder": "Optional — Enter Payoneer Partner ID if provided",
             "condition": {
                 "field": "payoneer_enabled",
                 "value": true
@@ -1269,11 +1269,11 @@
                     "value": "USD"
                 },
                 "EUR": {
-                    "label": "EUR - Euro (â‚¬)",
+                    "label": "EUR - Euro (€)",
                     "value": "EUR"
                 },
                 "GBP": {
-                    "label": "GBP - British Pound (Â£)",
+                    "label": "GBP - British Pound (£)",
                     "value": "GBP"
                 },
                 "CAD": {
@@ -1554,8 +1554,8 @@
             "label": "Top Badge Text",
             "type": "text",
             "style": 2,
-            "placeholder": "e.g. Limited Time Mega Sale â€¢ Extra 25% Off",
-            "value": "Limited Time Mega Sale â€¢ Extra 25% Off"
+            "placeholder": "e.g. Limited Time Mega Sale • Extra 25% Off",
+            "value": "Limited Time Mega Sale • Extra 25% Off"
         },
         "popup_title": {
             "label": "Popup Title",

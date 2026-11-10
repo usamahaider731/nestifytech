@@ -64,7 +64,7 @@
 </script>
     @routes
     @viteReactRefresh
-    <link rel="shortcut icon" href="{{'/storage/uploads/image/' . $setting['site']['favicon']['value']}}" type="image/x-icon">
+    <link rel="shortcut icon" href="{{ isset($setting['site']['favicon']['value']) ? '/storage/uploads/image/' . $setting['site']['favicon']['value'] : '/favicon.ico' }}" type="image/x-icon">
     @vite(['resources/css/backapp.css', 'resources/js/app.jsx', "resources/js/Pages/{$page['component']}.jsx"])
     @inertiaHead
 </head>
