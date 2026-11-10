@@ -97,8 +97,6 @@ class SettingController extends Controller
             'colorPalettes' => $colorPalettes,
         ]);
     }
-        ]);
-    }
 
     public function delete_null_tax()
     {
