@@ -237,6 +237,11 @@ class SettingController extends Controller
         foreach ($request->all() as $key => $value) {
             if (in_array($key, ['_token', '_method', 'type'])) continue;
 
+            // Protect critical system flags: 'installed' can never be disabled from the web form
+            if ($request->type === 'site' && $key === 'installed') {
+                continue;
+            }
+
             if (isset($currentSettings[$request->type][$key])) {
                 $settingItem = $currentSettings[$request->type][$key];
                 if ($settingItem['type'] === 'repeater') {

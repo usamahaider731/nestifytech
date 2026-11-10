@@ -375,17 +375,34 @@ function Form({ Data = [], name = '', link = '', type = '', colorPalettes = {} }
             )}
 
             {setting.type === 'checkbox' && (
-                <div className='flex gap-2'>
-                    <Togglebox
-                        id={key}
-                        name={key}
-                        checked={data[key] || false}
-                        onChange={(e) => handleChange(e, key)}
-                        className='h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary'
-                    />
-                    <InputLabel htmlFor={key} className='text-base capitalize text-res'>
-                        {setting.value_label ?? setting.label}
-                    </InputLabel>
+                <div className='flex flex-col gap-1.5'>
+                    <div className='flex items-center gap-2'>
+                        <Togglebox
+                            id={key}
+                            name={key}
+                            checked={data[key] || false}
+                            disabled={setting.disabled || processing}
+                            onChange={(e) => {
+                                if (setting.disabled) return;
+                                handleChange(e, key);
+                            }}
+                            className={`h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary ${setting.disabled ? 'opacity-60 cursor-not-allowed' : ''}`}
+                        />
+                        <InputLabel htmlFor={key} className={`text-base capitalize ${setting.disabled ? 'text-heading font-semibold' : 'text-res'}`}>
+                            {setting.value_label ?? setting.label}
+                            {setting.disabled && (
+                                <span className="ml-2 text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-bold border border-emerald-500/20 uppercase tracking-wider">
+                                    System Locked (Active)
+                                </span>
+                            )}
+                        </InputLabel>
+                    </div>
+                    {setting.description && (
+                        <p className={`text-xs mt-0.5 leading-relaxed ${setting.disabled ? 'p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 font-medium' : 'text-res/70'}`}>
+                            {setting.disabled && <strong className="font-bold mr-1">⚠️ Note:</strong>}
+                            {setting.description}
+                        </p>
+                    )}
                 </div>
             )}
 
