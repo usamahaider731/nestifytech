@@ -5,7 +5,7 @@
             "type": "checkbox",
             "value": true,
             "disabled": true,
-            "description": "Yeh system-locked status hai. NestifyTech successfully installed hai. Agar isko uncheck kiya jaye toh live store crash ya reset ho sakta hai, isliye security ke tehat is field ko locked/disabled rakha gaya hai."
+            "description": "This is the system lock status. NestifyTech has been successfully installed. If this is unchecked, the live store could crash or become misconfigured; therefore, this field has been disabled for security reasons."
         },
         "name": {
             "label": "Site Name",
