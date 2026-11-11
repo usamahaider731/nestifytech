@@ -5,6 +5,7 @@ namespace App\Mail;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -32,7 +33,11 @@ class UserEmailChangedOldMail extends Mailable
      */
     public function envelope(): Envelope
     {
+        $fromAddress = config('mail.from.address') ?: 'info.nestifytech@gmail.com';
+        $fromName    = config('mail.from.name') ?: 'NestifyTech';
+
         return new Envelope(
+            from: new Address($fromAddress, $fromName),
             subject: 'Security Alert: Your Email Address Has Been Changed',
         );
     }

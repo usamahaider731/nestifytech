@@ -16,7 +16,7 @@ const CategorySlider = ({categories}) => {
                     <h2 className='text-2xl font-extrabold text-heading md:text-3xl'>{__('Featured Categories')}</h2>
                     <p className='mt-2 text-sm text-res md:text-base'>{__('Explore our top selections tailored for you')}</p>
                 </div>
-                <Link className='group flex items-center gap-1 text-sm font-bold text-primary transition-colors hover:opacity-75'>
+                <Link href={route('shop')} className='group flex items-center gap-1 text-sm font-bold text-primary transition-colors hover:opacity-75'>
                     {__('View All')}
                     <span className="group-hover:translate-x-1 transition-transform inline-block">→</span>
                 </Link>

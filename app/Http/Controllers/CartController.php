@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\File;
+use App\Mail\OrderConfirmationMail;
 use Stripe\Stripe;
 use Stripe\PaymentIntent;
 
@@ -482,6 +485,43 @@ class CartController extends Controller
                     'order_id' => $orderId,
                     'total'    => $total,
                 ], (int) $userId);
+            }
+
+            // ── 8. Dispatch Order Confirmation Email ──────────────────────────
+            try {
+                $settingFile = storage_path('app/data/setting.json');
+                $settings    = File::exists($settingFile) ? json_decode(File::get($settingFile), true) : [];
+                $mailEnabled = filter_var($settings['mail']['mail_enabled']['value'] ?? true, FILTER_VALIDATE_BOOLEAN);
+
+                if ($mailEnabled) {
+                    $orderRecord = DB::table('orders')->where('id', $orderId)->first();
+                    $customerUser = $userId ? DB::table('users')->where('id', $userId)->first() : null;
+                    $recipientEmail = $customerUser->email ?? $request->input('email') ?? $request->input('customer_email');
+
+                    // Purge stale mailer connection instance
+                    app()->forgetInstance('mailer');
+                    Mail::clearResolvedInstances();
+
+                    // Send confirmation receipt to customer
+                    if (!empty($recipientEmail)) {
+                        Mail::mailer('smtp')->to($recipientEmail)->send(
+                            new OrderConfirmationMail($orderRecord, $resolvedItems, 'customer')
+                        );
+                    }
+
+                    // Also send new order alert to store admin/owner
+                    $adminEmail = $settings['mail']['contact_recipient_email']['value']
+                        ?? $settings['mail']['mail_from_address']['value']
+                        ?? 'info.nestifytech@gmail.com';
+
+                    if (!empty($adminEmail) && $adminEmail !== $recipientEmail) {
+                        Mail::mailer('smtp')->to($adminEmail)->send(
+                            new OrderConfirmationMail($orderRecord, $resolvedItems, 'admin')
+                        );
+                    }
+                }
+            } catch (\Throwable $mailErr) {
+                Log::error("Failed to send order confirmation email for order #{$orderId}: " . $mailErr->getMessage());
             }
 
             return response()->json([

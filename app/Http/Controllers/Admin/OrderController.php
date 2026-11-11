@@ -14,6 +14,7 @@ use Inertia\Inertia;
 use Carbon\Carbon;
 use App\Mail\OfficeSettlementOtpMail;
 use App\Mail\DeliveryOtpMail;
+use App\Mail\OrderStatusChangedMail;
 use App\Services\WalletService;
 use Stripe\Stripe;
 use Stripe\Refund;
@@ -786,6 +787,32 @@ class OrderController extends Controller
                     $refundIssued = true;
                 }
             }
+        }
+
+        // ── Customer Notification on Status Change ───────────────────────────
+        try {
+            if ($order->status !== $request->status) {
+                $customerUser = !empty($order->user_id) ? DB::table('users')->where('id', $order->user_id)->first() : null;
+                $recipientEmail = $customerUser->email ?? null;
+
+                if (!empty($recipientEmail)) {
+                    $settingFile = storage_path('app/data/setting.json');
+                    $settings    = File::exists($settingFile) ? json_decode(File::get($settingFile), true) : [];
+                    $mailEnabled = filter_var($settings['mail']['mail_enabled']['value'] ?? true, FILTER_VALIDATE_BOOLEAN);
+
+                    if ($mailEnabled) {
+                        app()->forgetInstance('mailer');
+                        Mail::clearResolvedInstances();
+
+                        $freshOrder = DB::table('orders')->where('id', $id)->first();
+                        Mail::mailer('smtp')->to($recipientEmail)->send(
+                            new OrderStatusChangedMail($freshOrder, $request->status)
+                        );
+                    }
+                }
+            }
+        } catch (\Throwable $mailErr) {
+            Log::error("Failed to send order status email for order #{$id}: " . $mailErr->getMessage());
         }
 
         return response()->json([

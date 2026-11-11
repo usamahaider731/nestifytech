@@ -41,7 +41,7 @@ class UserOtpMail extends Mailable
             'verification'   => 'Your Verification Code',
         ];
 
-        $fromAddress = config('mail.from.address') ?: 'usamahaiderkhokher@gmail.com';
+        $fromAddress = config('mail.from.address') ?: 'info.nestifytech@gmail.com';
         $fromName    = config('mail.from.name') ?: 'NestifyTech';
 
         return new Envelope(

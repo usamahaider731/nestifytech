@@ -5,6 +5,7 @@ namespace App\Mail;
 use App\Models\ContactInquiry;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -28,7 +29,11 @@ class ContactInquiryAutoReplyMail extends Mailable
      */
     public function envelope(): Envelope
     {
+        $fromAddress = config('mail.from.address') ?: 'info.nestifytech@gmail.com';
+        $fromName    = config('mail.from.name') ?: 'NestifyTech';
+
         return new Envelope(
+            from: new Address($fromAddress, $fromName),
             subject: 'We Received Your Message: ' . ($this->inquiry->subject ?: 'Customer Request') . ' | ' . config('app.name', 'NestifyTech'),
         );
     }
