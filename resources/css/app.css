@@ -190,3 +190,17 @@ select:-webkit-autofill:focus {
   transition: background-color 5000s ease-in-out 0s;
   caret-color: var(--text, #1e293b);
 }
+
+/* Leaflet map containment & overflow protection */
+.leaflet-container {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  z-index: 10 !important;
+}
+
+.leaflet-pane,
+.leaflet-tile-pane,
+.leaflet-map-pane {
+  max-width: 100% !important;
+}

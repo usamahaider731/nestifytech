@@ -11,11 +11,12 @@ import { useSelector, useDispatch } from 'react-redux';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import QuantitySelector from '@/Components/Single/QuantitySelector';
+import DropdownSelect from '@/Components/DropdownSelect';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
 function CheckoutFormContent() {
-    const { setting, auth } = usePage().props;
+    const { setting, auth, initialStates = [] } = usePage().props;
     const user = auth?.user;
     const { __ } = useLang();
 
@@ -140,20 +141,26 @@ function CheckoutFormContent() {
     });
 
     // ── State / City cascade dropdowns ───────────────────────────────────────
-    const [states, setStates] = useState([]);
+    const [states, setStates] = useState(Array.isArray(initialStates) && initialStates.length > 0 ? initialStates : []);
     const [cities, setCities] = useState([]);
     const [statesLoading, setStatesLoading] = useState(false);
     const [citiesLoading, setCitiesLoading] = useState(false);
 
-    // Load states once on mount
+    // Load states once on mount (fallback if initialStates was empty)
     useEffect(() => {
+        if (states.length > 0) return;
         setStatesLoading(true);
-        axios.get('/api/taxonomies', { params: { type: 'state', limit: -1 } })
+        axios.get('/api/taxonomy-options/state', { params: { as_options: true } })
             .then(res => {
                 const data = res.data?.data || res.data || [];
                 setStates(Array.isArray(data) ? data : []);
             })
-            .catch(() => {})
+            .catch(() => {
+                // Secondary fallback
+                axios.get('/api/get_taxonomies', { params: { type: 'state' } })
+                    .then(r => setStates(Array.isArray(r.data) ? r.data : []))
+                    .catch(() => {});
+            })
             .finally(() => setStatesLoading(false));
     }, []);
 
@@ -164,12 +171,16 @@ function CheckoutFormContent() {
             return;
         }
         setCitiesLoading(true);
-        axios.get('/api/taxonomies', { params: { type: 'city', parent_id: form.state_id, limit: -1 } })
+        axios.get('/api/taxonomy-options/city', { params: { parent_id: form.state_id, as_options: true } })
             .then(res => {
                 const data = res.data?.data || res.data || [];
                 setCities(Array.isArray(data) ? data : []);
             })
-            .catch(() => {})
+            .catch(() => {
+                axios.get('/api/get_taxonomies', { params: { type: 'city', parent_id: form.state_id } })
+                    .then(r => setCities(Array.isArray(r.data) ? r.data : []))
+                    .catch(() => {});
+            })
             .finally(() => setCitiesLoading(false));
     }, [form.state_id]);
 
@@ -839,9 +850,9 @@ function CheckoutFormContent() {
         }
     };
     return (
-        <div className="bg-bg min-h-screen py-10">
+        <div className="bg-bg min-h-screen py-10 overflow-x-hidden">
             <Head title="Secure Checkout" />
-            <div className="max-w-[1400px] mx-auto px-4 md:px-6">
+            <div className="max-w-[1400px] mx-auto px-4 md:px-6 w-full overflow-hidden">
                 <div className="mb-8">
                     <h1 className="text-3xl font-extrabold text-heading">Secure Checkout</h1>
                     <p className="text-res mt-2">Please review your order and enter your delivery details.</p>
@@ -858,8 +869,8 @@ function CheckoutFormContent() {
                         </Link>
                     </div>
                 ) : (
-                    <div className="flex flex-col lg:flex-row gap-8">
-                        <div className="flex-1">
+                    <div className="flex flex-col lg:flex-row gap-8 w-full">
+                        <div className="flex-1 min-w-0 max-w-full">
                             {/* ── Price-changed banner ──────────────────────────── */}
                             {priceChangedItems.length > 0 && (
                                 <div className="mb-5 p-4 rounded-xl border border-amber-400/60 bg-amber-50 flex gap-3 items-start">
@@ -880,7 +891,7 @@ function CheckoutFormContent() {
                                     <button type="button" onClick={() => setPriceChangedItems([])} className="text-amber-400 hover:text-amber-600 shrink-0 text-lg leading-none">✕</button>
                                 </div>
                             )}
-                            <form id="checkout-form" onSubmit={handleSubmit} className="bg-white rounded p-6 md:p-8 shadow-sm border border-permanent/10">
+                            <form id="checkout-form" onSubmit={handleSubmit} className="bg-white rounded p-6 md:p-8 shadow-sm border border-permanent/10 max-w-full overflow-hidden">
                                 <h3 className="text-xl font-bold text-heading mb-6 pb-4 border-b border-permanent/10">Delivery Information</h3>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
@@ -902,45 +913,39 @@ function CheckoutFormContent() {
                                     </div>
                                     <div className="md:col-span-2">
                                         <label className="block text-sm font-semibold text-heading mb-2">State / Province</label>
-                                        <div className="relative">
-                                            <select
-                                                name="state_id"
-                                                value={form.state_id}
-                                                onChange={handleChange}
-                                                className="w-full bg-bg border border-border focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-md px-4 py-3 text-sm text-text transition-all outline-hidden appearance-none"
-                                            >
-                                                <option value="">
-                                                    {statesLoading ? 'Loading states...' : '— Select State / Province —'}
-                                                </option>
-                                                {states.map(s => (
-                                                    <option key={s.id} value={s.id}>{s.title}</option>
-                                                ))}
-                                            </select>
-                                            <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-res">▾</div>
-                                        </div>
+                                        <DropdownSelect
+                                            name="state_id"
+                                            value={form.state_id}
+                                            searchable={true}
+                                            options={states}
+                                            isLoading={statesLoading}
+                                            onChange={(val) => {
+                                                setForm(prev => ({ ...prev, state_id: val, city_id: '', city: '' }));
+                                            }}
+                                            className="w-full"
+                                        />
                                     </div>
                                     <div className="md:col-span-2">
                                         <label className="block text-sm font-semibold text-heading mb-2">City</label>
-                                        <div className="relative">
-                                            {form.state_id ? (
-                                                <select
-                                                    name="city_id"
-                                                    value={form.city_id}
-                                                    onChange={e => {
-                                                        const id = e.target.value;
-                                                        const selected = cities.find(c => String(c.id) === String(id));
-                                                        setForm(prev => ({ ...prev, city_id: id, city: selected ? selected.title : '' }));
-                                                    }}
-                                                    className="w-full bg-bg border border-border focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-md px-4 py-3 text-sm text-text transition-all outline-hidden appearance-none"
-                                                >
-                                                    <option value="">
-                                                        {citiesLoading ? 'Loading cities...' : '— Select City —'}
-                                                    </option>
-                                                    {cities.map(c => (
-                                                        <option key={c.id} value={c.id}>{c.title}</option>
-                                                    ))}
-                                                </select>
-                                            ) : (
+                                        {form.state_id && cities.length > 0 ? (
+                                            <DropdownSelect
+                                                name="city_id"
+                                                value={form.city_id}
+                                                searchable={true}
+                                                options={cities}
+                                                isLoading={citiesLoading}
+                                                onChange={(val) => {
+                                                    const selected = cities.find(c => String(c.id ?? c.value) === String(val));
+                                                    setForm(prev => ({
+                                                        ...prev,
+                                                        city_id: val,
+                                                        city: selected ? (selected.title ?? selected.name) : val
+                                                    }));
+                                                }}
+                                                className="w-full"
+                                            />
+                                        ) : (
+                                            <div className="relative">
                                                 <input
                                                     type="text"
                                                     name="city"
@@ -949,11 +954,8 @@ function CheckoutFormContent() {
                                                     className="w-full bg-bg border border-border focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-md px-4 py-3 text-sm text-text transition-all outline-hidden"
                                                     placeholder="Select a state first, or type city name"
                                                 />
-                                            )}
-                                            <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-res">
-                                                {form.state_id ? '▾' : ''}
                                             </div>
-                                        </div>
+                                        )}
                                     </div>
                                     <div className="md:col-span-2">
                                         <div className="flex items-center justify-between mb-2">
@@ -1133,8 +1135,8 @@ function CheckoutFormContent() {
                                             </div>
 
                                             {/* Foodpanda-style Map Container with Interactive Fixed Center Pin */}
-                                            <div className="relative overflow-hidden select-none">
-                                                <div ref={mapContainerRef} style={{ height: '390px', width: '100%', background: '#e5e7eb' }} />
+                                            <div className="relative overflow-hidden select-none w-full max-w-full">
+                                                <div ref={mapContainerRef} className="w-full max-w-full" style={{ height: '390px', width: '100%', maxWidth: '100%', background: '#e5e7eb' }} />
                                                 
                                                 {/* Foodpanda Fixed Center Marker with Lift Animation on Drag */}
                                                 <div 

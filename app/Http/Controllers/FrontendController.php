@@ -253,7 +253,39 @@ class FrontendController extends Controller
 
     public function checkout()
     {
-        return Inertia::render('Frontend/Checkout/Index');
+        // Resolve default country from settings
+        $countryName = $this->settings['site']['country']['value'] ?? 'Pakistan';
+        $country = DB::table('taxonomies')->where('type', 'country')->where('title', $countryName)->first();
+        if (!$country) {
+            $country = DB::table('taxonomies')->where('type', 'country')->where('title', 'like', "%{$countryName}%")->first();
+        }
+
+        // Fetch all states for this country or fallback to all published states
+        $statesQuery = DB::table('taxonomies')->where('type', 'state');
+        if ($country) {
+            $statesQuery->where('parent_id', $country->id);
+        }
+        $states = $statesQuery->orderBy('title', 'asc')->get(['id', 'title', 'parent_id'])->map(function ($s) {
+            return [
+                'id' => (string) $s->id,
+                'title' => $s->title,
+            ];
+        });
+
+        // Fallback: if no states found for country, load any states in database
+        if ($states->isEmpty()) {
+            $states = DB::table('taxonomies')->where('type', 'state')->orderBy('title', 'asc')->get(['id', 'title'])->map(function ($s) {
+                return [
+                    'id' => (string) $s->id,
+                    'title' => $s->title,
+                ];
+            });
+        }
+
+        return Inertia::render('Frontend/Checkout/Index', [
+            'initialStates' => $states,
+            'defaultCountry' => $countryName,
+        ]);
     }
 
     public function compare()
