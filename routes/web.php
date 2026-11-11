@@ -60,6 +60,7 @@ Route::controller(FrontendController::class)->group(function () {
     Route::get('/faq', 'faqs')->name('faq');
     Route::get('/store-locator', 'storeLocator')->name('store.locator');
     Route::get('/track-order/{trackingNumber?}', 'trackOrder')->name('track.order');
+    Route::get('/gift-cards', [\App\Http\Controllers\Frontend\GiftCardController::class, 'index'])->name('gift-cards.index');
     Route::get('/get_languages', 'get_languages')->name('languages');
     Route::get('/set-language/{prefix}', 'setLanguage')->name('language.set');
 });
@@ -309,6 +310,14 @@ Route::get('/api/pricing-rules', [\App\Http\Controllers\Admin\PromotionRuleContr
 Route::post('/api/gift-card/validate', [\App\Http\Controllers\Admin\GiftCardController::class, 'validateCode'])
     ->middleware('throttle:20,1')
     ->name('api.gift-card.validate');
+
+// Public Gift Card Purchase APIs (Stripe Payment & Issuance)
+Route::post('/api/gift-card/create-payment-intent', [\App\Http\Controllers\Frontend\GiftCardController::class, 'createPaymentIntent'])
+    ->middleware('throttle:15,1')
+    ->name('api.gift-card.create-payment-intent');
+Route::post('/api/gift-card/purchase-success', [\App\Http\Controllers\Frontend\GiftCardController::class, 'purchaseSuccess'])
+    ->middleware('throttle:15,1')
+    ->name('api.gift-card.purchase-success');
 
 // Customer Profile Routes
 Route::middleware(['auth'])->prefix('/profile')->name('profile.')->controller(ProfileController::class)->group(function () {

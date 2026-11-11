@@ -31,7 +31,10 @@ const STATUS_COLORS = {
 
 const EMPTY_FORM = {
   code: '',
+  title: '',
   initial_balance: '',
+  purchase_price: '',
+  is_for_sale: true,
   status: 'active',
   expires_at: '',
   issued_to_user_id: '',
@@ -86,7 +89,10 @@ export default function GiftCardsIndex({ cards = {}, stats = {}, users = [], fil
     setEditCard(card)
     setForm({
       code: card.code || '',
+      title: card.title || '',
       initial_balance: card.initial_balance ?? '',
+      purchase_price: card.purchase_price ?? card.initial_balance ?? '',
+      is_for_sale: Boolean(card.is_for_sale),
       status: card.status || 'active',
       expires_at: card.expires_at ? card.expires_at.substring(0, 10) : '',
       issued_to_user_id: card.issued_to_user_id ?? '',
@@ -112,7 +118,10 @@ export default function GiftCardsIndex({ cards = {}, stats = {}, users = [], fil
 
     if (editCard) {
       router.put(route('admin.gift-cards.update', editCard.id), {
+        title: form.title || null,
         status: form.status,
+        purchase_price: form.purchase_price ? Number(form.purchase_price) : null,
+        is_for_sale: Boolean(form.is_for_sale),
         remaining_balance: Number(form.remaining_balance ?? form.initial_balance),
         expires_at: form.expires_at || null,
         issued_to_user_id: form.issued_to_user_id || null,
@@ -125,7 +134,10 @@ export default function GiftCardsIndex({ cards = {}, stats = {}, users = [], fil
     } else {
       router.post(route('admin.gift-cards.store'), {
         code: form.code || null,
+        title: form.title || null,
         initial_balance: Number(form.initial_balance),
+        purchase_price: form.purchase_price ? Number(form.purchase_price) : null,
+        is_for_sale: Boolean(form.is_for_sale),
         status: form.status,
         expires_at: form.expires_at || null,
         issued_to_user_id: form.issued_to_user_id || null,
@@ -242,7 +254,7 @@ export default function GiftCardsIndex({ cards = {}, stats = {}, users = [], fil
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b accent">
-                  {['Code', 'Balance', 'Remaining', 'Issued To', 'Expires', 'Status', 'Actions'].map(h => (
+                  {['Code / Title', 'Value (Credit)', 'Sale Price', 'Remaining', 'Issued To', 'Expires', 'Status', 'Actions'].map(h => (
                     <th key={h} className="px-4 py-3 text-left secondary font-medium uppercase text-xs">{h}</th>
                   ))}
                 </tr>
@@ -252,9 +264,21 @@ export default function GiftCardsIndex({ cards = {}, stats = {}, users = [], fil
                   <tr key={card.id} className="border-b accent hover:bg-primary/5 transition-colors">
                     <td className="px-4 py-3">
                       <span className="font-mono font-bold text-primary text-sm">{card.code}</span>
+                      {card.title && <div className="text-xs font-semibold heading">{card.title}</div>}
                       {card.note && <div className="text-xs secondary mt-0.5 truncate max-w-32">{card.note}</div>}
                     </td>
-                    <td className="px-4 py-3 font-mono heading">PKR {Number(card.initial_balance).toLocaleString()}</td>
+                    <td className="px-4 py-3 font-mono heading">
+                      <div>PKR {Number(card.initial_balance).toLocaleString()}</div>
+                      {card.purchase_price && Number(card.initial_balance) > Number(card.purchase_price) && (
+                        <span className="text-[10px] text-emerald-500 font-bold block">+PKR {(Number(card.initial_balance) - Number(card.purchase_price)).toLocaleString()} Free</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 font-mono text-secondary">
+                      {card.purchase_price ? `PKR ${Number(card.purchase_price).toLocaleString()}` : '—'}
+                      {card.is_for_sale ? (
+                        <span className="block text-[10px] text-primary font-bold">● In Store</span>
+                      ) : null}
+                    </td>
                     <td className="px-4 py-3">
                       <div className="font-mono heading">PKR {Number(card.remaining_balance).toLocaleString()}</div>
                       <div className="w-20 h-1.5 bg-accent rounded-full mt-1 overflow-hidden">
@@ -383,17 +407,28 @@ export default function GiftCardsIndex({ cards = {}, stats = {}, users = [], fil
                 </>
               )}
 
-              {/* Balance */}
+              {/* Balance & Selling Price (Option 2 Logic: Pay less, get more) */}
+              <div>
+                <label className="block text-sm font-medium secondary mb-1.5">Card Title / Name <span className="text-xs opacity-60">(optional, e.g. Silver Shopping Pass)</span></label>
+                <input
+                  type="text"
+                  placeholder="e.g. Bronze Gift Card"
+                  value={form.title}
+                  onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-lg border accent bg text-sm heading focus:ring-2 focus:ring-primary/30 outline-none"
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium secondary mb-1.5">
-                    {editCard ? 'Remaining Balance' : 'Balance (PKR)'} <span className="text-red-400">*</span>
+                    {editCard ? 'Remaining Balance' : 'Card Value / Balance'} <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="number"
                     min="0"
                     step="0.01"
-                    placeholder="e.g. 5000"
+                    placeholder="e.g. 4250"
                     value={editCard ? form.remaining_balance : form.initial_balance}
                     onChange={e => setForm(p => ({
                       ...p,
@@ -401,6 +436,45 @@ export default function GiftCardsIndex({ cards = {}, stats = {}, users = [], fil
                     }))}
                     className="w-full px-3 py-2 rounded-lg border accent bg text-sm heading focus:ring-2 focus:ring-primary/30 outline-none"
                   />
+                  <span className="text-xs text-secondary mt-1 block">Value customer gets for shopping</span>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium secondary mb-1.5">
+                    Customer Purchase Price
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="e.g. 4000"
+                    value={form.purchase_price}
+                    onChange={e => setForm(p => ({ ...p, purchase_price: e.target.value }))}
+                    className="w-full px-3 py-2 rounded-lg border accent bg text-sm heading focus:ring-2 focus:ring-primary/30 outline-none"
+                  />
+                  <span className="text-xs text-secondary mt-1 block">What customer actually pays</span>
+                </div>
+              </div>
+
+              {/* Bonus summary box */}
+              {form.initial_balance && form.purchase_price && Number(form.initial_balance) > Number(form.purchase_price) && (
+                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-600 flex items-center justify-between">
+                  <span>Customer pays <strong>PKR {Number(form.purchase_price).toLocaleString()}</strong> & gets <strong>PKR {Number(form.initial_balance).toLocaleString()}</strong></span>
+                  <span className="px-2 py-0.5 rounded bg-emerald-500 text-white font-bold">+PKR {(Number(form.initial_balance) - Number(form.purchase_price)).toLocaleString()} Bonus</span>
+                </div>
+              )}
+
+              {/* Sale status & Status */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium secondary mb-1.5">Show in Public Store</label>
+                  <select 
+                    value={form.is_for_sale ? 'yes' : 'no'} 
+                    onChange={e => setForm(p => ({ ...p, is_for_sale: e.target.value === 'yes' }))} 
+                    className="w-full px-3 py-2 rounded-lg border accent bg text-sm heading focus:ring-2 focus:ring-primary/30 outline-none"
+                  >
+                    <option value="yes">Yes (Available to buy online)</option>
+                    <option value="no">No (Private / Admin only)</option>
+                  </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium secondary mb-1.5">Status</label>

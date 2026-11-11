@@ -60,7 +60,10 @@ class GiftCardController extends Controller
     {
         $request->validate([
             'code'               => 'nullable|string|max:50|unique:gift_cards,code',
+            'title'              => 'nullable|string|max:100',
             'initial_balance'    => 'required|numeric|min:1',
+            'purchase_price'     => 'nullable|numeric|min:0',
+            'is_for_sale'        => 'nullable|boolean',
             'status'             => 'required|in:active,inactive',
             'expires_at'         => 'nullable|date',
             'issued_to_user_id'  => 'nullable|integer|exists:users,id',
@@ -70,6 +73,9 @@ class GiftCardController extends Controller
 
         $quantity = max(1, intval($request->input('quantity', 1)));
         $now = now();
+        $purchasePrice = $request->filled('purchase_price') 
+            ? (float) $request->input('purchase_price') 
+            : (float) $request->input('initial_balance');
 
         for ($i = 0; $i < $quantity; $i++) {
             $code = $quantity === 1 && $request->filled('code')
@@ -78,7 +84,10 @@ class GiftCardController extends Controller
 
             DB::table('gift_cards')->insert([
                 'code'               => $code,
+                'title'              => $request->input('title'),
                 'initial_balance'    => $request->input('initial_balance'),
+                'purchase_price'     => $purchasePrice,
+                'is_for_sale'        => (bool) $request->input('is_for_sale', false),
                 'remaining_balance'  => $request->input('initial_balance'),
                 'status'             => $request->input('status', 'active'),
                 'expires_at'         => $request->input('expires_at'),
@@ -100,7 +109,10 @@ class GiftCardController extends Controller
         abort_if(!$card, 404);
 
         $request->validate([
+            'title'              => 'nullable|string|max:100',
             'status'             => 'required|in:active,inactive,exhausted',
+            'purchase_price'     => 'nullable|numeric|min:0',
+            'is_for_sale'        => 'nullable|boolean',
             'remaining_balance'  => 'required|numeric|min:0',
             'expires_at'         => 'nullable|date',
             'issued_to_user_id'  => 'nullable|integer|exists:users,id',
@@ -108,7 +120,10 @@ class GiftCardController extends Controller
         ]);
 
         DB::table('gift_cards')->where('id', $id)->update([
+            'title'              => $request->input('title'),
             'status'             => $request->input('status'),
+            'purchase_price'     => $request->filled('purchase_price') ? (float) $request->input('purchase_price') : $card->purchase_price,
+            'is_for_sale'        => (bool) $request->input('is_for_sale', false),
             'remaining_balance'  => $request->input('remaining_balance'),
             'expires_at'         => $request->input('expires_at'),
             'issued_to_user_id'  => $request->input('issued_to_user_id'),
