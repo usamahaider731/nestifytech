@@ -1,72 +1,8 @@
 # NestifyTech — Enterprise Full-Stack E-Commerce & Multi-Vendor Ecosystem
 
-> **Live Production Store:** [nestifytech.laravel.cloud](https://nestifytech.laravel.cloud)  
-> **Tech Stack:** Laravel 12 (PHP 8.2+) • Inertia.js v2 • React 18 • Tailwind CSS v4 • Vite 6 • MySQL • Stripe • Redis/Database Queues
+NestifyTech is an enterprise-grade e-commerce application designed for high-performance catalog management, multi-store operations, and modern storefront experiences. It couples a secure Laravel 12 backend with an Inertia.js v2 and React 18 Single Page Application (SPA) frontend, Tailwind CSS v4 styling, dynamic module builder, rider logistics with delivery OTP, and automated Stripe/wallet refund lifecycles.
 
----
-
-## 🌟 Fiverr Gig Title & Portfolio Copywriting (Ready to Use)
-
-### 📌 Gig Titles (SEO Optimized)
-* **Option 1 (Primary):** I will develop a modern Laravel React Inertia full stack ecommerce website
-* **Option 2:** I will build enterprise ecommerce store with Laravel 12, React, Stripe and Admin Panel
-* **Option 3:** I will build multi vendor ecommerce website with rider tracking and automated delivery
-
-### 🎯 Gig Search Tags / Keywords
-`laravel react` • `ecommerce website` • `inertia js` • `full stack developer` • `stripe payment` • `delivery tracking` • `custom admin panel`
-
----
-
-### 📝 Fiverr Gig Description (Copy & Paste)
-
-```markdown
-Are you looking for a modern, blazingly fast, and high-converting E-Commerce platform built with cutting-edge technology?
-
-Welcome! I build enterprise-grade, fully customized E-Commerce stores using Laravel 12, React 18 (Inertia.js v2), Tailwind CSS v4, and MySQL. No slow page reloads, no clunky templates — you get a smooth Single Page Application (SPA) experience powered by the rock-solid security of Laravel.
-
-🚀 KEY FEATURES OF THIS PLATFORM:
-
-🛒 Modern Storefront & Customer Experience:
-- Ultra-fast React + Inertia.js SPA storefront with instantaneous page transitions
-- Dynamic category sliders, hot tags, and multi-currency support (PKR, USD, EUR, etc.)
-- Advanced product catalog with variations (sizes, colors, specs, live stock tracking)
-- Instant product review & feedback system (verified purchaser badge, auto-published)
-- Customer portal: live order tracking, download receipts, invoice history, wallet system
-- Order cancellation with customizable deduction fee & automatic card/wallet refunds
-
-💳 Payment Gateways & Secure Checkout:
-- Stripe Payment Gateway (Card checkout, PaymentIntent API, automated partial refunds)
-- Cash on Delivery (COD), PayPal, Payoneer, and in-store credit wallet
-- Real-time stock reservation and price validation prevents overselling
-- CSRF-hardened, rate-limited APIs with strict fraud prevention
-
-🚴 Delivery Boy & Rider Management System:
-- Real-time rider GPS live location tracking & performance metrics
-- Automated OTP verification: Delivery OTP sent to customer via WhatsApp / Email
-- Office settlement workflow: Delivery boy handoffs COD cash verified by secure Office OTP
-- Rider delivery analytics, cash-in-hand calculation, and completion rates
-
-⚙️ Powerhouse Admin Panel:
-- Dynamic Module Builder: create any custom post type, taxonomy, or custom form in seconds
-- Dynamic Color Theme Switcher: live appearance preview applied instantly without reload
-- Order Management with order status lifecycle (Pending, Processing, Shipped, Delivered, Returned, Cancelled)
-- Automated Abuse Prevention: auto-blocks fraud accounts with 3+ repeated product returns
-- Role-Based Access Control (RBAC): granular permissions ({module}-read, write, delete)
-- Newsletter subscriber management with automated welcome emails
-
-📧 Automated Notification & Email Engine:
-- Dark-themed responsive HTML transactional emails
-- Instant order confirmation (sent to both customer and admin)
-- Status update notifications (Processing, Shipped with tracking number, Delivered)
-- Secure OTP emails for delivery and cash settlements
-
-📦 WHAT PACKAGES I OFFER:
-- Basic: Clean Laravel + React setup, product catalog, simple checkout.
-- Standard: Full E-Commerce store, Stripe integration, admin panel, responsive UI.
-- Premium (Enterprise): Complete ecosystem with multi-step checkout, rider tracking, OTP verification, wallet, advanced analytics, and custom modules.
-
-Let's discuss your project and build something extraordinary! Contact me before ordering.
-```
+> **Live Production Store:** [nestifytech.laravel.cloud](https://nestifytech.laravel.cloud)
 
 ---
 
@@ -74,32 +10,47 @@ Let's discuss your project and build something extraordinary! Contact me before 
 
 | Layer | Technologies |
 | :--- | :--- |
-| **Backend** | PHP 8.2+, Laravel 12, Laravel Sanctum, Intervention Image |
-| **Frontend** | Inertia.js 2, React 18, Vite 6, Tailwind CSS 4, Redux Toolkit |
+| **Backend Framework** | PHP 8.2+, Laravel 12, Laravel Sanctum |
+| **Frontend Framework** | Inertia.js 2, React 18, Vite 6, Tailwind CSS 4, Redux Toolkit |
+| **Image Processing** | Intervention Image (automated thumbnail generation) |
 | **UI Components** | React Icons (`react-icons/ri`), React Toastify, React Quill, Embla Carousel, Motion |
 | **Database & Cache** | MySQL 8.0, Database/Redis Queues, Stateful Web Sessions |
-| **Payments** | Stripe PaymentIntent API, Stripe Refunds API, In-house Wallet Ledger |
-| **Notifications** | SMTP Mailables with responsive Blade templates, WhatsApp OTP integration |
+| **Payment Gateways** | Stripe PaymentIntent API, Stripe Refunds API, COD, Internal Wallet Ledger |
+| **Notifications & Mail** | SMTP Mailables with responsive Blade templates, WhatsApp OTP integration |
+| **Code Quality** | PHPUnit 11 for automated tests, Laravel Pint for PHP formatting |
 
 ---
 
-## 🚀 Key Architectural Modules
+## 🚀 Key Architectural Modules & Features
 
-### 1. E-Commerce Order Lifecycle & Cancellation Fee Engine
-- **Configurable Cancellation Fee:** Store managers can configure the deduction percentage (`0% - 100%`) under `Admin -> Site Settings`.
-- **Automated Stripe Refund:** If a customer cancels a paid card order, the cancellation fee is deducted and the remainder is refunded directly to their card via the Stripe API.
-- **Wallet Credit:** Non-card paid orders automatically credit the refund amount to the customer's internal wallet.
-- **Restock Automation:** Stock quantities are restored to inventory automatically when an order is cancelled or marked as returned.
-- **Fraud & Return Abuse Blocking:** Users exceeding 3 returns have their accounts flagged and blocked automatically.
+### 1. Storefront & Customer Experience
+- **Single Page Application (SPA):** Inertia.js 2 provides instant page transitions without full browser reloads.
+- **Catalog & Variations:** Dynamic product variations (sizes, colors, attributes) with real-time stock inspection and price calculation.
+- **Customer Account Portal:** Live order timeline, itemized receipts with download options, profile management, and activity logs.
+- **Verified Product Reviews:** Verified purchasers can submit ratings and reviews directly from delivered order receipts without approval delays.
 
-### 2. Verified Customer Reviews & Feedback
-- Customers can submit verified product reviews directly from completed/delivered order receipts.
-- Direct auto-approval model eliminates moderation delays and shows social proof immediately on product pages.
+### 2. Commerce, Order Lifecycle & Cancellation Fee Engine
+- **Flexible Order Cancellation:** Configurable cancellation fee percentage (`0% - 100%`) managed under Admin Site Settings (`/admin/setting/site`).
+- **Automated Stripe Card Refund:** If a customer cancels a paid card order, the cancellation fee is deducted and the remainder is refunded directly to their card via the Stripe API.
+- **Wallet Credit Engine:** Non-card paid orders automatically credit the refund amount to the customer's internal wallet for future purchases.
+- **Automated Restocking:** Stock quantities are restored to inventory automatically upon order cancellation or return.
+- **Fraud & Return Abuse Prevention:** Automatically detects and blocks user accounts with 3 or more repeated returns (`is_blocked` flag with reason).
 
-### 3. Rider & Logistics Management
-- **Customer Delivery OTP:** High-entropy 6-digit OTP dispatched via customer's WhatsApp or Email; rider cannot mark delivered without OTP verification.
-- **Office Cash Settlement:** COD amounts collected by riders are audited and settled with the head office using a dedicated Office Settlement OTP.
-- **Live Location Tracking:** Stores rider GPS coordinates to monitor active routes and delivery turnaround times.
+### 3. Rider & Logistics Management System
+- **Real-Time Rider GPS:** Tracks active delivery boy coordinates to monitor delivery routes.
+- **Customer Delivery OTP:** Secure 6-digit OTP dispatched to customer's WhatsApp or Email; delivery cannot be finalized without customer OTP verification.
+- **Office Cash Settlement Workflow:** Cash collected on delivery (COD) by riders is audited and handed over to the head office via a dedicated Office Settlement OTP verification process.
+- **Rider Performance Analytics:** Calculates completion rate, average delivery turnaround time, and cash-in-hand balance.
+
+### 4. Admin Panel & Dynamic Module Builder
+- **Dynamic Module Builder:** Create any custom post type, taxonomy, or custom form in seconds without writing repetitive CRUD code.
+- **Role-Based Access Control (RBAC):** Granular permission checks (`{module}-read`, `{module}-write`, `{module}-delete`).
+- **Dynamic Theme Color Engine:** Live appearance preview and theme color switching applied instantly across the application.
+- **System Settings:** Centralized JSON-backed settings for site configuration, payment gateway keys, SMTP credentials, and cancellation fees.
+
+### 5. Automated Notification & Email Engine
+- Responsive dark-themed HTML transactional emails for order placement, status changes, delivery OTP, and office cash settlements.
+- Auto-reply contact inquiry handling and newsletter subscriber onboarding.
 
 ---
 
