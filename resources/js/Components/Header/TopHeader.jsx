@@ -4,7 +4,7 @@ import { TbTruckDelivery } from 'react-icons/tb';
 import LanguageDropdown from './LanguageDropdown';
 import CitySelectorDropdown from './CitySelectorDropdown';
 import { BiMap } from "react-icons/bi";
-import { RiUser3Line, RiUserLine } from 'react-icons/ri';
+import { RiUser3Line, RiUserLine, RiGiftLine } from 'react-icons/ri';
 import { useLang } from '@/contexts/LanguageContext';
 
 const TopHeader = ({ show_language, ContainerType }) => {
@@ -47,6 +47,12 @@ const TopHeader = ({ show_language, ContainerType }) => {
                         <ul className='flex leading-9.5 items-center font-roboto'>
                             <li className='lg:px-3.75 pl-0 md:pl-3 px-3 text-[11px] md:text-[13px] flex items-center'>
                                 <CitySelectorDropdown />
+                            </li>
+                            <li className='lg:px-3.75 px-3 text-[11px] md:text-[13px] h-4 border-l-2 border-l-border flex'>
+                                <Link href={route('gift-cards.index')} className='flex items-center gap-1 font-semibold text-primary transition-colors hover:opacity-80'>
+                                    <RiGiftLine size={15} />
+                                    {__('Gift Cards')}
+                                </Link>
                             </li>
                             <li className='lg:px-3.75 px-3 text-[11px] md:text-[13px] h-4 border-l-2 border-l-border flex'>
                                 <Link href={route('store.locator')} className='flex items-center gap-1 font-medium transition-colors hover:text-primary'>
