@@ -15,6 +15,8 @@ use Carbon\Carbon;
 use App\Mail\OfficeSettlementOtpMail;
 use App\Mail\DeliveryOtpMail;
 use App\Services\WalletService;
+use Stripe\Stripe;
+use Stripe\Refund;
 
 class OrderController extends Controller
 {
@@ -728,38 +730,69 @@ class OrderController extends Controller
 
         DB::table('orders')->where('id', $id)->update($update);
 
-        // ── On cancellation: restore stock + credit wallet ────────────────────
+        // ── On cancellation: restore stock + refund ──────────────────────────
+        $refundIssued  = false;
+        $refundableAmt = 0;
+
         if ($request->status === 'cancelled' && $order->status !== 'cancelled') {
             // Restore inventory
             WalletService::restoreOrderStock($id);
 
-            // Credit wallet if order was paid and user exists
-            $wasPaid = in_array(strtolower($order->payment_status ?? ''), ['paid']);
-            $isNonStripe = strtolower($order->payment_method ?? '') !== 'card';
+            $wasPaid     = strtolower($order->payment_status ?? '') === 'paid';
+            $isStripe    = strtolower($order->payment_method ?? '') === 'card'
+                           && !empty($order->stripe_payment_intent_id);
+
             if ($wasPaid && !empty($order->user_id)) {
-                $refundable = (float) $order->total_price;
-                if ($isNonStripe && $refundable > 0) {
+                $refundableAmt = (float) $order->total_price;
+
+                if ($isStripe && $refundableAmt > 0) {
+                    // ── Stripe card refund ──────────────────────────────────
+                    try {
+                        $settings  = json_decode(File::get(storage_path('app/data/setting.json')), true) ?? [];
+                        $stripeKey = $settings['payment']['stripe_secret_key']['value'] ?? null;
+                        if ($stripeKey) {
+                            Stripe::setApiKey($stripeKey);
+                            $stripeRefund = Refund::create([
+                                'payment_intent' => $order->stripe_payment_intent_id,
+                                'amount'         => (int) round($refundableAmt * 100),
+                            ]);
+                            DB::table('orders')->where('id', $id)->update([
+                                'payment_status' => 'refunded',
+                                'refund_amount'  => $refundableAmt,
+                                'refund_id'      => $stripeRefund->id,
+                                'refund_status'  => $stripeRefund->status,
+                            ]);
+                            $refundIssued = true;
+                            Log::info("Stripe refund issued for order #{$id}: {$stripeRefund->id}");
+                        }
+                    } catch (\Exception $e) {
+                        Log::error("Stripe refund failed for order #{$id}: " . $e->getMessage());
+                    }
+                } elseif (!$isStripe && $refundableAmt > 0) {
+                    // ── Wallet credit for non-Stripe paid orders ────────────
                     WalletService::credit(
                         (int) $order->user_id,
-                        $refundable,
+                        $refundableAmt,
                         'order_refund',
                         $id,
                         null,
                         "Admin cancelled order #" . str_pad($id, 5, '0', STR_PAD_LEFT) . " — full refund credited to wallet."
                     );
-                    // Mark order refunded
                     DB::table('orders')->where('id', $id)->update([
                         'payment_status' => 'refunded',
-                        'refund_amount'  => $refundable,
+                        'refund_amount'  => $refundableAmt,
                         'refund_status'  => 'wallet_credited',
                     ]);
+                    $refundIssued = true;
                 }
             }
         }
 
         return response()->json([
-            'success' => true,
-            'message' => "Order #{$id} status updated to " . ucfirst($request->status) . '.',
+            'success'       => true,
+            'message'       => "Order #{$id} status updated to " . ucfirst($request->status) . '.',
+            'refunded'      => $refundIssued,
+            'refund_amount' => $refundableAmt,
         ]);
     }
 
@@ -780,21 +813,53 @@ class OrderController extends Controller
             WalletService::restoreOrderStock($id);
         }
 
-        // Credit wallet if the order was paid and not yet delivered/cancelled
+        // ── Refund if the order was paid and not yet delivered/cancelled ──────
+        $deleteRefundIssued = false;
+        $deleteRefundAmt    = 0;
+
         if ($isActive && !empty($order->user_id)) {
-            $wasPaid    = in_array(strtolower($order->payment_status ?? ''), ['paid']);
-            $isNonStripe = strtolower($order->payment_method ?? '') !== 'card';
-            if ($wasPaid && $isNonStripe) {
-                $refundable = (float) $order->total_price;
-                if ($refundable > 0) {
+            $wasPaid  = strtolower($order->payment_status ?? '') === 'paid';
+            $isStripe = strtolower($order->payment_method ?? '') === 'card'
+                        && !empty($order->stripe_payment_intent_id);
+
+            if ($wasPaid) {
+                $deleteRefundAmt = (float) $order->total_price;
+
+                if ($isStripe && $deleteRefundAmt > 0) {
+                    // ── Stripe card refund ──────────────────────────────────
+                    try {
+                        $settings  = json_decode(File::get(storage_path('app/data/setting.json')), true) ?? [];
+                        $stripeKey = $settings['payment']['stripe_secret_key']['value'] ?? null;
+                        if ($stripeKey) {
+                            Stripe::setApiKey($stripeKey);
+                            $stripeRefund = Refund::create([
+                                'payment_intent' => $order->stripe_payment_intent_id,
+                                'amount'         => (int) round($deleteRefundAmt * 100),
+                            ]);
+                            // Update payment status before deleting (for audit logs if any)
+                            DB::table('orders')->where('id', $id)->update([
+                                'payment_status' => 'refunded',
+                                'refund_amount'  => $deleteRefundAmt,
+                                'refund_id'      => $stripeRefund->id,
+                                'refund_status'  => $stripeRefund->status,
+                            ]);
+                            $deleteRefundIssued = true;
+                            Log::info("Stripe refund issued on delete for order #{$id}: {$stripeRefund->id}");
+                        }
+                    } catch (\Exception $e) {
+                        Log::error("Stripe refund failed on delete for order #{$id}: " . $e->getMessage());
+                    }
+                } elseif (!$isStripe && $deleteRefundAmt > 0) {
+                    // ── Wallet credit for non-Stripe paid orders ────────────
                     WalletService::credit(
                         (int) $order->user_id,
-                        $refundable,
+                        $deleteRefundAmt,
                         'order_deleted_refund',
                         $id,
                         null,
                         "Order #" . str_pad($id, 5, '0', STR_PAD_LEFT) . " was deleted by admin — full refund credited to wallet."
                     );
+                    $deleteRefundIssued = true;
                 }
             }
         }
@@ -803,8 +868,10 @@ class OrderController extends Controller
         DB::table('orders')->where('id', $id)->delete();
 
         return response()->json([
-            'success' => true,
-            'message' => "Order #{$id} deleted successfully.",
+            'success'       => true,
+            'message'       => "Order #{$id} deleted successfully.",
+            'refunded'      => $deleteRefundIssued,
+            'refund_amount' => $deleteRefundAmt,
         ]);
     }
 
