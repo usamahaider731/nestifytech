@@ -113,6 +113,12 @@ const STATUS_CONFIG = {
         dot: 'bg-rose-500',
         icon: RiCloseLine,
     },
+    returned: {
+        label: 'Returned',
+        cls: 'bg-purple-500/15 text-purple-500 border-purple-500/25',
+        dot: 'bg-purple-500',
+        icon: RiRefreshLine,
+    },
 }
 
 function StatusBadge({ status }) {
@@ -694,6 +700,7 @@ function OrderProcessModal({ order, deliveryBoys = [], onClose, onUpdated, curre
                                     <option value="delivered">Delivered (Received by customer)</option>
                                     <option value="completed">Completed (Order Finalized)</option>
                                     <option value="cancelled">Cancelled</option>
+                                    <option value="returned">Returned (Restores Stock & Auto-blocks on 3+ returns)</option>
                                 </select>
                             </div>
 

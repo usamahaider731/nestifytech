@@ -191,8 +191,19 @@ class CartController extends Controller
 
         $items = $request->input('items');
 
-        // ── Prevent seller from buying their own product ──────────────────────
+        // ── Check if user account is blocked ──────────────────────────────────
         $currentUserId = Auth::id();
+        if ($currentUserId) {
+            $currentUser = DB::table('users')->where('id', $currentUserId)->first();
+            if ($currentUser && !empty($currentUser->is_blocked)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __("Your account has been suspended due to policy violations (multiple returns). You cannot place orders."),
+                ], 403);
+            }
+        }
+
+        // ── Prevent seller from buying their own product ──────────────────────
         if ($currentUserId) {
             $productIds = array_unique(array_filter(array_column($items, 'productId')));
             $ownedProduct = DB::table('posts')

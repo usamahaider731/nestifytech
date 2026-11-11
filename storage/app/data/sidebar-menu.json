@@ -48,7 +48,7 @@
         "menu": [
           {
             "id": "site-setting",
-            "title": "Site Setting",
+            "title": "Site Configration",
             "route": "admin.setting",
             "params": {
               "type": "site"

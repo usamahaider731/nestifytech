@@ -49,6 +49,19 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        // Check if user account is blocked
+        $user = Auth::user();
+        if ($user && !empty($user->is_blocked)) {
+            Auth::guard('web')->logout();
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'email' => $user->blocked_reason
+                    ? "Your account has been suspended: {$user->blocked_reason}. Please contact customer support."
+                    : "Your account has been suspended due to policy violations. Please contact customer support.",
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

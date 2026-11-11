@@ -96,6 +96,13 @@ export default function Orders({ profile, orders = [], current_status = 'all' })
                 </span>
             );
         }
+        if (s === 'returned') {
+            return (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+                    <RiRefreshLine size={12} /> {__('Returned')}
+                </span>
+            );
+        }
         return (
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
                 <RiTimeLine size={12} /> {__('Pending')}
@@ -130,6 +137,7 @@ export default function Orders({ profile, orders = [], current_status = 'all' })
         { id: 'delivered', label: __('Delivered'), count: orders.filter(o => o.status === 'delivered').length },
         { id: 'completed', label: __('Completed'), count: stats.completed_orders || 0 },
         { id: 'cancelled', label: __('Cancelled'), count: stats.cancelled_orders || 0 },
+        { id: 'returned', label: __('Returned'), count: orders.filter(o => o.status === 'returned').length },
     ];
 
     return (

@@ -55,3 +55,4 @@ class OrderStatusChangedMail extends Mailable
         return [];
     }
 }
+

@@ -731,11 +731,15 @@ class OrderController extends Controller
 
         DB::table('orders')->where('id', $id)->update($update);
 
-        // ── On cancellation: restore stock + refund ──────────────────────────
+        // ── On cancellation or return: restore stock + refund + return count check ──
         $refundIssued  = false;
         $refundableAmt = 0;
+        $userBlocked   = false;
 
-        if ($request->status === 'cancelled' && $order->status !== 'cancelled') {
+        $isCancellation = ($request->status === 'cancelled' && $order->status !== 'cancelled');
+        $isReturn       = ($request->status === 'returned' && $order->status !== 'returned');
+
+        if ($isCancellation || $isReturn) {
             // Restore inventory
             WalletService::restoreOrderStock($id);
 
@@ -743,13 +747,21 @@ class OrderController extends Controller
             $isStripe    = strtolower($order->payment_method ?? '') === 'card'
                            && !empty($order->stripe_payment_intent_id);
 
+            // Fetch cancellation fee percentage if it's a cancellation
+            $cancellationFeePercent = 0.0;
+            $settings = json_decode(File::get(storage_path('app/data/setting.json')), true) ?? [];
+            if ($isCancellation && isset($settings['site']['order_cancellation_fee']['value'])) {
+                $cancellationFeePercent = (float) $settings['site']['order_cancellation_fee']['value'];
+            }
+
             if ($wasPaid && !empty($order->user_id)) {
-                $refundableAmt = (float) $order->total_price;
+                $totalOrderAmt = (float) $order->total_price;
+                $deduction = $isCancellation ? round(($totalOrderAmt * ($cancellationFeePercent / 100)), 2) : 0.0;
+                $refundableAmt = max(0, round($totalOrderAmt - $deduction, 2));
 
                 if ($isStripe && $refundableAmt > 0) {
                     // ── Stripe card refund ──────────────────────────────────
                     try {
-                        $settings  = json_decode(File::get(storage_path('app/data/setting.json')), true) ?? [];
                         $stripeKey = $settings['payment']['stripe_secret_key']['value'] ?? null;
                         if ($stripeKey) {
                             Stripe::setApiKey($stripeKey);
@@ -758,10 +770,12 @@ class OrderController extends Controller
                                 'amount'         => (int) round($refundableAmt * 100),
                             ]);
                             DB::table('orders')->where('id', $id)->update([
-                                'payment_status' => 'refunded',
-                                'refund_amount'  => $refundableAmt,
-                                'refund_id'      => $stripeRefund->id,
-                                'refund_status'  => $stripeRefund->status,
+                                'payment_status'              => 'refunded',
+                                'cancellation_fee_percentage' => $cancellationFeePercent,
+                                'cancellation_deduction'      => $deduction,
+                                'refund_amount'               => $refundableAmt,
+                                'refund_id'                   => $stripeRefund->id,
+                                'refund_status'               => $stripeRefund->status,
                             ]);
                             $refundIssued = true;
                             Log::info("Stripe refund issued for order #{$id}: {$stripeRefund->id}");
@@ -771,20 +785,42 @@ class OrderController extends Controller
                     }
                 } elseif (!$isStripe && $refundableAmt > 0) {
                     // ── Wallet credit for non-Stripe paid orders ────────────
+                    $descAction = $isReturn ? 'returned' : 'cancelled';
                     WalletService::credit(
                         (int) $order->user_id,
                         $refundableAmt,
-                        'order_refund',
+                        $isReturn ? 'order_returned_refund' : 'order_refund',
                         $id,
                         null,
-                        "Admin cancelled order #" . str_pad($id, 5, '0', STR_PAD_LEFT) . " — full refund credited to wallet."
+                        "Admin marked order #" . str_pad($id, 5, '0', STR_PAD_LEFT) . " as {$descAction} — net refund credited to wallet." .
+                            ($deduction > 0 ? " (after {$cancellationFeePercent}% fee)" : "")
                     );
                     DB::table('orders')->where('id', $id)->update([
-                        'payment_status' => 'refunded',
-                        'refund_amount'  => $refundableAmt,
-                        'refund_status'  => 'wallet_credited',
+                        'payment_status'              => 'refunded',
+                        'cancellation_fee_percentage' => $cancellationFeePercent,
+                        'cancellation_deduction'      => $deduction,
+                        'refund_amount'               => $refundableAmt,
+                        'refund_status'               => 'wallet_credited',
                     ]);
                     $refundIssued = true;
+                }
+            }
+
+            // ── Auto-Block User if Returned 3 or more times ───────────────────
+            if ($isReturn && !empty($order->user_id)) {
+                $returnCount = DB::table('orders')
+                    ->where('user_id', $order->user_id)
+                    ->where('status', 'returned')
+                    ->count();
+
+                if ($returnCount >= 3) {
+                    DB::table('users')->where('id', $order->user_id)->update([
+                        'is_blocked'     => true,
+                        'blocked_reason' => "Account suspended automatically due to {$returnCount} product returns.",
+                        'updated_at'     => now(),
+                    ]);
+                    $userBlocked = true;
+                    Log::warning("User #{$order->user_id} automatically blocked due to {$returnCount} returned orders.");
                 }
             }
         }
@@ -815,11 +851,17 @@ class OrderController extends Controller
             Log::error("Failed to send order status email for order #{$id}: " . $mailErr->getMessage());
         }
 
+        $msg = "Order #{$id} status updated to " . ucfirst($request->status) . '.';
+        if ($userBlocked) {
+            $msg .= ' ⚠️ Customer account has been automatically suspended due to excessive (3+) product returns.';
+        }
+
         return response()->json([
             'success'       => true,
-            'message'       => "Order #{$id} status updated to " . ucfirst($request->status) . '.',
+            'message'       => $msg,
             'refunded'      => $refundIssued,
             'refund_amount' => $refundableAmt,
+            'user_blocked'  => $userBlocked,
         ]);
     }
 
