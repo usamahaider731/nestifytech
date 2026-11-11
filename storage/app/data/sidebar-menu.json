@@ -541,7 +541,8 @@
             "params": {
               "type": "supplier"
             },
-            "title": "Add Supplier",          "permission": "category-write"
+            "title": "Add Supplier",
+            "permission": "category-write"
           }
         ]
       },
