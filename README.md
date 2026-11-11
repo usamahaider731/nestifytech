@@ -1,21 +1,107 @@
-# NestifyTech
+# NestifyTech — Enterprise Full-Stack E-Commerce & Multi-Vendor Ecosystem
 
-NestifyTech is a Laravel 12 application for managing a configurable catalog and storefront. It combines a PHP backend, an Inertia.js and React frontend, a permission-aware admin panel, JSON-backed site configuration, media management, taxonomy-driven content, product variations, reviews, and cart/order workflows.
+> **Live Production Store:** [nestifytech.laravel.cloud](https://nestifytech.laravel.cloud)  
+> **Tech Stack:** Laravel 12 (PHP 8.2+) • Inertia.js v2 • React 18 • Tailwind CSS v4 • Vite 6 • MySQL • Stripe • Redis/Database Queues
 
-## Technology Stack
+---
 
-- PHP 8.2+
-- Laravel 12
-- Inertia.js 2 with React 18
-- Vite 6
-- Tailwind CSS 4
-- MySQL
-- Laravel Sanctum for API authentication support
-- Intervention Image for image processing
-- PHPUnit 11 for automated tests
-- Laravel Pint for PHP formatting
+## 🌟 Fiverr Gig Title & Portfolio Copywriting (Ready to Use)
 
-The frontend also uses Redux Toolkit, FullCalendar, Chart.js, Embla Carousel, React Quill, React Icons, React Toastify, and Motion.
+### 📌 Gig Titles (SEO Optimized)
+* **Option 1 (Primary):** I will develop a modern Laravel React Inertia full stack ecommerce website
+* **Option 2:** I will build enterprise ecommerce store with Laravel 12, React, Stripe and Admin Panel
+* **Option 3:** I will build multi vendor ecommerce website with rider tracking and automated delivery
+
+### 🎯 Gig Search Tags / Keywords
+`laravel react` • `ecommerce website` • `inertia js` • `full stack developer` • `stripe payment` • `delivery tracking` • `custom admin panel`
+
+---
+
+### 📝 Fiverr Gig Description (Copy & Paste)
+
+```markdown
+Are you looking for a modern, blazingly fast, and high-converting E-Commerce platform built with cutting-edge technology?
+
+Welcome! I build enterprise-grade, fully customized E-Commerce stores using Laravel 12, React 18 (Inertia.js v2), Tailwind CSS v4, and MySQL. No slow page reloads, no clunky templates — you get a smooth Single Page Application (SPA) experience powered by the rock-solid security of Laravel.
+
+🚀 KEY FEATURES OF THIS PLATFORM:
+
+🛒 Modern Storefront & Customer Experience:
+- Ultra-fast React + Inertia.js SPA storefront with instantaneous page transitions
+- Dynamic category sliders, hot tags, and multi-currency support (PKR, USD, EUR, etc.)
+- Advanced product catalog with variations (sizes, colors, specs, live stock tracking)
+- Instant product review & feedback system (verified purchaser badge, auto-published)
+- Customer portal: live order tracking, download receipts, invoice history, wallet system
+- Order cancellation with customizable deduction fee & automatic card/wallet refunds
+
+💳 Payment Gateways & Secure Checkout:
+- Stripe Payment Gateway (Card checkout, PaymentIntent API, automated partial refunds)
+- Cash on Delivery (COD), PayPal, Payoneer, and in-store credit wallet
+- Real-time stock reservation and price validation prevents overselling
+- CSRF-hardened, rate-limited APIs with strict fraud prevention
+
+🚴 Delivery Boy & Rider Management System:
+- Real-time rider GPS live location tracking & performance metrics
+- Automated OTP verification: Delivery OTP sent to customer via WhatsApp / Email
+- Office settlement workflow: Delivery boy handoffs COD cash verified by secure Office OTP
+- Rider delivery analytics, cash-in-hand calculation, and completion rates
+
+⚙️ Powerhouse Admin Panel:
+- Dynamic Module Builder: create any custom post type, taxonomy, or custom form in seconds
+- Dynamic Color Theme Switcher: live appearance preview applied instantly without reload
+- Order Management with order status lifecycle (Pending, Processing, Shipped, Delivered, Returned, Cancelled)
+- Automated Abuse Prevention: auto-blocks fraud accounts with 3+ repeated product returns
+- Role-Based Access Control (RBAC): granular permissions ({module}-read, write, delete)
+- Newsletter subscriber management with automated welcome emails
+
+📧 Automated Notification & Email Engine:
+- Dark-themed responsive HTML transactional emails
+- Instant order confirmation (sent to both customer and admin)
+- Status update notifications (Processing, Shipped with tracking number, Delivered)
+- Secure OTP emails for delivery and cash settlements
+
+📦 WHAT PACKAGES I OFFER:
+- Basic: Clean Laravel + React setup, product catalog, simple checkout.
+- Standard: Full E-Commerce store, Stripe integration, admin panel, responsive UI.
+- Premium (Enterprise): Complete ecosystem with multi-step checkout, rider tracking, OTP verification, wallet, advanced analytics, and custom modules.
+
+Let's discuss your project and build something extraordinary! Contact me before ordering.
+```
+
+---
+
+## 🛠️ Technology Stack Overview
+
+| Layer | Technologies |
+| :--- | :--- |
+| **Backend** | PHP 8.2+, Laravel 12, Laravel Sanctum, Intervention Image |
+| **Frontend** | Inertia.js 2, React 18, Vite 6, Tailwind CSS 4, Redux Toolkit |
+| **UI Components** | React Icons (`react-icons/ri`), React Toastify, React Quill, Embla Carousel, Motion |
+| **Database & Cache** | MySQL 8.0, Database/Redis Queues, Stateful Web Sessions |
+| **Payments** | Stripe PaymentIntent API, Stripe Refunds API, In-house Wallet Ledger |
+| **Notifications** | SMTP Mailables with responsive Blade templates, WhatsApp OTP integration |
+
+---
+
+## 🚀 Key Architectural Modules
+
+### 1. E-Commerce Order Lifecycle & Cancellation Fee Engine
+- **Configurable Cancellation Fee:** Store managers can configure the deduction percentage (`0% - 100%`) under `Admin -> Site Settings`.
+- **Automated Stripe Refund:** If a customer cancels a paid card order, the cancellation fee is deducted and the remainder is refunded directly to their card via the Stripe API.
+- **Wallet Credit:** Non-card paid orders automatically credit the refund amount to the customer's internal wallet.
+- **Restock Automation:** Stock quantities are restored to inventory automatically when an order is cancelled or marked as returned.
+- **Fraud & Return Abuse Blocking:** Users exceeding 3 returns have their accounts flagged and blocked automatically.
+
+### 2. Verified Customer Reviews & Feedback
+- Customers can submit verified product reviews directly from completed/delivered order receipts.
+- Direct auto-approval model eliminates moderation delays and shows social proof immediately on product pages.
+
+### 3. Rider & Logistics Management
+- **Customer Delivery OTP:** High-entropy 6-digit OTP dispatched via customer's WhatsApp or Email; rider cannot mark delivered without OTP verification.
+- **Office Cash Settlement:** COD amounts collected by riders are audited and settled with the head office using a dedicated Office Settlement OTP.
+- **Live Location Tracking:** Stores rider GPS coordinates to monitor active routes and delivery turnaround times.
+
+---
 
 ## Requirements
 
@@ -23,7 +109,7 @@ Install the following before starting development:
 
 - PHP 8.2 or newer with the required Laravel extensions
 - Composer
-- Node.js and npm
+- Node.js (v18+) and npm
 - MySQL or a compatible database
 - A web server, or the PHP development server supplied by Artisan
 
@@ -85,10 +171,11 @@ app/
 	Console/Commands/       Custom Artisan commands
 	Http/Controllers/       Web, admin, API, media, and commerce controllers
 	Http/Middleware/        Authentication, permissions, and request middleware
-	Http/Requests/           Form request validation
+	Http/Requests/          Form request validation
+	Mail/                   Transactional mailables (Order, OTP, Status, Welcome)
 	Models/                 Eloquent models and domain data access
 	Providers/              Application service providers
-	Services/               Application services such as JSON importers
+	Services/               Application services such as WalletService & Importers
 	Support/                Shared support helpers
 	Traits/                 Reusable module behavior
 bootstrap/                Application and route configuration
@@ -104,7 +191,7 @@ public/
 resources/
 	css/                    Application and admin stylesheets
 	js/                     React entry points, pages, layouts, components, and stores
-	views/                  Blade shell views for Inertia and frontend rendering
+	views/                  Blade shell views for Inertia and transactional emails
 routes/
 	web.php                 Browser and admin routes
 	api.php                 API routes registered by bootstrap/app.php
