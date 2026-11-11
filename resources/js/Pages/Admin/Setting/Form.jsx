@@ -244,16 +244,24 @@ function Form({ Data = [], name = '', link = '', type = '', colorPalettes = {} }
             )}
 
             {setting.type === 'number' && (
-                <TextInput
-                    id={key}
-                    name={key}
-                    type="number"
-                    value={data[key] ?? ''}
-                    className='w-full'
-                    placeholder={setting.placeholder ?? ''}
-                    onChange={(e) => handleChange(e, key)}
-                    error={errors[key]}
-                />
+                <div>
+                    <TextInput
+                        id={key}
+                        name={key}
+                        type="number"
+                        step={setting.step ?? 'any'}
+                        min={setting.min ?? '0'}
+                        max={setting.max ?? undefined}
+                        value={data[key] ?? ''}
+                        className='w-full'
+                        placeholder={setting.placeholder ?? ''}
+                        onChange={(e) => handleChange(e, key)}
+                        error={errors[key]}
+                    />
+                    {setting.description && (
+                        <p className="text-xs text-res mt-1">{setting.description}</p>
+                    )}
+                </div>
             )}
 
             {setting.type === 'password' && (
