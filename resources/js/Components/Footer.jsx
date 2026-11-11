@@ -305,6 +305,11 @@ const Footer = () => {
                                 </h4>
                                 <ul className="space-y-2.5 text-sm text-text">
                                     <li>
+                                        <Link href="/gift-cards" className="transition-colors duration-200 hover:text-primary font-semibold text-primary">
+                                            {__('Gift Cards & Vouchers')}
+                                        </Link>
+                                    </li>
+                                    <li>
                                         <Link href="/faqs" className="transition-colors duration-200 hover:text-primary">
                                             {__('Shipping & Returns')}
                                         </Link>

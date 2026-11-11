@@ -27,8 +27,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Enforce HTTPS across all URLs and assets in production / live cloud
-        if (app()->environment('production') || str_starts_with(config('app.url', ''), 'https://')) {
+        // Enforce HTTPS across all URLs and assets in production / live cloud, but NEVER on localhost
+        $isLocalhost = in_array(request()->getHost(), ['localhost', '127.0.0.1', '::1'])
+            || str_contains(config('app.url', ''), 'localhost')
+            || str_contains(config('app.url', ''), '127.0.0.1');
+
+        if (!$isLocalhost && (app()->environment('production') || str_starts_with(config('app.url', ''), 'https://'))) {
             URL::forceScheme('https');
         }
 
