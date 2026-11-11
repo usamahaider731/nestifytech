@@ -5,6 +5,7 @@ namespace App\Mail;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -40,7 +41,11 @@ class UserOtpMail extends Mailable
             'verification'   => 'Your Verification Code',
         ];
 
+        $fromAddress = config('mail.from.address') ?: 'usamahaiderkhokher@gmail.com';
+        $fromName    = config('mail.from.name') ?: 'NestifyTech';
+
         return new Envelope(
+            from: new Address($fromAddress, $fromName),
             subject: $subjects[$this->action] ?? 'Your NestifyTech Verification Code',
         );
     }

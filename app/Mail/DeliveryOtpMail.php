@@ -4,6 +4,7 @@ namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -34,8 +35,12 @@ class DeliveryOtpMail extends Mailable
      */
     public function envelope(): Envelope
     {
+        $fromAddress = config('mail.from.address') ?: 'usamahaiderkhokher@gmail.com';
+        $fromName    = config('mail.from.name') ?: 'NestifyTech';
+
         return new Envelope(
-            subject: "📦 Your Delivery OTP for Order #{$this->order->id} — NestifyTech",
+            from: new Address($fromAddress, $fromName),
+            subject: "Your Delivery OTP for Order #{$this->order->id} — NestifyTech",
         );
     }
 

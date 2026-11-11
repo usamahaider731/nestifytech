@@ -436,7 +436,28 @@ class OrderController extends Controller
             $emailSent = false;
             $emailError = null;
             try {
-                Mail::to($customerEmail)->send(new DeliveryOtpMail($order, $otp, $currency, 30));
+                $settingFile = storage_path('app/data/setting.json');
+                if (File::exists($settingFile)) {
+                    $settings = json_decode(File::get($settingFile), true);
+                    if (!empty($settings['mail']['mail_host']['value'])) {
+                        config([
+                            'mail.default' => 'smtp',
+                            'mail.mailers.smtp.host' => $settings['mail']['mail_host']['value'],
+                            'mail.mailers.smtp.port' => (int) ($settings['mail']['mail_port']['value'] ?? 587),
+                            'mail.mailers.smtp.username' => $settings['mail']['mail_username']['value'] ?? '',
+                            'mail.mailers.smtp.password' => $settings['mail']['mail_password']['value'] ?? '',
+                            'mail.mailers.smtp.encryption' => ($settings['mail']['mail_encryption']['value'] ?? 'tls') === 'none' ? null : ($settings['mail']['mail_encryption']['value'] ?? 'tls'),
+                            'mail.from.address' => $settings['mail']['mail_from_address']['value'] ?? config('mail.from.address'),
+                            'mail.from.name' => $settings['mail']['mail_from_name']['value'] ?? config('mail.from.name'),
+                        ]);
+                    }
+                }
+                try {
+                    app()->forgetInstance('mailer');
+                    Mail::clearResolvedInstances();
+                } catch (\Throwable $e) {}
+
+                Mail::mailer('smtp')->to($customerEmail)->send(new DeliveryOtpMail($order, $otp, $currency, 30));
                 $emailSent = true;
             } catch (\Throwable $e) {
                 $emailError = $e->getMessage();

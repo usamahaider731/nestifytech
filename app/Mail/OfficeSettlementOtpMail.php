@@ -4,6 +4,7 @@ namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -37,8 +38,12 @@ class OfficeSettlementOtpMail extends Mailable
      */
     public function envelope(): Envelope
     {
+        $fromAddress = config('mail.from.address') ?: 'usamahaiderkhokher@gmail.com';
+        $fromName    = config('mail.from.name') ?: 'NestifyTech';
+
         return new Envelope(
-            subject: "🔑 Office Settlement Authorization OTP for Order #{$this->order->id}",
+            from: new Address($fromAddress, $fromName),
+            subject: "Office Settlement Authorization OTP for Order #{$this->order->id}",
         );
     }
 
