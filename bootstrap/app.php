@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
         $middleware->web(prepend: [
             \App\Http\Middleware\CheckInstallation::class,
+            \App\Http\Middleware\SecurityHeaders::class,
         ], append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
             \App\Http\Middleware\UpdateUserLastSeen::class,

@@ -283,13 +283,13 @@ Route::middleware('web')->group(function () {
     // Auto-detected country saving
     Route::post('/user/save-country', [\App\Http\Controllers\ProfileController::class, 'saveCountry'])->name('api.user.save-country');
 
-    // Phone OTP Verification via SMS / WhatsApp
-    Route::post('/user/phone/send-otp', [\App\Http\Controllers\ProfileController::class, 'sendPhoneOtp'])->name('api.user.phone.send-otp');
-    Route::post('/user/phone/verify-otp', [\App\Http\Controllers\ProfileController::class, 'verifyPhoneOtp'])->name('api.user.phone.verify-otp');
+    // Phone OTP Verification via SMS / WhatsApp (Rate-limited to prevent abuse)
+    Route::post('/user/phone/send-otp', [\App\Http\Controllers\ProfileController::class, 'sendPhoneOtp'])->middleware('throttle:5,1')->name('api.user.phone.send-otp');
+    Route::post('/user/phone/verify-otp', [\App\Http\Controllers\ProfileController::class, 'verifyPhoneOtp'])->middleware('throttle:10,1')->name('api.user.phone.verify-otp');
 
-    // Email OTP Verification (Delete Account, Change Email, Verification)
-    Route::post('/user/email/send-otp', [\App\Http\Controllers\ProfileController::class, 'sendEmailOtp'])->name('api.user.email.send-otp');
-    Route::post('/user/email/verify-otp', [\App\Http\Controllers\ProfileController::class, 'verifyEmailOtp'])->name('api.user.email.verify-otp');
+    // Email OTP Verification (Rate-limited: 5 requests per minute, 10 verifications per minute)
+    Route::post('/user/email/send-otp', [\App\Http\Controllers\ProfileController::class, 'sendEmailOtp'])->middleware('throttle:5,1')->name('api.user.email.send-otp');
+    Route::post('/user/email/verify-otp', [\App\Http\Controllers\ProfileController::class, 'verifyEmailOtp'])->middleware('throttle:10,1')->name('api.user.email.verify-otp');
 
     // Notifications (New Products & Orders + Chrome Web Notifications)
     Route::get('/notifications', [\App\Http\Controllers\FrontendController::class, 'getNotifications'])->name('api.notifications');

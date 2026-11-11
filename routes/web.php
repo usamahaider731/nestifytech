@@ -207,9 +207,9 @@ Route::prefix('/admin')->middleware(['auth', 'verified'])->group(function () {
     Route::prefix('/orders')->controller(\App\Http\Controllers\Admin\OrderController::class)->middleware('permission:order-read')->group(function () {
         Route::get('/', 'index')->name('admin.orders.index');
         Route::post('/generate-tracking', 'generateTrackingNumber')->name('admin.orders.generate-tracking')->middleware('permission:order-write');
-        Route::post('/{id}/send-delivery-otp', 'sendDeliveryOtp')->name('admin.orders.send-delivery-otp')->middleware('permission:order-write');
-        Route::post('/{id}/verify-delivery-otp', 'verifyDeliveryOtp')->name('admin.orders.verify-delivery-otp')->middleware('permission:order-write');
-        Route::post('/{id}/generate-settlement-otp', 'generateOfficeSettlementOtp')->name('admin.orders.generate-settlement-otp')->middleware('permission:order-write');
+        Route::post('/{id}/send-delivery-otp', 'sendDeliveryOtp')->name('admin.orders.send-delivery-otp')->middleware(['permission:order-write', 'throttle:10,1']);
+        Route::post('/{id}/verify-delivery-otp', 'verifyDeliveryOtp')->name('admin.orders.verify-delivery-otp')->middleware(['permission:order-write', 'throttle:15,1']);
+        Route::post('/{id}/generate-settlement-otp', 'generateOfficeSettlementOtp')->name('admin.orders.generate-settlement-otp')->middleware(['permission:order-write', 'throttle:10,1']);
         Route::post('/{id}/settle-payment', 'settleOfficePayment')->name('admin.orders.settle-payment')->middleware('permission:order-write');
         Route::post('/{id}/status', 'updateStatus')->name('admin.orders.status')->middleware('permission:order-write');
         Route::delete('/{id}', 'destroy')->name('admin.orders.destroy')->middleware('permission:order-write');
@@ -231,9 +231,9 @@ Route::prefix('/admin')->middleware(['auth', 'verified'])->group(function () {
     });
     Route::prefix('/delivery')->controller(\App\Http\Controllers\Delivery\DeliveryPortalController::class)->middleware('permission:delivery-read')->group(function () {
         Route::get('/orders', 'index')->name('delivery.orders.index');
-        Route::post('/orders/{id}/send-otp', 'sendDeliveryOtp')->name('delivery.orders.send-otp');
-        Route::post('/orders/{id}/verify-otp', 'verifyDeliveryOtp')->name('delivery.orders.verify-otp');
-        Route::post('/orders/{id}/generate-settlement-otp', 'generateOfficeSettlementOtp')->name('delivery.orders.generate-settlement-otp');
+        Route::post('/orders/{id}/send-otp', 'sendDeliveryOtp')->name('delivery.orders.send-otp')->middleware('throttle:10,1');
+        Route::post('/orders/{id}/verify-otp', 'verifyDeliveryOtp')->name('delivery.orders.verify-otp')->middleware('throttle:15,1');
+        Route::post('/orders/{id}/generate-settlement-otp', 'generateOfficeSettlementOtp')->name('delivery.orders.generate-settlement-otp')->middleware('throttle:10,1');
         Route::post('/orders/{id}/settle-payment', 'settleOfficePayment')->name('delivery.orders.settle-payment');
         Route::post('/location', 'updateLocation')->name('delivery.location.update');
     });
