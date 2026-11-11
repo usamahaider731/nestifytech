@@ -32,6 +32,8 @@ return Application::configure(basePath: dirname(__DIR__))
             '/api/add-lang-key',
             'checkout/create-payment-intent',
             'api/cart/order',
+            'api/orders/*/cancel',
+            'api/orders/*/attach-payment',
             'admin/module/*/submit*',
             'admin/taxonomy/*/submit*',
             'admin/post/*/submit*',
