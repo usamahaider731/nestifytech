@@ -361,6 +361,15 @@ class DeliveryPortalController extends Controller
 
         DB::table('orders')->where('id', $id)->update($update);
 
+        // Check and award loyalty gift card milestone if applicable
+        if (!empty($order->user_id)) {
+            try {
+                \App\Services\LoyaltyRewardService::checkAndAwardLoyaltyGiftCard((int) $order->user_id);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error("Loyalty reward check in Rider Portal failed for order #{$id}: " . $e->getMessage());
+            }
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Order successfully marked as Completed! ' .

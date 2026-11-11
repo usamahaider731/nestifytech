@@ -66,6 +66,41 @@
             "placeholder": "e.g. 5",
             "description": "Percentage deducted from paid orders upon customer cancellation before refunding the remaining amount to original payment method or wallet."
         },
+        "loyalty_reward_enabled": {
+            "label": "Enable Milestone Loyalty Gift Cards",
+            "type": "boolean",
+            "value": true,
+            "description": "Automatically award a free Gift Card to customers who reach the specified order milestone."
+        },
+        "loyalty_milestone_orders": {
+            "label": "Milestone Orders Required",
+            "type": "number",
+            "value": "10",
+            "min": "1",
+            "max": "1000",
+            "step": "1",
+            "placeholder": "e.g. 10",
+            "description": "Number of successfully completed/delivered orders required to trigger the gift card award (e.g. 10 orders)."
+        },
+        "loyalty_reward_percentage": {
+            "label": "Loyalty Gift Card Reward Percentage (%)",
+            "type": "number",
+            "value": "5",
+            "min": "0.1",
+            "max": "100",
+            "step": "0.1",
+            "placeholder": "e.g. 5",
+            "description": "Percentage of total customer spend across delivered orders to issue as free Gift Card balance (e.g. 5%)."
+        },
+        "loyalty_min_total_spend": {
+            "label": "Minimum Total Spend Required (PKR)",
+            "type": "number",
+            "value": "0",
+            "min": "0",
+            "step": "100",
+            "placeholder": "e.g. 10000",
+            "description": "Optional minimum total spend needed across milestone orders before awarding the gift card (set 0 for no minimum)."
+        },
         "featured_tag": {
             "label": "Featured Tag",
             "type": "dropdown",

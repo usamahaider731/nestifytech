@@ -566,10 +566,25 @@ class OrderController extends Controller
 
         DB::table('orders')->where('id', $id)->update($update);
 
+        // Check loyalty reward on delivery OTP completion
+        $loyaltyAward = null;
+        if (!empty($order->user_id)) {
+            try {
+                $loyaltyAward = \App\Services\LoyaltyRewardService::checkAndAwardLoyaltyGiftCard((int) $order->user_id);
+            } catch (\Throwable $e) {
+                Log::error("Loyalty reward check on delivery OTP failed for order #{$id}: " . $e->getMessage());
+            }
+        }
+
+        $successMsg = 'Delivery successfully confirmed and completed! ' .
+            (strtolower($order->payment_method) === 'cod' ? "Cash of {$order->total_price} credited to delivery boy balance." : '');
+        if ($loyaltyAward) {
+            $successMsg .= " 🎁 Customer reached milestone! Awarded VIP Gift Card {$loyaltyAward['code']} worth PKR " . number_format($loyaltyAward['reward_amount'], 2) . ".";
+        }
+
         return response()->json([
             'success' => true,
-            'message' => 'Delivery successfully confirmed and completed! ' .
-                (strtolower($order->payment_method) === 'cod' ? "Cash of {$order->total_price} credited to delivery boy balance." : ''),
+            'message' => $successMsg,
         ]);
     }
 
@@ -731,6 +746,16 @@ class OrderController extends Controller
 
         DB::table('orders')->where('id', $id)->update($update);
 
+        // ── Check and award milestone loyalty reward if delivered/completed ──
+        $loyaltyAward = null;
+        if (in_array($request->status, ['delivered', 'completed']) && !empty($order->user_id)) {
+            try {
+                $loyaltyAward = \App\Services\LoyaltyRewardService::checkAndAwardLoyaltyGiftCard((int) $order->user_id);
+            } catch (\Throwable $e) {
+                Log::error("Loyalty reward check failed for order #{$id}: " . $e->getMessage());
+            }
+        }
+
         // ── On cancellation or return: restore stock + refund + return count check ──
         $refundIssued  = false;
         $refundableAmt = 0;
@@ -852,6 +877,9 @@ class OrderController extends Controller
         }
 
         $msg = "Order #{$id} status updated to " . ucfirst($request->status) . '.';
+        if ($loyaltyAward) {
+            $msg .= " 🎁 Customer completed {$loyaltyAward['total_orders']} orders! Awarded VIP Gift Card {$loyaltyAward['code']} worth PKR " . number_format($loyaltyAward['reward_amount'], 2) . ".";
+        }
         if ($userBlocked) {
             $msg .= ' ⚠️ Customer account has been automatically suspended due to excessive (3+) product returns.';
         }
