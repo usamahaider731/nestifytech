@@ -16,11 +16,16 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(prepend: [
             \App\Http\Middleware\CheckInstallation::class,
             \App\Http\Middleware\SecurityHeaders::class,
+            \App\Http\Middleware\DecodeEncryptedPayload::class,
         ], append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
             \App\Http\Middleware\UpdateUserLastSeen::class,
             \App\Http\Middleware\LogUserActivity::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
+        ]);
+        $middleware->api(prepend: [
+            \App\Http\Middleware\SecurityHeaders::class,
+            \App\Http\Middleware\DecodeEncryptedPayload::class,
         ]);
         $middleware->statefulApi();
         $middleware->validateCsrfTokens(except: [
