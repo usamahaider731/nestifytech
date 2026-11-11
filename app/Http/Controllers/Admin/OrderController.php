@@ -775,8 +775,12 @@ class OrderController extends Controller
             // Fetch cancellation fee percentage if it's a cancellation
             $cancellationFeePercent = 0.0;
             $settings = json_decode(File::get(storage_path('app/data/setting.json')), true) ?? [];
-            if ($isCancellation && isset($settings['site']['order_cancellation_fee']['value'])) {
-                $cancellationFeePercent = (float) $settings['site']['order_cancellation_fee']['value'];
+            if ($isCancellation) {
+                if (isset($settings['order-policy']['order_cancellation_fee']['value'])) {
+                    $cancellationFeePercent = (float) $settings['order-policy']['order_cancellation_fee']['value'];
+                } elseif (isset($settings['site']['order_cancellation_fee']['value'])) {
+                    $cancellationFeePercent = (float) $settings['site']['order_cancellation_fee']['value'];
+                }
             }
 
             if ($wasPaid && !empty($order->user_id)) {

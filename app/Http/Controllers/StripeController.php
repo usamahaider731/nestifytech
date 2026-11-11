@@ -87,7 +87,9 @@ class StripeController extends Controller
         $settingFile = storage_path('app/data/setting.json');
         if (file_exists($settingFile)) {
             $settings = json_decode(file_get_contents($settingFile), true) ?: [];
-            if (isset($settings['site']['order_cancellation_fee']['value'])) {
+            if (isset($settings['order-policy']['order_cancellation_fee']['value'])) {
+                $cancellationFeePercent = (float) $settings['order-policy']['order_cancellation_fee']['value'];
+            } elseif (isset($settings['site']['order_cancellation_fee']['value'])) {
                 $cancellationFeePercent = (float) $settings['site']['order_cancellation_fee']['value'];
             }
         }

@@ -42,8 +42,12 @@ export default function Orders({ profile, orders = [], current_status = 'all' })
     const [reviewComment, setReviewComment] = useState('');
     const [submittingReview, setSubmittingReview] = useState(false);
 
-    // Cancellation fee percentage from site settings (default 5%)
-    const cancellationFeePercent = parseFloat(setting?.site?.order_cancellation_fee?.value ?? 5);
+    // Cancellation fee percentage from settings (checks new order-policy first, falls back to site)
+    const cancellationFeePercent = parseFloat(
+        setting?.['order-policy']?.order_cancellation_fee?.value 
+        ?? setting?.site?.order_cancellation_fee?.value 
+        ?? 5
+    );
 
     const stats = profile?.stats || {};
 

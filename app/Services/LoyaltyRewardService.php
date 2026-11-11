@@ -20,20 +20,20 @@ class LoyaltyRewardService
             return null;
         }
 
-        // Read settings from storage/app/data/setting.json
+        // Read settings from storage/app/data/setting.json (checks new order-policy, falls back to site)
         $settingPath = storage_path('app/data/setting.json');
         $settings = file_exists($settingPath) ? json_decode(file_get_contents($settingPath), true) : [];
-        $site = $settings['site'] ?? [];
+        $policy = $settings['order-policy'] ?? $settings['site'] ?? [];
 
         // Check if loyalty reward is enabled
-        $isEnabled = filter_var($site['loyalty_reward_enabled']['value'] ?? true, FILTER_VALIDATE_BOOLEAN);
+        $isEnabled = filter_var($policy['loyalty_reward_enabled']['value'] ?? true, FILTER_VALIDATE_BOOLEAN);
         if (!$isEnabled) {
             return null;
         }
 
-        $milestoneOrders = (int) ($site['loyalty_milestone_orders']['value'] ?? 10);
-        $rewardPercentage = (float) ($site['loyalty_reward_percentage']['value'] ?? 5.0);
-        $minSpendRequirement = (float) ($site['loyalty_min_total_spend']['value'] ?? 0.0);
+        $milestoneOrders = (int) ($policy['loyalty_milestone_orders']['value'] ?? 10);
+        $rewardPercentage = (float) ($policy['loyalty_reward_percentage']['value'] ?? 5.0);
+        $minSpendRequirement = (float) ($policy['loyalty_min_total_spend']['value'] ?? 0.0);
 
         if ($milestoneOrders < 1 || $rewardPercentage <= 0) {
             return null;

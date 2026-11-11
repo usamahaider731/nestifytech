@@ -57,6 +57,16 @@
             "permission": "setting-read"
           },
           {
+            "id": "order-policy-setting",
+            "title": "Orders & Loyalty Policy",
+            "route": "admin.setting",
+            "params": {
+              "type": "order-policy"
+            },
+            "icon": "ri-file-list-3-line",
+            "permission": "setting-read"
+          },
+          {
             "id": "font-setting",
             "title": "Font Setting",
             "route": "admin.setting",

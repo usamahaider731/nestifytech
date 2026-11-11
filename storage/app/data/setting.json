@@ -56,51 +56,6 @@
             "depend_on": "country",
             "meta_value": "currency"
         },
-        "order_cancellation_fee": {
-            "label": "Order Cancellation Fee (%)",
-            "type": "number",
-            "value": "5",
-            "min": "0",
-            "max": "100",
-            "step": "0.1",
-            "placeholder": "e.g. 5",
-            "description": "Percentage deducted from paid orders upon customer cancellation before refunding the remaining amount to original payment method or wallet."
-        },
-        "loyalty_reward_enabled": {
-            "label": "Enable Milestone Loyalty Gift Cards",
-            "type": "boolean",
-            "value": true,
-            "description": "Automatically award a free Gift Card to customers who reach the specified order milestone."
-        },
-        "loyalty_milestone_orders": {
-            "label": "Milestone Orders Required",
-            "type": "number",
-            "value": "10",
-            "min": "1",
-            "max": "1000",
-            "step": "1",
-            "placeholder": "e.g. 10",
-            "description": "Number of successfully completed/delivered orders required to trigger the gift card award (e.g. 10 orders)."
-        },
-        "loyalty_reward_percentage": {
-            "label": "Loyalty Gift Card Reward Percentage (%)",
-            "type": "number",
-            "value": "5",
-            "min": "0.1",
-            "max": "100",
-            "step": "0.1",
-            "placeholder": "e.g. 5",
-            "description": "Percentage of total customer spend across delivered orders to issue as free Gift Card balance (e.g. 5%)."
-        },
-        "loyalty_min_total_spend": {
-            "label": "Minimum Total Spend Required (PKR)",
-            "type": "number",
-            "value": "0",
-            "min": "0",
-            "step": "100",
-            "placeholder": "e.g. 10000",
-            "description": "Optional minimum total spend needed across milestone orders before awarding the gift card (set 0 for no minimum)."
-        },
         "featured_tag": {
             "label": "Featured Tag",
             "type": "dropdown",
@@ -139,11 +94,11 @@
             "value": "250"
         },
         "delivery_role": {
-            "label": "Delivery Boy \/ Rider Staff Role",
+            "label": "Delivery Boy / Rider Staff Role",
             "type": "dropdown",
             "value": 2,
             "searchable": false,
-            "description": "Select which staff role is treated as Delivery Boy\/Rider for order dispatch.",
+            "description": "Select which staff role is treated as Delivery Boy/Rider for order dispatch.",
             "options": {
                 "model": "App\\Models\\Roles",
                 "type": "role",
@@ -178,35 +133,35 @@
                 {
                     "platform": "facebook",
                     "title": "Facebook",
-                    "url": "https:\/\/facebook.com\/nestifytech",
+                    "url": "https://facebook.com/nestifytech",
                     "icon": "ri-facebook-fill",
                     "status": "1"
                 },
                 {
                     "platform": "instagram",
                     "title": "Instagram",
-                    "url": "https:\/\/instagram.com\/nestifytech",
+                    "url": "https://instagram.com/nestifytech",
                     "icon": "ri-instagram-line",
                     "status": "1"
                 },
                 {
                     "platform": "tiktok",
                     "title": "TikTok",
-                    "url": "https:\/\/tiktok.com\/@nestifytech",
+                    "url": "https://tiktok.com/@nestifytech",
                     "icon": "ri-tiktok-line",
                     "status": "1"
                 },
                 {
                     "platform": "twitter",
                     "title": "X (Twitter)",
-                    "url": "https:\/\/x.com\/nestifytech",
+                    "url": "https://x.com/nestifytech",
                     "icon": "ri-twitter-x-line",
                     "status": "1"
                 },
                 {
                     "platform": "youtube",
                     "title": "YouTube",
-                    "url": "https:\/\/youtube.com\/@nestifytech",
+                    "url": "https://youtube.com/@nestifytech",
                     "icon": "ri-youtube-line",
                     "status": "1"
                 }
@@ -226,9 +181,9 @@
                 },
                 {
                     "name": "url",
-                    "label": "Profile \/ Page URL",
+                    "label": "Profile / Page URL",
                     "type": "text",
-                    "placeholder": "https:\/\/..."
+                    "placeholder": "https://..."
                 },
                 {
                     "name": "icon",
@@ -673,16 +628,16 @@
         },
         "api_key": {
             "value": "nst_x:4d5941754f68476141661a4f7d7a7f6e5a4d1e6840734d5c7d6d4e5348196c735078656e586b5a4848591c4c125b6067525d417b5a726e1d",
-            "label": "Api Key (Groq \/ OpenRouter \/ OpenAI)",
+            "label": "Api Key (Groq / OpenRouter / OpenAI)",
             "type": "text",
             "style": "2"
         },
         "model": {
-            "value": "qwen\/qwen3.8-27b",
-            "label": "AI Model (e.g. qwen\/qwen3.8-27b for Groq, deepseek\/deepseek-r1:free for OpenRouter)",
+            "value": "qwen/qwen3.8-27b",
+            "label": "AI Model (e.g. qwen/qwen3.8-27b for Groq, deepseek/deepseek-r1:free for OpenRouter)",
             "type": "text",
             "style": "2",
-            "placeholder": "qwen\/qwen3.8-27b"
+            "placeholder": "qwen/qwen3.8-27b"
         },
         "description_prompt": {
             "value": "Write an SEO-optimized product description between 100 and 350 characters.\n\nProduct Title: {title}\nBrand: {brand}\nCategory: {category}\n\nInclude:\n\nA meta description (maximum 160 characters)\n\nBullet-point features\n\nA short Benefits section explaining customer value\n\n2 short FAQs related to the product\n\nTone should be human-friendly, clear, and professional.\nAvoid unnecessary fluff. Make it suitable for an e-commerce product page.",
@@ -719,7 +674,7 @@
                     "active": true,
                     "placement": "product_sidebar",
                     "ad_type": "image",
-                    "link": "\/view\/post\/product\/NT-1326932\/2",
+                    "link": "/view/post/product/NT-1326932/2",
                     "open_new_tab": true,
                     "iframe": null,
                     "html": null,
@@ -730,7 +685,7 @@
                     "active": true,
                     "placement": "product_bottom",
                     "ad_type": "image",
-                    "link": "http:\/\/nestifytech.localhost\/post\/product\/NT-1326932\/2",
+                    "link": "http://nestifytech.localhost/post/product/NT-1326932/2",
                     "open_new_tab": true,
                     "iframe": null,
                     "html": null,
@@ -741,7 +696,7 @@
                     "active": true,
                     "placement": "home_bottom",
                     "ad_type": "image",
-                    "link": "\/view\/post\/product\/NST-1260900004\/6",
+                    "link": "/view/post/product/NST-1260900004/6",
                     "open_new_tab": true,
                     "iframe": null,
                     "html": null,
@@ -752,7 +707,7 @@
                     "active": true,
                     "placement": "home_after_categories",
                     "ad_type": "image",
-                    "link": "\/view\/specific\/classification\/category\/20\/electronics",
+                    "link": "/view/specific/classification/category/20/electronics",
                     "open_new_tab": true,
                     "iframe": null,
                     "html": null,
@@ -763,7 +718,7 @@
                     "active": true,
                     "placement": "blog_bottom",
                     "ad_type": "image",
-                    "link": "\/view\/post\/product\/NST-82600001\/12",
+                    "link": "/view/post/product/NST-82600001/12",
                     "open_new_tab": true,
                     "iframe": null,
                     "html": null,
@@ -774,7 +729,7 @@
                     "active": true,
                     "placement": "blog_sidebar",
                     "ad_type": "image",
-                    "link": "\/view\/post\/product\/NT-1326932\/2",
+                    "link": "/view/post/product/NT-1326932/2",
                     "open_new_tab": true,
                     "iframe": null,
                     "html": null,
@@ -785,7 +740,7 @@
                     "active": true,
                     "placement": "single_blog_bottom",
                     "ad_type": "image",
-                    "link": "\/view\/specific\/classification\/category\/20\/electronics",
+                    "link": "/view/specific/classification/category/20/electronics",
                     "open_new_tab": true,
                     "iframe": null,
                     "html": null,
@@ -868,7 +823,7 @@
                         },
                         {
                             "id": "iframe",
-                            "title": "Iframe \/ Embed"
+                            "title": "Iframe / Embed"
                         },
                         {
                             "id": "html",
@@ -880,7 +835,7 @@
                     "name": "link",
                     "label": "Ad Link",
                     "type": "text",
-                    "placeholder": "https:\/\/example.com"
+                    "placeholder": "https://example.com"
                 },
                 {
                     "name": "open_new_tab",
@@ -897,13 +852,13 @@
                     "name": "iframe",
                     "label": "Iframe URL or Embed Code",
                     "type": "textarea",
-                    "placeholder": "https:\/\/... or <iframe src=\"...\"><\/iframe>"
+                    "placeholder": "https://... or <iframe src=\"...\"></iframe>"
                 },
                 {
                     "name": "html",
                     "label": "HTML Code",
                     "type": "textarea",
-                    "placeholder": "<div>Your ad HTML<\/div>"
+                    "placeholder": "<div>Your ad HTML</div>"
                 }
             ]
         }
@@ -997,7 +952,7 @@
         "stripe_section": {
             "type": "section",
             "label": "Stripe Card Payments",
-            "description": "Accept all major debit\/credit cards securely via Stripe.",
+            "description": "Accept all major debit/credit cards securely via Stripe.",
             "icon": "ri-bank-card-line",
             "toggle_field": "stripe_enabled"
         },
@@ -1019,11 +974,11 @@
             },
             "options": {
                 "test": {
-                    "label": "Test \/ Sandbox",
+                    "label": "Test / Sandbox",
                     "value": "test"
                 },
                 "live": {
-                    "label": "Live \/ Production",
+                    "label": "Live / Production",
                     "value": "live"
                 }
             },
@@ -1132,11 +1087,11 @@
             },
             "options": {
                 "sandbox": {
-                    "label": "Sandbox \/ Testing",
+                    "label": "Sandbox / Testing",
                     "value": "sandbox"
                 },
                 "live": {
-                    "label": "Live \/ Production",
+                    "label": "Live / Production",
                     "value": "live"
                 }
             },
@@ -1246,11 +1201,11 @@
             },
             "options": {
                 "sandbox": {
-                    "label": "Sandbox \/ Testing",
+                    "label": "Sandbox / Testing",
                     "value": "sandbox"
                 },
                 "live": {
-                    "label": "Live \/ Production",
+                    "label": "Live / Production",
                     "value": "live"
                 }
             },
@@ -1387,15 +1342,15 @@
             "label": "API Endpoint URL",
             "type": "text",
             "style": 2,
-            "placeholder": "https:\/\/graph.facebook.com\/v20.0\/{phone_number_id}\/messages",
+            "placeholder": "https://graph.facebook.com/v20.0/{phone_number_id}/messages",
             "condition": {
                 "field": "whatsapp_enabled",
                 "value": true
             },
-            "value": "https:\/\/wasenderapi.com\/api\/send-message"
+            "value": "https://wasenderapi.com/api/send-message"
         },
         "api_key": {
-            "label": "Meta \/ Facebook Access Token",
+            "label": "Meta / Facebook Access Token",
             "type": "password",
             "style": 2,
             "placeholder": "Enter your Meta System User or User Access Token (EAA...)",
@@ -1417,7 +1372,7 @@
             "value": "1396790376847486"
         },
         "sender_phone": {
-            "label": "WhatsApp Connected Number (Display \/ Support)",
+            "label": "WhatsApp Connected Number (Display / Support)",
             "type": "phone",
             "style": 2,
             "placeholder": "+1234567890",
@@ -1441,7 +1396,7 @@
     "mail": {
         "mail_section": {
             "type": "section",
-            "label": "SMTP \/ Mailtrap Email Configuration",
+            "label": "SMTP / Mailtrap Email Configuration",
             "description": "Configure outgoing transactional and notification emails using Mailtrap sandbox or production SMTP.",
             "icon": "ri-mail-settings-line",
             "toggle_field": "mail_enabled"
@@ -1454,7 +1409,7 @@
             "value": true
         },
         "mail_provider": {
-            "label": "Mail Service \/ Gateway",
+            "label": "Mail Service / Gateway",
             "type": "dropdown",
             "style": 2,
             "searchable": false,
@@ -1464,7 +1419,7 @@
             },
             "options": {
                 "mailtrap": {
-                    "label": "Mailtrap (Testing & Sandbox \/ Production)",
+                    "label": "Mailtrap (Testing & Sandbox / Production)",
                     "value": "mailtrap"
                 },
                 "smtp": {
@@ -1530,7 +1485,7 @@
             "value": "tls"
         },
         "mail_username": {
-            "label": "SMTP Username \/ API User",
+            "label": "SMTP Username / API User",
             "type": "text",
             "style": 2,
             "placeholder": "Enter SMTP Username",
@@ -1541,7 +1496,7 @@
             "value": "info.nestifytech@gmail.com"
         },
         "mail_password": {
-            "label": "SMTP Password \/ API Key",
+            "label": "SMTP Password / API Key",
             "type": "password",
             "style": 2,
             "placeholder": "Enter SMTP Password or Token",
@@ -1591,7 +1546,7 @@
     },
     "popup": {
         "sale_popup_enabled": {
-            "label": "Enable Sale \/ Offer Popup",
+            "label": "Enable Sale / Offer Popup",
             "type": "checkbox",
             "value": true,
             "value_label": "Enable Promotional Sale Popup on Frontend"
@@ -1618,13 +1573,13 @@
             "value": "25% OFF"
         },
         "popup_description": {
-            "label": "Popup Subtitle \/ Description",
+            "label": "Popup Subtitle / Description",
             "type": "textarea",
             "placeholder": "Enter promo message or discount conditions...",
             "value": "Upgrade your shopping bag today. Use coupon code at checkout or subscribe to receive our VIP deals directly."
         },
         "popup_coupon_code": {
-            "label": "Promo \/ Coupon \/ Gift Card Code",
+            "label": "Promo / Coupon / Gift Card Code",
             "type": "text",
             "style": 1,
             "placeholder": "e.g. NESTIFY25 or GC-WELCOME",
@@ -1641,8 +1596,8 @@
             "label": "Shop Button Link",
             "type": "text",
             "style": 1,
-            "placeholder": "e.g. \/shop",
-            "value": "\/shop"
+            "placeholder": "e.g. /shop",
+            "value": "/shop"
         },
         "popup_delay_seconds": {
             "label": "Popup Delay (Seconds)",
@@ -1673,7 +1628,7 @@
         "google_redirect_uri": {
             "label": "Google Redirect URI",
             "type": "text",
-            "value": "http:\/\/127.0.0.1:8000\/auth\/google\/callback"
+            "value": "http://127.0.0.1:8000/auth/google/callback"
         },
         "facebook_client_id": {
             "label": "Facebook App ID",
@@ -1688,7 +1643,55 @@
         "facebook_redirect_uri": {
             "label": "Facebook Redirect URI",
             "type": "text",
-            "value": "http:\/\/127.0.0.1:8000\/auth\/facebook\/callback"
+            "value": "http://127.0.0.1:8000/auth/facebook/callback"
+        }
+    },
+    "order-policy": {
+        "order_cancellation_fee": {
+            "label": "Order Cancellation Fee (%)",
+            "type": "number",
+            "value": "5",
+            "min": "0",
+            "max": "100",
+            "step": "0.1",
+            "placeholder": "e.g. 5",
+            "description": "Percentage deducted from paid orders upon customer cancellation before refunding the remaining amount to original payment method or wallet."
+        },
+        "loyalty_reward_enabled": {
+            "label": "Enable Milestone Loyalty Gift Cards",
+            "type": "checkbox",
+            "value": true,
+            "style":2,
+            "description": "Automatically award a free Gift Card to customers who reach the specified order milestone."
+        },
+        "loyalty_milestone_orders": {
+            "label": "Milestone Orders Required",
+            "type": "number",
+            "value": "10",
+            "min": "1",
+            "max": "1000",
+            "step": "1",
+            "placeholder": "e.g. 10",
+            "description": "Number of successfully completed/delivered orders required to trigger the gift card award (e.g. 10 orders)."
+        },
+        "loyalty_reward_percentage": {
+            "label": "Loyalty Gift Card Reward Percentage (%)",
+            "type": "number",
+            "value": "5",
+            "min": "0.1",
+            "max": "100",
+            "step": "0.1",
+            "placeholder": "e.g. 5",
+            "description": "Percentage of total customer spend across delivered orders to issue as free Gift Card balance (e.g. 5%)."
+        },
+        "loyalty_min_total_spend": {
+            "label": "Minimum Total Spend Required (PKR)",
+            "type": "number",
+            "value": "0",
+            "min": "0",
+            "step": "100",
+            "placeholder": "e.g. 10000",
+            "description": "Optional minimum total spend needed across milestone orders before awarding the gift card (set 0 for no minimum)."
         }
     }
 }
