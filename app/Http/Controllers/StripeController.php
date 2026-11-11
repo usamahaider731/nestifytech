@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Stripe\Stripe;
 use Stripe\PaymentIntent;
 use Stripe\Refund;
@@ -109,16 +110,42 @@ class StripeController extends Controller
                 $this->setApiKey();
 
                 try {
-                    $refundParams = [
-                        'payment_intent' => $order->stripe_payment_intent_id,
-                        'amount'         => (int) round($refundAmount * 100), // Stripe expects amount in cents
-                    ];
+                    // Retrieve PaymentIntent to verify it's refundable
+                    $pi = PaymentIntent::retrieve($order->stripe_payment_intent_id);
 
-                    $refund = Refund::create($refundParams);
+                    Log::info("Stripe PI status for order #{$orderId}: {$pi->status}, amount: {$pi->amount}, currency: {$pi->currency}");
 
-                    $refundId     = $refund->id;
-                    $refundStatus = $refund->status; // 'succeeded', 'pending', etc.
+                    if (!in_array($pi->status, ['succeeded', 'requires_capture'])) {
+                        Log::warning("Stripe PI {$pi->id} is not in refundable state: {$pi->status}");
+                        // Fall through to wallet credit since card wasn't charged
+                        $refundStatus = 'processed';
+                    } else {
+                        // amount in Stripe is already in smallest unit (e.g. 469000 for 4690 PKR)
+                        // We need to refund proportionally: refundAmount / totalPrice * pi->amount
+                        $refundAmountInSmallestUnit = (int) round(($refundAmount / $totalPrice) * $pi->amount);
+
+                        $refundParams = [
+                            'payment_intent' => $order->stripe_payment_intent_id,
+                            'amount'         => $refundAmountInSmallestUnit,
+                        ];
+
+                        Log::info("Attempting Stripe refund for order #{$orderId}", $refundParams);
+
+                        $refund = Refund::create($refundParams);
+
+                        $refundId     = $refund->id;
+                        $refundStatus = $refund->status; // 'succeeded', 'pending', etc.
+
+                        Log::info("Stripe refund created: {$refundId}, status: {$refundStatus}");
+                    }
+                } catch (\Stripe\Exception\InvalidRequestException $e) {
+                    Log::error("Stripe InvalidRequest for order #{$orderId}: " . $e->getMessage());
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Stripe refund failed: ' . $e->getMessage(),
+                    ], 500);
                 } catch (\Exception $e) {
+                    Log::error("Stripe refund error for order #{$orderId}: " . $e->getMessage());
                     return response()->json([
                         'success' => false,
                         'message' => 'Stripe refund processing failed: ' . $e->getMessage(),

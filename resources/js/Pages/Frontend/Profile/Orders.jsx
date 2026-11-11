@@ -50,7 +50,15 @@ export default function Orders({ profile, orders = [], current_status = 'all' })
     const handleCancelOrder = async (orderId) => {
         setCancelling(true);
         try {
-            const res = await axios.post(`/api/orders/${orderId}/cancel`);
+            // Get CSRF token from meta tag (Laravel injects this in app layout)
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            const res = await axios.post(`/api/orders/${orderId}/cancel`, {}, {
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken || '',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                withCredentials: true,
+            });
             if (res.data?.success) {
                 toast.success(res.data.message || __('Order cancelled successfully!'));
                 setCancelModalOrder(null);

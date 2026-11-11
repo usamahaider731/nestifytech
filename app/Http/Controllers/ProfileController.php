@@ -167,7 +167,7 @@ class ProfileController extends Controller
             ->where('user_id', $userId)
             ->orderByDesc('id');
 
-        $validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'completed', 'cancelled'];
+        $validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'completed', 'cancelled', 'returned'];
         if ($status && in_array($status, $validStatuses)) {
             $query->where('status', $status);
         }
@@ -224,8 +224,12 @@ class ProfileController extends Controller
                 'total_price' => (float) $order->total_price,
                 'quantity' => (int) $order->quantity,
                 'status' => $order->status,
-                'payment_method' => ucfirst($order->payment_method ?? 'card'),
-                'payment_status' => ucfirst($order->payment_status ?? 'unpaid'),
+                'payment_method' => strtolower($order->payment_method ?? 'card'),
+                'payment_status' => strtolower($order->payment_status ?? 'unpaid'),
+                'stripe_payment_intent_id' => $order->stripe_payment_intent_id ?? null,
+                'refund_id' => $order->refund_id ?? null,
+                'refund_amount' => (float) ($order->refund_amount ?? 0),
+                'cancellation_deduction' => (float) ($order->cancellation_deduction ?? 0),
                 'tracking_number' => $order->tracking_number ?? null,
                 'shipping_carrier' => $order->shipping_carrier ?? null,
                 'shipping_address' => $order->shipping_address ?? null,

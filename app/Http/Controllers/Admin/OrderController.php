@@ -679,7 +679,7 @@ class OrderController extends Controller
     public function updateStatus(Request $request, int $id)
     {
         $request->validate([
-            'status'           => 'required|in:pending,processing,shipped,delivered,completed,cancelled',
+            'status'           => 'required|in:pending,processing,shipped,delivered,completed,cancelled,returned',
             'payment_status'   => 'nullable|string|in:paid,unpaid,refunded',
             'tracking_number'  => 'nullable|string|max:100',
             'shipping_carrier' => 'nullable|string|max:100',
