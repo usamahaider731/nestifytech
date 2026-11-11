@@ -43,3 +43,4 @@ return new class extends Migration
         DB::statement("ALTER TABLE `orders` MODIFY `status` ENUM('pending', 'processing', 'shipped', 'delivered', 'completed', 'cancelled') NOT NULL DEFAULT 'pending'");
     }
 };
+

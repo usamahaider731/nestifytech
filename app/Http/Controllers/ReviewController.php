@@ -62,7 +62,7 @@ class ReviewController extends Controller
             'post_id' => $request->post_id,
             'rating'  => $request->rating ?? 5,
             'comment' => $request->comment,
-            'status'  => 'pending',
+            'status'  => 'approved', // Auto-approved directly so reviews show immediately
             'type' => $request->type,
             'parent_id' => $request->parent_id ?? 0,
             'created_at' => now(),

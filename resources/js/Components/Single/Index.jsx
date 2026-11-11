@@ -246,7 +246,7 @@ const SingleProductTabs = ({ product }) => {
         setSubmitMessage(null);
         try {
             await axios.post(route('api.reviews.store'), { post_id: product.id, rating: reviewForm.rating, comment: reviewForm.comment, type: 'general' });
-            setSubmitMessage({ type: 'success', text: __('Thank you! Your review was submitted for approval.') });
+            setSubmitMessage({ type: 'success', text: __('Thank you! Your review has been published.') });
             setReviewForm({ rating: 5, comment: '' });
             fetchReviews();
         } catch {

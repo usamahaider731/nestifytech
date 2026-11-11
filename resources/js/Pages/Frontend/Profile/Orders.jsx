@@ -18,6 +18,9 @@ import {
     RiAlertLine,
     RiRefund2Line,
     RiWallet3Line,
+    RiStarFill,
+    RiStarLine,
+    RiChatSmile3Line,
 } from 'react-icons/ri';
 import { useLang } from '@/contexts/LanguageContext';
 import { toast } from 'react-toastify';
@@ -34,6 +37,10 @@ export default function Orders({ profile, orders = [], current_status = 'all' })
     const [activeModalOrder, setActiveModalOrder] = useState(null);
     const [cancelModalOrder, setCancelModalOrder] = useState(null);
     const [cancelling, setCancelling] = useState(false);
+    const [reviewModalItem, setReviewModalItem] = useState(null);
+    const [reviewRating, setReviewRating] = useState(5);
+    const [reviewComment, setReviewComment] = useState('');
+    const [submittingReview, setSubmittingReview] = useState(false);
 
     // Cancellation fee percentage from site settings (default 5%)
     const cancellationFeePercent = parseFloat(setting?.site?.order_cancellation_fee?.value ?? 5);
@@ -56,6 +63,32 @@ export default function Orders({ profile, orders = [], current_status = 'all' })
             toast.error(err.response?.data?.message || __('Error cancelling order.'));
         } finally {
             setCancelling(false);
+        }
+    };
+
+    const handleOpenReviewModal = (item) => {
+        setReviewModalItem(item);
+        setReviewRating(5);
+        setReviewComment('');
+    };
+
+    const handleSubmitReview = async (e) => {
+        e.preventDefault();
+        if (!reviewModalItem?.product_id) return;
+        setSubmittingReview(true);
+        try {
+            await axios.post(route('api.reviews.store'), {
+                post_id: reviewModalItem.product_id,
+                rating: reviewRating,
+                comment: reviewComment,
+                type: 'verified',
+            });
+            toast.success(__('Thank you! Your feedback has been published.'));
+            setReviewModalItem(null);
+        } catch (err) {
+            toast.error(err.response?.data?.message || __('Failed to submit review.'));
+        } finally {
+            setSubmittingReview(false);
         }
     };
 
@@ -326,6 +359,16 @@ export default function Orders({ profile, orders = [], current_status = 'all' })
                                     </div>
 
                                     <div className="flex items-center gap-2">
+                                        {(order.status === 'completed' || order.status === 'delivered') && order.items?.[0] && (
+                                            <button
+                                                type="button"
+                                                onClick={() => handleOpenReviewModal(order.items[0])}
+                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-amber-500 hover:bg-amber-600 text-white rounded transition-colors cursor-pointer shadow-xs"
+                                            >
+                                                <RiStarFill size={13} className="text-amber-200" />
+                                                {__('Leave Feedback')}
+                                            </button>
+                                        )}
                                         {order.status === 'pending' && (
                                             <button
                                                 type="button"
@@ -549,8 +592,22 @@ export default function Orders({ profile, orders = [], current_status = 'all' })
                                                 </span>
                                             </div>
                                         </div>
-                                        <div className="font-bold text-text">
-                                            {currency} {item.subtotal.toLocaleString()}
+                                        <div className="text-right shrink-0">
+                                            <div className="font-bold text-text">
+                                                {currency} {item.subtotal.toLocaleString()}
+                                            </div>
+                                            {(activeModalOrder.status === 'completed' || activeModalOrder.status === 'delivered') && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setActiveModalOrder(null);
+                                                        handleOpenReviewModal(item);
+                                                    }}
+                                                    className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-semibold text-amber-600 hover:text-amber-700 underline cursor-pointer"
+                                                >
+                                                    <RiStarFill size={11} /> {__('Write Review')}
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 ))}
@@ -704,6 +761,112 @@ export default function Orders({ profile, orders = [], current_status = 'all' })
                                 {cancelling ? __('Cancelling...') : __('Confirm Cancellation')}
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Product Feedback & Review Modal ── */}
+            {reviewModalItem && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+                    <div className="bg-bg border border-border rounded-2xl max-w-lg w-full p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+                        <div className="flex items-center justify-between pb-3 border-b border-border mb-4">
+                            <div className="flex items-center gap-2">
+                                <span className="p-2 rounded-xl bg-amber-500/10 text-amber-500">
+                                    <RiStarFill size={20} />
+                                </span>
+                                <div>
+                                    <h3 className="text-base font-bold text-text">
+                                        {__('Product Review & Feedback')}
+                                    </h3>
+                                    <p className="text-xs text-res">
+                                        {__('Your verified review will be published directly.')}
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setReviewModalItem(null)}
+                                className="text-res hover:text-text p-1 rounded-lg"
+                            >
+                                <RiCloseLine size={20} />
+                            </button>
+                        </div>
+
+                        <div className="flex items-center gap-3 p-3 bg-bg/50 border border-border rounded-xl mb-4">
+                            {reviewModalItem.image && (
+                                <img
+                                    src={reviewModalItem.image}
+                                    alt={reviewModalItem.product_title}
+                                    className="size-11 rounded-lg object-cover border border-border"
+                                />
+                            )}
+                            <div className="min-w-0 flex-1">
+                                <p className="font-semibold text-xs text-text truncate">
+                                    {reviewModalItem.product_title}
+                                </p>
+                                <span className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">
+                                    ✓ {__('Verified Purchaser')}
+                                </span>
+                            </div>
+                        </div>
+
+                        <form onSubmit={handleSubmitReview} className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-semibold text-text mb-1.5">
+                                    {__('Your Rating')}
+                                </label>
+                                <div className="flex items-center gap-1">
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <button
+                                            key={star}
+                                            type="button"
+                                            onClick={() => setReviewRating(star)}
+                                            className="text-2xl transition-transform hover:scale-110 cursor-pointer focus:outline-hidden"
+                                        >
+                                            {star <= reviewRating ? (
+                                                <RiStarFill className="text-amber-400" />
+                                            ) : (
+                                                <RiStarLine className="text-border" />
+                                            )}
+                                        </button>
+                                    ))}
+                                    <span className="ml-2 text-xs font-bold text-amber-500">
+                                        {reviewRating} / 5
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-semibold text-text mb-1.5">
+                                    {__('Write Your Review')}
+                                </label>
+                                <textarea
+                                    rows={4}
+                                    required
+                                    value={reviewComment}
+                                    onChange={(e) => setReviewComment(e.target.value)}
+                                    placeholder={__('Share your detailed experience with this product...')}
+                                    className="w-full px-3 py-2 text-xs bg-bg border border-border rounded-xl text-text focus:outline-hidden focus:border-primary resize-none"
+                                />
+                            </div>
+
+                            <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
+                                <button
+                                    type="button"
+                                    onClick={() => setReviewModalItem(null)}
+                                    className="px-4 py-2 text-xs font-medium bg-bg hover:bg-border text-text rounded-xl border border-border transition-colors cursor-pointer"
+                                >
+                                    {__('Cancel')}
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={submittingReview || !reviewComment.trim()}
+                                    className="px-5 py-2 text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white rounded-xl transition-colors cursor-pointer disabled:opacity-50 inline-flex items-center gap-1.5 shadow-sm"
+                                >
+                                    {submittingReview ? __('Publishing...') : __('Publish Review')}
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}
