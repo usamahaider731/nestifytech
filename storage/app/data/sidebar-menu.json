@@ -224,12 +224,14 @@
           {
             "id": "inventory-management",
             "title": "Inventory & Stock",
+            "icon": "ri-stack-line",
             "route": "admin.inventory.index",
             "permission": "product-read"
           },
           {
             "id": "incoming-stock-management",
             "title": "Incoming Stock (POs)",
+            "icon": "ri-inbox-archive-line",
             "route": "admin.incoming-stock.index",
             "permission": "product-read"
           }
@@ -276,7 +278,7 @@
       {
         "id": "gift-cards",
         "title": "Gift Cards",
-        "icon": "ri-coupon2-line",
+        "icon": "ri-coupon-line",
         "permission": "product-read",
         "route": "admin.gift-cards.index"
       },

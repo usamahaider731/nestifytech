@@ -34,6 +34,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'api/cart/order',
             'api/orders/*/cancel',
             'api/orders/*/attach-payment',
+            'api/reviews',
+            'api/reviews/*',
             'admin/module/*/submit*',
             'admin/taxonomy/*/submit*',
             'admin/post/*/submit*',

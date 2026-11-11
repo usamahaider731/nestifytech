@@ -18,11 +18,11 @@ function Sidebar() {
       ...group,
       menu: group.menu.map(item => ({
         ...item,
-        icon: <Icon name={item.icon} className={item.icon.includes('ri-') ? (item.id === 'users' ? 'size-4' : 'size-5') : 'size-5'} />,
+        icon: item.icon ? <Icon name={item.icon} className={item.icon.includes('ri-') ? (item.id === 'users' ? 'size-4' : 'size-5') : 'size-5'} /> : null,
         route: item.route ? route(item.route, item.params || {}) : null,
         menu: item.menu ? item.menu.map(sub => ({
           ...sub,
-          icon: <Icon name={sub.icon} className="size-4" />,
+          icon: sub.icon ? <Icon name={sub.icon} className="size-4" /> : null,
           route: sub.route ? route(sub.route, sub.params || {}) : null,
         })) : null
       }))

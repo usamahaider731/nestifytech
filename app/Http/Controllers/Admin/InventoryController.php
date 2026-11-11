@@ -38,19 +38,25 @@ class InventoryController extends Controller
         $activeStoreId = $assignedStoreId ?: ($storeFilter && $storeFilter !== 'all' ? $storeFilter : null);
 
         // Fetch products with their base metadata
+        // Use subquery for first media image to avoid duplicate rows from leftJoin
+        $mediaSubquery = DB::table('media')
+            ->select('parent_id', DB::raw('MIN(id) as first_media_id'))
+            ->where('type', 'post')
+            ->groupBy('parent_id');
+
         $query = DB::table('posts')
             ->where('posts.type', 'product')
-            ->leftJoin('media', function ($join) {
-                $join->on('media.parent_id', '=', 'posts.id')
-                    ->where('media.type', '=', 'post');
+            ->leftJoinSub($mediaSubquery, 'first_media', function ($join) {
+                $join->on('first_media.parent_id', '=', 'posts.id');
             })
+            ->leftJoin('media as m2', 'm2.id', '=', 'first_media.first_media_id')
             ->select([
                 'posts.id',
                 'posts.title',
                 'posts.sku',
                 'posts.status',
                 'posts.created_at',
-                'media.filename as image',
+                'm2.filename as image',
             ])
             ->orderByDesc('posts.id');
 
