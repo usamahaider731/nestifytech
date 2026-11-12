@@ -13,26 +13,42 @@ use Stripe\Stripe;
 
 class GiftCardController extends Controller
 {
-    private function setStripeKey(): void
+    private array $stripeSettings = [];
+
+    private function loadSettings(): array
     {
-        $secret = null;
+        if (!empty($this->stripeSettings)) {
+            return $this->stripeSettings;
+        }
         $settingFile = storage_path('app/data/setting.json');
         if (file_exists($settingFile)) {
-            $settings = json_decode(file_get_contents($settingFile), true) ?: [];
-            $secret = $settings['payment']['stripe_secret_key']['value'] 
-                ?? $settings['stripe']['stripe_secret_key']['value'] 
-                ?? null;
+            $this->stripeSettings = json_decode(file_get_contents($settingFile), true) ?: [];
         }
+        return $this->stripeSettings;
+    }
 
-        if (empty($secret)) {
-            $secret = env('STRIPE_SECRET');
-        }
+    private function setStripeKey(): void
+    {
+        $settings = $this->loadSettings();
+        $secret = $settings['payment']['stripe_secret_key']['value'] 
+            ?? $settings['stripe']['stripe_secret_key']['value'] 
+            ?? env('STRIPE_SECRET');
 
         if (empty($secret)) {
             throw new \RuntimeException('Payment gateway is currently not configured.');
         }
 
         Stripe::setApiKey($secret);
+    }
+
+    private function getStripeCurrency(): string
+    {
+        $settings = $this->loadSettings();
+        return strtolower(
+            $settings['payment']['stripe_currency']['value'] ?? 
+            $settings['stripe']['stripe_currency']['value'] ?? 
+            'usd'
+        );
     }
 
     /**
@@ -103,19 +119,16 @@ class GiftCardController extends Controller
             'defaultTiers'   => $defaultTiers,
             'myGiftCards'    => $myGiftCards,
             'stripePublishableKey' => $this->getStripePublishableKey(),
+            'stripeCurrency'      => $this->getStripeCurrency(),
         ]);
     }
 
     private function getStripePublishableKey(): ?string
     {
-        $settingFile = storage_path('app/data/setting.json');
-        if (file_exists($settingFile)) {
-            $settings = json_decode(file_get_contents($settingFile), true) ?: [];
-            return $settings['payment']['stripe_publishable_key']['value'] 
-                ?? $settings['stripe']['stripe_publishable_key']['value'] 
-                ?? env('STRIPE_KEY');
-        }
-        return env('STRIPE_KEY');
+        $settings = $this->loadSettings();
+        return $settings['payment']['stripe_publishable_key']['value'] 
+            ?? $settings['stripe']['stripe_publishable_key']['value'] 
+            ?? env('STRIPE_KEY');
     }
 
     /**
@@ -130,12 +143,13 @@ class GiftCardController extends Controller
         ]);
 
         $this->setStripeKey();
+        $currency = $this->getStripeCurrency();
         $amountInCents = (int) ($request->purchase_price * 100);
 
         try {
             $paymentIntent = PaymentIntent::create([
                 'amount'   => $amountInCents,
-                'currency' => 'pkr',
+                'currency' => $currency,
                 'metadata' => [
                     'type'            => 'gift_card_purchase',
                     'user_id'         => Auth::id() ?? 0,
