@@ -20,6 +20,7 @@ import {
     RiLogoutBoxRLine,
     RiSettings4Line,
     RiFileList3Line,
+    RiGift2Line,
 } from 'react-icons/ri';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectCartCount } from '@/store/cartSlice';
@@ -348,6 +349,14 @@ export default function MobileSidebar({ isOpen, onClose }) {
                                                 >
                                                     <RiTruckLine size={16} />
                                                     {__('Track Your Order')}
+                                                </Link>
+                                                <Link
+                                                    href={route('gift-cards.index')}
+                                                    onClick={onClose}
+                                                    className="flex items-center gap-2.5 py-2 px-3 rounded-lg text-xs font-medium text-res hover:text-primary hover:bg-slate-100/80 transition-colors"
+                                                >
+                                                    <RiGift2Line size={16} />
+                                                    {__('Gift Cards')}
                                                 </Link>
                                             </div>
                                         </div>
