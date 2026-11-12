@@ -122,7 +122,7 @@ function GiftCardPurchaseForm({
     <form onSubmit={handlePurchase} className="space-y-6">
       {/* Recipient Email */}
       <div>
-        <label className="block text-xs font-bold text-heading uppercase tracking-wider mb-2">
+        <label className="block text-xs font-semibold sm:font-bold text-heading uppercase tracking-wider mb-2">
           Your Email / Recipient Email <span className="text-secondary font-roboto">(for digital delivery)</span>
         </label>
         <input
@@ -131,7 +131,7 @@ function GiftCardPurchaseForm({
           value={recipientEmail}
           onChange={(e) => setRecipientEmail(e.target.value)}
           required
-          className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-800 text-sm heading focus:ring-2 focus:ring-primary/30 outline-none"
+          className="w-full sm:px-4 px-3 py-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-800 text-sm heading focus:ring-2 focus:ring-primary/30 outline-none"
         />
       </div>
 
@@ -163,12 +163,12 @@ function GiftCardPurchaseForm({
 
       {/* Card Details Element */}
       {paymentMethod === 'card' && (
-        <div className="p-5 rounded-xl bg-gray-50 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-700 space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-heading flex items-center gap-1.5">
+        <div className="sm:p-5 p-3 rounded-xl bg-gray-50 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-700 space-y-3">
+          <div className="flex flex-col sm:flex-row gap-1.25 sm:gap-0 sm:items-center justify-between">
+            <span className="text-xs sm:font-bold font-semibold uppercase tracking-wider text-heading flex items-center gap-1.5">
               <RiLockLine className="text-emerald-500" /> Secure Card Details
             </span>
-            <span className="text-[10px] text-accent font-medium font-roboto">256-bit SSL Encryption</span>
+            <span className="sm:text-[10px] text-[9px] text-accent font-medium font-roboto">256-bit SSL Encryption</span>
           </div>
           <div className="p-3.5 bg-white dark:bg-slate-900 rounded-lg border border-gray-300 dark:border-slate-700">
             <CardElement
@@ -176,9 +176,11 @@ function GiftCardPurchaseForm({
                 style: {
                   base: {
                     fontSize: '15px',
+
                     color: '#32325d',
                     '::placeholder': { color: '#aab7c4' },
                   },
+
                   invalid: { color: '#fa755a' },
                 },
               }}
@@ -194,9 +196,9 @@ function GiftCardPurchaseForm({
       <button
         type="submit"
         disabled={isProcessing}
-        className="w-full py-4 rounded-xl bg-gradient-to-r from-primary to-primary/70 text-white font-bold font-poppins text-base shadow-xl hover:opacity-95 transition-all flex items-center justify-center gap-3 disabled:opacity-60 cursor-pointer"
+        className="w-full py-4 rounded-xl bg-gradient-to-r from-primary to-primary/70 text-white font-semibold sm:font-bold font-poppins text-xs sm:text-base shadow-xl hover:opacity-95 transition-all flex items-center justify-center gap-2 sm:gap-3 disabled:opacity-60 cursor-pointer"
       >
-        <RiSecurePaymentLine className="text-xl" />
+        <RiSecurePaymentLine className="sm:text-xl text-base" />
         <span>
           {isProcessing
             ? 'Processing Secure Payment...'
@@ -249,13 +251,12 @@ export default function GiftCardsIndex({
     <FrontendLayout>
       <Head title="Buy Gift Cards & Discount Vouchers - NestifyTech" />
 
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto space-y-12">
-
           {/* ── Hero Header ── */}
           <div className="text-center space-y-4 max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider">
-              <RiSparklingFill className="text-primary animate-pulse" />
+            <div className="inline-flex items-center gap-1 sm:gap-2 sm:px-3.5 px-2 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[8px] sm:text-xs font-semibold sm:font-bold uppercase sm:tracking-wider">
+              <RiSparklingFill className="sm:size-4 size-3 text-primary animate-pulse" />
               <span>Special Promotional Offer • Pay Less, Get More</span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-bold font-oswald text-heading tracking-tight">
@@ -268,25 +269,25 @@ export default function GiftCardsIndex({
 
           {/* ── Success Modal / Card Generated Banner ── */}
           {purchasedCard && (
-            <div className="p-8 rounded-3xl bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-teal-500/10 border-2 border-emerald-500/30 text-center max-w-2xl mx-auto shadow-xl space-y-5">
-              <div className="size-16 mx-auto rounded-full bg-emerald-500 text-white flex items-center justify-center text-3xl shadow-lg">
-                <RiGiftLine />
+            <div className="p-8 rounded-lg text-center max-w-2xl mx-auto shadow-lg bg-white border border-border space-y-4">
+              <div className="size-16 mx-auto rounded-full bg-primary text-white flex items-center justify-center text-3xl shadow-lg">
+                <RiGift2Line />
               </div>
               <div>
-                <h3 className="text-2xl font-bold text-heading">Gift Card Issued Successfully!</h3>
-                <p className="text-sm text-secondary mt-1">
+                <h3 className="text-2xl font-semibold font-poppins text-heading">Gift Card Issued Successfully!</h3>
+                <p className="text-sm text-accent mt-1">
                   You paid <strong>{currency} {Number(purchasedCard.price).toLocaleString()}</strong> and received <strong>{currency} {Number(purchasedCard.balance).toLocaleString()}</strong> shopping balance (+{currency} {Number(purchasedCard.bonus).toLocaleString()} Bonus).
                 </p>
               </div>
 
               {/* Code Box */}
-              <div className="flex items-center justify-center gap-3 bg-white dark:bg-slate-900 p-4 rounded-2xl border border-emerald-500/30 shadow-inner">
-                <span className="font-mono text-2xl font-extrabold text-primary tracking-widest">
+              <div className="flex items-center justify-center gap-3">
+                <span className="font-poppins text-lg font-bold text-primary tracking-widest">
                   {purchasedCard.code}
                 </span>
                 <button
                   onClick={() => handleCopy(purchasedCard.code)}
-                  className="px-4 py-2 rounded-xl bg-primary text-white font-semibold text-xs flex items-center gap-1.5 hover:opacity-90 transition-opacity cursor-pointer"
+                  className="px-4 py-2 rounded-lg bg-primary text-white font-semibold text-xs flex items-center gap-1.5 hover:opacity-90 transition-opacity cursor-pointer"
                 >
                   {copiedCode ? <RiCheckDoubleLine className="text-base" /> : <RiFileCopyLine className="text-base" />}
                   <span>{copiedCode ? 'Copied!' : 'Copy Code'}</span>
@@ -296,14 +297,14 @@ export default function GiftCardsIndex({
               <div className="flex items-center justify-center gap-4 pt-2">
                 <Link
                   href={route('checkout')}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 text-white font-bold text-sm hover:bg-emerald-700 shadow-md transition-all"
+                  className="inline-flex items-center gap-2 px-4 py-3 rounded-lg bg-primary text-white font-bold text-sm hover:bg-primary/90 shadow-md transition-all"
                 >
                   <RiShoppingBag3Line />
                   <span>Redeem at Checkout</span>
                 </Link>
                 <button
                   onClick={() => setPurchasedCard(null)}
-                  className="px-5 py-3 rounded-xl border border-gray-300 dark:border-slate-700 text-secondary hover:text-heading font-medium text-sm transition-colors cursor-pointer"
+                  className="px-5 py-3 rounded-lg border border-border dark:border-slate-700 text-primary hover:text-white hover:bg-primary font-medium text-sm transition-colors cursor-pointer"
                 >
                   Buy Another Card
                 </button>
@@ -392,12 +393,12 @@ export default function GiftCardsIndex({
           {/* ── Summary & Integrated Payment Panel ── */}
           {selectedTier && (
             <div className="max-w-xl mx-auto rounded-xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 p-6 shadow-xl space-y-5">
-              <div className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-slate-800">
+              <div className="flex gap-3 sm:gap-0 sm:flex-row flex-col sm:items-center justify-between pb-4 border-b border-gray-100 dark:border-slate-800">
                 <div>
                   <h3 className="text-xl font-bold font-roboto text-heading">Checkout & Payment</h3>
                   <p className="text-xs text-accent font-medium font-roboto mt-0.5">Pay securely to instantly unlock code</p>
                 </div>
-                <div className="text-right">
+                <div className="sm:text-right">
                   <span className="text-xs text-secondary font-bold font-roboto block">Selected Card</span>
                   <span className="text-sm font-bold text-primary">{selectedTier.title}</span>
                 </div>
@@ -415,9 +416,9 @@ export default function GiftCardsIndex({
                   <span>Instant Promotional Bonus:</span>
                   <span>- {currency} {Number(selectedTier.bonus || (selectedTier.initial_balance - selectedTier.purchase_price)).toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between text-base font-bold font-poppins text-heading pt-3 border-t border-gray-100 dark:border-slate-800">
+                <div className="flex justify-between text-sm sm:text-base font-bold font-poppins text-heading pt-3 border-t border-gray-100 dark:border-slate-800">
                   <span>Total Amount to Pay:</span>
-                  <span className="text-base font-roboto text-primary">
+                  <span className="sm:text-base font-roboto text-primary">
                     {currency} {Number(selectedTier.purchase_price).toLocaleString()}
                   </span>
                 </div>
@@ -434,7 +435,7 @@ export default function GiftCardsIndex({
                 />
               </Elements>
 
-              <div className="flex items-center justify-center gap-6 text-xs text-secondary pt-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-center gap-2 sm:gap-6 text-xs text-secondary pt-2">
                 <span className="flex items-center gap-1">
                   <RiShieldCheckLine className="text-emerald-500" /> 100% Secure Checkout
                 </span>
@@ -449,21 +450,21 @@ export default function GiftCardsIndex({
           {myGiftCards.length > 0 && (
             <div className="mt-16 space-y-6">
               <div className="border-t border-gray-200 dark:border-slate-800 pt-10">
-                <h2 className="text-2xl font-bold text-heading flex items-center gap-2">
-                  <RiGiftLine className="text-primary" />
+                <h2 className="text-2xl font-poppins font-bold text-heading flex items-center gap-2">
+                  <RiGift2Line className="text-primary" />
                   <span>My Active Gift Cards</span>
                 </h2>
-                <p className="text-sm text-secondary mt-1">All gift vouchers linked to your account.</p>
+                <p className="text-sm text-accent font-medium font-roboto mt-1">All gift vouchers linked to your account.</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 {myGiftCards.map(gc => (
                   <div
                     key={gc.id}
-                    className="p-5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-3"
+                    className="p-5 rounded-lg border border-border bg-white dark:bg-slate-900 shadow-sm space-y-3"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-mono text-sm font-bold text-primary">{gc.code}</span>
+                      <span className="text-sm font-roboto font-bold text-primary">{gc.code}</span>
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${gc.status === 'active' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-gray-500/10 text-gray-400'
                         }`}>
                         {gc.status}
@@ -472,17 +473,22 @@ export default function GiftCardsIndex({
 
                     <div className="flex justify-between items-end">
                       <div>
-                        <span className="text-[11px] text-secondary block">Remaining Balance</span>
+                        <span className="text-[11px] text-secondary font-semibold font-poppins block">Remaining Balance</span>
                         <strong className="text-lg font-bold text-heading font-mono">
-                          PKR {Number(gc.remaining_balance).toLocaleString()}
+                          {currency} {Number(gc.remaining_balance).toLocaleString()}
                         </strong>
                       </div>
                       <button
                         onClick={() => handleCopy(gc.code)}
-                        className="px-3 py-1.5 rounded-lg border border-primary/30 text-primary text-xs font-semibold hover:bg-primary hover:text-white transition-colors cursor-pointer"
+                        className="px-3 py-1.25 rounded-sm border border-primary/30 text-primary text-xs font-semibold hover:bg-primary hover:text-white transition-colors cursor-pointer"
                       >
                         Copy
                       </button>
+                    </div>
+                    <div>
+                      <small className='text-accent font-semibold font-poppins text-xs'>
+                        <span className="mr-1 text-primary font-poppins">Purchased On:</span> {(gc.created_at)}
+                      </small>
                     </div>
                   </div>
                 ))}
