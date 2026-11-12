@@ -18,6 +18,7 @@ import {
   RiMoneyDollarCircleLine,
   RiPaypalLine,
   RiLockLine,
+  RiGift2Line,
 } from 'react-icons/ri'
 
 // Internal component wrapped inside Stripe Elements
@@ -30,6 +31,8 @@ function GiftCardPurchaseForm({
 }) {
   const stripe = useStripe()
   const elements = useElements()
+  const { setting } = usePage().props;
+  const currency = setting?.site.currency.value ?? '$';
   const [paymentMethod, setPaymentMethod] = useState('card') // 'card' | 'wallet'
   const [recipientEmail, setRecipientEmail] = useState('')
   const [cardError, setCardError] = useState(null)
@@ -120,7 +123,7 @@ function GiftCardPurchaseForm({
       {/* Recipient Email */}
       <div>
         <label className="block text-xs font-bold text-heading uppercase tracking-wider mb-2">
-          Your Email / Recipient Email <span className="text-secondary font-normal">(for digital delivery)</span>
+          Your Email / Recipient Email <span className="text-secondary font-roboto">(for digital delivery)</span>
         </label>
         <input
           type="email"
@@ -141,20 +144,18 @@ function GiftCardPurchaseForm({
           <button
             type="button"
             onClick={() => setPaymentMethod('card')}
-            className={`p-4 rounded-2xl border-2 flex items-center gap-3 transition-all text-left ${
-              paymentMethod === 'card'
-                ? 'border-primary bg-primary/5 text-heading font-bold shadow-sm'
-                : 'border-gray-200 dark:border-slate-800 text-secondary hover:border-primary/40'
-            }`}
+            className={`p-4 rounded-xl border-2 flex items-center gap-3 transition-all text-left ${paymentMethod === 'card'
+              ? 'border-primary bg-primary/5 text-heading font-bold shadow-sm'
+              : 'border-gray-200 dark:border-slate-800 text-secondary hover:border-primary/40'
+              }`}
           >
-            <div className={`size-10 rounded-xl flex items-center justify-center text-xl ${
-              paymentMethod === 'card' ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-slate-800 text-secondary'
-            }`}>
+            <div className={`size-10 rounded-xl flex items-center justify-center text-xl ${paymentMethod === 'card' ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-slate-800 text-secondary'
+              }`}>
               <RiBankCardLine />
             </div>
             <div>
-              <span className="block text-sm">Credit / Debit Card</span>
-              <span className="text-[11px] opacity-70">Visa, Mastercard, Stripe</span>
+              <span className="block text-sm font-roboto">Credit / Debit Card</span>
+              <span className="text-[11px] text-accent">Visa, Mastercard, Stripe</span>
             </div>
           </button>
         </div>
@@ -162,14 +163,14 @@ function GiftCardPurchaseForm({
 
       {/* Card Details Element */}
       {paymentMethod === 'card' && (
-        <div className="p-5 rounded-2xl bg-gray-50 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-700 space-y-3">
+        <div className="p-5 rounded-xl bg-gray-50 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-700 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-heading flex items-center gap-1.5">
               <RiLockLine className="text-emerald-500" /> Secure Card Details
             </span>
-            <span className="text-[10px] text-secondary">256-bit SSL Encryption</span>
+            <span className="text-[10px] text-accent font-medium font-roboto">256-bit SSL Encryption</span>
           </div>
-          <div className="p-3.5 bg-white dark:bg-slate-900 rounded-xl border border-gray-300 dark:border-slate-700">
+          <div className="p-3.5 bg-white dark:bg-slate-900 rounded-lg border border-gray-300 dark:border-slate-700">
             <CardElement
               options={{
                 style: {
@@ -193,13 +194,13 @@ function GiftCardPurchaseForm({
       <button
         type="submit"
         disabled={isProcessing}
-        className="w-full py-4 rounded-2xl bg-gradient-to-r from-primary to-orange-500 text-white font-extrabold text-base shadow-xl hover:opacity-95 transition-all flex items-center justify-center gap-3 disabled:opacity-60 cursor-pointer"
+        className="w-full py-4 rounded-xl bg-gradient-to-r from-primary to-primary/70 text-white font-bold font-poppins text-base shadow-xl hover:opacity-95 transition-all flex items-center justify-center gap-3 disabled:opacity-60 cursor-pointer"
       >
         <RiSecurePaymentLine className="text-xl" />
         <span>
           {isProcessing
             ? 'Processing Secure Payment...'
-            : `Pay PKR ${Number(selectedTier.purchase_price).toLocaleString()} & Get PKR ${Number(selectedTier.initial_balance).toLocaleString()}`}
+            : `Pay ${currency} ${Number(selectedTier.purchase_price).toLocaleString()} & Get ${currency} ${Number(selectedTier.initial_balance).toLocaleString()}`}
         </span>
       </button>
     </form>
@@ -212,6 +213,8 @@ export default function GiftCardsIndex({
   myGiftCards = [],
   stripePublishableKey,
 }) {
+  const { setting } = usePage().props;
+  const currency = setting?.site.currency.value ?? '$';
   const { auth } = usePage().props
   const [selectedTier, setSelectedTier] = useState(defaultTiers[2] || defaultTiers[0])
   const [isProcessing, setIsProcessing] = useState(false)
@@ -226,13 +229,13 @@ export default function GiftCardsIndex({
   // Combined cards list
   const tiersToDisplay = availableCards.length > 0
     ? availableCards.map(c => ({
-        id: c.id,
-        title: c.title || 'Gift Voucher',
-        purchase_price: Number(c.purchase_price || c.initial_balance),
-        initial_balance: Number(c.initial_balance),
-        bonus: Math.max(0, Number(c.initial_balance) - Number(c.purchase_price || c.initial_balance)),
-        note: c.note || `Get PKR ${Number(c.initial_balance).toLocaleString()} shopping credit`,
-      }))
+      id: c.id,
+      title: c.title || 'Gift Voucher',
+      purchase_price: Number(c.purchase_price || c.initial_balance),
+      initial_balance: Number(c.initial_balance),
+      bonus: Math.max(0, Number(c.initial_balance) - Number(c.purchase_price || c.initial_balance)),
+      note: c.note || `Get ${currency} ${Number(c.initial_balance).toLocaleString()} shopping credit`,
+    }))
     : defaultTiers
 
   const handleCopy = (code) => {
@@ -255,10 +258,10 @@ export default function GiftCardsIndex({
               <RiSparklingFill className="text-primary animate-pulse" />
               <span>Special Promotional Offer • Pay Less, Get More</span>
             </div>
-            <h1 className="text-3xl sm:text-5xl font-extrabold text-heading tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-bold font-oswald text-heading tracking-tight">
               Buy Gift Cards & Get <span className="text-primary underline decoration-primary/40 underline-offset-8">Extra Shopping Credit</span>
             </h1>
-            <p className="text-base sm:text-lg text-secondary">
+            <p className="text-base font-medium font-roboto text-accent">
               Pay securely via Credit/Debit card and instantly receive your gift card code. Redeem anytime at checkout for 100% instant shopping credit!
             </p>
           </div>
@@ -272,7 +275,7 @@ export default function GiftCardsIndex({
               <div>
                 <h3 className="text-2xl font-bold text-heading">Gift Card Issued Successfully!</h3>
                 <p className="text-sm text-secondary mt-1">
-                  You paid <strong>PKR {Number(purchasedCard.price).toLocaleString()}</strong> and received <strong>PKR {Number(purchasedCard.balance).toLocaleString()}</strong> shopping balance (+PKR {Number(purchasedCard.bonus).toLocaleString()} Bonus).
+                  You paid <strong>{currency} {Number(purchasedCard.price).toLocaleString()}</strong> and received <strong>{currency} {Number(purchasedCard.balance).toLocaleString()}</strong> shopping balance (+{currency} {Number(purchasedCard.bonus).toLocaleString()} Bonus).
                 </p>
               </div>
 
@@ -309,7 +312,7 @@ export default function GiftCardsIndex({
           )}
 
           {/* ── Tier Cards Grid ── */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             {tiersToDisplay.map((tier, idx) => {
               const isSelected = selectedTier?.title === tier.title || selectedTier?.id === tier.id
               const bonusAmount = tier.bonus || (tier.initial_balance - tier.purchase_price)
@@ -318,52 +321,51 @@ export default function GiftCardsIndex({
                 <div
                   key={tier.id || idx}
                   onClick={() => setSelectedTier(tier)}
-                  className={`relative cursor-pointer rounded-3xl p-6 transition-all duration-300 flex flex-col justify-between border-2 ${
-                    isSelected
-                      ? 'border-primary bg-primary/[0.03] shadow-2xl scale-[1.02]'
-                      : 'border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:border-primary/40 shadow-sm'
-                  }`}
+                  className={`relative cursor-pointer rounded-xl p-5 transition-all duration-300 flex flex-col justify-between border-2 ${isSelected
+                    ? 'border-primary bg-primary/[0.03] shadow-2xl scale-[1.02]'
+                    : 'border-border dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:border-primary/40 shadow-sm'
+                    }`}
                 >
                   {tier.popular && (
-                    <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-[11px] uppercase tracking-wider shadow-md">
+                    <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-gradient-to-r from-primary to-primary/80 text-white font-bold text-[11px] uppercase tracking-wider shadow-md">
                       Most Popular
                     </span>
                   )}
 
-                  <div className="space-y-4">
+                  <div className="space-y-3.5">
                     {/* Header */}
                     <div className="flex items-center justify-between">
-                      <div className="size-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center text-2xl font-bold">
-                        <RiGiftLine />
+                      <div className="size-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center text-2xl font-bold">
+                        <RiGift2Line />
                       </div>
                       <div className="text-right">
-                        <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-extrabold text-xs">
-                          +PKR {Number(bonusAmount).toLocaleString()} Free
+                        <span className="px-2.5 py-1 rounded-full bg-green-700/10 text-green-600 font-bold font-roboto text-xs">
+                          +{currency} {Number(bonusAmount).toLocaleString()} Free
                         </span>
                       </div>
                     </div>
 
                     <div>
-                      <h3 className="font-bold text-lg text-heading">{tier.title}</h3>
-                      <p className="text-xs text-secondary mt-1">{tier.note}</p>
+                      <h3 className="font-semibold font-poppins text-lg text-heading">{tier.title}</h3>
+                      <p className="text-xs text-accent font-medium font-roboto mt-1">{tier.note}</p>
                     </div>
 
                     {/* Pricing Breakdown */}
-                    <div className="p-4 rounded-2xl bg-gray-50 dark:bg-slate-800/60 space-y-2 border border-gray-100 dark:border-slate-700">
+                    <div className="p-4 rounded-xl bg-bg dark:bg-slate-800/60 space-y-2 border border-gray-100 dark:border-slate-700">
                       <div className="flex justify-between items-center text-xs text-secondary">
-                        <span>You Pay (Cost):</span>
+                        <span className="font-medium font-roboto">You Pay (Cost):</span>
                         <strong className="text-heading text-sm font-bold">
-                          PKR {Number(tier.purchase_price).toLocaleString()}
+                          {currency} {Number(tier.purchase_price).toLocaleString()}
                         </strong>
                       </div>
                       <div className="flex justify-between items-center text-xs text-emerald-600 font-semibold">
                         <span>Free Bonus Credit:</span>
-                        <span>+PKR {Number(bonusAmount).toLocaleString()}</span>
+                        <span>+{currency} {Number(bonusAmount).toLocaleString()}</span>
                       </div>
-                      <div className="pt-2 border-t border-gray-200 dark:border-slate-700 flex justify-between items-center">
-                        <span className="text-xs font-bold text-heading">Shopping Balance:</span>
-                        <span className="text-lg font-black text-primary font-mono">
-                          PKR {Number(tier.initial_balance).toLocaleString()}
+                      <div className="pt-2 border-t border-gray-200 dark:border-slate-700 flex flex-col justify-between gap-1">
+                        <span className="text-sm font-bold text-heading">Shopping Balance:</span>
+                        <span className="text-base font-bold text-primary font-oswald">
+                          {currency} {Number(tier.initial_balance).toLocaleString()}
                         </span>
                       </div>
                     </div>
@@ -373,11 +375,10 @@ export default function GiftCardsIndex({
                   <div className="pt-6">
                     <button
                       type="button"
-                      className={`w-full py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
-                        isSelected
-                          ? 'bg-primary text-white shadow-md'
-                          : 'border border-primary/30 text-primary hover:bg-primary/10'
-                      }`}
+                      className={`w-full py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${isSelected
+                        ? 'bg-primary text-white shadow-md'
+                        : 'border border-primary/30 text-primary hover:bg-primary/10'
+                        }`}
                     >
                       <span>{isSelected ? 'Selected Plan' : 'Choose Plan'}</span>
                       <RiArrowRightLine />
@@ -390,34 +391,34 @@ export default function GiftCardsIndex({
 
           {/* ── Summary & Integrated Payment Panel ── */}
           {selectedTier && (
-            <div className="max-w-xl mx-auto rounded-3xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 p-8 shadow-xl space-y-6">
+            <div className="max-w-xl mx-auto rounded-xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 p-6 shadow-xl space-y-5">
               <div className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-slate-800">
                 <div>
-                  <h3 className="text-xl font-bold text-heading">Checkout & Payment</h3>
-                  <p className="text-xs text-secondary mt-0.5">Pay securely to instantly unlock code</p>
+                  <h3 className="text-xl font-bold font-roboto text-heading">Checkout & Payment</h3>
+                  <p className="text-xs text-accent font-medium font-roboto mt-0.5">Pay securely to instantly unlock code</p>
                 </div>
                 <div className="text-right">
-                  <span className="text-xs text-secondary block">Selected Card</span>
+                  <span className="text-xs text-secondary font-bold font-roboto block">Selected Card</span>
                   <span className="text-sm font-bold text-primary">{selectedTier.title}</span>
                 </div>
               </div>
 
               {/* Price Breakdown */}
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between text-secondary">
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between text-secondary font-medium font-roboto">
                   <span>Gift Card Total Face Value:</span>
                   <span className="font-semibold text-heading font-mono">
-                    PKR {Number(selectedTier.initial_balance).toLocaleString()}
+                    {currency} {Number(selectedTier.initial_balance).toLocaleString()}
                   </span>
                 </div>
-                <div className="flex justify-between text-emerald-600 font-medium">
+                <div className="flex justify-between text-emerald-600 font-medium font-roboto">
                   <span>Instant Promotional Bonus:</span>
-                  <span>- PKR {Number(selectedTier.bonus || (selectedTier.initial_balance - selectedTier.purchase_price)).toLocaleString()}</span>
+                  <span>- {currency} {Number(selectedTier.bonus || (selectedTier.initial_balance - selectedTier.purchase_price)).toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between text-base font-extrabold text-heading pt-3 border-t border-gray-100 dark:border-slate-800">
+                <div className="flex justify-between text-base font-bold font-poppins text-heading pt-3 border-t border-gray-100 dark:border-slate-800">
                   <span>Total Amount to Pay:</span>
-                  <span className="text-2xl text-primary font-mono">
-                    PKR {Number(selectedTier.purchase_price).toLocaleString()}
+                  <span className="text-base font-roboto text-primary">
+                    {currency} {Number(selectedTier.purchase_price).toLocaleString()}
                   </span>
                 </div>
               </div>
@@ -463,9 +464,8 @@ export default function GiftCardsIndex({
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-mono text-sm font-bold text-primary">{gc.code}</span>
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                        gc.status === 'active' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-gray-500/10 text-gray-400'
-                      }`}>
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${gc.status === 'active' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-gray-500/10 text-gray-400'
+                        }`}>
                         {gc.status}
                       </span>
                     </div>

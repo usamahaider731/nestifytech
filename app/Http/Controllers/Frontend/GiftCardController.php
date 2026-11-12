@@ -38,6 +38,10 @@ class GiftCardController extends Controller
             throw new \RuntimeException('Payment gateway is currently not configured.');
         }
 
+        if (!function_exists('curl_version')) {
+            \Stripe\ApiRequestor::setHttpClient(\App\Services\StripeFallbackClient::instance());
+        }
+
         Stripe::setApiKey($secret);
     }
 

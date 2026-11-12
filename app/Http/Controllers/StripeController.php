@@ -31,6 +31,10 @@ class StripeController extends Controller
             throw new \RuntimeException('Stripe secret key is not configured.');
         }
 
+        if (!function_exists('curl_version')) {
+            \Stripe\ApiRequestor::setHttpClient(\App\Services\StripeFallbackClient::instance());
+        }
+
         Stripe::setApiKey($secret);
     }
 

@@ -27,6 +27,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Fallback Stripe HTTP client when cURL extension is not enabled in PHP (e.g. Apache module or server missing curl)
+        if (!function_exists('curl_version')) {
+            \Stripe\ApiRequestor::setHttpClient(\App\Services\StripeFallbackClient::instance());
+        }
+
         // Enforce HTTPS across all URLs and assets in production / live cloud, but NEVER on localhost
         $isLocalhost = in_array(request()->getHost(), ['localhost', '127.0.0.1', '::1'])
             || str_contains(config('app.url', ''), 'localhost')
