@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import FieldControls from './FieldsControls';
-import { RiListOrdered2 } from 'react-icons/ri';
+import { RiListOrdered2, RiLoader4Line } from 'react-icons/ri';
 import { router, usePage } from '@inertiajs/react';
 
 const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = 'product', routes, redirectUrl }) => {
@@ -59,6 +59,7 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
 
     const handleSubmit = async (e = null, isDraft = false, isSilent = false) => {
         if (e) e.preventDefault();
+        if (isSaving) return;
 
         let r;
         if (!isSilent) {
@@ -494,22 +495,30 @@ const Form = ({ initialData = {}, rows = [], onSubmit, mode = 'create', type = '
                     <p className="text-base font-medium text-res font-roboto">Fill the details below</p>
                 </div>
                 <div className="flex gap-5">
-                    <button type="reset" className="rounded-md h-10 bg-accent px-6 text-secondary text-[15px] font-medium">
+                    <button
+                        type="reset"
+                        disabled={isSaving}
+                        className="rounded-md h-10 bg-accent px-6 text-secondary text-[15px] font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
                         Discard
                     </button>
                     <button
                         type="button"
+                        disabled={isSaving}
                         onClick={(e) => handleSubmit(e, true)}
-                        className="rounded-md h-10 flex items-center bg-[color-mix(in_sRGB,var(--color-primary)_10%,_#2f3349)] px-6 text-primary text-[15px] cursor-pointer font-medium"
+                        className="rounded-md h-10 flex items-center gap-2 bg-[color-mix(in_sRGB,var(--color-primary)_10%,_#2f3349)] px-6 text-primary text-[15px] cursor-pointer font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     >
+                        {isSaving && <RiLoader4Line className="animate-spin text-base" />}
                         Save Draft
                     </button>
                     <button
                         type="button"
+                        disabled={isSaving}
                         onClick={(e) => handleSubmit(e, false)}
-                        className="rounded-md h-10 bg-primary px-6 text-heading text-[15px] font-medium"
+                        className="rounded-md h-10 flex items-center gap-2 bg-primary px-6 text-heading text-[15px] font-medium cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {mode === 'edit' ? 'Update' : 'Publish'} {type.charAt(0).toUpperCase() + type.slice(1)}
+                        {isSaving && <RiLoader4Line className="animate-spin text-base" />}
+                        {isSaving ? 'Submitting...' : `${mode === 'edit' ? 'Update' : 'Publish'} ${type.charAt(0).toUpperCase() + type.slice(1)}`}
                     </button>
                 </div>
             </div>
