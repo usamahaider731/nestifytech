@@ -29,8 +29,11 @@ import {
   RiMore2Fill,
   RiCheckboxCircleFill,
   RiTimeLine,
-  RiTrophyLine
+  RiTrophyLine,
+  RiEyeLine,
+  RiExternalLinkLine
 } from 'react-icons/ri'
+import StorePreviewModal from '@/Components/Admin/StorePreviewModal'
 
 ChartJS.register(
   CategoryScale,
@@ -51,6 +54,7 @@ function Dashboard({ data, ecommerce }) {
   const availableYears = ecommerce?.available_years
   const [reportYear, setReportYear] = useState(ecommerce?.selected_year?.toString() || '2026')
   const [reportTab, setReportTab] = useState('all') // 'all' | 'earnings' | 'expenses'
+  const [showPreviewModal, setShowPreviewModal] = useState(false)
   const handleYearChange = (year) => {
     setReportYear(year)
     router.get(route('admin.dashboard'), { year }, { preserveState: true, preserveScroll: true, replace: true })
@@ -225,6 +229,41 @@ const formatCurrencyString = (str) => {
 };
   return (
     <div className='flex flex-col gap-6 pt-3 pb-12 font-sans'>
+      {/* ── Top Dashboard Header with Live Store Preview Action ── */}
+      <div className='flex flex-wrap items-center justify-between gap-4 bg-accent/70 px-6 py-4 rounded-xl border border-permanent/30 shadow-[0_4px_18px_0_rgba(15,20,34,0.2)]'>
+        <div>
+          <h2 className='text-xl font-bold text-heading flex items-center gap-2'>
+            <span>Store Dashboard</span>
+            <span className='size-2 rounded-full bg-emerald-500 animate-pulse' />
+          </h2>
+          <p className='text-xs text-secondary mt-0.5'>
+            Real-time analytics, customer activity, and live store monitoring
+          </p>
+        </div>
+
+        <div className='flex items-center gap-3'>
+          <button
+            type='button'
+            onClick={() => setShowPreviewModal(true)}
+            className='flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary hover:bg-[#685dd8] text-white text-xs font-bold transition-all shadow-[0_4px_14px_0_rgba(115,103,240,0.35)] hover:shadow-[0_6px_18px_0_rgba(115,103,240,0.5)] cursor-pointer'
+          >
+            <RiEyeLine size={16} />
+            <span>Preview Live Store</span>
+          </button>
+
+          <a
+            href='/'
+            target='_blank'
+            rel='noopener noreferrer'
+            className='flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-bg hover:bg-bg/70 text-secondary hover:text-heading border border-permanent/30 text-xs font-semibold transition-colors'
+            title='Open storefront in new tab'
+          >
+            <RiExternalLinkLine size={15} />
+            <span className='hidden sm:inline'>Open Tab</span>
+          </a>
+        </div>
+      </div>
+
       <div className='grid grid-cols-1 lg:grid-cols-12 gap-6'>
         <div className='lg:col-span-4 bg-accent p-6 rounded relative overflow-hidden shadow-[0_4px_18px_0_rgba(15,20,34,0.36)] border border-permanent/30 flex flex-col justify-between group'>
           <div className='relative z-10 flex flex-col gap-2 max-w-[240px]'>
@@ -244,12 +283,23 @@ const formatCurrencyString = (str) => {
                 {congratulations.achievement_percentage || stats.revenue.change} of target
               </p>
             </div>
-            <Link
-              href={route('post.index', { type: 'product' })}
-              className='bg-primary hover:bg-[#685dd8] text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-[0_4px_12px_0_rgba(115,103,240,0.4)] hover:shadow-[0_6px_16px_0_rgba(115,103,240,0.5)] cursor-pointer'
-            >
-              View Sales
-            </Link>
+            <div className='flex items-center gap-2'>
+              <button
+                type='button'
+                onClick={() => setShowPreviewModal(true)}
+                className='bg-bg hover:bg-bg/80 text-heading text-xs font-bold px-3 py-2.5 rounded-xl border border-permanent/30 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs'
+                title='Quick Preview'
+              >
+                <RiEyeLine size={14} className='text-primary' />
+                <span>Preview</span>
+              </button>
+              <Link
+                href={route('post.index', { type: 'product' })}
+                className='bg-primary hover:bg-[#685dd8] text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-[0_4px_12px_0_rgba(115,103,240,0.4)] hover:shadow-[0_6px_16px_0_rgba(115,103,240,0.5)] cursor-pointer'
+              >
+                View Sales
+              </Link>
+            </div>
           </div>
           <div className='absolute right-2 top-4 size-13 pointer-events-none select-none opacity-90 group-hover:scale-105 transition-transform duration-500'>
             <div className='relative w-full h-full flex items-center justify-center'>
@@ -720,6 +770,12 @@ const formatCurrencyString = (str) => {
         </div>
 
       </div>
+
+      {/* ── Live Storefront Preview Modal ── */}
+      <StorePreviewModal
+        isOpen={showPreviewModal}
+        onClose={() => setShowPreviewModal(false)}
+      />
 
     </div>
   )

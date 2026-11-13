@@ -1,12 +1,13 @@
 import { usePage, Link } from '@inertiajs/react'
 import React, { useEffect, useRef, useState } from 'react'
-import { RiLogoutBoxRLine, RiProfileLine, RiSearchLine, RiSettings3Line, RiUser3Line, RiGlobalLine, RiLayoutGridLine, RiMoonLine, RiSunLine } from 'react-icons/ri'
+import { RiLogoutBoxRLine, RiProfileLine, RiSearchLine, RiSettings3Line, RiUser3Line, RiGlobalLine, RiLayoutGridLine, RiMoonLine, RiSunLine, RiEyeLine } from 'react-icons/ri'
 import { IoNotificationsOutline } from "react-icons/io5";
 import Dropdown from '../Dropdown';
 import ImageViwer from './ImageViwer';
 import SearchPopup from './SearchPopup';
 import ShortcutsModal from './ShortcutsModal';
 import CommandPalette from './CommandPalette';
+import StorePreviewModal from './StorePreviewModal';
 import { useTheme } from '@/contexts/ThemeContext';
 
 function Header() {
@@ -17,6 +18,7 @@ function Header() {
     const [ShowSearchPopup, SetShowSearchPopup] = useState(false);
     const [ShowShortcutsModal, SetShowShortcutsModal] = useState(false);
     const [ShowCommandPalette, SetShowCommandPalette] = useState(false);
+    const [showPreviewModal, setShowPreviewModal] = useState(false);
 
     const handleSearchPopup = () => {
         SetShowSearchPopup(true);
@@ -86,6 +88,15 @@ function Header() {
                         </div>
 
                         <div className='flex items-center gap-1.5 sm:gap-3'>
+                            <button
+                                onClick={() => setShowPreviewModal(true)}
+                                className='flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 text-xs font-bold transition-all shadow-xs cursor-pointer'
+                                title="Live Store Preview"
+                            >
+                                <RiEyeLine className='text-base' />
+                                <span className='hidden md:inline'>Preview Store</span>
+                            </button>
+
                             <button className='p-2 rounded-lg text-res hover:text-primary hover:bg-dynamic/50 transition-colors relative' title="Language">
                                 <RiGlobalLine className='text-xl' />
                             </button>
@@ -194,6 +205,7 @@ function Header() {
             {ShowSearchPopup && <SearchPopup close={SetShowSearchPopup} />}
             <ShortcutsModal isOpen={ShowShortcutsModal} onClose={SetShowShortcutsModal} />
             <CommandPalette isOpen={ShowCommandPalette} onClose={() => SetShowCommandPalette(false)} />
+            <StorePreviewModal isOpen={showPreviewModal} onClose={() => setShowPreviewModal(false)} />
         </>
     )
 }

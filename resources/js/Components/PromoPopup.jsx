@@ -136,7 +136,7 @@ export default function PromoPopup() {
         >
             {/* Modal Card */}
             <div 
-                className="relative w-full max-w-lg bg-white dark:bg-neutral-900 rounded-xl shadow-2xl border border-neutral-100 dark:border-neutral-800 overflow-hidden transform transition-all animate-scaleUp"
+                className="relative w-full max-h-[80vh] overflow-y-auto max-w-lg bg-white dark:bg-neutral-900 rounded-xl shadow-2xl border border-neutral-100 dark:border-neutral-800 overflow-hidden transform transition-all animate-scaleUp"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Decorative Background Glow */}
