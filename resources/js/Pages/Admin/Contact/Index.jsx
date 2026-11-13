@@ -58,7 +58,11 @@ export default function ContactInquiriesIndex({
         if (!activeInquiry) return;
         setIsGeneratingAiReply(true);
         try {
-            const res = await axios.post(`/contact-inquiries/${activeInquiry.id}/ai-reply`, {
+            const url = typeof route === 'function' && route().has('admin.contact.ai-reply')
+                ? route('admin.contact.ai-reply', activeInquiry.id)
+                : `/admin/contact-inquiries/${activeInquiry.id}/ai-reply`;
+
+            const res = await axios.post(url, {
                 tone: aiTone,
             });
             if (res.data?.success && res.data?.reply) {

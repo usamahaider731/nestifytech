@@ -295,6 +295,8 @@ Route::prefix('/admin')->middleware(['auth', 'verified'])->group(function () {
 // Public Contact Form Submission
 Route::post('/contact/submit', [ContactController::class, 'submit'])
     ->name('contact.submit');
+Route::post('/contact-inquiries/{id}/ai-reply', [ContactController::class, 'generateAiReply'])
+    ->middleware(['auth', 'verified']);
 Route::post('/api/ai/contact-assistant', [\App\Http\Controllers\AiController::class, 'contactAssistant'])
     ->name('api.ai.contact-assistant');
 
