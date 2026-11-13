@@ -11,13 +11,49 @@ import {
     RiShieldCheckLine,
     RiCustomerService2Fill,
     RiTimeLine,
+    RiSparkling2Line,
+    RiRobotLine,
+    RiCloseLine,
+    RiArrowRightLine,
 } from 'react-icons/ri';
+import axios from 'axios';
 import { useLang } from '@/contexts/LanguageContext';
 
 export default function DynamicContactForm({ className = '' }) {
     const { __ } = useLang();
     const { flash = {}, errors: serverErrors = {} } = usePage().props;
     const [submittedSuccessfully, setSubmittedSuccessfully] = useState(false);
+    const [aiQuery, setAiQuery] = useState('');
+    const [aiResponse, setAiResponse] = useState(null);
+    const [aiLoading, setAiLoading] = useState(false);
+    const [showAiBox, setShowAiBox] = useState(true);
+
+    const quickAiQuestions = [
+        'How can I track my order?',
+        'What are shipping delivery times?',
+        'How do promotional gift cards work?',
+        'What is your return & refund policy?',
+    ];
+
+    const handleAskAi = async (questionToAsk) => {
+        const query = (questionToAsk || aiQuery).trim();
+        if (!query) return;
+
+        setAiLoading(true);
+        setAiResponse(null);
+        try {
+            const res = await axios.post('/api/ai/contact-assistant', { message: query });
+            if (res.data?.success && res.data?.reply) {
+                setAiResponse(res.data.reply);
+            } else {
+                setAiResponse("I couldn't fetch an instant answer right now. Please feel free to submit your inquiry via the form below!");
+            }
+        } catch (err) {
+            setAiResponse("Our AI service is currently busy. You can submit your message below and our team will get back to you shortly.");
+        } finally {
+            setAiLoading(false);
+        }
+    };
 
     const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
         name: '',
@@ -82,6 +118,113 @@ export default function DynamicContactForm({ className = '' }) {
                     <p className="text-xs font-semibold leading-relaxed">
                         {serverErrors.rate_limit}
                     </p>
+                </div>
+            )}
+
+            {/* ── AI Instant Contact Assistant ── */}
+            {showAiBox && (
+                <div className="mb-8 p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-purple-500/10 via-indigo-500/5 to-primary/10 border border-purple-500/20 shadow-xs relative overflow-hidden">
+                    <div className="flex items-center justify-between gap-3 mb-3">
+                        <div className="flex items-center gap-2">
+                            <span className="p-1.5 rounded-lg bg-purple-600 text-white shadow-xs">
+                                <RiSparkling2Line size={16} />
+                            </span>
+                            <div>
+                                <h4 className="text-sm font-bold text-heading flex items-center gap-2">
+                                    <span>{__('AI Instant Answers')}</span>
+                                    <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-600 dark:text-purple-300">
+                                        {__('Fast')}
+                                    </span>
+                                </h4>
+                                <p className="text-[11px] text-res/80">
+                                    {__('Need quick information about your order, shipping, returns, or gift cards? Ask below!')}
+                                </p>
+                            </div>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={() => setShowAiBox(false)}
+                            className="text-res/60 hover:text-heading p-1 text-xs"
+                            title={__('Dismiss AI suggestions')}
+                        >
+                            <RiCloseLine size={18} />
+                        </button>
+                    </div>
+
+                    {/* Quick Suggestions Chips */}
+                    <div className="flex flex-wrap gap-1.5 mb-3">
+                        {quickAiQuestions.map((q, idx) => (
+                            <button
+                                key={idx}
+                                type="button"
+                                disabled={aiLoading}
+                                onClick={() => {
+                                    setAiQuery(q);
+                                    handleAskAi(q);
+                                }}
+                                className="px-3 py-1 rounded-full text-xs font-medium bg-bg hover:bg-bg/80 text-heading border border-purple-500/20 transition-all hover:border-purple-500/50 hover:scale-[1.01] cursor-pointer disabled:opacity-50"
+                            >
+                                💡 {q}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* AI Query Input */}
+                    <form
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            handleAskAi();
+                        }}
+                        className="flex items-center gap-2"
+                    >
+                        <input
+                            type="text"
+                            value={aiQuery}
+                            onChange={(e) => setAiQuery(e.target.value)}
+                            placeholder={__('Type any question for instant response...')}
+                            className="flex-1 px-4 py-2.5 rounded-xl border border-purple-500/30 bg-bg text-xs text-heading placeholder:text-res/40 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
+                        />
+                        <button
+                            type="submit"
+                            disabled={aiLoading || !aiQuery.trim()}
+                            className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all disabled:opacity-50 cursor-pointer"
+                        >
+                            {aiLoading ? (
+                                <span className="size-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            ) : (
+                                <RiSparkling2Line size={14} />
+                            )}
+                            <span className="hidden sm:inline">{aiLoading ? __('Thinking...') : __('Ask AI')}</span>
+                        </button>
+                    </form>
+
+                    {/* AI Answer Box */}
+                    {aiResponse && (
+                        <div className="mt-4 p-4 rounded-xl bg-bg/95 border border-purple-500/30 text-xs text-heading shadow-sm animate-fadeIn">
+                            <div className="flex items-center justify-between mb-2 pb-2 border-b border-border/40">
+                                <span className="font-bold flex items-center gap-1.5 text-purple-600 dark:text-purple-400">
+                                    <RiRobotLine size={15} /> {__('NestifyAI Answer:')}
+                                </span>
+                                <span className="text-[10px] text-res/60 font-medium">
+                                    {__('Instant Assistance')}
+                                </span>
+                            </div>
+                            <p className="leading-relaxed whitespace-pre-line text-heading/90">
+                                {aiResponse}
+                            </p>
+                            <div className="mt-3 pt-2 flex items-center justify-between text-[11px] text-res/70 border-t border-border/30">
+                                <span>{__('Still need to speak with human support? Submit the detailed form below.')}</span>
+                                <button
+                                    type="button"
+                                    onClick={() => setAiResponse(null)}
+                                    className="text-primary hover:underline font-semibold"
+                                >
+                                    {__('Clear')}
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 

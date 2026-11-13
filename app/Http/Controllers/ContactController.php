@@ -403,4 +403,138 @@ class ContactController extends Controller
         ContactInquiry::findOrFail($id)->delete();
         return back()->with('success', 'Inquiry deleted successfully.');
     }
+
+    /**
+     * AI-Powered Inquiry Draft Reply and Analysis for Admin
+     */
+    public function generateAiReply(Request $request, $id)
+    {
+        $inquiry = ContactInquiry::findOrFail($id);
+        $tone = $request->input('tone', 'professional');
+
+        $settingFile = storage_path('app/data/setting.json');
+        $settings = File::exists($settingFile) ? json_decode(File::get($settingFile), true) : [];
+        $site = $settings['site'] ?? [];
+        $aiSettings = $settings['ai'] ?? [];
+        $storeName = $site['name']['value'] ?? 'NestifyTech';
+        $contactEmail = $site['email']['value'] ?? 'support@nestifytech.com';
+
+        $customerName = $inquiry->name ?: 'Valued Customer';
+        $customerMsg = $inquiry->message;
+        $subject = $inquiry->subject ?: 'Inquiry';
+
+        $toneInstructions = match ($tone) {
+            'apologetic'   => 'Empathize warmly, apologize for any inconvenience caused, and clearly explain the resolution or next steps.',
+            'friendly'     => 'Warm, approachable, conversational yet polite and helpful.',
+            'sales'        => 'Enthusiastic and commercial, highlighting product features, wholesale/bulk discounts, and inviting an order.',
+            default        => 'Professional, concise, courteous, and solution-oriented.',
+        };
+
+        $systemPrompt = "You are an expert customer relations executive at {$storeName} e-commerce.
+Draft a complete, ready-to-send email response to this customer inquiry.
+Tone requirement: {$toneInstructions}
+
+Store details:
+- Store Name: {$storeName}
+- Support Email: {$contactEmail}
+
+Customer Details:
+- Name: {$customerName}
+- Subject: {$subject}
+- Customer Message: \"{$customerMsg}\"
+
+Formatting Instructions:
+- Start with a polite greeting (e.g. 'Dear {$customerName},').
+- Directly address their specific questions or concerns with practical assistance.
+- Conclude with a professional sign-off with {$storeName} Support Team.
+- Do NOT output placeholder brackets like [Your Name] — output actual professional closing.";
+
+        $platform = $aiSettings['ai_platform']['value'] ?? 'groq';
+        $apiKey   = $aiSettings['api_key']['value'] ?? env('AI_API_KEY', env('GROQ_API_KEY', env('OPENROUTER_API_KEY')));
+
+        if (!empty($apiKey)) {
+            $endpoint = match ($platform) {
+                'openai'          => 'https://api.openai.com/v1/chat/completions',
+                'groq'            => 'https://api.groq.com/openai/v1/chat/completions',
+                'openrouter'      => 'https://openrouter.ai/api/v1/chat/completions',
+                'experientiallabs'=> 'https://api.experientiallabs.ai/v1/chat/completions',
+                default           => 'https://api.groq.com/openai/v1/chat/completions',
+            };
+
+            $messages = [
+                ['role' => 'system', 'content' => $systemPrompt],
+                ['role' => 'user', 'content' => "Generate the draft response now for {$customerName}."],
+            ];
+
+            $model = $aiSettings['model']['value'] ?? ($platform === 'openai' ? 'gpt-4o-mini' : 'qwen/qwen3.8-27b');
+
+            try {
+                $response = \Illuminate\Support\Facades\Http::timeout(15)
+                    ->connectTimeout(5)
+                    ->withToken($apiKey)
+                    ->post($endpoint, [
+                        'model'       => $model,
+                        'messages'    => $messages,
+                        'temperature' => 0.6,
+                        'max_tokens'  => 600,
+                    ]);
+
+                if ($response->successful()) {
+                    $aiDraft = trim((string) $response->json('choices.0.message.content', ''));
+                    if ($aiDraft !== '') {
+                        return response()->json([
+                            'success'   => true,
+                            'reply'     => $aiDraft,
+                            'source'    => 'ai',
+                            'sentiment' => $this->detectSentiment($customerMsg),
+                        ]);
+                    }
+                }
+            } catch (\Throwable $e) {
+                // fallback to autonomous rule engine
+            }
+        }
+
+        // Autonomous Fallback Generator
+        $fallbackReply = "Dear {$customerName},\n\n"
+            . "Thank you for reaching out to {$storeName} regarding \"{$subject}\".\n\n"
+            . "We have received your message and our support team has carefully reviewed your inquiry: \"{$customerMsg}\".\n\n";
+
+        if ($tone === 'apologetic') {
+            $fallbackReply .= "We sincerely apologize for any inconvenience you may have experienced. We are actively investigating this matter to ensure a quick and satisfactory resolution for you.\n\n";
+        } elseif ($tone === 'sales') {
+            $fallbackReply .= "We are delighted by your interest in our products. We offer competitive rates, verified authenticity, and dedicated customer service for all orders.\n\n";
+        } else {
+            $fallbackReply .= "We are pleased to assist you with this request and ensure you have an exceptional shopping experience with us.\n\n";
+        }
+
+        $fallbackReply .= "Should you have any additional details or tracking references to share, please reply directly to this email or reach us at {$contactEmail}.\n\n"
+            . "Warm regards,\n"
+            . "{$storeName} Customer Support Team";
+
+        return response()->json([
+            'success'   => true,
+            'reply'     => $fallbackReply,
+            'source'    => 'autonomous_engine',
+            'sentiment' => $this->detectSentiment($customerMsg),
+        ]);
+    }
+
+    protected function detectSentiment(string $text): string
+    {
+        $lower = strtolower($text);
+        if (preg_match('/(angry|worst|terrible|broken|fraud|scam|hate|damaged|refund|stolen|cheat)/', $lower)) {
+            return 'Urgent / Negative';
+        }
+        if (preg_match('/(thank|great|love|awesome|good|excellent|appreciate|best)/', $lower)) {
+            return 'Positive / Complimentary';
+        }
+        if (preg_match('/(track|order|status|where|deliver|delay|late|when)/', $lower)) {
+            return 'Order Status Inquiry';
+        }
+        if (preg_match('/(price|quote|bulk|wholesale|discount|buy|quantity)/', $lower)) {
+            return 'Sales / Bulk Quote';
+        }
+        return 'General Inquiry';
+    }
 }

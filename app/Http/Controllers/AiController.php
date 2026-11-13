@@ -454,4 +454,126 @@ CRITICAL RULES YOU MUST STRICTLY FOLLOW:
 
         return $value;
     }
+
+    /**
+     * Frontend AI Contact Assistant - answers customer inquiries instantly
+     */
+    public function contactAssistant(Request $request)
+    {
+        $request->validate([
+            'message' => 'required|string|min:2|max:1000',
+        ]);
+
+        $userQuery = trim($request->message);
+
+        // Load store context from setting.json
+        $settings = File::exists($this->file) ? json_decode(File::get($this->file), true) : [];
+        $site = $settings['site'] ?? [];
+        $orderPolicy = $settings['order-policy'] ?? [];
+        $storeName = $site['name']['value'] ?? 'NestifyTech';
+        $currency = $site['currency']['value'] ?? 'PKR';
+        $contactEmail = $site['email']['value'] ?? 'support@nestifytech.com';
+        $contactPhone = $site['phone']['value'] ?? '+92 300 1234567';
+
+        $cancellationFee = $orderPolicy['cancellation_fee_fixed']['value'] ?? '500';
+        $loyaltyEnabled = !empty($orderPolicy['loyalty_reward_enabled']['value']);
+        $loyaltyMilestone = $orderPolicy['loyalty_milestone_orders']['value'] ?? '10';
+        $loyaltyPercentage = $orderPolicy['loyalty_reward_percentage']['value'] ?? '5';
+
+        $systemPrompt = "You are NestifyAI, the official intelligent customer support assistant for {$storeName} e-commerce.
+Your goal is to provide concise, friendly, helpful, and accurate answers to customer questions.
+Key Store Information:
+- Store Name: {$storeName}
+- Support Email: {$contactEmail}
+- Support Phone/WhatsApp: {$contactPhone}
+- Currency: {$currency}
+- Order Tracking: Customers can track their orders at /track-order by entering their Order ID or Tracking Number.
+- Gift Cards: Available at /gift-cards with instant promotional bonus credits and safe checkout.
+" . ($loyaltyEnabled ? "- Loyalty Program: Customers receive a free Gift Card worth {$loyaltyPercentage}% of their total spend after every {$loyaltyMilestone} completed orders.\n" : "") . "
+- Cancellation Policy: Orders can be cancelled before dispatch (Cancellation fee: {$currency} {$cancellationFee}).
+- Return & Refund Policy: Standard 7-day hassle-free returns on eligible items with intact packaging.
+
+Guidelines:
+1. Answer directly and politely in 2-4 sentences.
+2. If the user asks about specific order tracking, direct them to the /track-order page.
+3. If they need personalized human assistance or have a complex complaint, invite them to fill out the contact form below or reach {$contactEmail}.
+4. Support both English and Urdu/Roman Urdu if the user writes in that language.";
+
+        $platform = $this->data['ai_platform']['value'] ?? 'groq';
+        $apiKey   = $this->data['api_key']['value'] ?? env('AI_API_KEY', env('GROQ_API_KEY', env('OPENROUTER_API_KEY')));
+
+        if (!empty($apiKey)) {
+            $endpoint = match ($platform) {
+                'openai'          => 'https://api.openai.com/v1/chat/completions',
+                'groq'            => 'https://api.groq.com/openai/v1/chat/completions',
+                'openrouter'      => 'https://openrouter.ai/api/v1/chat/completions',
+                'experientiallabs'=> 'https://api.experientiallabs.ai/v1/chat/completions',
+                default           => 'https://api.groq.com/openai/v1/chat/completions',
+            };
+
+            $messages = [
+                ['role' => 'system', 'content' => $systemPrompt],
+                ['role' => 'user', 'content' => $userQuery],
+            ];
+
+            $model = $this->data['model']['value'] ?? ($platform === 'openai' ? 'gpt-4o-mini' : 'qwen/qwen3.8-27b');
+
+            try {
+                $response = Http::timeout(12)
+                    ->connectTimeout(4)
+                    ->withToken($apiKey)
+                    ->post($endpoint, [
+                        'model'       => $model,
+                        'messages'    => $messages,
+                        'temperature' => 0.6,
+                        'max_tokens'  => 350,
+                    ]);
+
+                if ($response->successful()) {
+                    $reply = trim((string) $response->json('choices.0.message.content', ''));
+                    if ($reply !== '') {
+                        return response()->json([
+                            'success' => true,
+                            'reply'   => $reply,
+                            'source'  => 'ai',
+                        ]);
+                    }
+                }
+            } catch (\Throwable $e) {
+                // fall through to autonomous fallback
+            }
+        }
+
+        // Autonomous Fallback
+        $reply = $this->autonomousContactReply($userQuery, $storeName, $currency, $contactEmail, $cancellationFee);
+
+        return response()->json([
+            'success' => true,
+            'reply'   => $reply,
+            'source'  => 'autonomous_engine',
+        ]);
+    }
+
+    protected function autonomousContactReply(string $query, string $store, string $curr, string $email, string $cancelFee): string
+    {
+        $q = strtolower($query);
+
+        if (str_contains($q, 'track') || str_contains($q, 'status') || str_contains($q, 'kahan') || str_contains($q, 'order')) {
+            return "You can track your order in real time by visiting our Track Order page at /track-order. Simply enter your Order ID or tracking code provided in your confirmation email.";
+        }
+        if (str_contains($q, 'gift') || str_contains($q, 'card') || str_contains($q, 'voucher')) {
+            return "We offer discounted Promotional Gift Cards under our 'Pay Less, Get More' program! Visit /gift-cards to purchase a pass and receive instant bonus shopping credits.";
+        }
+        if (str_contains($q, 'cancel') || str_contains($q, 'cancellation')) {
+            return "Orders can be cancelled from your customer profile before dispatch. Please note that an administrative cancellation fee of {$curr} {$cancelFee} may apply as per store policy.";
+        }
+        if (str_contains($q, 'return') || str_contains($q, 'refund') || str_contains($q, 'exchange')) {
+            return "We provide a 7-day return and exchange policy for unused items in original packaging. To initiate a return, submit an inquiry below or email our support desk at {$email}.";
+        }
+        if (str_contains($q, 'deliver') || str_contains($q, 'shipping') || str_contains($q, 'time')) {
+            return "Standard delivery takes between 2 to 4 business days nationwide. You will receive an SMS and email notification with your tracking link as soon as your parcel is dispatched.";
+        }
+
+        return "Thank you for contacting {$store}! Our AI assistant is here to help. For order tracking visit /track-order, or fill out the form below and our specialists will respond to your email promptly.";
+    }
 }

@@ -9,7 +9,7 @@ import {
     RiShieldKeyholeLine, RiStarLine, RiStarFill, RiAlertLine,
     RiDownloadLine, RiCheckboxLine, RiCheckboxBlankLine, RiFilterLine,
     RiWhatsappLine, RiSendPlaneLine, RiTimeLine, RiUserReceivedLine,
-    RiMailSendLine, RiEyeLine, RiArrowUpLine,
+    RiMailSendLine, RiEyeLine, RiArrowUpLine, RiSparkling2Line,
 } from 'react-icons/ri';
 import { toast } from 'react-toastify';
 
@@ -50,6 +50,32 @@ export default function ContactInquiriesIndex({
     const [selectedIds, setSelectedIds] = useState([]);
     const [bulkLoading, setBulkLoading] = useState(false);
     const [starringId, setStarringId]   = useState(null);
+    const [isGeneratingAiReply, setIsGeneratingAiReply] = useState(false);
+    const [aiTone, setAiTone] = useState('professional');
+    const [detectedSentiment, setDetectedSentiment] = useState(null);
+
+    const handleGenerateAiReply = async () => {
+        if (!activeInquiry) return;
+        setIsGeneratingAiReply(true);
+        try {
+            const res = await axios.post(`/contact-inquiries/${activeInquiry.id}/ai-reply`, {
+                tone: aiTone,
+            });
+            if (res.data?.success && res.data?.reply) {
+                setAdminReply(res.data.reply);
+                if (res.data.sentiment) {
+                    setDetectedSentiment(res.data.sentiment);
+                }
+                toast.success('AI draft reply generated! You can review or edit before sending.');
+            } else {
+                toast.error(res.data?.message || 'Could not generate AI draft.');
+            }
+        } catch (err) {
+            toast.error('Failed to connect to AI reply service.');
+        } finally {
+            setIsGeneratingAiReply(false);
+        }
+    };
 
     // Settings form
     const [settingsForm, setSettingsForm] = useState({
@@ -679,12 +705,52 @@ export default function ContactInquiriesIndex({
 
                             {/* Reply to Customer */}
                             <div>
-                                <label className="block text-[10px] font-bold text-heading uppercase tracking-wider mb-1.5 flex items-center gap-2">
-                                    <RiReplyLine size={14} className="text-primary" />
-                                    Reply to Customer (Email)
-                                </label>
+                                <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                                    <label className="text-[10px] font-bold text-heading uppercase tracking-wider flex items-center gap-1.5">
+                                        <RiReplyLine size={14} className="text-primary" />
+                                        Reply to Customer (Email)
+                                    </label>
+
+                                    {/* AI Draft Reply Controls */}
+                                    <div className="flex items-center gap-2">
+                                        <select
+                                            value={aiTone}
+                                            onChange={(e) => setAiTone(e.target.value)}
+                                            className="px-2 py-1 text-[11px] rounded-lg border border-border/60 bg-bg text-heading focus:outline-none"
+                                            title="AI Tone"
+                                        >
+                                            <option value="professional">Tone: Professional</option>
+                                            <option value="friendly">Tone: Friendly</option>
+                                            <option value="apologetic">Tone: Apologetic (Issue)</option>
+                                            <option value="sales">Tone: Sales / Quote</option>
+                                        </select>
+
+                                        <button
+                                            type="button"
+                                            disabled={isGeneratingAiReply}
+                                            onClick={handleGenerateAiReply}
+                                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-[11px] font-bold shadow-xs cursor-pointer transition-all disabled:opacity-50"
+                                            title="Generate automatic reply using store AI context"
+                                        >
+                                            {isGeneratingAiReply ? (
+                                                <RiLoader4Line size={12} className="animate-spin" />
+                                            ) : (
+                                                <RiSparkling2Line size={12} />
+                                            )}
+                                            <span>{isGeneratingAiReply ? 'Drafting...' : '✨ AI Draft Reply'}</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {detectedSentiment && (
+                                    <div className="mb-2 px-2.5 py-1 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400 text-[11px] flex items-center gap-1.5">
+                                        <RiSparkling2Line size={12} />
+                                        <span>AI Sentiment Detected: <strong>{detectedSentiment}</strong></span>
+                                    </div>
+                                )}
+
                                 <textarea rows={4} value={adminReply} onChange={(e) => setAdminReply(e.target.value)}
-                                    placeholder="Type your reply here... Customer will receive this via email when you save."
+                                    placeholder="Type your reply here or click 'AI Draft Reply' to generate a response instantly... Customer will receive this via email when you save."
                                     className="w-full p-3 rounded-xl border border-primary/30 bg-primary/5 text-xs text-heading focus:outline-none focus:border-primary resize-none"
                                 />
                                 {adminReply && (

@@ -279,6 +279,7 @@ Route::prefix('/admin')->middleware(['auth', 'verified'])->group(function () {
         Route::post('/bulk-action', 'adminBulkAction')->name('admin.contact.bulk');
         Route::get('/export-csv', 'adminExportCsv')->name('admin.contact.export');
         Route::post('/{id}/toggle-star', 'adminToggleStar')->name('admin.contact.toggle-star');
+        Route::post('/{id}/ai-reply', 'generateAiReply')->name('admin.contact.ai-reply');
         Route::put('/{id}', 'adminUpdate')->name('admin.contact.update');
         Route::delete('/{id}', 'adminDestroy')->name('admin.contact.destroy');
     });
@@ -294,6 +295,8 @@ Route::prefix('/admin')->middleware(['auth', 'verified'])->group(function () {
 // Public Contact Form Submission
 Route::post('/contact/submit', [ContactController::class, 'submit'])
     ->name('contact.submit');
+Route::post('/api/ai/contact-assistant', [\App\Http\Controllers\AiController::class, 'contactAssistant'])
+    ->name('api.ai.contact-assistant');
 
 // Public Newsletter Routes
 Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])

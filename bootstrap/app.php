@@ -37,6 +37,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'api/reviews',
             'api/reviews/*',
             'api/gift-card/*',
+            'api/ai/*',
             'admin/module/*/submit*',
             'admin/taxonomy/*/submit*',
             'admin/post/*/submit*',
