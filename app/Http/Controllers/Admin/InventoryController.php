@@ -78,11 +78,27 @@ class InventoryController extends Controller
             ->groupBy('post_id') : collect();
 
         // Fetch variations
-        $variations = !empty($postIds) ? DB::table('post_variations')
+        $allVariations = !empty($postIds) ? DB::table('post_variations')
             ->whereIn('post_id', $postIds)
             ->whereNotNull('parent_id')
-            ->get()
-            ->groupBy('post_id') : collect();
+            ->get() : collect();
+
+        $varIds = $allVariations->pluck('id')->filter()->toArray();
+        $varLabels = [];
+        if (!empty($varIds)) {
+            $varValueRows = DB::table('product_variation_values')
+                ->join('attribute_values', 'product_variation_values.attribute_option_id', '=', 'attribute_values.id')
+                ->whereIn('product_variation_values.variation_id', $varIds)
+                ->select('product_variation_values.variation_id', 'attribute_values.value')
+                ->get()
+                ->groupBy('variation_id');
+
+            foreach ($varValueRows as $vId => $valCollection) {
+                $varLabels[$vId] = $valCollection->pluck('value')->implode(' / ');
+            }
+        }
+
+        $variations = $allVariations->groupBy('post_id');
 
         // Fetch taxonomy titles for category/brand/supplier labels
         $taxonomies = DB::table('taxonomies')->pluck('title', 'id')->toArray();
@@ -169,9 +185,11 @@ class InventoryController extends Controller
                         $totalProjectedProfit += ($varStock * ($varPrice - $buyPrice));
                     }
 
+                    $varName = $varLabels[$var->id] ?? ($var->name ?? ($var->color ? "Color: {$var->color}" : "Variation #{$var->id}"));
+
                     $variationRows[] = [
                         'id' => $var->id,
-                        'name' => $var->name ?: "Variation #{$var->id}",
+                        'name' => $varName,
                         'stock' => $varStock,
                         'price' => $varPrice,
                         'color' => $var->color ?? null,

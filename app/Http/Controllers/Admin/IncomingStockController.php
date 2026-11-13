@@ -118,13 +118,29 @@ class IncomingStockController extends Controller
         $products = $productsQuery->select('posts.id', 'posts.title', 'posts.sku')->get();
 
         $postIds = $products->pluck('id')->toArray();
-        $variations = !empty($postIds) ? DB::table('post_variations')
+        $allVariations = !empty($postIds) ? DB::table('post_variations')
             ->whereIn('post_id', $postIds)
             ->whereNotNull('parent_id')
-            ->get()
-            ->groupBy('post_id') : collect();
+            ->get() : collect();
 
-        $productList = $products->map(function ($p) use ($variations) {
+        $varIds = $allVariations->pluck('id')->filter()->toArray();
+        $varLabels = [];
+        if (!empty($varIds)) {
+            $varValueRows = DB::table('product_variation_values')
+                ->join('attribute_values', 'product_variation_values.attribute_option_id', '=', 'attribute_values.id')
+                ->whereIn('product_variation_values.variation_id', $varIds)
+                ->select('product_variation_values.variation_id', 'attribute_values.value')
+                ->get()
+                ->groupBy('variation_id');
+
+            foreach ($varValueRows as $vId => $valCollection) {
+                $varLabels[$vId] = $valCollection->pluck('value')->implode(' / ');
+            }
+        }
+
+        $variations = $allVariations->groupBy('post_id');
+
+        $productList = $products->map(function ($p) use ($variations, $varLabels) {
             $vars = $variations->get($p->id, collect());
             return [
                 'id' => $p->id,
@@ -133,7 +149,7 @@ class IncomingStockController extends Controller
                 'has_variations' => $vars->isNotEmpty(),
                 'variations' => $vars->map(fn($v) => [
                     'id' => $v->id,
-                    'name' => $v->name ?: "Variation #{$v->id}",
+                    'name' => $varLabels[$v->id] ?? ($v->name ?? ($v->color ? "Color: {$v->color}" : "Variation #{$v->id}")),
                     'stock' => $v->stock,
                 ]),
             ];
