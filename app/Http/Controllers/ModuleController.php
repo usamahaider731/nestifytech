@@ -31,6 +31,25 @@ class ModuleController extends Controller
                 $managerId = $managerId['id'];
             }
 
+            // Authorization guard: Non-global admins cannot reassign a manager outside their assigned store
+            $authUser = $request->user();
+            if ($authUser && !\App\Services\UserAuthorizationService::isAdministrator($authUser)) {
+                $assignedStore = \App\Services\UserAuthorizationService::getAssignedStoreId($authUser);
+                if ((int) $assignedStore !== (int) $record->id) {
+                    abort(403, 'Unauthorized store management action.');
+                }
+            }
+
+            // In-transaction validation and row-locking on the target manager
+            if (!empty($managerId)) {
+                \App\Services\UserAuthorizationService::validateManagerAssignment(
+                    $authUser,
+                    (int) $record->id,
+                    $managerId,
+                    true // lockForUpdate
+                );
+            }
+
             // If editing, clear previous assignment for this store in case the manager changed
             if ($isEdit) {
                 DB::table('user_meta')
@@ -61,6 +80,18 @@ class ModuleController extends Controller
             if (is_array($storeId) && isset($storeId['id'])) {
                 $storeId = $storeId['id'];
             }
+
+            // In-transaction locking and validation
+            $authUser = $request->user();
+            if ($authUser) {
+                \App\Services\UserAuthorizationService::validateUserStoreAssignment(
+                    $authUser,
+                    $record->id,
+                    $storeId,
+                    true // lockForUpdate
+                );
+            }
+
             if (!empty($storeId)) {
                 DB::table('user_meta')->updateOrInsert(
                     ['user_id' => $record->id, 'key' => 'assigned_store'],
@@ -686,15 +717,54 @@ class ModuleController extends Controller
         // Pre-check for submission authorization
         $currentUser = auth()->user();
         if ($currentUser) {
-            $userRoles = is_string($currentUser->roles) ? json_decode($currentUser->roles, true) : (array) $currentUser->roles;
-            $isGlobalAdmin = !empty($userRoles) && DB::table('roles')->whereIn('id', $userRoles)->where('title', 'Administrator')->exists();
+            $isGlobalAdmin = \App\Services\UserAuthorizationService::isAdministrator($currentUser);
+
+            // Pre-check for store creation and edit authorization
+            if ($type === 'store') {
+                if ($id === null || $id === '') {
+                    // Store creation: only global admin or users with store creation permission
+                    if (!\App\Services\UserAuthorizationService::canCreateStore($currentUser)) {
+                        abort(403, 'Unauthorized: Only global administrators can create new stores.');
+                    }
+                } else {
+                    // Store editing: must be global admin or assigned store admin
+                    if (!\App\Services\UserAuthorizationService::canManageStore($currentUser, (int) $id)) {
+                        abort(403, 'Unauthorized: You are not authorized to manage this store.');
+                    }
+                }
+
+                // If manager_id is being assigned, validate eligibility and cross-store protection
+                $managerId = $request->input('manager_id');
+                if (is_array($managerId) && isset($managerId['id'])) {
+                    $managerId = $managerId['id'];
+                }
+                if (!empty($managerId)) {
+                    \App\Services\UserAuthorizationService::validateManagerAssignment(
+                        $currentUser,
+                        (int) ($id ?? 0),
+                        $managerId
+                    );
+                }
+            }
+
+            // Pre-flight validation for user-store assignment (applies to both global admin and store admin)
+            if ($type === 'user' || $type === 'users') {
+                \App\Services\UserAuthorizationService::validateUserStoreAssignment(
+                    $currentUser,
+                    $id,
+                    $request->input('store_id')
+                );
+            }
 
             if (!$isGlobalAdmin) {
                 // If editing or creating a user
                 if ($type === 'user' || $type === 'users') {
+
                     if ($id) {
                         $targetUser = DB::table('users')->where('id', $id)->first();
                         $targetRoles = is_string($targetUser->roles ?? null) ? json_decode($targetUser->roles, true) : (array) ($targetUser->roles ?? []);
+                        $targetRoles = is_array($targetRoles) ? $targetRoles : (is_string($targetRoles) ? json_decode($targetRoles, true) : []);
+                        $targetRoles = is_array($targetRoles) ? array_values(array_filter($targetRoles)) : [];
                         if (!empty($targetRoles)) {
                             $targetHasPlatformRole = DB::table('roles')->whereIn('id', $targetRoles)->where(function ($q) {
                                 $q->where('scope', 'platform')->orWhere('title', 'Administrator');
@@ -785,6 +855,8 @@ class ModuleController extends Controller
                     if (!$isGlobalAdmin) {
                         $targetUser = DB::table('users')->where('id', $id)->first();
                         $targetRoles = is_string($targetUser->roles ?? null) ? json_decode($targetUser->roles, true) : (array) ($targetUser->roles ?? []);
+                        $targetRoles = is_array($targetRoles) ? $targetRoles : (is_string($targetRoles) ? json_decode($targetRoles, true) : []);
+                        $targetRoles = is_array($targetRoles) ? array_values(array_filter($targetRoles)) : [];
                         if (!empty($targetRoles)) {
                             $targetHasPlatformRole = DB::table('roles')->whereIn('id', $targetRoles)->where(function ($q) {
                                 $q->where('scope', 'platform')->orWhere('title', 'Administrator');

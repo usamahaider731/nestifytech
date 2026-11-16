@@ -15,10 +15,12 @@ const STORAGE_KEY = 'nt_sale_popup_dismissed_until';
 export default function PromoPopup() {
     const { setting } = usePage().props;
     const popupConfig = setting?.popup || {};
+    const developerOverlayOn = Boolean(setting?.site?.developer_work_enabled?.value)
+        && setting?.site?.developer_work_mode?.value === 'overlay';
 
-    const isEnabled = popupConfig.sale_popup_enabled?.value !== undefined 
-        ? Boolean(popupConfig.sale_popup_enabled.value) 
-        : true;
+    const isEnabled = !developerOverlayOn && (popupConfig.sale_popup_enabled?.value !== undefined
+        ? Boolean(popupConfig.sale_popup_enabled.value)
+        : true);
 
     const badgeText = popupConfig.popup_badge_text?.value || 'Limited Time Mega Sale • Extra 25% Off';
     const rawTitle = popupConfig.popup_title?.value || 'Unlock 25% OFF Your Order';

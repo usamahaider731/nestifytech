@@ -183,31 +183,7 @@ Route::get('/attribute-options', function () {
         })
     );
 });
-Route::get('/user-options', function (\Illuminate\Http\Request $request) {
-    $roleFilter = $request->input('role');
-    $query = \Illuminate\Support\Facades\DB::table('users')
-        ->where('active', 1)
-        ->select('id', 'name', 'email');
-
-    if ($roleFilter) {
-        $query->where(function ($q) use ($roleFilter) {
-            $q->where('roles', 'like', "%\"{$roleFilter}\"%")
-              ->orWhere('roles', 'like', "%[{$roleFilter}]%")
-              ->orWhere('roles', 'like', "%{$roleFilter}%");
-        });
-    }
-
-    $users = $query->orderBy('name')->get();
-
-    return response()->json(
-        $users->map(fn($u) => [
-            'id'    => (string) $u->id,
-            'title' => "{$u->name} ({$u->email})",
-            'name'  => $u->name,
-            'email' => $u->email,
-        ])
-    );
-});
+Route::middleware(['web', 'auth'])->get('/user-options', [\App\Http\Controllers\UserOptionsController::class, 'index'])->name('api.user-options');
 Route::get('/store-options', function (\Illuminate\Http\Request $request) {
     $cityFilter = $request->input('parent'); 
     $query = \Illuminate\Support\Facades\DB::table('posts')

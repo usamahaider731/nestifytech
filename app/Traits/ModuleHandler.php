@@ -658,7 +658,13 @@ trait ModuleHandler
         } catch (\Throwable $e) {
             DB::rollBack();
             report($e);
-            return ['success' => false, 'message' => 'Error: ' . $e->getMessage() . ' in ' . $e->getFile() . ' on line ' . $e->getLine()];
+
+            // In debug mode or tests, provide helpful error info; in production, keep details in server logs
+            $message = (config('app.debug') || app()->environment('testing'))
+                ? 'Error: ' . $e->getMessage()
+                : 'An error occurred while saving the record. Please try again.';
+
+            return ['success' => false, 'message' => $message];
         }
     }
 

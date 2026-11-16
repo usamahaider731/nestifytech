@@ -13,6 +13,7 @@ import { ToastContainer } from 'react-toastify';
 import CookieConsent from '@/Components/CookieConsent';
 import PromoPopup from '@/Components/PromoPopup';
 import FrontendChatBot from '@/Components/FrontendChatBot';
+import DeveloperWorkNotice from '@/Components/DeveloperWorkNotice';
 
 export default function FrontendLayout({ children, title }) {
     return (
@@ -34,6 +35,7 @@ export default function FrontendLayout({ children, title }) {
                 theme={'light'} />
             <CartProvider>
                 <div className="min-h-screen font-primary text-res antialiased w-full flex flex-col">
+                    <DeveloperWorkNotice />
                     <Header title={title} />
                     <ThemeSwitcher />
                     <main className="flex-grow">{children}</main>

@@ -6,6 +6,7 @@ import { ToastContainer } from 'react-toastify'
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext'
 
 import { Head, usePage } from '@inertiajs/react'
+import { AdminDeveloperWorkBanner } from '@/Components/DeveloperWorkNotice'
 
 function AdminLayoutInner({ children, title }) {
     const { theme } = useTheme();
@@ -22,6 +23,7 @@ function AdminLayoutInner({ children, title }) {
             <div className='flex-1 min-w-0 flex flex-col min-h-screen bg-bg'>
                 <Header />
                 <main className='px-6 pb-8 flex-1 min-w-0'>
+                    <AdminDeveloperWorkBanner />
                     {children}
                 </main>
                 <ChatBot />
